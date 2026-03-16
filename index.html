@@ -1047,7 +1047,7 @@ document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
 // ── Supabase ─────────────────────────────────
 const SUPABASE_URL  = 'https://fvgajfiksxmwioxnesry.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2Z2FqZmlrc3h3aW94bmVzcnkiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc0NzIzMTYzNiwiZXhwIjoyMDYyODA3NjM2fQ.Bv6cTc-G5vjBwjckXq7Z3IcFXWXrmMQEiHsE0PZJKiI';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2Z2FqZmlrc3htd2lveG5lc3J5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NDU4OTEsImV4cCI6MjA4OTIyMTg5MX0.KwqAzx1oAGeh0F3q1LfeQPXYjtdOjaOrzS_c4eUGKJY';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
 // ── Email form ───────────────────────────────
@@ -1057,7 +1057,6 @@ async function handleSubmit(e) {
   const note  = document.getElementById('emailNote');
   const btn   = e.target.querySelector('.email-submit');
 
-  // Loading state
   btn.textContent = 'Joining…';
   btn.disabled = true;
 
@@ -1067,7 +1066,6 @@ async function handleSubmit(e) {
       .insert({ email });
 
     if (error) {
-      // Duplicate email — already signed up
       if (error.code === '23505') {
         btn.textContent = '✓ Already registered!';
         btn.style.background = 'var(--amber)';
@@ -1078,7 +1076,6 @@ async function handleSubmit(e) {
         throw error;
       }
     } else {
-      // Success
       btn.textContent = '✓ You\'re on the list!';
       btn.style.background = 'var(--green)';
       btn.style.color = '#0a1f14';
@@ -1086,10 +1083,8 @@ async function handleSubmit(e) {
       note.style.color = 'var(--green)';
     }
   } catch (err) {
-    // Error fallback
     btn.textContent = 'Try again';
     btn.disabled = false;
-    btn.style.background = '';
     note.textContent = 'Something went wrong — please try again.';
     note.style.color = 'var(--red, #E05252)';
     console.error('Signup error:', err);
