@@ -7,6 +7,7 @@
 <meta name="description" content="Beautiful, private, offline-capable tools for managing your money, your time, your health and almost anything you can plan in your daily life and for your future. No subscriptions. No complexity. Just tools that work.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=JetBrains+Mono:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 /* ═══════════════════════════════════════ TOKENS */
 :root {
@@ -1044,23 +1045,55 @@ const observer = new IntersectionObserver((entries) => {
 
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
+// ── Supabase ─────────────────────────────────
+const SUPABASE_URL  = 'https://fvgajfiksxmwioxnesry.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2Z2FqZmlrc3h3aW94bmVzcnkiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc0NzIzMTYzNiwiZXhwIjoyMDYyODA3NjM2fQ.Bv6cTc-G5vjBwjckXq7Z3IcFXWXrmMQEiHsE0PZJKiI';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
 // ── Email form ───────────────────────────────
-function handleSubmit(e) {
+async function handleSubmit(e) {
   e.preventDefault();
-  const email = document.getElementById('emailInput').value;
+  const email = document.getElementById('emailInput').value.trim().toLowerCase();
   const note  = document.getElementById('emailNote');
   const btn   = e.target.querySelector('.email-submit');
 
-  // Visual feedback
-  btn.textContent = '✓ You\'re on the list!';
-  btn.style.background = 'var(--green)';
-  btn.style.color = '#0a1f14';
+  // Loading state
+  btn.textContent = 'Joining…';
   btn.disabled = true;
-  note.textContent = `We'll be in touch at ${email} — welcome to the Lab!`;
-  note.style.color = 'var(--green)';
 
-  // TODO: wire to Supabase / Resend when platform is live
-  console.log('Early access signup:', email);
+  try {
+    const { error } = await db
+      .from('early_access')
+      .insert({ email });
+
+    if (error) {
+      // Duplicate email — already signed up
+      if (error.code === '23505') {
+        btn.textContent = '✓ Already registered!';
+        btn.style.background = 'var(--amber)';
+        btn.style.color = 'var(--navy)';
+        note.textContent = `${email} is already on the list — we'll be in touch!`;
+        note.style.color = 'var(--amber2)';
+      } else {
+        throw error;
+      }
+    } else {
+      // Success
+      btn.textContent = '✓ You\'re on the list!';
+      btn.style.background = 'var(--green)';
+      btn.style.color = '#0a1f14';
+      note.textContent = `Welcome to the Lab, ${email} — we'll be in touch soon!`;
+      note.style.color = 'var(--green)';
+    }
+  } catch (err) {
+    // Error fallback
+    btn.textContent = 'Try again';
+    btn.disabled = false;
+    btn.style.background = '';
+    note.textContent = 'Something went wrong — please try again.';
+    note.style.color = 'var(--red, #E05252)';
+    console.error('Signup error:', err);
+  }
 }
 
 // ── Sticky nav shadow on scroll ──────────────
