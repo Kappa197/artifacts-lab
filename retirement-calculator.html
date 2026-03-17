@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Retirement Runway Calculator</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -796,27 +797,69 @@
 </div><!-- #panelMC -->
 
 <script>
-// ── Tier & capability flags ────────────────────────────────────────────────
-const TIER = 'free'; // 'free' | 'basic' | 'premium'  ← swap via Supabase in Phase 2
+// ── Supabase config ───────────────────────────────────────────────────────────
+const SUPABASE_URL  = 'https://fvgajfiksxmwioxnesry.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2Z2FqZmlrc3htd2lveG5lc3J5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NDU4OTEsImV4cCI6MjA4OTIyMTg5MX0.KwqAzx1oAGeh0F3q1LfeQPXYjtdOjaOrzS_c4eUGKJY';
+const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-const can = {
-  // Always available
-  basicProjection:    true,
-  inflationAdjust:    true,
-  survivalChart:      true,
-  // Basic + Premium
-  legacyTarget:       TIER !== 'free',
-  yearByYear:         TIER !== 'free',
-  // Premium only
-  fivePeriodIRR:      TIER === 'premium',
-  multiAssetNestEgg:  TIER === 'premium',
-  optimizer:          TIER === 'premium',
-  stressTest:         TIER === 'premium',
-  rollingReopt:       TIER === 'premium',
-  taxAware:           TIER === 'premium',
-  incomeSeries:       TIER === 'premium',
-  monteCarlo:         TIER === 'premium',
-};
+// ── Tier & capability flags ────────────────────────────────────────────────────
+// TIER and can are set dynamically by initTier() on load.
+let TIER = 'free';
+let can  = {};
+
+function buildCan(tier) {
+  TIER = tier;
+  can = {
+    // Always available
+    basicProjection:    true,
+    inflationAdjust:    true,
+    survivalChart:      true,
+    // Basic + Premium
+    legacyTarget:       tier !== 'free',
+    yearByYear:         tier !== 'free',
+    // Premium only
+    fivePeriodIRR:      tier === 'premium',
+    multiAssetNestEgg:  tier === 'premium',
+    optimizer:          tier === 'premium',
+    stressTest:         tier === 'premium',
+    rollingReopt:       tier === 'premium',
+    taxAware:           tier === 'premium',
+    incomeSeries:       tier === 'premium',
+    monteCarlo:         tier === 'premium',
+  };
+}
+
+async function initTier() {
+  // Show a subtle loading state on the header while fetching
+  const header = document.querySelector('h1');
+  if (header) header.style.opacity = '0.5';
+
+  try {
+    const { data: { user } } = await _sb.auth.getUser();
+    if (user) {
+      const { data: profile } = await _sb
+        .from('profiles')
+        .select('tier')
+        .eq('id', user.id)
+        .single();
+      buildCan(profile?.tier ?? 'free');
+    } else {
+      buildCan('free');  // not logged in → free tier
+    }
+  } catch (e) {
+    console.warn('Supabase tier fetch failed, defaulting to free:', e.message);
+    buildCan('free');
+  }
+
+  if (header) header.style.opacity = '';
+
+  // Boot the app now that tier is known
+  buildPeriodInputs();
+  const _initIrrs = Array.from({length:5}, (_,i) => parseFloat(document.getElementById(`irr${i}`)?.value ?? 8));
+  updateAlphaPreview(_initIrrs);
+  initUI();
+  recalc();
+}
 
 function upgradeNudge(targetTier, featureDesc) {
   const price = targetTier === 'basic' ? '$8/year' : '$29/year';
@@ -1803,15 +1846,20 @@ async function _runMonteCarloInner() {
     return wds;
   })();
 
-  // ── Nominal stress test α-schedule (nominal IRR ordering) ──────────────────
-  const nomAlphaShape    = computeAlphaFactors(mus, getAlpha());
-  const nomAlphaStartWd  = baselineWd * nomAlphaShape[0];
+  // ── Nominal stress test α-schedule — Option A ────────────────────────────
+  // Uses solveProgressiveFactors (minLegacy=0) to find the MAXIMUM sustainable
+  // spending under the α-shape with nominal IRR ordering. Answers: "if I follow
+  // the dashboard's recommended spending shape and push to the max, how does
+  // it survive stochastically?" Survival rate will be lower than Nominal Fixed
+  // (spending more), but the gap is meaningful — not a near-duplicate line.
+  const nomAlphaFactors  = solveProgressiveFactors(nestEggCalc, baselineWd, retYears, periodLen, mus, inf, 0, incomeSeries, taxMult);
+  const nomAlphaStartWd  = baselineWd * nomAlphaFactors[0];
   const nomAlphaWds = (() => {
     const wds = []; let nominal = baselineWd;
     let wd = nomAlphaStartWd;
     for (let yr = 0; yr < retYears; yr++) {
       const p = Math.min(Math.floor(yr / periodLen), 4);
-      if (yr > 0 && yr % periodLen === 0) wd = nominal * nomAlphaShape[p];
+      if (yr > 0 && yr % periodLen === 0) wd = nominal * nomAlphaFactors[p];
       wds.push(wd);
       nominal *= (1+inf); wd *= (1+inf);
     }
@@ -3289,12 +3337,10 @@ function initUI() {
     applyLock('milestonesSection', 'premium', 'Rolling Re-Optimizer');
 }
 
-// ── Init ─────────────────────────────────────────────────────────────────────
-buildPeriodInputs();
-const _initIrrs = Array.from({length:5}, (_,i) => parseFloat(document.getElementById(`irr${i}`)?.value ?? 8));
-updateAlphaPreview(_initIrrs);
-initUI();   // apply locks after DOM is ready
-recalc();
+// ── Boot ──────────────────────────────────────────────────────────────────────
+// initTier() fetches the user's tier from Supabase, then calls buildCan(),
+// initUI() and recalc(). Everything is driven from there.
+window.addEventListener('load', initTier);
 </script>
 </body>
 </html>

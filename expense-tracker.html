@@ -6,6 +6,7 @@
 <title>Finance Tracker</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=JetBrains+Mono:wght@300;400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -191,6 +192,14 @@ select option{background:var(--navy3);}
 </style>
 </head>
 <body>
+
+<!-- Tier loading overlay — shown while Supabase resolves the user's plan -->
+<div id="tierLoadingOverlay" style="display:none;position:fixed;inset:0;z-index:99999;background:var(--navy);align-items:center;justify-content:center;flex-direction:column;gap:16px;">
+  <div style="font-family:var(--serif);font-size:1.3rem;color:var(--amber2);">Finance Tracker</div>
+  <div style="width:36px;height:36px;border:3px solid var(--border2);border-top-color:var(--amber2);border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+  <div style="font-family:var(--mono);font-size:0.68rem;color:var(--text3);letter-spacing:0.08em;">Loading your account…</div>
+</div>
+<style>@keyframes spin{to{transform:rotate(360deg);}}</style>
 
 <header class="app-header">
   <div class="logo">Finance Tracker<span>Personal Balance Sheet</span></div>
@@ -711,26 +720,62 @@ select option{background:var(--navy3);}
 
 <script>
 // ═══════════════════════════════════════════════
-// TIER — swap this one constant to change plan
-// 'free' | 'basic' | 'premium'
-// Phase 2: replace with Supabase profile.tier lookup
+// SUPABASE — tier resolution
 // ═══════════════════════════════════════════════
-const TIER = 'free';
+const _SUPA_URL = 'https://fvgajfiksxmwioxnesry.supabase.co';
+const _SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2Z2FqZmlrc3htd2lveG5lc3J5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NDU4OTEsImV4cCI6MjA4OTIyMTg5MX0.KwqAzx1oAGeh0F3q1LfeQPXYjtdOjaOrzS_c4eUGKJY';
+const _supa = supabase.createClient(_SUPA_URL, _SUPA_KEY);
 
-const can = {
-  csvImport:        TIER !== 'free',      // basic + premium
-  autoRules:        TIER !== 'free',      // basic + premium
-  customCats:       TIER !== 'free',      // basic + premium
-  trendChart:       TIER !== 'free',      // basic + premium
-  momComparison:    TIER !== 'free',      // basic + premium
-  dualCurrency:     TIER !== 'free',      // basic + premium
-  backup:           TIER !== 'free',      // basic + premium
-  fullHistory:      TIER !== 'free',      // basic = 6 months, premium = unlimited
-  unlimitedHistory: TIER === 'premium',   // premium only
-  multiUser:        TIER === 'premium',   // premium only
-  yearlySummary:    TIER === 'premium',   // premium only
-  pdfExport:        TIER === 'premium',   // premium only
-};
+// Resolved at runtime — do not reference before initTier() completes
+let TIER = 'free';
+let can  = {};
+
+function buildCan(tier) {
+  TIER = tier;
+  can = {
+    csvImport:        TIER !== 'free',      // basic + premium
+    autoRules:        TIER !== 'free',      // basic + premium
+    customCats:       TIER !== 'free',      // basic + premium
+    trendChart:       TIER !== 'free',      // basic + premium
+    momComparison:    TIER !== 'free',      // basic + premium
+    dualCurrency:     TIER !== 'free',      // basic + premium
+    backup:           TIER !== 'free',      // basic + premium
+    fullHistory:      TIER !== 'free',      // basic = 6 months, premium = unlimited
+    unlimitedHistory: TIER === 'premium',   // premium only
+    multiUser:        TIER === 'premium',   // premium only
+    yearlySummary:    TIER === 'premium',   // premium only
+    pdfExport:        TIER === 'premium',   // premium only
+  };
+}
+
+async function initTier() {
+  // Show loading overlay while resolving tier
+  const overlay = document.getElementById('tierLoadingOverlay');
+  if (overlay) overlay.style.display = 'flex';
+
+  let resolvedTier = 'free'; // safe default
+
+  try {
+    const { data: { user }, error: authErr } = await _supa.auth.getUser();
+    if (!authErr && user) {
+      const { data: profile, error: profileErr } = await _supa
+        .from('profiles')
+        .select('tier')
+        .eq('id', user.id)
+        .single();
+      if (!profileErr && profile?.tier) {
+        resolvedTier = profile.tier;
+      }
+    }
+  } catch (e) {
+    // Network error or Supabase unavailable — fall back to free gracefully
+    console.warn('Tier fetch failed, defaulting to free:', e);
+  }
+
+  buildCan(resolvedTier);
+  if (overlay) overlay.style.display = 'none';
+  init();
+}
 
 // ═══════════════════════════════════════════════
 // DEFAULTS
@@ -2649,7 +2694,7 @@ function init() {
   initManualEntry();
 }
 
-init();
+window.addEventListener('load', initTier);
 </script>
 </body>
 </html>

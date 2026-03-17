@@ -469,6 +469,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 <div class="help-ov" id="helpOv"><div class="help-panel" id="helpPanel"></div></div>
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const R=[
 {id:1,name:"Scrambled Eggs with Avocado & Smoked Salmon",sl:["B"],diff:1,tags:{vg:0,ve:0,pe:1,gf:1,df:1},kcal:[280,340],prot:[25,30],carbs:[5,7],fat:[18,22],pri:["eggs","salmon","avocado"],mc:["omega3","b12","vitD"],em:"🥚",ing:["3 eggs","50g smoked salmon","½ avocado","1 tsp olive oil","Salt & pepper"],steps:["Beat eggs with salt and pepper.","Heat oil in a non-stick pan over medium-low heat.","Gently scramble eggs 2–3 min until just set.","Serve alongside smoked salmon and sliced avocado."],tip:"Rich in omega-3 and complete proteins.",cuisine:"global",prepTime:10},
@@ -566,32 +567,70 @@ const R=[
 ];
 
 // ─── TIER & CAPABILITY OBJECT ────────────────────────
-const TIER = 'free'; // 'free' | 'basic' | 'premium'
+// ─── SUPABASE ────────────────────────────────────────
+const SUPABASE_URL  = 'https://fvgajfiksxmwioxnesry.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2Z2FqZmlrc3htd2lveG5lc3J5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NDU4OTEsImV4cCI6MjA4OTIyMTg5MX0.KwqAzx1oAGeh0F3q1LfeQPXYjtdOjaOrzS_c4eUGKJY';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-const can = {
-  // Always available
-  oneWeekPlan:      true,
-  dietType:         true,
-  caloriePresets:   true,
-  commonAllergens:  true,
-  // Basic + Premium
-  customMacros:     TIER !== 'free',
-  fullExclusions:   TIER !== 'free',
-  portionScaling:   TIER !== 'free',
-  multiWeekPlan:    TIER !== 'free',
-  shoppingList:     TIER !== 'free',
-  recipeSwap:       TIER !== 'free',
-  nutritionSummary: TIER !== 'free',
-  proteinTarget:    TIER === 'premium',
-  // Premium only
-  cuisineFilter:    TIER === 'premium',
-  prepTimeFilter:   TIER === 'premium',
-  savedFavourites:  TIER === 'premium',
-  macroBreakdown:   TIER === 'premium',
-};
+// ─── TIER ────────────────────────────────────────────
+// Resolved at runtime from Supabase. Falls back to 'free'.
+var TIER = 'free';
+var can  = {};
 
-// Free tier recipe subset (30 balanced recipes)
 const FREE_IDS = new Set([1,4,5,6,7,9,12,13,18,20,22,25,26,28,29,30,32,36,38,39,41,44,45,46,50,55,58,62,65,69]);
+
+function buildCan(tier){
+  TIER = tier;
+  can = {
+    // Always available
+    oneWeekPlan:      true,
+    dietType:         true,
+    caloriePresets:   true,
+    commonAllergens:  true,
+    // Basic + Premium
+    customMacros:     TIER !== 'free',
+    fullExclusions:   TIER !== 'free',
+    portionScaling:   TIER !== 'free',
+    multiWeekPlan:    TIER !== 'free',
+    shoppingList:     TIER !== 'free',
+    recipeSwap:       TIER !== 'free',
+    nutritionSummary: TIER !== 'free',
+    proteinTarget:    TIER === 'premium',
+    // Premium only
+    cuisineFilter:    TIER === 'premium',
+    prepTimeFilter:   TIER === 'premium',
+    savedFavourites:  TIER === 'premium',
+    macroBreakdown:   TIER === 'premium',
+  };
+}
+
+async function initTier(){
+  // Show loading state
+  document.getElementById('appLoader').style.display = 'flex';
+
+  try {
+    const { data: { user }, error: authErr } = await sb.auth.getUser();
+    if(authErr || !user){
+      // Not logged in — free tier
+      buildCan('free');
+    } else {
+      const { data: profile, error: profileErr } = await sb
+        .from('profiles')
+        .select('tier')
+        .eq('id', user.id)
+        .single();
+      var tier = (profile && !profileErr) ? (profile.tier || 'free') : 'free';
+      buildCan(tier);
+    }
+  } catch(e){
+    console.warn('Supabase unreachable — defaulting to free tier', e);
+    buildCan('free');
+  }
+
+  document.getElementById('appLoader').style.display = 'none';
+  init();
+}
+
 
 // ─── STATIC DATA ─────────────────────────────────────
 const ING_CATS=[
@@ -1186,7 +1225,7 @@ function openHelp(type){
 function closeHelp(){ document.getElementById("helpOv").classList.remove("open"); document.body.style.overflow=""; }
 
 // ─── INIT ────────────────────────────────────────────
-(function init(){
+function init(){
   // Show tier badge in header
   var tierLabels={free:"Free Plan",basic:"Basic Plan",premium:"Premium Plan"};
   document.getElementById("tierBadge").textContent=tierLabels[TIER];
@@ -1443,8 +1482,19 @@ function closeHelp(){ document.getElementById("helpOv").classList.remove("open")
   if(!can.multiWeekPlan){
     document.querySelector(".setup-header p").textContent="Free plan · 1 week · 30 recipes · No account needed";
   }
-})();
+}
+
+window.addEventListener('load', initTier);
 
 </script>
+
+<div id="appLoader" style="display:none;position:fixed;inset:0;background:#F7F4EF;z-index:999;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
+  <div style="font-size:40px">🌿</div>
+  <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#2A5C2E">Meal Planner</div>
+  <div style="font-size:13px;color:#7A7670">Loading your plan…</div>
+  <div style="width:40px;height:40px;border:3px solid #E4E0D8;border-top-color:#2A5C2E;border-radius:50%;animation:spin .8s linear infinite"></div>
+</div>
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
 </body>
 </html>

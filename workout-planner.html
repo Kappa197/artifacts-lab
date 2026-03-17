@@ -6,6 +6,7 @@
 <title>Workout Planner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -975,47 +976,83 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 </div>
 
 <script>
-// =====================================================================
-// TIER — change this one constant to produce free / basic / premium build
-// 'free'    → 3 days max, 4 weeks only, beginner only, no tracker, no supersets, no priority, no undulation, no Class B
-// 'basic'   → full planner + tracker + history/CSV, no supersets, no undulation, no Class B, no progress charts
-// 'premium' → everything unlocked
-// =====================================================================
 // ─────────────────────────────────────────────────────────────────────
-// TIER — single constant. Change here only.
-// 'free' | 'basic' | 'premium'
-// Phase 2: replace this line with a Supabase profile lookup — nothing
-// else in the codebase needs to change.
+// SUPABASE — tier is fetched async on load.
+// buildCan(tier) constructs the capability object.
+// initTier() is the single entry point called on window load.
 // ─────────────────────────────────────────────────────────────────────
-const TIER = 'free';
+const SUPABASE_URL  = 'https://fvgajfiksxmwioxnesry.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2Z2FqZmlrc3htd2lveG5lc3J5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NDU4OTEsImV4cCI6MjA4OTIyMTg5MX0.KwqAzx1oAGeh0F3q1LfeQPXYjtdOjaOrzS_c4eUGKJY';
 
-// ─────────────────────────────────────────────────────────────────────
-// CAN — capability object. All feature gates go through this.
-// NEVER use raw TIER comparisons elsewhere in the code.
-// ─────────────────────────────────────────────────────────────────────
-const can = {
-  // ── Always available ──────────────────────────────────────────────
-  basicGoals:     true,   // Hypertrophy + Endurance day focus
-  fourWeekPlan:   true,   // 4-week plan duration
-  threeSessionMax:true,   // up to 3 sessions/week
+// TIER and can are declared here; buildCan() populates them after fetch.
+let TIER = 'free';
+let can  = {};
 
-  // ── Basic + Premium ───────────────────────────────────────────────
-  advancedGoals:  TIER !== 'free',  // Strength + Power/Speed day focus
-  longerPlans:    TIER !== 'free',  // 8-week and 12-week plan durations
-  fiveSessionMax: TIER !== 'free',  // 4–5 sessions per week
-  sixSessionMax:  TIER === 'premium', // 6 sessions per week
-  volumeTable:    TIER !== 'free',  // weekly volume tracking table
-  deloadWeeks:    TIER !== 'free',  // deload week generation
-  printExport:    TIER !== 'free',  // print / PDF export
-  priority:       TIER !== 'free',  // muscle priority selection
-  exerciseSwap:   TIER !== 'free',  // swap exercise button
+function buildCan(tier) {
+  TIER = tier;
+  can = {
+    // ── Always available ──────────────────────────────────────────────
+    basicGoals:     true,   // Hypertrophy + Endurance day focus
+    fourWeekPlan:   true,   // 4-week plan duration
+    threeSessionMax:true,   // up to 3 sessions/week
 
-  // ── Premium only ──────────────────────────────────────────────────
-  undulation:     TIER === 'premium', // Phase D — weekly intensity undulation
-  supersets:      TIER === 'premium', // Phase E — supersets
-  classBendo:     TIER === 'premium', // Class B endurance (AGT, EMOM, GPR)
-  sessionLogging: TIER === 'premium', // Tracker — log sessions + progress charts
-};
+    // ── Basic + Premium ───────────────────────────────────────────────
+    advancedGoals:  TIER !== 'free',  // Strength + Power/Speed day focus
+    longerPlans:    TIER !== 'free',  // 8-week and 12-week plan durations
+    fiveSessionMax: TIER !== 'free',  // 4–5 sessions per week
+    sixSessionMax:  TIER === 'premium', // 6 sessions per week
+    volumeTable:    TIER !== 'free',  // weekly volume tracking table
+    deloadWeeks:    TIER !== 'free',  // deload week generation
+    printExport:    TIER !== 'free',  // print / PDF export
+    priority:       TIER !== 'free',  // muscle priority selection
+    exerciseSwap:   TIER !== 'free',  // swap exercise button
+
+    // ── Premium only ──────────────────────────────────────────────────
+    undulation:     TIER === 'premium', // Phase D — weekly intensity undulation
+    supersets:      TIER === 'premium', // Phase E — supersets
+    classBendo:     TIER === 'premium', // Class B endurance (AGT, EMOM, GPR)
+    sessionLogging: TIER === 'premium', // Tracker — log sessions + progress charts
+  };
+}
+
+async function initTier() {
+  let tier = 'free'; // safe default — never crashes even if Supabase is unreachable
+
+  try {
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    // 1. Get the logged-in user
+    const { data: { user }, error: authErr } = await sb.auth.getUser();
+
+    if (user && !authErr) {
+      // 2. Fetch their tier from profiles table
+      const { data: profile, error: profileErr } = await sb
+        .from('profiles')
+        .select('tier')
+        .eq('id', user.id)
+        .single();
+
+      if (profile?.tier && !profileErr) {
+        tier = profile.tier; // 'free' | 'basic' | 'premium'
+      }
+    }
+    // If no user (not logged in) or any error → tier stays 'free'
+  } catch (err) {
+    console.warn('Supabase tier fetch failed — defaulting to free:', err);
+  }
+
+  buildCan(tier);
+  initUI();
+}
+
+function initUI() {
+  S.wpw = 3;
+  updateSplitHint();
+  renderDots(1);
+  updateDayFocusGrid();
+  initTierGating();
+}
+
 
 // =====================================================================
 // STATE
@@ -3478,10 +3515,8 @@ function closeCuesModal(e){
 document.addEventListener('keydown', e=>{
   if(e.key==='Escape'){ closeCuesModal(); closeSwapModal(); }
 });
-document.addEventListener('DOMContentLoaded',()=>{
-  S.wpw=3; updateSplitHint(); renderDots(1); updateDayFocusGrid();
-  initTierGating();
-});
+// initTier() fetches Supabase tier, builds can, then calls initUI()
+window.addEventListener('load', initTier);
 
 // =====================================================================
 // TIER GATING — all gates use can.xxx, never raw TIER comparisons
