@@ -1,0 +1,1450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meal Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+
+:root{--bg:#F7F4EF;--surface:#FFFFFF;--primary:#2A5C2E;--primary-light:#3A7A3F;--accent:#C4622D;--accent-light:#E8795E;--text:#1E1E1A;--muted:#7A7670;--border:#E4E0D8;--card-shadow:0 2px 12px rgba(30,30,26,.08);--radius:12px;--radius-sm:8px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:'Playfair Display',serif}
+.page{display:none;min-height:100vh;animation:fadeIn .3s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.setup-header{background:var(--primary);color:#fff;padding:28px 24px 24px;position:relative;overflow:hidden}
+.setup-header::after{content:'';position:absolute;right:-40px;top:-40px;width:200px;height:200px;border:2px solid rgba(255,255,255,.1);border-radius:50%}
+.logo{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.logo-icon{font-size:28px}
+.logo-text{font-family:'Playfair Display',serif;font-size:24px;font-weight:700}
+.setup-header p{font-size:14px;opacity:.75;margin-top:2px;font-weight:300}
+.setup-body{padding:0 16px 130px;max-width:680px;margin:0 auto}
+.section{padding:24px 0;border-bottom:1px solid var(--border)}
+.section:last-of-type{border-bottom:none}
+.section-label{font-size:12px;font-weight:600;letter-spacing:.5px;color:var(--accent);text-transform:uppercase;margin-bottom:6px}
+.section-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:500;margin-bottom:4px}
+.section-desc{font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.5}
+.diet-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.diet-card{border:2px solid var(--border);border-radius:var(--radius);padding:14px;cursor:pointer;transition:all .2s;background:var(--surface);text-align:center;user-select:none}
+.diet-card:hover{border-color:var(--primary-light)}
+.diet-card.sel{border-color:var(--primary);background:#F0F7F0}
+.diet-icon{font-size:26px;margin-bottom:6px}
+.diet-name{font-weight:600;font-size:13px}
+.diet-desc{font-size:11px;color:var(--muted);margin-top:2px}
+.slider-row{display:flex;align-items:center;gap:12px}
+.slider-val{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--primary);min-width:60px;text-align:center}
+.slider-unit{font-size:13px;color:var(--muted);margin-top:2px}
+input[type=range]{-webkit-appearance:none;appearance:none;flex:1;height:4px;background:var(--border);border-radius:2px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--primary);cursor:pointer;box-shadow:0 2px 8px rgba(42,92,46,.3)}
+.slots-grid{display:flex;flex-direction:column;gap:8px}
+.slot-tog{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border:2px solid var(--border);border-radius:var(--radius);background:var(--surface);cursor:pointer;transition:all .2s;user-select:none}
+.slot-tog.on{border-color:var(--primary);background:#F0F7F0}
+.slot-left{display:flex;align-items:center;gap:12px}
+.slot-icon{font-size:20px;width:32px;text-align:center}
+.slot-name{font-weight:600;font-size:14px}
+.slot-time{font-size:12px;color:var(--muted)}
+.pill{width:44px;height:24px;border-radius:12px;background:var(--border);position:relative;transition:background .2s;flex-shrink:0}
+.pill::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:3px;left:3px;transition:transform .2s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.slot-tog.on .pill{background:var(--primary)}
+.slot-tog.on .pill::after{transform:translateX(20px)}
+.check-row{display:flex;align-items:center;gap:8px;margin-top:12px;cursor:pointer}
+.check-row input{width:18px;height:18px;accent-color:var(--primary);cursor:pointer}
+.check-row label{font-size:13px;color:var(--muted);cursor:pointer}
+.warn-box{display:none;margin-top:10px;padding:10px 13px;background:#FFFBEB;border:1.5px solid #F59E0B;border-radius:8px;font-size:12px;color:#92400E;line-height:1.5}
+.warn-box.show{display:block}
+.ing-cat{margin-bottom:14px}
+.ing-cat-label{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.4px;text-transform:uppercase;margin-bottom:8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:6px 12px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;user-select:none}
+.chip:hover{border-color:var(--primary);color:var(--primary)}
+.chip.sel{background:var(--primary);border-color:var(--primary);color:#fff}
+.micro-grid{display:flex;flex-wrap:wrap;gap:8px}
+.micro-chip{padding:8px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;user-select:none}
+.micro-chip.sel{background:var(--accent);border-color:var(--accent);color:#fff}
+.diff-row{display:flex;gap:8px}
+.diff-btn{flex:1;padding:12px 8px;border:2px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);cursor:pointer;text-align:center;transition:all .2s;user-select:none}
+.diff-btn .di{font-size:20px;margin-bottom:4px}
+.diff-btn .dl{font-size:12px;font-weight:600;color:var(--muted)}
+.diff-btn .ds{font-size:10px;color:var(--muted)}
+.diff-btn.sel{border-color:var(--primary);background:#F0F7F0}
+.diff-btn.sel .dl{color:var(--primary)}
+.excl-row{display:flex;gap:8px;margin-bottom:10px}
+.excl-input{flex:1;padding:10px 14px;border:2px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s;background:var(--surface);color:var(--text)}
+.excl-input:focus{border-color:var(--primary)}
+.excl-ok{padding:10px 18px;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap}
+.excl-ok:hover{background:var(--primary-light)}
+.excl-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.excl-tag{display:flex;align-items:center;gap:5px;padding:5px 10px;background:#FEE2E2;border:1.5px solid #FECACA;border-radius:16px;font-size:12px;font-weight:500;color:#B91C1C}
+.excl-tag button{background:none;border:none;color:#B91C1C;font-size:15px;cursor:pointer;padding:0;line-height:1;font-weight:700}
+.setup-footer{position:fixed;bottom:0;left:0;right:0;padding:16px 24px;background:linear-gradient(transparent,var(--bg) 30%);z-index:100}
+.gen-btn{width:100%;max-width:680px;margin:0 auto;display:block;padding:18px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;cursor:pointer;transition:all .2s;box-shadow:0 4px 20px rgba(196,98,45,.35)}
+.gen-btn:hover{background:var(--accent-light);transform:translateY(-1px)}
+.help-links{display:flex;justify-content:center;gap:20px;margin-top:8px}
+.help-link{font-size:12px;color:var(--muted);text-decoration:underline;cursor:pointer;background:none;border:none;font-family:inherit}
+.plan-header{background:var(--primary);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50}
+.back-btn{background:rgba(255,255,255,.15);border:none;color:#fff;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;flex-shrink:0}
+.back-btn:hover{background:rgba(255,255,255,.25)}
+.plan-hinfo{flex:1;min-width:0}
+.plan-htitle{font-family:'Playfair Display',serif;font-size:17px;font-weight:700}
+.plan-hsub{font-size:11px;opacity:.7;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hdr-btns{display:flex;gap:6px;flex-shrink:0}
+.hdr-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .2s}
+.hdr-btn:hover{background:rgba(255,255,255,.25)}
+.portion-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:12px}
+.portion-label{font-size:13px;font-weight:600;color:var(--text)}
+.portion-btns{display:flex;gap:4px}
+.portion-btn{width:34px;height:34px;border:2px solid var(--border);border-radius:8px;background:var(--surface);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;font-family:inherit;color:var(--muted)}
+.portion-btn.sel{border-color:var(--primary);background:var(--primary);color:#fff}
+.portion-note{font-size:11px;color:var(--muted)}
+.nutr-bar{background:var(--surface);border-bottom:1px solid var(--border);overflow:hidden;transition:max-height .4s ease}
+.nutr-bar.collapsed{max-height:44px}
+.nutr-bar.expanded{max-height:500px}
+.nutr-toggle{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;user-select:none}
+.nutr-toggle-label{font-size:13px;font-weight:600;color:var(--primary)}
+.nutr-arrow{font-size:11px;color:var(--muted);transition:transform .3s}
+.nutr-bar.expanded .nutr-arrow{transform:rotate(180deg)}
+.nutr-content{padding:0 16px 16px}
+.nutr-macro-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.nutr-box{background:var(--bg);border-radius:8px;padding:10px;text-align:center}
+.nutr-val{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--primary)}
+.nutr-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-top:2px}
+.nutr-micro-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px}
+.micro-bars{display:flex;flex-direction:column;gap:6px}
+.micro-bar-row{display:flex;align-items:center;gap:8px}
+.micro-bar-lbl{font-size:11px;color:var(--text);width:96px;flex-shrink:0}
+.micro-bar-track{flex:1;height:7px;background:var(--border);border-radius:4px;overflow:hidden}
+.micro-bar-fill{height:100%;border-radius:4px;background:var(--primary);transition:width .6s ease}
+.micro-bar-fill.hi{background:var(--accent)}
+.micro-bar-pct{font-size:10px;color:var(--muted);width:30px;text-align:right;flex-shrink:0}
+.week-tabs{background:var(--surface);border-bottom:1px solid var(--border);display:flex;padding:0 16px;gap:4px;overflow-x:auto;position:sticky;top:62px;z-index:40}
+.week-tab{padding:12px 16px;font-size:13px;font-weight:600;color:var(--muted);border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap;transition:all .2s;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit}
+.week-tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+.plan-content{padding:12px 16px;max-width:1400px;margin:0 auto}
+.week-grid{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.grid-head{display:grid;gap:5px;margin-bottom:5px}
+.day-hdr{text-align:center;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.4px;text-transform:uppercase;padding:6px 0}
+.slot-row{display:grid;gap:5px;margin-bottom:5px;align-items:start}
+.slot-lbl{padding:8px 4px;display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.slot-lbl-icon{font-size:15px}
+.slot-lbl-txt{font-size:9px;font-weight:600;color:var(--muted);text-transform:uppercase;text-align:right;letter-spacing:.3px}
+.meal-card{background:var(--surface);border-radius:8px;padding:8px;border:1px solid var(--border);position:relative;overflow:hidden;min-height:76px;transition:box-shadow .2s,transform .2s}
+.meal-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.meal-card.breakfast::before{background:#C4622D}
+.meal-card.snack1::before,.meal-card.snack2::before{background:#5A7A4A}
+.meal-card.lunch::before{background:#2A5C2E}
+.meal-card.dinner::before{background:#3D3830}
+.meal-card:hover{box-shadow:var(--card-shadow);transform:translateY(-2px)}
+.mc-inner{cursor:pointer}
+.mc-emoji{font-size:16px;margin-bottom:2px;display:block}
+.mc-name{font-size:11px;font-weight:600;color:var(--text);line-height:1.3;margin-bottom:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mc-meta{font-size:10px;color:var(--muted)}
+.swap-btn{position:absolute;bottom:5px;right:5px;width:22px;height:22px;border-radius:50%;background:var(--bg);border:1px solid var(--border);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;color:var(--text)}
+.meal-card:hover .swap-btn{opacity:1}
+.day-tot-row{display:grid;gap:5px;margin-bottom:16px}
+.day-tot{text-align:center;font-size:10px;color:var(--muted);padding:3px}
+.day-tot strong{display:block;font-size:12px;color:var(--primary);font-family:'Playfair Display',serif;font-weight:700}
+.plan-footer{padding:14px 16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;border-top:1px solid var(--border);margin-top:8px}
+.pfbtn{padding:11px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;border:2px solid}
+.pfbtn-p{background:var(--accent);color:#fff;border-color:var(--accent)}
+.pfbtn-p:hover{background:var(--accent-light);border-color:var(--accent-light)}
+.pfbtn-o{background:transparent;color:var(--primary);border-color:var(--primary)}
+.pfbtn-o:hover{background:var(--primary);color:#fff}
+.pfbtn-g{background:transparent;color:var(--muted);border-color:var(--border)}
+.pfbtn-g:hover{background:var(--border)}
+.modal-ov{position:fixed;inset:0;background:rgba(30,30,26,.5);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(4px)}
+.modal-ov.open{opacity:1;pointer-events:all}
+.modal-panel{background:var(--surface);border-radius:20px 20px 0 0;width:100%;max-width:600px;max-height:92vh;overflow-y:auto;transform:translateY(100%);transition:transform .35s cubic-bezier(.34,1.2,.64,1);padding-bottom:32px}
+.modal-ov.open .modal-panel{transform:translateY(0)}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 0}
+.modal-top{position:sticky;top:0;background:var(--surface);padding:10px 18px 6px;display:flex;justify-content:flex-end;z-index:10}
+.modal-x{background:var(--border);border:none;width:30px;height:30px;border-radius:50%;font-size:14px;cursor:pointer;color:var(--text)}
+.modal-body{padding:0 20px}
+.m-emoji{font-size:38px;margin-bottom:6px;display:block}
+.m-title{font-family:'Playfair Display',serif;font-size:21px;font-weight:700;line-height:1.2;margin-bottom:10px}
+.m-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px}
+.tag{padding:4px 10px;border-radius:12px;font-size:10px;font-weight:600;letter-spacing:.3px;text-transform:uppercase}
+.tv{background:#E8F5E9;color:#2E7D32}.tvg{background:#F1F8E9;color:#558B2F}.tp{background:#E3F2FD;color:#1565C0}
+.tgf{background:#FFF3E0;color:#E65100}.tdf{background:#F3E5F5;color:#6A1B9A}
+.thp{background:#E8F5E9;color:#1B5E20}.tq{background:#FFFDE7;color:#F57F17}
+.macro-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:18px}
+.macro-box{background:var(--bg);border-radius:8px;padding:10px;text-align:center}
+.macro-val{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--primary)}
+.macro-lbl{font-size:10px;color:var(--muted);font-weight:500;margin-top:2px;text-transform:uppercase;letter-spacing:.3px}
+.m-sec{font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--accent);margin-bottom:8px;margin-top:18px}
+.ing-list{list-style:none;display:flex;flex-direction:column;gap:5px}
+.ing-list li{font-size:13px;padding:7px 11px;background:var(--bg);border-radius:8px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.ing-list li::before{content:'•';color:var(--primary);font-weight:700;flex-shrink:0}
+.ing-scaled{font-weight:700;color:var(--primary)}
+.scaled-badge{display:inline-block;background:var(--primary);color:#fff;font-size:10px;font-weight:700;letter-spacing:.3px;padding:2px 7px;border-radius:10px;margin-left:6px}
+.steps-list{list-style:none;display:flex;flex-direction:column;gap:8px}
+.step-item{display:flex;gap:10px;align-items:flex-start}
+.step-num{width:24px;height:24px;background:var(--primary);color:#fff;border-radius:50%;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.step-txt{font-size:13px;line-height:1.5;padding-top:3px}
+.tip-box{background:linear-gradient(135deg,#FFF5F0,#FEF0EA);border-left:3px solid var(--accent);border-radius:8px;padding:11px 13px;margin-top:14px}
+.tip-lbl{font-size:10px;font-weight:700;letter-spacing:.4px;color:var(--accent);text-transform:uppercase;margin-bottom:3px}
+.tip-txt{font-size:12px;line-height:1.5;font-style:italic}
+.scale-bar{display:flex;align-items:center;justify-content:space-between;background:#F0F7F0;border:1.5px solid var(--primary);border-radius:10px;padding:10px 14px;margin:14px 0 4px}
+.scale-label{font-size:13px;font-weight:600;color:var(--primary)}
+.scale-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.scale-toggle{position:relative;width:46px;height:26px;flex-shrink:0;cursor:pointer}
+.scale-toggle input{opacity:0;width:0;height:0;position:absolute}
+.scale-track{position:absolute;inset:0;background:var(--border);border-radius:13px;transition:background .2s}
+.scale-toggle input:checked+.scale-track{background:var(--primary)}
+.scale-track::after{content:'';position:absolute;width:20px;height:20px;border-radius:50%;background:#fff;top:3px;left:3px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.scale-toggle input:checked+.scale-track::after{transform:translateX(20px)}
+.swap-ov{position:fixed;inset:0;background:rgba(30,30,26,.5);z-index:250;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .25s}
+.swap-ov.open{opacity:1;pointer-events:all}
+.swap-panel{background:var(--surface);border-radius:16px;width:100%;max-width:420px;max-height:80vh;overflow-y:auto;padding:20px}
+.swap-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;margin-bottom:4px}
+.swap-sub{font-size:12px;color:var(--muted);margin-bottom:14px}
+.swap-list{display:flex;flex-direction:column;gap:8px}
+.swap-item{display:flex;align-items:center;gap:12px;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;transition:all .2s}
+.swap-item:hover{border-color:var(--primary);background:#F0F7F0}
+.swap-em{font-size:22px;flex-shrink:0}
+.swap-item-name{font-size:13px;font-weight:600}
+.swap-item-meta{font-size:11px;color:var(--muted);margin-top:2px}
+.swap-cancel{width:100%;margin-top:12px;padding:11px;background:none;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;color:var(--muted)}
+.shop-ov{position:fixed;inset:0;background:rgba(30,30,26,.5);z-index:250;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(4px)}
+.shop-ov.open{opacity:1;pointer-events:all}
+.shop-panel{background:var(--surface);border-radius:20px 20px 0 0;width:100%;max-width:620px;max-height:88vh;overflow-y:auto;transform:translateY(100%);transition:transform .35s cubic-bezier(.34,1.2,.64,1);padding-bottom:32px}
+.shop-ov.open .shop-panel{transform:translateY(0)}
+.shop-header{position:sticky;top:0;background:var(--surface);padding:14px 20px 10px;border-bottom:1px solid var(--border);z-index:10}
+.shop-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 12px}
+.shop-title-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.shop-title{font-family:'Playfair Display',serif;font-size:19px;font-weight:700}
+.shop-actions{display:flex;gap:6px;align-items:center}
+.shop-action-btn{padding:7px 13px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;border:1.5px solid;transition:all .2s}
+.shop-copy{background:var(--primary);color:#fff;border-color:var(--primary)}
+.shop-print{background:transparent;color:var(--muted);border-color:var(--border)}
+.shop-close{background:var(--border);border:none;width:30px;height:30px;border-radius:50%;font-size:14px;cursor:pointer;flex-shrink:0}
+.shop-portions-note{font-size:11px;color:var(--muted);margin-top:6px;font-style:italic}
+.shop-body{padding:14px 20px}
+.shop-cat{margin-bottom:18px}
+.shop-cat-title{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--accent);margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--border)}
+.shop-items{display:flex;flex-direction:column;gap:4px}
+.shop-item{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:8px;background:var(--bg);font-size:13px;cursor:pointer;user-select:none;transition:opacity .2s}
+.shop-item.checked{opacity:.4;text-decoration:line-through}
+.shop-item-check{width:18px;height:18px;border-radius:4px;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;transition:all .2s;background:var(--surface)}
+.shop-item.checked .shop-item-check{background:var(--primary);border-color:var(--primary);color:#fff}
+.shop-item-text{flex:1}
+.shop-item-qty{font-size:11px;color:var(--muted);font-weight:600;white-space:nowrap}
+.help-ov{position:fixed;inset:0;background:rgba(30,30,26,.5);z-index:300;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .25s}
+.help-ov.open{opacity:1;pointer-events:all}
+.help-panel{background:var(--surface);border-radius:20px;max-width:520px;width:100%;max-height:85vh;overflow-y:auto;padding:26px 22px;transform:scale(.95);transition:transform .25s}
+.help-ov.open .help-panel{transform:scale(1)}
+.help-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:3px;color:var(--primary)}
+.help-sub{font-size:13px;color:var(--muted);margin-bottom:18px}
+.help-x{float:right;background:var(--border);border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:14px;margin-top:-4px;margin-left:8px}
+.help-sec{margin-bottom:16px}
+.help-sec h3{font-size:13px;font-weight:700;color:var(--text);margin-bottom:5px}
+.help-sec p{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:3px}
+.faq-item{border-bottom:1px solid var(--border);padding:10px 0}
+.faq-q{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px}
+.faq-a{font-size:12px;color:var(--muted);line-height:1.5}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--text);color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:500;transition:transform .3s;z-index:500;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+@media(min-width:480px){.diet-grid{grid-template-columns:repeat(4,1fr)}.modal-ov{align-items:center}.modal-panel{border-radius:20px;max-height:88vh}.modal-handle{display:none}.shop-ov{align-items:center}.shop-panel{border-radius:20px;max-height:88vh}}
+@media print{.plan-header,.week-tabs,.plan-footer,.portion-bar,.nutr-bar,.swap-btn,.hdr-btns{display:none!important}.page{display:block!important}#setupPage{display:none!important}}
+
+.tier-locked{opacity:.38;pointer-events:none;position:relative}
+.tier-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:12px;font-size:10px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;margin-left:8px;vertical-align:middle}
+.badge-basic{background:#E3F2FD;color:#1565C0}
+.badge-premium{background:#FFF3E0;color:#E65100}
+.tier-lock-msg{font-size:11px;color:var(--muted);font-style:italic;margin-top:6px;display:none}
+.tier-locked+.tier-lock-msg{display:block}
+
+
+/* TIER PILL */
+.tier-pill{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:.3px;margin-left:8px;vertical-align:middle}
+.tier-free{background:rgba(255,255,255,.15);color:#fff}
+.tier-basic{background:#E3F2FD;color:#1565C0}
+.tier-premium{background:#FFF3E0;color:#E65100}
+/* UPGRADE NUDGE */
+.upgrade-nudge{padding:10px 13px;background:#FFFBEB;border:1.5px solid #F59E0B;border-radius:8px;font-size:12px;color:#92400E;line-height:1.6;margin-top:8px}
+.upgrade-nudge a{color:#C4622D;font-weight:600;text-decoration:underline;cursor:pointer}
+/* LOCKED STATES */
+.locked-slot{opacity:.45}
+.locked-port{opacity:.38;cursor:not-allowed!important}
+/* HEART BUTTON */
+.heart-btn{position:absolute;top:5px;right:5px;width:22px;height:22px;border-radius:50%;background:none;border:none;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;padding:0;line-height:1}
+.meal-card:hover .heart-btn{opacity:1}
+.heart-btn.fav{opacity:1}
+.modal-heart{background:none;border:none;font-size:22px;cursor:pointer;padding:4px;line-height:1;flex-shrink:0}
+.m-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:10px}
+.m-title-row .m-title{margin-bottom:0}
+/* SECTION BODY */
+.section-body{margin-top:4px}
+/* CUISINE CHIPS */
+#cuisineChips{display:flex;flex-wrap:wrap;gap:6px}
+/* PREP TIME BUTTONS */
+.prep-row{display:flex;gap:8px;flex-wrap:wrap}
+.prep-btn{padding:9px 14px;border:2px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--muted);transition:all .2s}
+.prep-btn.sel{border-color:var(--primary);background:#F0F7F0;color:var(--primary)}
+/* MACRO DETAIL (premium) */
+.macro-detail{margin-bottom:4px}
+.macro-donut-wrap{display:flex;align-items:center;gap:16px;margin-bottom:14px}
+.macro-donut{width:80px;height:80px;border-radius:50%;flex-shrink:0;position:relative}
+.macro-donut::after{content:'';position:absolute;inset:16px;background:var(--surface);border-radius:50%}
+.macro-donut-legend{display:flex;flex-direction:column;gap:5px}
+.mdl-item{display:flex;align-items:center;gap:6px;font-size:12px}
+.mdl-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.macro-target-bars{margin-bottom:12px}
+.mtb-lbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:6px}
+.mtb-row{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);margin-bottom:5px}
+.mtb-row span:first-child{width:56px;flex-shrink:0}
+.mtb-track{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.mtb-fill{height:100%;background:var(--primary);border-radius:3px}
+.mtb-row span:last-child{width:32px;text-align:right;flex-shrink:0}
+.macro-extras{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.mex-item{background:var(--bg);border-radius:8px;padding:8px;text-align:center}
+.mex-lbl{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:2px}
+.mex-val{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--primary)}
+.macro-locked{position:relative;margin-bottom:8px}
+.macro-locked-blur{filter:blur(4px);pointer-events:none}
+.macro-donut-placeholder{width:80px;height:80px;border-radius:50%;background:var(--border);margin-bottom:12px}
+.macro-bars-placeholder{height:60px;background:var(--border);border-radius:8px}
+.macro-locked .upgrade-nudge{margin-top:8px}
+
+</style>
+</head>
+<body>
+
+<div id="setupPage" class="page active">
+  <header class="setup-header">
+    <div class="logo"><span class="logo-icon">🌿</span><span class="logo-text">Meal Planner<span id="tierBadge"></span></span></div>
+    <p>Build your personalised weekly meal plan</p>
+  </header>
+  <div class="setup-body">
+
+    <div class="section">
+      <div class="section-label">Step 1</div>
+      <div class="section-title">What's your diet?</div>
+      <p class="section-desc">Filters the recipe database to match your lifestyle.</p>
+      <div class="diet-grid">
+        <div class="diet-card sel" data-diet="omnivore"><div class="diet-icon">🍽️</div><div class="diet-name">Omnivore</div><div class="diet-desc">All foods</div></div>
+        <div class="diet-card" data-diet="pescatarian"><div class="diet-icon">🐟</div><div class="diet-name">Pescatarian</div><div class="diet-desc">Fish, no meat</div></div>
+        <div class="diet-card" data-diet="vegetarian"><div class="diet-icon">🥗</div><div class="diet-name">Vegetarian</div><div class="diet-desc">No meat or fish</div></div>
+        <div class="diet-card" data-diet="vegan"><div class="diet-icon">🌱</div><div class="diet-name">Vegan</div><div class="diet-desc">Plant-based only</div></div>
+      </div>
+    </div>
+
+    <div id="cuisineSection" class="section">
+      <div class="section-label">Step 2 · Optional <span style="font-size:10px;color:var(--accent)">Premium</span></div>
+      <div class="section-title">Cuisine preference</div>
+      <div class="section-body"><div class="chips" id="cuisineChips"></div></div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">Step 3</div>
+      <div class="section-title">How many weeks?</div>
+      <p class="section-desc">A full 7-day plan per week.</p>
+      <div class="slider-row"><div class="slider-val" id="wkVal">1</div><div style="flex:1"><input type="range" id="wkSlider" min="1" max="4" value="1" step="1"><div class="slider-unit">week(s)</div></div></div>
+      <div id="weeksNudge"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">Step 4</div>
+      <div class="section-title">Which meals to include?</div>
+      <p class="section-desc">Toggle the slots you want planned each day.</p>
+      <div class="slots-grid">
+        <div class="slot-tog on" data-slot="breakfast"><div class="slot-left"><span class="slot-icon">🌅</span><div><div class="slot-name">Breakfast</div><div class="slot-time">~7:00 AM</div></div></div><div class="pill"></div></div>
+        <div class="slot-tog on" data-slot="snack1"><div class="slot-left"><span class="slot-icon">🍎</span><div><div class="slot-name">Morning Snack</div><div class="slot-time">~10:30 AM</div></div></div><div class="pill"></div></div>
+        <div class="slot-tog on" data-slot="lunch"><div class="slot-left"><span class="slot-icon">🍽️</span><div><div class="slot-name">Lunch</div><div class="slot-time">~1:00 PM</div></div></div><div class="pill"></div></div>
+        <div class="slot-tog on" data-slot="snack2"><div class="slot-left"><span class="slot-icon">🍫</span><div><div class="slot-name">Afternoon Snack</div><div class="slot-time">~4:00 PM</div></div></div><div class="pill"></div></div>
+        <div class="slot-tog on" data-slot="dinner"><div class="slot-left"><span class="slot-icon">🌙</span><div><div class="slot-name">Dinner</div><div class="slot-time">~7:30 PM</div></div></div><div class="pill"></div></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">Step 5</div>
+      <div class="section-title">Daily calorie target?</div>
+      <p class="section-desc">For the selected meals only.</p>
+      <div id="calWrap"><div class="slider-row"><div class="slider-val" id="calVal">1800</div><div style="flex:1"><input type="range" id="calSlider" min="1000" max="3200" value="1800" step="50"><div class="slider-unit">kcal / day</div></div></div></div>
+      <div id="calWarn" class="warn-box"><span>⚠️ </span><span id="calWarnTxt"></span></div>
+      <div class="check-row"><input type="checkbox" id="calUnk"><label for="calUnk">I don't know — use 1600 kcal default</label></div>
+      <div id="calNudge"></div>
+    </div>
+
+    <div class="section" id="protSection">
+      <div class="section-label">Step 6 · Optional <span style="font-size:10px;color:var(--accent)">Premium</span></div>
+      <div class="section-title">Daily protein target?</div>
+      <p class="section-desc">Minimum protein across your plan meals.</p>
+      <div id="protWrap"><div class="slider-row"><div class="slider-val" id="protVal">80</div><div style="flex:1"><input type="range" id="protSlider" min="40" max="220" value="80" step="5"><div class="slider-unit">g protein / day</div></div></div></div>
+      <div id="protWarn" class="warn-box"><span>⚠️ </span><span id="protWarnTxt"></span></div>
+      <div class="check-row"><input type="checkbox" id="protUnk" checked><label for="protUnk">No specific protein goal</label></div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">Step 7 · Optional</div>
+      <div class="section-title">Dietary restrictions</div>
+      <p class="section-desc">Select common allergens to exclude from your plan.</p>
+      <div class="chips" id="allergenChips"></div>
+      <div id="exclCustomSection" style="margin-top:14px">
+        <div class="excl-row"><input type="text" id="exclInput" class="excl-input" placeholder="e.g. mushrooms, coconut…"><button class="excl-ok" id="exclOk">OK</button></div>
+        <div class="excl-tags" id="exclTags"></div>
+      </div>
+    </div>
+
+    <div id="ingSection" class="section">
+      <div class="section-label">Step 8 · Optional <span style="font-size:10px;color:var(--muted)">Basic+</span></div>
+      <div class="section-title">Favourite ingredients</div>
+      <p class="section-desc">Recipes containing these will be prioritised.</p>
+      <div class="section-body"><div id="ingPicker"></div></div>
+    </div>
+
+    <div id="microSection" class="section">
+      <div class="section-label">Step 9 · Optional <span style="font-size:10px;color:var(--accent)">Premium</span></div>
+      <div class="section-title">Nutritional focus</div>
+      <p class="section-desc">Pick up to 2 micronutrients to prioritise.</p>
+      <div class="section-body"><div class="micro-grid" id="microPicker"></div><div id="microNote" style="font-size:11px;color:var(--muted);margin-top:8px"></div></div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">Step 10</div>
+      <div class="section-title">Max cooking complexity?</div>
+      <p class="section-desc">How much time are you happy to spend?</p>
+      <div class="diff-row">
+        <div class="diff-btn" data-diff="1"><div class="di">⚡</div><div class="dl">Quick</div><div class="ds">≤15 min</div></div>
+        <div class="diff-btn sel" data-diff="2"><div class="di">🍳</div><div class="dl">Medium</div><div class="ds">≤30 min</div></div>
+        <div class="diff-btn" data-diff="3"><div class="di">👨‍🍳</div><div class="dl">All levels</div><div class="ds">any time</div></div>
+      </div>
+    </div>
+
+    <div id="prepSection" class="section">
+      <div class="section-label">Step 11 · Optional <span style="font-size:10px;color:var(--accent)">Premium</span></div>
+      <div class="section-title">Max prep time</div>
+      <div class="section-body">
+        <div class="prep-row">
+          <button class="prep-btn sel" data-prep="999">Any</button>
+          <button class="prep-btn" data-prep="15">Quick &lt;15 min</button>
+          <button class="prep-btn" data-prep="30">Medium &lt;30 min</button>
+          <button class="prep-btn" data-prep="60">Extended &lt;60 min</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="setup-footer">
+    <button class="gen-btn" id="genBtn">✨ Generate My Meal Plan</button>
+    <div class="help-links"><button class="help-link" id="manualBtn">📖 User Manual</button><button class="help-link" id="faqBtn">❓ FAQ</button></div>
+  </div>
+</div>
+
+
+<div id="planPage" class="page">
+  <header class="plan-header">
+    <button class="back-btn" id="backBtn">←</button>
+    <div class="plan-hinfo"><div class="plan-htitle">Meal Plan</div><div class="plan-hsub" id="planSub"></div></div>
+    <div class="hdr-btns"><button class="hdr-btn" id="shopBtn">🛒 List</button><button class="hdr-btn" id="printBtn">🖨️</button></div>
+  </header>
+  <div class="portion-bar">
+    <span class="portion-label">Serves</span>
+    <div class="portion-btns">
+      <button class="portion-btn sel" data-p="1">1</button>
+      <button class="portion-btn" data-p="2">2</button>
+      <button class="portion-btn" data-p="3">3</button>
+      <button class="portion-btn" data-p="4">4</button>
+    </div>
+    <span class="portion-note">Scales ingredient quantities &amp; macros</span>
+  </div>
+  <div class="nutr-bar collapsed" id="nutrBar">
+    <div class="nutr-toggle" id="nutrToggle"><span class="nutr-toggle-label">📊 Weekly Nutrition Summary</span><span class="nutr-arrow">▼</span></div>
+    <div class="nutr-content" id="nutrContent"></div>
+  </div>
+  <nav class="week-tabs" id="weekTabs"></nav>
+  <div class="plan-content" id="planContent"></div>
+  <div class="plan-footer">
+    <button class="pfbtn pfbtn-g" id="backBtn2">← Setup</button>
+    <button class="pfbtn pfbtn-o" id="regenBtn">🔄 Regenerate</button>
+  </div>
+</div>
+
+
+<div class="modal-ov" id="recipeModal"><div class="modal-panel"><div class="modal-handle"></div><div class="modal-top"><button class="modal-x" id="modalX">✕</button></div><div class="modal-body" id="modalBody"></div></div></div>
+<div class="swap-ov" id="swapOv"><div class="swap-panel"><div class="swap-title">🔄 Swap Recipe</div><div class="swap-sub" id="swapSub"></div><div class="swap-list" id="swapList"></div><button class="swap-cancel" id="swapCancel">Cancel</button></div></div>
+<div class="shop-ov" id="shopOv"><div class="shop-panel"><div class="shop-header"><div class="shop-handle"></div><div class="shop-title-row"><div class="shop-title">🛒 Shopping List</div><div class="shop-actions"><button class="shop-action-btn shop-copy" id="shopCopy">📋 Copy</button><button class="shop-action-btn shop-print" id="shopPrint">🖨️ Print</button><button class="shop-close" id="shopClose">✕</button></div></div><div class="shop-portions-note" id="shopPortionNote"></div></div><div class="shop-body" id="shopBody"></div></div></div>
+<div class="help-ov" id="helpOv"><div class="help-panel" id="helpPanel"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const R=[
+{id:1,name:"Scrambled Eggs with Avocado & Smoked Salmon",sl:["B"],diff:1,tags:{vg:0,ve:0,pe:1,gf:1,df:1},kcal:[280,340],prot:[25,30],carbs:[5,7],fat:[18,22],pri:["eggs","salmon","avocado"],mc:["omega3","b12","vitD"],em:"🥚",ing:["3 eggs","50g smoked salmon","½ avocado","1 tsp olive oil","Salt & pepper"],steps:["Beat eggs with salt and pepper.","Heat oil in a non-stick pan over medium-low heat.","Gently scramble eggs 2–3 min until just set.","Serve alongside smoked salmon and sliced avocado."],tip:"Rich in omega-3 and complete proteins.",cuisine:"global",prepTime:10},
+{id:2,name:"Rye Toast with Eggs & Avocado",sl:["B"],diff:1,tags:{vg:0,ve:1,pe:1,gf:0,df:1},kcal:[310,370],prot:[16,20],carbs:[28,33],fat:[17,21],pri:["eggs","avocado","bread"],mc:["b12","folate","potassium"],em:"🍞",ing:["2 slices rye bread","2 eggs","½ avocado","Lemon juice, salt, pepper","1 tsp olive oil"],steps:["Toast rye bread.","Mash avocado with lemon, salt and pepper.","Fry or scramble eggs.","Spread avocado on toast, top with eggs."],tip:"Rye provides slow-releasing carbs.",cuisine:"global",prepTime:10},
+{id:3,name:"Protein Pancakes",sl:["B"],diff:2,tags:{vg:0,ve:1,pe:1,gf:0,df:0},kcal:[350,420],prot:[22,27],carbs:[42,50],fat:[8,11],pri:["eggs","yogurt","oats","banana"],mc:["b12","calcium","magnesium"],em:"🥞",ing:["40g rolled oats","2 eggs","100g 0% Greek yogurt","1 banana","Pinch of salt"],steps:["Blend oats, eggs, yogurt and banana until smooth.","Heat a lightly oiled non-stick pan.","Pour small circles; cook 2 min until bubbles form.","Flip and cook 1 more min."],tip:"High-protein, naturally sweetened.",cuisine:"global",prepTime:20},
+{id:4,name:"Banana & Peanut Butter Porridge",sl:["B"],diff:1,tags:{vg:1,ve:1,pe:1,gf:1,df:1},kcal:[380,445],prot:[13,17],carbs:[52,62],fat:[14,18],pri:["oats","banana","peanut_butter"],mc:["magnesium","potassium","fiber"],em:"🥣",ing:["40g rolled oats","150ml soy milk","1 banana","15g peanut butter","1 tsp honey"],steps:["Bring oats and milk to boil; stir 4–5 min until thick.","Add sliced banana and peanut butter.","Drizzle honey. Serve warm."],tip:"Great before a workout.",cuisine:"global",prepTime:10},
+{id:5,name:"Mixed Berry Porridge",sl:["B"],diff:1,tags:{vg:0,ve:1,pe:1,gf:1,df:0},kcal:[290,350],prot:[10,13],carbs:[48,58],fat:[7,10],pri:["oats","yogurt"],mc:["vitC","fiber","magnesium","calcium"],em:"🥣",ing:["40g rolled oats","150ml milk","100g mixed berries","1 tsp honey","Pinch cinnamon"],steps:["Bring oats and milk to boil; stir 4–5 min.","Top with berries and honey."],tip:"Berries are antioxidant powerhouses.",cuisine:"global",prepTime:10},
+{id:6,name:"Tofu Scramble",sl:["B"],diff:1,tags:{vg:1,ve:1,pe:1,gf:1,df:1},kcal:[220,270],prot:[16,20],carbs:[8,12],fat:[13,17],pri:["tofu","spinach","tomatoes"],mc:["iron","calcium","vitC"],em:"🟡",ing:["150g firm tofu, crumbled","40g fresh spinach","60g cherry tomatoes, halved","¼ tsp turmeric","¼ tsp cumin","1 tsp olive oil","Salt & pepper"],steps:["Press tofu 5 min; crumble into chunks.","Cook tofu with turmeric, cumin and salt 4–5 min until golden.","Add tomatoes 2 min. Add spinach until wilted.","Serve with pepper."],tip:"Turmeric gives a beautiful colour and anti-inflammatory benefits.",cuisine:"global",prepTime:10},
+{id:7,name:"Shakshuka",sl:["B"],diff:2,tags:{vg:0,ve:1,pe:1,gf:1,df:0},kcal:[280,340],prot:[16,20],carbs:[14,18],fat:[16,20],pri:["eggs","tomatoes"],mc:["b12","vitC","vitA","iron"],em:"🍳",ing:["2 eggs","200g crushed tomatoes","¼ onion diced","1 garlic clove","½ tsp cumin","½ tsp paprika","30g feta crumbled","1 tsp olive oil","Fresh parsley"],steps:["Sauté onion 3 min; add garlic and spices 1 min.","Add tomatoes; simmer 8–10 min until thick.","Make two wells; crack eggs in. Cover and cook 6–8 min.","Top with feta and parsley."],tip:"A Middle Eastern classic. Serve with warm pitta.",cuisine:"middleeastern",prepTime:20},
+{id:8,name:"Mango Coconut Chia Pudding",sl:["B"],diff:1,tags:{vg:1,ve:1,pe:1,gf:1,df:1},kcal:[290,350],prot:[6,9],carbs:[38,46],fat:[12,16],pri:["seeds"],mc:["fiber","magnesium","vitC"],em:"🥭",ing:["30g chia seeds","200ml coconut milk","100g mango diced","1 tsp maple syrup","Pinch vanilla"],steps:["Mix chia, coconut milk, sweetener and vanilla in jar.","Refrigerate overnight; stir after 30 min.","Top with fresh mango before serving."],tip:"Chia seeds are a top plant source of omega-3.",cuisine:"asian",prepTime:5},
+{id:9,name:"Overnight Oats with Peach",sl:["B"],diff:1,tags:{vg:0,ve:1,pe:1,gf:1,df:0},kcal:[330,390],prot:[16,20],carbs:[52,62],fat:[5,8],pri:["oats","yogurt"],mc:["calcium","b12","fiber","magnesium"],em:"🍑",ing:["40g rolled oats","150g Greek yogurt","50ml milk","1 ripe peach","1 tsp maple syrup"],steps:["Mix oats, yogurt and milk in jar.","Slice peach and layer on top.","Drizzle maple syrup; seal and refrigerate overnight.","Stir before eating."],tip:"Prep the night before for a grab-and-go breakfast.",cuisine:"global",prepTime:5},
+{id:10,name:"Tiramisu Overnight Oats",sl:["B"],diff:1,tags:{vg:0,ve:1,pe:1,gf:1,df:0},kcal:[310,375],prot:[15,19],carbs:[46,56],fat:[5,8],pri:["oats","yogurt"],mc:["calcium","b12","fiber"],em:"☕",ing:["60g rolled oats","100g 0% Greek yogurt","60ml milk","1 shot cold espresso","1 tsp cocoa powder","1 tsp honey"],steps:["Mix oats, yogurt, milk and espresso in jar.","Refrigerate overnight.","Dust with cocoa before serving."],tip:"Coffee gives a natural morning energy boost.",cuisine:"italian",prepTime:5},
+{id:11,name:"Açaí Smoothie Bowl",sl:["B"],diff:1,tags:{vg:1,ve:1,pe:1,gf:1,df:1},kcal:[340,410],prot:[7,10],carbs:[52,62],fat:[12,16],pri:["banana","seeds"],mc:["vitC","potassium","fiber"],em:"🫐",ing:["100g frozen açaí pulp","1 frozen banana","60ml plant milk","Toppings: granola, berries, coconut flakes, seeds"],steps:["Blend açaí, banana and milk until thick.","Pour into chilled bowl.","Arrange toppings decoratively."],tip:"Açaí is rich in anthocyanins — powerful antioxidants.",cuisine:"global",prepTime:5},
+{id:12,name:"Greek Yogurt & Granola Bowl",sl:["B"],diff:1,tags:{vg:0,ve:1,pe:1,gf:0,df:0},kcal:[300,360],prot:[16,20],carbs:[45,54],fat:[6,9],pri:["yogurt"],mc:["calcium","b12","magnesium"],em:"🥣",ing:["150g 0% Greek yogurt","30g granola","100g mixed fruit","1 tsp honey"],steps:["Spoon yogurt into bowl.","Top with granola, fruit and honey."],tip:"High in protein and probiotics.",cuisine:"global",prepTime:5},
+{id:13,name:"Avocado Toast",sl:["B"],diff:1,tags:{vg:1,ve:1,pe:1,gf:0,df:1},kcal:[240,295],prot:[5,7],carbs:[26,32],fat:[13,17],pri:["avocado","bread"],mc:["potassium","folate","magnesium"],em:"🥑",ing:["2 slices wholegrain bread","½ avocado","Lemon","Salt & pepper","Chilli flakes"],steps:["Toast bread.","Mash avocado with lemon, salt and pepper.","Spread on toast; add chilli flakes."],tip:"Add a poached egg for extra protein.",cuisine:"global",prepTime:5},
+{id:14,name:"Green Protein Smoothie Bowl",sl:["B"],diff:1,tags:{vg:1,ve:1,pe:1,gf:1,df:1},kcal:[330,395],prot:[9,12],carbs:[48,58],fat:[13,17],pri:["banana","seeds","oats"],mc:["magnesium","potassium","iron"],em:"💚",ing:["1 frozen banana","60g frozen mango","Large handful spinach","150ml coconut water","Toppings: almonds, kiwi, seeds"],steps:["Blend banana, mango, spinach and coconut water until thick.","Pour into chilled bowl.","Add toppings."],tip:"Spinach is masked by mango and banana — a sneaky greens boost.",cuisine:"global",prepTime:10},
+{id:15,name:"Sweet Potato & Black Bean Breakfast Hash",sl:["B"],diff:2,tags:{vg:1,ve:1,pe:1,gf:1,df:1},kcal:[310,375],prot:[9,12],carbs:[54,65],fat:[7,10],pri:["sweet_potato","black_beans"],mc:["vitA","iron","folate","fiber"],em:"🍠",ing:["150g sweet potato cubed","80g black beans","½ red pepper diced","1 tsp smoked paprika","½ tsp cumin","1 tsp olive oil","Fresh coriander, lime"],steps:["Parboil sweet potato 5 min; drain.","Cook in pan until golden 8–10 min.","Add pepper, spices; cook 3–4 min. Add beans 2 min.","Squeeze lime and add coriander."],tip:"Add a poached egg on top for extra protein.",cuisine:"mexican",prepTime:20},
+{id:16,name:"Peanut Butter Toast",sl:["B"],diff:1,tags:{vg:1,ve:1,pe:1,gf:0,df:1},kcal:[270,325],prot:[9,12],carbs:[32,38],fat:[13,16],pri:["peanut_butter","bread"],mc:["magnesium","potassium","fiber"],em:"🥜",ing:["2 slices wholegrain bread","20g peanut butter","½ banana"],steps:["Toast bread.","Spread peanut butter.","Top with sliced banana."],tip:"Choose 100% nut butter with no added sugar.",cuisine:"global",prepTime:5},
+{id:17,name:"Banana Nice Cream",sl:["S"],diff:1,tags:{vg:1,ve:1,pe:1,gf:1,df:1},kcal:[130,165],prot:[2,3],carbs:[30,36],fat:[1,2],pri:["banana"],mc:["potassium","magnesium"],em:"🍌",ing:["150g frozen banana","1 tsp cocoa (optional)","Splash of plant milk"],steps:["Freeze banana slices at least 2 hours.","Blend frozen banana until smooth.","Add cocoa if desired. Serve immediately."],tip:"One ingredient, no added sugar.",cuisine:"global",prepTime:5},
+{id:18,name:"Carrot & Hummus Snack",sl:["S"],diff:1,tags:{vg:1,ve:1,pe:1,gf:1,df:1},kcal:[145,180],prot:[6,8],carbs:[18,23],fat:[5,8],pri:["chickpeas","carrots"],mc:["folate","iron","vitA","fiber"],em:"🥕",ing:["100g cooked chickpeas","5g olive oil","1 tbsp lemon juice","Salt, paprika, cumin","70g carrot sticks"],steps:["Blend chickpeas, oil, lemon and spices until smooth.","Add 1–2 tbsp water if too thick.","Serve with carrot sticks."],tip:"Chickpeas are a great plant protein and fibre source.",cuisine:"mediterranean",prepTime:10},
+{id:19,name:"Crispy Spiced Chickpeas",sl:["S"],diff:1,tags:{vg:1,ve:1,pe:1,gf:1,df:1},kcal:[170,210],prot:[8,11],carbs:[22,27],fat:[5,8],pri:["chickpeas"],mc:["iron","folate","fiber"],em:"🫘",ing:["100g cooked chickpeas, well-dried","1 tsp olive oil","½ tsp smoked paprika","½ tsp cumin","Salt"],steps:["Preheat oven to 200°C. Pat chickpeas completely dry.","Toss with oil and spices.","Roast 20–25 min, shaking halfway, until crunchy."],tip:"Stay crispy for 2 days in an open container.",cuisine:"mediterranean",prepTime:25},
+{id:20,name:"Apple Slices with Almond Butter",sl:["S"],diff:1,tags:{vg:1,ve:1,pe:1,gf:1,df:1},kcal:[185,225],prot:[4,6],carbs:[24,29],fat:[9,12],pri:["almonds"],mc:["magnesium","potassium","fiber"],em:"🍎",ing:["1 medium apple, sliced","20g almond butter","Pinch cinnamon"],steps:["Core and slice apple.","Serve with almond butter for dipping."],tip:"Fibre + protein + fat = a very satiating snack.",cuisine:"global",prepTime:5},
+{id:21,name:"Date & Walnut Energy Balls",sl:["S"],diff:1,tags:{vg:1,ve:1,pe:1,gf:1,df:1},kcal:[195,235],prot:[4,6],carbs:[26,32],fat:[9,12],pri:["walnuts"],mc:["magnesium","omega3","fiber"],em:"🟤",ing:["80g Medjool dates pitted","30g walnuts","15g oats","1 tbsp cocoa","Pinch salt"],steps:["Blend all in food processor until sticky dough.","Roll into 6–8 balls.","Refrigerate 30 min. Store in fridge up to 1 week."],tip:"Make a batch Sunday for the whole week.",cuisine:"global",prepTime:10},
+{id:22,name:"Frozen Berry Yogurt",sl:["S"],diff:1,tags:{vg:0,ve:1,pe:1,gf:1,df:0},kcal:[110,145],prot:[12,15],carbs:[14,18],fat:[0,1],pri:["yogurt"],mc:["calcium","b12","vitC"],em:"🍧",ing:["150g 0% Greek yogurt","50g mixed berries","1 tsp honey"],steps:["Blend yogurt with berries until smooth.","Freeze at least 2 hours.","Scoop and serve."],tip:"High-protein alternative to ice cream.",cuisine:"global",prepTime:10},
+{id:23,name:"Baked Apple with Walnuts",sl:["S"],diff:1,tags:{vg:1,ve:1,pe:1,gf:1,df:1},kcal:[150,185],prot:[2,3],carbs:[26,32],fat:[6,9],pri:["walnuts"],mc:["potassium","omega3","magnesium"],em:"🍎",ing:["1 apple","10g walnuts","1 tsp honey","Pinch cinnamon"],steps:["Core apple; place in oven dish.","Fill with walnuts, honey and cinnamon.","Bake at 180°C for 18–20 min."],tip:"Walnuts are richest nut in omega-3.",cuisine:"global",prepTime:20},
+{id:24,name:"Hummus & Veggie Sticks",sl:["S"],diff:1,tags:{vg:1,ve:1,pe:1,gf:1,df:1},kcal:[155,190],prot:[6,8],carbs:[16,20],fat:[7,10],pri:["chickpeas"],mc:["iron","folate","fiber","vitC"],em:"🥕",ing:["80g hummus","1 carrot","1 celery stick","½ cucumber","Radishes"],steps:["Cut vegetables into sticks.","Serve with hummus."],tip:"Raw veg retains all vitamins lost in cooking.",cuisine:"mediterranean",prepTime:5},
+{id:25,name:"Dark Chocolate & Almonds",sl:["S"],diff:1,tags:{vg:1,ve:1,pe:1,gf:1,df:1},kcal:[200,245],prot:[5,7],carbs:[10,14],fat:[16,20],pri:["almonds"],mc:["magnesium","calcium"],em:"🍫",ing:["20g whole almonds","15g 70%+ dark chocolate"],steps:["Portion almonds and chocolate.","Eat slowly, savouring each bite."],tip:"70%+ chocolate has minimal sugar and is rich in antioxidants.",cuisine:"global",prepTime:5},
+{id:26,name:"Edamame with Sea Salt & Lime",sl:["S"],diff:1,tags:{vg:1,ve:1,pe:1,gf:1,df:1},kcal:[115,140],prot:[10,13],carbs:[8,11],fat:[4,6],pri:["edamame"],mc:["folate","iron","fiber","potassium"],em:"🫛",ing:["100g frozen edamame in pods","½ tsp sea salt flakes","Juice of ½ lime"],steps:["Boil edamame in salted water 5 min; drain.","Toss with salt and lime."],tip:"Edamame provides all essential amino acids.",cuisine:"asian",prepTime:10},
+{id:27,name:"Rice Cakes with Avocado & Tomato",sl:["S"],diff:1,tags:{vg:1,ve:1,pe:1,gf:1,df:1},kcal:[145,180],prot:[2,4],carbs:[18,23],fat:[7,10],pri:["avocado","tomatoes"],mc:["potassium","folate","vitC"],em:"🌾",ing:["3 plain rice cakes","¼ avocado","4 cherry tomatoes","Salt, pepper, lemon"],steps:["Mash avocado with lemon, salt and pepper.","Spread on rice cakes; top with tomatoes."],tip:"Very light — fits even restricted calorie plans.",cuisine:"global",prepTime:5},
+{id:28,name:"Wasa Crackers with Avocado & Egg",sl:["S"],diff:1,tags:{vg:0,ve:1,pe:1,gf:0,df:1},kcal:[195,240],prot:[9,12],carbs:[16,20],fat:[11,14],pri:["eggs","avocado"],mc:["b12","folate","potassium"],em:"🫙",ing:["2 wasa crackers","40g avocado","1 hard-boiled egg","Salt, pepper, lemon"],steps:["Hard-boil egg 8 min; cool and slice.","Mash avocado with lemon, salt and pepper.","Spread on crackers; top with egg."],tip:"A balanced snack with healthy fats, protein and carbs.",cuisine:"global",prepTime:10},
+{id:29,name:"Pasta with Spinach & Chickpeas",sl:["M"],diff:1,tags:{vg:1,ve:1,pe:1,gf:0,df:1},kcal:[440,525],prot:[19,24],carbs:[72,86],fat:[8,12],pri:["pasta","chickpeas","spinach"],mc:["iron","folate","fiber","vitC"],em:"🍝",ing:["80g pasta","100g cooked chickpeas","50g fresh spinach","1 garlic clove","10g olive oil","Chilli flakes"],steps:["Cook pasta al dente; reserve some water.","Sauté garlic in oil; add chickpeas 3 min.","Add spinach until wilted. Add pasta with a splash of water.","Toss 1 min. Season and serve."],tip:"A complete one-pot meal.",cuisine:"italian",prepTime:20},
+{id:30,name:"Red Lentil Dal",sl:["M"],diff:1,tags:{vg:1,ve:1,pe:1,gf:1,df:1},kcal:[370,445],prot:[18,23],carbs:[58,70],fat:[8,11],pri:["lentils","tomatoes"],mc:["iron","folate","fiber","potassium","vitC"],em:"🍛",ing:["80g red lentils","200ml veg broth","200g chopped tomatoes","½ onion diced","1 tsp turmeric","1 tsp cumin","½ tsp garam masala","1 tsp oil","Salt, fresh coriander","Serve with 60g basmati rice"],steps:["Sauté onion 4–5 min; add spices 1 min.","Add lentils, tomatoes and broth.","Simmer covered 20–22 min until creamy.","Serve over rice with coriander."],tip:"Red lentils dissolve into a thick, comforting sauce.",cuisine:"indian",prepTime:25},
+{id:31,name:"Chana Masala",sl:["M"],diff:2,tags:{vg:1,ve:1,pe:1,gf:1,df:1},kcal:[390,465],prot:[15,19],carbs:[60,72],fat:[9,12],pri:["chickpeas","tomatoes"],mc:["iron","folate","fiber","vitC"],em:"🫘",ing:["150g cooked chickpeas","200g chopped tomatoes","½ onion diced","1 tsp cumin seeds","1 tsp garam masala","½ tsp turmeric","½ tsp chilli","1 tsp oil","Salt, coriander","With 70g basmati rice"],steps:["Heat oil; add cumin seeds 30 sec. Add onion 5 min.","Add garlic, ginger 2 min. Add dry spices 1 min.","Add tomatoes; simmer 10 min.","Add chickpeas; simmer 8 min. Top with coriander."],tip:"A staple of North Indian cooking.",cuisine:"indian",prepTime:25},
+{id:32,name:"Black Bean Tacos",sl:["M"],diff:1,tags:{vg:1,ve:1,pe:1,gf:1,df:1},kcal:[380,455],prot:[14,18],carbs:[58,70],fat:[11,14],pri:["black_beans","tomatoes"],mc:["iron","folate","fiber","vitC"],em:"🌮",ing:["3 small corn tortillas","120g cooked black beans","½ avocado","80g cherry tomatoes","¼ red cabbage shredded","Lime, cumin, coriander"],steps:["Season beans with cumin; warm in pan 3 min.","Mix tomatoes, coriander and lime for salsa.","Warm tortillas 30 sec per side.","Fill with beans, avocado, cabbage and salsa."],tip:"Corn tortillas are naturally gluten-free.",cuisine:"mexican",prepTime:15},
+{id:33,name:"Thai Green Tofu Curry",sl:["M"],diff:2,tags:{vg:1,ve:1,pe:1,gf:1,df:1},kcal:[410,495],prot:[14,18],carbs:[42,50],fat:[20,25],pri:["tofu","rice"],mc:["calcium","iron","vitC","vitA"],em:"🟢",ing:["150g firm tofu cubed","70g basmati rice","150ml coconut milk","1–2 tsp green curry paste","100g mixed veg (courgette, pepper, broccoli)","1 garlic clove","1 tsp oil","1 tsp soy sauce","Lime, basil"],steps:["Cook rice; set aside.","Fry tofu until golden 4–5 min; remove.","Fry curry paste 1 min; add coconut milk and soy sauce 3 min.","Add veg 5 min; add tofu 2 min. Serve over rice with lime."],tip:"Use a good-quality vegan green curry paste.",cuisine:"asian",prepTime:25},
+{id:34,name:"Falafel Bowl with Tahini",sl:["M"],diff:2,tags:{vg:1,ve:1,pe:1,gf:1,df:1},kcal:[450,540],prot:[16,20],carbs:[52,62],fat:[18,22],pri:["chickpeas","tomatoes"],mc:["iron","folate","fiber","vitC","calcium"],em:"🧆",ing:["100g cooked chickpeas","¼ onion","1 garlic clove","20g fresh parsley","½ tsp cumin","Salt, 1 tbsp flour","Tahini sauce: 20g tahini, lemon, water","Serve with 50g bulgur, tomato, cucumber"],steps:["Blend chickpeas, onion, garlic, parsley, spices (keep texture). Add flour; mix.","Form 6–8 balls. Bake at 200°C 18–20 min, turning once.","Whisk tahini with lemon and water to drizzle.","Build bowl: bulgur, falafel, tomato, cucumber, tahini."],tip:"Baking instead of frying cuts calories by 40%.",cuisine:"middleeastern",prepTime:25},
+{id:35,name:"Vegan Pad Thai",sl:["M"],diff:2,tags:{vg:1,ve:1,pe:1,gf:1,df:1},kcal:[450,540],prot:[14,18],carbs:[60,72],fat:[16,20],pri:["tofu","seeds"],mc:["calcium","iron","folate","magnesium"],em:"🍜",ing:["80g rice noodles","120g firm tofu cubed","80g bean sprouts","2 spring onions","1 carrot julienned","Sauce: 1 tbsp soy sauce, 1 tbsp lime juice, 1 tsp maple syrup, 1 tsp peanut butter","15g crushed peanuts, lime, coriander"],steps:["Soak noodles in boiling water 5–6 min; drain.","Fry tofu until golden 4–5 min; add garlic 1 min. Add carrot 2 min.","Add noodles and sauce; toss 2 min on high heat.","Add sprouts and spring onions 1 min. Serve with peanuts and lime."],tip:"Classic Thai street food made plant-based.",cuisine:"asian",prepTime:25},
+{id:36,name:"Korean Veggie Bibimbap",sl:["M"],diff:2,tags:{vg:1,ve:1,pe:1,gf:1,df:1},kcal:[420,505],prot:[10,14],carbs:[66,80],fat:[11,14],pri:["rice","spinach","carrots","mushrooms"],mc:["vitA","iron","vitC","folate","fiber"],em:"🍚",ing:["70g short-grain rice","50g spinach wilted","1 carrot julienned & sautéed","50g shiitake mushrooms sautéed","50g cucumber matchstick-cut","1 tbsp gochujang mixed with sesame oil","1 tsp sesame oil, soy sauce","Sesame seeds"],steps:["Cook rice; press into bowl.","Prepare each vegetable separately with seasoning.","Arrange in coloured sections over rice.","Top with gochujang sauce. Mix at the table."],tip:"Bibimbap means mixed rice. The variety of vegetables provides an extraordinary range of nutrients.",cuisine:"asian",prepTime:30},
+{id:37,name:"Moroccan Vegetable Tagine",sl:["M"],diff:2,tags:{vg:1,ve:1,pe:1,gf:1,df:1},kcal:[370,445],prot:[12,16],carbs:[58,70],fat:[8,11],pri:["chickpeas","sweet_potato","tomatoes","carrots"],mc:["vitA","vitC","iron","folate","fiber"],em:"🏺",ing:["100g cooked chickpeas","100g sweet potato cubed","1 carrot sliced","100g cherry tomatoes","½ onion","1 garlic clove","½ tsp ras el hanout","½ tsp cinnamon","½ tsp cumin","1 tsp olive oil","Serve with 60g couscous"],steps:["Sauté onion 4 min; add garlic and spices 2 min.","Add sweet potato, carrot, chickpeas and tomatoes. Add 150ml water.","Cover and simmer 20–25 min until tender.","Serve over couscous with coriander."],tip:"Ras el hanout is a Moroccan spice blend — find it in most supermarkets.",cuisine:"mediterranean",prepTime:30},
+{id:38,name:"Teriyaki Tofu Bowl",sl:["M"],diff:1,tags:{vg:1,ve:1,pe:1,gf:1,df:1},kcal:[390,470],prot:[16,20],carbs:[50,60],fat:[13,17],pri:["tofu","rice"],mc:["calcium","iron","potassium","magnesium"],em:"🍱",ing:["150g firm tofu","70g basmati rice","Teriyaki: 2 tbsp soy sauce, 1 tbsp honey, 1 tsp rice vinegar, ½ tsp ginger","80g broccoli steamed","Sesame seeds, spring onion"],steps:["Press and cube tofu; pan-fry 5–6 min until golden.","Mix teriyaki sauce; pour over tofu 2–3 min until caramelised.","Steam broccoli 4–5 min.","Serve over rice with broccoli, seeds and spring onion."],tip:"Pressing tofu is essential — it allows the sauce to caramelise properly.",cuisine:"asian",prepTime:20},
+{id:39,name:"Lebanese Lentil Soup",sl:["M"],diff:1,tags:{vg:1,ve:1,pe:1,gf:1,df:1},kcal:[320,385],prot:[16,20],carbs:[50,60],fat:[6,9],pri:["lentils","spinach"],mc:["iron","folate","fiber","vitC","vitA"],em:"🍲",ing:["100g brown lentils rinsed","80g fresh spinach","½ onion diced","2 garlic cloves","1 tsp cumin","½ tsp turmeric","Juice of 1 lemon","1 tsp olive oil","600ml water or broth","Salt"],steps:["Sauté onion 4 min; add garlic and spices 2 min.","Add lentils and water; boil then simmer 18–20 min.","Blend half for creamy-chunky texture.","Add spinach 3 min; add lemon generously."],tip:"Red wine vinegar or lemon at the end brightens the whole dish.",cuisine:"middleeastern",prepTime:25},
+{id:40,name:"Lentil & Sweet Potato Buddha Bowl",sl:["M"],diff:2,tags:{vg:1,ve:1,pe:1,gf:1,df:1},kcal:[430,515],prot:[17,21],carbs:[62,74],fat:[14,18],pri:["lentils","sweet_potato"],mc:["iron","folate","vitA","fiber","potassium"],em:"🥣",ing:["80g cooked brown lentils","150g sweet potato roasted","50g kale massaged with lemon","30g quinoa cooked","Tahini dressing: 20g tahini, lemon, garlic, water","10g pumpkin seeds"],steps:["Roast sweet potato cubes at 200°C 20–25 min.","Massage kale with lemon and salt until it softens.","Cook quinoa.","Build bowl: quinoa, lentils, sweet potato, kale. Drizzle tahini. Top with seeds."],tip:"A buddha bowl needs: grain, protein, roasted veg, raw green and dressing.",cuisine:"global",prepTime:30},
+{id:41,name:"Tabbouleh with Grilled Halloumi",sl:["M"],diff:1,tags:{vg:0,ve:1,pe:1,gf:0,df:0},kcal:[370,445],prot:[18,23],carbs:[32,39],fat:[18,22],pri:["tomatoes","bread"],mc:["calcium","vitC","folate","iron"],em:"🌿",ing:["50g bulgur wheat","Large bunch fresh parsley (~60g) finely chopped","30g fresh mint","100g cherry tomatoes diced","½ cucumber diced","Juice of 1 large lemon","2 tbsp olive oil","80g halloumi sliced"],steps:["Pour boiling water over bulgur (1:1); cover 10 min. Cool.","Mix bulgur with parsley, mint, tomatoes and cucumber.","Dress with lemon and olive oil generously.","Grill halloumi 2 min per side until golden."],tip:"Tabbouleh is predominantly herbs, not grain. Parsley provides a huge vitamin C boost.",cuisine:"middleeastern",prepTime:20},
+{id:42,name:"Sesame Soba Noodle Bowl",sl:["M"],diff:1,tags:{vg:1,ve:1,pe:1,gf:1,df:1},kcal:[380,455],prot:[14,18],carbs:[58,70],fat:[10,13],pri:["seeds"],mc:["magnesium","iron","calcium","fiber"],em:"🍜",ing:["80g soba noodles","½ cucumber julienned","1 carrot grated","2 spring onions","Dressing: 1 tbsp soy sauce, 1 tbsp rice vinegar, 1 tsp sesame oil, 1 tsp honey, ginger","1 tbsp sesame seeds","50g edamame (optional)"],steps:["Cook soba 3–4 min; drain and rinse cold.","Whisk all dressing ingredients.","Toss cold noodles with veg and dressing.","Top with sesame seeds and edamame."],tip:"Buckwheat (soba) is naturally gluten-free and richer in protein than regular pasta.",cuisine:"asian",prepTime:15},
+{id:43,name:"Chili Sin Carne",sl:["M"],diff:2,tags:{vg:1,ve:1,pe:1,gf:1,df:1},kcal:[395,475],prot:[17,21],carbs:[60,72],fat:[8,11],pri:["black_beans","lentils","tomatoes"],mc:["iron","folate","fiber","vitC","potassium"],em:"🫘",ing:["100g cooked black beans","60g red lentils","200g chopped tomatoes","½ onion","1 garlic clove","1 tsp chilli powder","1 tsp cumin","½ tsp smoked paprika","½ tsp cocoa powder","Salt, serve with rice or bread"],steps:["Sauté onion 4 min; add garlic and spices 2 min.","Add lentils, tomatoes and 150ml water. Simmer 15 min.","Add black beans and cocoa; simmer 8–10 min until thick.","Serve with rice, avocado and coriander."],tip:"Cocoa adds depth without sweetness — a Mexican mole trick.",cuisine:"mexican",prepTime:25},
+{id:44,name:"Prawn Masala",sl:["M"],diff:2,tags:{vg:0,ve:0,pe:1,gf:1,df:1},kcal:[340,410],prot:[26,32],carbs:[20,26],fat:[12,16],pri:["shrimp","tomatoes"],mc:["b12","omega3","vitC","zinc"],em:"🦐",ing:["150g raw prawns peeled","200g chopped tomatoes","½ onion diced","1 garlic clove","1 tsp ginger grated","1 tsp curry powder","½ tsp turmeric","1 tsp oil","Salt, coriander","With 70g basmati rice"],steps:["Sauté onion 4 min; add garlic, ginger and spices 2 min.","Add tomatoes; simmer 8 min.","Add prawns 3–4 min until pink.","Scatter coriander. Serve with rice."],tip:"Prawns cook in minutes — the perfect quick protein.",cuisine:"indian",prepTime:25},
+{id:45,name:"Salmon Teriyaki",sl:["M"],diff:1,tags:{vg:0,ve:0,pe:1,gf:1,df:1},kcal:[380,455],prot:[27,33],carbs:[28,34],fat:[16,20],pri:["salmon","rice"],mc:["omega3","b12","vitD","zinc"],em:"🐟",ing:["130g salmon fillet","Teriyaki: 2 tbsp soy sauce, 1 tbsp honey, 1 tsp rice vinegar","60g basmati rice","Steamed broccoli or edamame","Sesame seeds, spring onion"],steps:["Mix soy sauce, honey and vinegar.","Place salmon skin-down in cold pan; cook medium 5–6 min. Flip 2–3 min.","Pour teriyaki sauce; cook 1–2 min until sticky.","Serve over rice with sides."],tip:"Starting salmon in a cold pan renders the skin perfectly crispy.",cuisine:"asian",prepTime:20},
+{id:46,name:"Chicken Tikka Rice Bowl",sl:["M"],diff:2,tags:{vg:0,ve:0,pe:0,gf:1,df:0},kcal:[450,540],prot:[32,39],carbs:[52,62],fat:[12,16],pri:["chicken","rice","yogurt"],mc:["b12","zinc","calcium","potassium"],em:"🍛",ing:["100g chicken breast cubed","70g basmati rice","50g Greek yogurt (marinade)","½ tsp garam masala","½ tsp turmeric","½ tsp paprika","½ tsp cumin","Salt, lemon","Cucumber & mint to serve"],steps:["Marinate chicken in yogurt and spices 10 min.","Cook rice; set aside.","Grill or pan-fry chicken 8–10 min until charred and cooked.","Serve over rice with cucumber and mint."],tip:"Yogurt marinade makes chicken incredibly tender.",cuisine:"indian",prepTime:25},
+{id:47,name:"Greek Lentil Soup (Fakes)",sl:["M"],diff:1,tags:{vg:1,ve:1,pe:1,gf:1,df:1},kcal:[360,430],prot:[18,22],carbs:[56,67],fat:[7,10],pri:["lentils","tomatoes"],mc:["iron","folate","fiber","vitC","potassium"],em:"🍲",ing:["100g green lentils rinsed","200g chopped tomatoes","½ onion diced","1 carrot diced","1 celery stick","2 garlic cloves","1 tsp dried oregano","1 bay leaf","1 tsp olive oil","Red wine vinegar, serve with bread"],steps:["Sauté onion, carrot, celery 5 min; add garlic 1 min.","Add lentils, tomatoes, 500ml water, bay and oregano; boil.","Simmer covered 25 min until lentils tender.","Season and add a splash of red wine vinegar."],tip:"Red wine vinegar is the secret of Greek fakes.",cuisine:"mediterranean",prepTime:30},
+{id:48,name:"Pumpkin & Coconut Soup",sl:["M"],diff:1,tags:{vg:1,ve:1,pe:1,gf:1,df:1},kcal:[280,340],prot:[5,7],carbs:[32,39],fat:[14,18],pri:["squash"],mc:["vitA","potassium","vitC","magnesium"],em:"🎃",ing:["300g pumpkin or butternut squash cubed","150ml coconut milk","½ onion","1 garlic clove","1 tsp ginger","½ tsp turmeric","½ tsp cumin","300ml veg broth","1 tsp oil","Salt, lime","Pumpkin seeds to serve"],steps:["Sauté onion 4 min; add garlic, ginger and spices 2 min.","Add pumpkin and broth; simmer 20 min until very soft.","Blend completely smooth; add coconut milk.","Squeeze lime; top with seeds."],tip:"Pumpkin is one of the richest sources of beta-carotene.",cuisine:"asian",prepTime:25},
+{id:49,name:"Miso Soup with Tofu & Wakame",sl:["M"],diff:1,tags:{vg:1,ve:1,pe:1,gf:1,df:1},kcal:[200,250],prot:[12,15],carbs:[14,18],fat:[7,10],pri:["tofu"],mc:["calcium","iron","vitD","potassium"],em:"🍜",ing:["2 tbsp white miso paste","500ml water","100g silken tofu cubed","5g dried wakame seaweed","2 spring onions sliced","60g cooked rice or soba noodles (optional)"],steps:["Bring water to near-boil (do not boil). Soak wakame 5 min; drain.","Dissolve miso in a ladle of hot water; stir back.","Add tofu and wakame; heat gently 2–3 min.","Ladle into bowls; top with spring onions."],tip:"Never boil miso — it kills the beneficial probiotics.",cuisine:"asian",prepTime:15},
+{id:50,name:"Crispy Cornflake Chicken",sl:["M"],diff:2,tags:{vg:0,ve:0,pe:0,gf:0,df:1},kcal:[340,410],prot:[26,32],carbs:[30,36],fat:[10,13],pri:["chicken","eggs"],mc:["b12","zinc"],em:"🍗",ing:["100g chicken breast strips","30g unsweetened cornflakes crushed","1 egg","Paprika, salt, pepper"],steps:["Season chicken with salt, pepper and paprika.","Beat egg with a pinch of salt.","Dip chicken in egg then coat in cornflakes.","Bake at 200°C for 25 min, turning halfway."],tip:"Pair with salad or grilled vegetables.",cuisine:"global",prepTime:30},
+{id:51,name:"Turkey in Tomato Sauce",sl:["M"],diff:1,tags:{vg:0,ve:0,pe:0,gf:1,df:1},kcal:[220,270],prot:[26,32],carbs:[6,9],fat:[8,11],pri:["turkey","tomatoes"],mc:["b12","zinc","vitC","potassium"],em:"🍅",ing:["100g turkey breast cubed","100g cherry tomatoes","5–6 black olives","1 tbsp olive oil","Oregano, salt, basil"],steps:["Halve tomatoes; sauté in oil 5 min.","Brown turkey in oil 6–8 min.","Add tomato sauce and olives 1 min.","Top with basil."],tip:"Turkey is very lean and protein-dense. Pair with bread.",cuisine:"italian",prepTime:20},
+{id:52,name:"Power Bowl with Ground Beef & Sweet Potato",sl:["M"],diff:2,tags:{vg:0,ve:0,pe:0,gf:1,df:0},kcal:[520,625],prot:[32,39],carbs:[52,62],fat:[18,22],pri:["beef","sweet_potato","avocado"],mc:["b12","iron","vitA","potassium","zinc"],em:"💪",ing:["100g lean ground beef","200g sweet potato cubed","¼ avocado","50g cottage cheese","Paprika, garlic, soy sauce, olive oil"],steps:["Roast sweet potato at 200°C 25 min.","Cook ground beef with soy and spices 7–8 min.","Assemble bowl: sweet potato, beef, avocado, cottage cheese."],tip:"A nutrient-dense meal for active days.",cuisine:"global",prepTime:30},
+{id:53,name:"Gnocchi with Zucchini Cream & Ricotta",sl:["M"],diff:1,tags:{vg:0,ve:1,pe:1,gf:0,df:0},kcal:[375,450],prot:[15,19],carbs:[50,60],fat:[14,18],pri:["gnocchi","zucchini","ricotta"],mc:["calcium","vitA","b12"],em:"🥔",ing:["200g potato gnocchi","1 medium zucchini grated","80g ricotta","1 tsp olive oil","Salt & pepper"],steps:["Cook grated zucchini in pan with salt 5 min until soft.","Blend zucchini with ricotta until smooth cream.","Cook gnocchi; drain when they float (~2 min).","Toss gnocchi with cream over low heat 1 min."],tip:"Ricotta makes a naturally creamy sauce with no butter.",cuisine:"italian",prepTime:20},
+{id:54,name:"Egg Drop Pastina Soup",sl:["M"],diff:1,tags:{vg:0,ve:1,pe:1,gf:0,df:0},kcal:[330,395],prot:[20,25],carbs:[38,46],fat:[10,13],pri:["eggs","spinach","bread"],mc:["b12","iron","folate","calcium"],em:"🍜",ing:["50g pastina","60g baby spinach","350ml veg broth","2 eggs","10g grated Parmesan","Salt & pepper"],steps:["Bring broth to gentle boil; add pastina and cook.","Beat eggs; drizzle slowly into broth while stirring.","Add spinach last 2 min. Turn off heat.","Ladle into bowl; add Parmesan and pepper."],tip:"A comforting Italian classic. Light yet nourishing.",cuisine:"italian",prepTime:20},
+{id:55,name:"Smoked Salmon & Avocado Rice Bowl",sl:["M"],diff:1,tags:{vg:0,ve:0,pe:1,gf:1,df:1},kcal:[420,505],prot:[24,29],carbs:[44,53],fat:[17,21],pri:["salmon","rice","avocado"],mc:["omega3","b12","folate","potassium"],em:"🍱",ing:["70g basmati rice","100g smoked salmon","½ avocado","Handful rocket","Lemon or lime","Sesame seeds"],steps:["Cook rice; rest 5 min.","Slice salmon; cube avocado.","Assemble bowl: rice, avocado, rocket, salmon.","Dress with lemon, pepper and sesame seeds."],tip:"Smoked salmon needs no cooking — ready in 15 min.",cuisine:"asian",prepTime:15},
+{id:56,name:"Chicken Fajita Bowl",sl:["M"],diff:2,tags:{vg:0,ve:0,pe:0,gf:1,df:0},kcal:[430,515],prot:[30,36],carbs:[42,50],fat:[14,18],pri:["chicken","rice","tomatoes"],mc:["b12","zinc","vitC","vitA","potassium"],em:"🌶️",ing:["100g chicken breast sliced","70g basmati rice","½ red & ½ yellow pepper","½ onion sliced","1 tsp fajita seasoning","30g Greek yogurt","Lime, coriander"],steps:["Cook rice; set aside.","Season chicken with fajita spices; cook 6–8 min.","Add peppers and onion 4–5 min until charred.","Bowl: rice, chicken, peppers, yogurt, lime, coriander."],tip:"Greek yogurt is a lighter high-protein alternative to sour cream.",cuisine:"mexican",prepTime:25},
+{id:57,name:"Baked Cod with Tomatoes & Olives",sl:["M"],diff:1,tags:{vg:0,ve:0,pe:1,gf:1,df:1},kcal:[240,290],prot:[28,34],carbs:[6,9],fat:[10,13],pri:["cod","tomatoes"],mc:["b12","omega3","vitC","potassium"],em:"🐟",ing:["150g cod fillet","100g cherry tomatoes halved","10 black olives sliced","1 garlic clove minced","1 tbsp olive oil","Parsley, oregano, salt & pepper, lemon"],steps:["Place cod in a baking dish. Add tomatoes, olives and garlic around.","Drizzle oil; season with salt, pepper and herbs.","Bake at 190°C for 15–18 min until fish flakes.","Serve with lemon and fresh parsley."],tip:"Tomatoes and olives create a natural sauce — no cream needed.",cuisine:"mediterranean",prepTime:20},
+{id:58,name:"Quinoa & Roasted Veg Salad",sl:["M"],diff:2,tags:{vg:1,ve:1,pe:1,gf:1,df:1},kcal:[360,430],prot:[12,16],carbs:[48,58],fat:[14,18],pri:["quinoa","sweet_potato","zucchini"],mc:["vitA","vitC","magnesium","fiber","folate"],em:"🥗",ing:["60g quinoa","100g sweet potato cubed","100g zucchini sliced","80g cherry tomatoes","½ red onion wedged","2 tsp olive oil","1 tsp balsamic vinegar","Fresh basil"],steps:["Toss vegetables with oil, salt, pepper; roast at 200°C 20–25 min.","Cook quinoa in double water 12–15 min; fluff and cool.","Combine quinoa with roasted vegetables.","Dress with balsamic and basil."],tip:"Stays well for 3 days — perfect for meal prep.",cuisine:"global",prepTime:30},
+{id:59,name:"Stuffed Peppers with Rice & Feta",sl:["M"],diff:2,tags:{vg:0,ve:1,pe:1,gf:1,df:0},kcal:[380,455],prot:[14,18],carbs:[56,67],fat:[11,14],pri:["rice","tomatoes","feta"],mc:["calcium","vitC","vitA","folate"],em:"🫑",ing:["2 large bell peppers","70g long-grain rice","50g cooked chickpeas","80g cherry tomatoes","40g feta crumbled","Fresh herbs (parsley, mint)","1 tsp olive oil"],steps:["Halve peppers lengthwise; remove seeds. Place on tray.","Cook rice 8 min (par-cook); mix with chickpeas, tomatoes and herbs.","Fill peppers; top with feta and oil.","Bake at 180°C for 30–35 min until golden."],tip:"Keeps well in fridge for 2 days.",cuisine:"mediterranean",prepTime:40},
+{id:60,name:"Mushroom Risotto",sl:["M"],diff:3,tags:{vg:0,ve:1,pe:1,gf:1,df:0},kcal:[430,515],prot:[14,18],carbs:[62,74],fat:[13,17],pri:["mushrooms","rice"],mc:["vitD","zinc","calcium","b12","magnesium"],em:"🍄",ing:["80g arborio rice","150g mixed mushrooms sliced","½ onion diced","1 garlic clove","100ml dry white wine (optional)","500ml warm veg broth","20g Parmesan","1 tbsp olive oil","Fresh thyme"],steps:["Sauté mushrooms in half the oil until golden 5–6 min; set aside.","Sauté onion 3–4 min; add rice, toast 2 min. Add wine until absorbed.","Add warm broth one ladle at a time, stirring constantly 18–20 min.","Off heat, stir in oil, Parmesan and mushrooms. Rest 2 min."],tip:"Never rush risotto. Constant stirring creates the creamy texture without cream.",cuisine:"italian",prepTime:35},
+{id:61,name:"Tempeh Stir-Fry with Noodles",sl:["M"],diff:2,tags:{vg:1,ve:1,pe:1,gf:1,df:1},kcal:[420,505],prot:[20,25],carbs:[48,58],fat:[14,18],pri:["tofu","rice"],mc:["iron","calcium","magnesium","vitC","fiber"],em:"🫘",ing:["120g tempeh cubed","80g rice noodles","80g broccoli florets","1 red pepper sliced","1 carrot sliced","2 garlic cloves","Sauce: 2 tbsp soy sauce, 1 tsp sesame oil, 1 tsp maple syrup, ½ tsp chilli"],steps:["Soak noodles in boiling water 5 min; drain.","Pan-fry tempeh in oil 4–5 min until golden; remove.","Stir-fry garlic 30 sec; add broccoli, pepper, carrot 4–5 min.","Add noodles, tempeh and sauce. Toss 2 min. Serve with sesame seeds."],tip:"Tempeh is fermented soy — richer in protein and probiotics than tofu.",cuisine:"asian",prepTime:25},
+{id:62,name:"Tuna Nicoise Bowl",sl:["M"],diff:1,tags:{vg:0,ve:0,pe:1,gf:1,df:1},kcal:[350,420],prot:[28,34],carbs:[22,28],fat:[14,18],pri:["tuna","eggs","tomatoes"],mc:["b12","omega3","iron","vitC","folate"],em:"🥗",ing:["80g tuna in water drained","2 eggs hard-boiled","80g green beans blanched","100g cherry tomatoes","8 black olives","50g cucumber","Dressing: 1 tsp Dijon, 1 tbsp olive oil, lemon, salt"],steps:["Hard-boil eggs 9 min; cool and halve. Blanch beans 4 min.","Arrange all components in a bowl.","Whisk dressing; drizzle over everything."],tip:"A Provençal classic — high protein, rich in omega-3 and fibre.",cuisine:"mediterranean",prepTime:15},
+{id:63,name:"Sweet Potato & Black Bean Quesadilla",sl:["M"],diff:1,tags:{vg:0,ve:1,pe:1,gf:0,df:0},kcal:[430,515],prot:[16,20],carbs:[56,67],fat:[16,20],pri:["sweet_potato","black_beans","bread"],mc:["vitA","iron","calcium","folate"],em:"🌮",ing:["2 flour tortillas","100g roasted sweet potato mashed","80g cooked black beans","40g grated cheese","Smoked paprika, cumin, salt","Salsa and avocado to serve"],steps:["Mix mashed sweet potato with black beans and spices.","Spread on one tortilla; top with cheese. Fold.","Cook in dry hot pan 2–3 min per side until golden.","Serve with salsa and avocado."],tip:"Sweet potato provides complex carbs and beta-carotene.",cuisine:"mexican",prepTime:15},
+{id:64,name:"Shrimp Stir-Fry with Noodles",sl:["M"],diff:1,tags:{vg:0,ve:0,pe:1,gf:1,df:1},kcal:[380,455],prot:[24,29],carbs:[48,58],fat:[9,12],pri:["shrimp"],mc:["b12","omega3","vitC","vitA","zinc"],em:"🦐",ing:["120g raw prawns peeled","80g rice noodles","½ red pepper sliced","80g broccoli florets","1 garlic clove","1 tsp ginger","2 tbsp soy sauce","1 tsp sesame oil","Spring onion, sesame seeds"],steps:["Soak noodles 5 min; drain.","Stir-fry garlic and ginger 30 sec; add pepper and broccoli 3–4 min.","Add prawns 2–3 min until pink. Add noodles and soy sauce 1 min.","Serve with sesame oil and spring onion."],tip:"Prawns cook in 2–3 min — overcooking makes them tough.",cuisine:"asian",prepTime:20},
+{id:65,name:"Classic Minestrone",sl:["M"],diff:2,tags:{vg:1,ve:1,pe:1,gf:0,df:1},kcal:[310,375],prot:[13,17],carbs:[50,60],fat:[6,9],pri:["beans","carrots","zucchini","tomatoes"],mc:["vitC","vitA","iron","folate","fiber"],em:"🍲",ing:["80g cannellini beans","50g small pasta","1 carrot diced","1 celery stick","1 zucchini diced","200g crushed tomatoes","½ onion","1 garlic clove","1 litre veg broth","Fresh basil, olive oil"],steps:["Sauté onion, carrot, celery 5 min; add garlic 1 min.","Add tomatoes and broth; boil. Simmer 15 min.","Add zucchini, beans and pasta; cook 10 min more.","Serve with olive oil and basil."],tip:"Minestrone uses whatever vegetables are in season.",cuisine:"italian",prepTime:35},
+{id:66,name:"Couscous with Shrimp & Avocado",sl:["M"],diff:1,tags:{vg:0,ve:0,pe:1,gf:0,df:1},kcal:[400,480],prot:[26,32],carbs:[46,56],fat:[12,16],pri:["shrimp","couscous","avocado"],mc:["omega3","b12","folate","potassium"],em:"🦐",ing:["70g couscous","120g shrimp peeled","½ avocado","Juice of 1 lime","1 tsp olive oil","Salt, pepper, chives"],steps:["Pour 1:1 boiling salted water over couscous; cover 5 min, fluff.","Cook shrimp in pan 3–4 min until pink.","Dice avocado; toss with lime and salt.","Assemble: couscous + shrimp + avocado. Dress with oil."],tip:"Shrimp are very low in calories and fat.",cuisine:"mediterranean",prepTime:15},
+{id:67,name:"Mediterranean Chickpea Couscous",sl:["M"],diff:1,tags:{vg:0,ve:1,pe:1,gf:0,df:0},kcal:[480,575],prot:[22,27],carbs:[62,74],fat:[16,20],pri:["chickpeas","couscous","feta","tomatoes"],mc:["iron","calcium","vitC","folate"],em:"🫘",ing:["70g couscous","100g cooked chickpeas","50g feta crumbled","80g cherry tomatoes halved","15g black olives","10g olive oil","Fresh herbs, lemon"],steps:["Pour 1:1 boiling water over couscous; cover 5 min and fluff.","Sauté chickpeas in oil 3 min until golden.","Combine couscous, chickpeas, tomatoes, olives and feta.","Dress with oil and lemon; top with herbs."],tip:"Tastes great cold too — a perfect packed lunch.",cuisine:"mediterranean",prepTime:15},
+{id:68,name:"Grilled Sea Bass with Confit Tomatoes",sl:["M"],diff:1,tags:{vg:0,ve:0,pe:1,gf:1,df:1},kcal:[230,280],prot:[26,32],carbs:[5,8],fat:[11,14],pri:["sea_bass","tomatoes"],mc:["omega3","b12","vitC","potassium"],em:"🐟",ing:["150g sea bass fillet","100g cherry tomatoes","Basil, oregano","1 tsp olive oil","Salt & pepper"],steps:["Halve tomatoes; roast with oil, salt and herbs at 160°C 25–30 min.","Pat sea bass dry; season.","Grill on hot griddle 2–3 min per side.","Serve over confit tomatoes with fresh basil."],tip:"Add baked potatoes or bread for carbs.",cuisine:"mediterranean",prepTime:35},
+{id:69,name:"Curried Chicken & Zucchini Rice",sl:["M"],diff:2,tags:{vg:0,ve:0,pe:0,gf:1,df:0},kcal:[390,470],prot:[28,34],carbs:[50,60],fat:[9,12],pri:["chicken","rice","zucchini"],mc:["b12","zinc","vitA"],em:"🍛",ing:["70g basmati rice","100g chicken breast cubed","1 medium zucchini diced","1 tsp curry powder","1 tsp olive oil","15ml milk","Salt & pepper"],steps:["Cook rice; set aside.","Sauté zucchini 6–7 min; set aside.","Brown chicken 3–4 min; add curry and milk 2–3 min.","Assemble with rice and zucchini."],tip:"Curry powder has anti-inflammatory properties from turmeric.",cuisine:"indian",prepTime:25},
+{id:70,name:"Vegan Burrito Bowl",sl:["M"],diff:2,tags:{vg:1,ve:1,pe:1,gf:1,df:1},kcal:[450,540],prot:[15,19],carbs:[68,82],fat:[12,15],pri:["black_beans","rice","sweet_potato"],mc:["iron","folate","fiber","vitA","vitC"],em:"🌯",ing:["70g basmati rice","100g cooked black beans","100g sweet potato roasted","40g sweetcorn","¼ avocado","Lime, cumin, chilli","Fresh coriander, salsa"],steps:["Season rice with lime and salt.","Toss sweet potato with cumin and oil; roast at 200°C 20 min.","Warm black beans with cumin and salt.","Build bowl: rice, beans, sweet potato, corn, avocado, salsa."],tip:"Customise freely — this architecture works with any combination.",cuisine:"mexican",prepTime:30},
+{id:71,name:"Palak Tofu (Spinach & Tofu Curry)",sl:["M"],diff:2,tags:{vg:1,ve:1,pe:1,gf:1,df:1},kcal:[310,375],prot:[14,18],carbs:[14,18],fat:[18,22],pri:["tofu","spinach"],mc:["iron","calcium","vitA","folate","vitC"],em:"🍃",ing:["150g firm tofu cubed","150g fresh spinach","½ onion","1 garlic clove","1 tsp ginger","½ tsp garam masala","½ tsp cumin","½ tsp turmeric","100ml coconut milk","1 tsp oil","Serve with 70g basmati rice"],steps:["Pan-fry tofu until golden 5–6 min; set aside.","Sauté onion 4–5 min; add garlic, ginger and spices 2 min.","Blend spinach with 60ml water into smooth purée.","Add purée and coconut milk; simmer 8 min. Add tofu, warm through."],tip:"A plant-based version of palak paneer.",cuisine:"indian",prepTime:30},
+
+{id:72,name:"Greek Yogurt Power Bowl",sl:["B"],diff:1,tags:{vg:0,ve:1,pe:1,gf:1,df:0},kcal:[340,400],prot:[30,36],carbs:[32,38],fat:[8,11],pri:["yogurt","seeds"],mc:["calcium","b12","magnesium","fiber"],em:"🫙",ing:["250g 0% Greek yogurt","20g whey or plant protein powder","30g granola","80g mixed berries","1 tbsp honey","10g pumpkin seeds"],steps:["Mix yogurt with protein powder until smooth.","Spoon into bowl.","Top with granola, berries, honey and seeds."],tip:"Stirring protein powder into yogurt is the fastest high-protein breakfast — no cooking required.",cuisine:"global",prepTime:5},
+{id:73,name:"Cottage Cheese & Berry Bowl",sl:["B"],diff:1,tags:{vg:0,ve:1,pe:1,gf:1,df:0},kcal:[280,330],prot:[28,34],carbs:[22,28],fat:[4,6],pri:["yogurt"],mc:["calcium","b12","vitC","potassium"],em:"🍓",ing:["200g low-fat cottage cheese","100g mixed berries","1 tbsp honey","10g walnuts","Pinch cinnamon"],steps:["Spoon cottage cheese into bowl.","Top with berries, honey, walnuts and cinnamon."],tip:"Cottage cheese is one of the highest-protein dairy foods — 11g per 100g with minimal fat.",cuisine:"global",prepTime:5},
+{id:74,name:"High-Protein French Toast",sl:["B"],diff:2,tags:{vg:0,ve:1,pe:1,gf:0,df:0},kcal:[380,450],prot:[30,36],carbs:[34,42],fat:[10,14],pri:["eggs","bread","yogurt"],mc:["b12","calcium","magnesium"],em:"🍞",ing:["2 thick slices wholegrain bread","3 eggs","50ml milk","1 tsp vanilla","Pinch cinnamon","100g 0% Greek yogurt to serve","Fresh berries, honey"],steps:["Beat eggs with milk, vanilla and cinnamon.","Soak bread slices 1 min per side.","Cook in a lightly oiled pan 2–3 min per side until golden.","Serve with Greek yogurt, berries and a drizzle of honey."],tip:"Eggs in the batter turn regular French toast into a high-protein meal. Use thick-cut bread for best texture.",cuisine:"global",prepTime:15},
+{id:75,name:"Smoked Salmon & Egg White Omelette",sl:["B"],diff:1,tags:{vg:0,ve:0,pe:1,gf:1,df:1},kcal:[260,310],prot:[34,40],carbs:[2,4],fat:[11,15],pri:["eggs","salmon","spinach"],mc:["omega3","b12","vitD","iron"],em:"🥚",ing:["4 egg whites + 1 whole egg","60g smoked salmon","30g fresh spinach","5 cherry tomatoes halved","1 tsp olive oil","Salt, pepper, dill"],steps:["Whisk egg whites and whole egg with salt, pepper and dill.","Heat oil in a non-stick pan; add eggs and cook on medium-low.","When nearly set, add salmon, spinach and tomatoes on one half.","Fold and cook 1 more min. Serve immediately."],tip:"Egg whites alone are 86% protein. One whole egg adds richness and keeps the omelette from sticking.",cuisine:"global",prepTime:10},
+{id:76,name:"Chicken & Egg Breakfast Bowl",sl:["B"],diff:2,tags:{vg:0,ve:0,pe:0,gf:1,df:1},kcal:[370,440],prot:[38,46],carbs:[12,16],fat:[14,18],pri:["chicken","eggs","spinach"],mc:["b12","iron","zinc","vitA"],em:"🍳",ing:["80g cooked chicken breast sliced","2 eggs","40g baby spinach","60g cherry tomatoes","1 garlic clove","1 tsp olive oil","Salt, pepper, chilli flakes"],steps:["Sauté garlic in oil 30 sec. Add spinach and tomatoes 2 min.","Push to one side; fry eggs to your liking.","Add sliced chicken to warm through 1–2 min.","Season and serve in a bowl."],tip:"A savoury breakfast is a powerful tool for hitting high daily protein targets.",cuisine:"global",prepTime:15},
+{id:77,name:"Tuna & Avocado Rice Cakes Stack",sl:["B"],diff:1,tags:{vg:0,ve:0,pe:1,gf:1,df:1},kcal:[300,355],prot:[28,34],carbs:[20,26],fat:[10,14],pri:["tuna","avocado"],mc:["omega3","b12","potassium","vitD"],em:"🐟",ing:["1 can tuna in water (120g drained)","4 rice cakes","½ avocado","Juice of ½ lemon","Salt, pepper, chilli flakes","Fresh parsley"],steps:["Drain and flake tuna; mix with lemon, salt and chilli.","Mash avocado with lemon and salt.","Spread avocado on rice cakes; top with tuna mixture.","Finish with parsley and pepper."],tip:"Tuna is one of the leanest complete proteins. This breakfast needs zero cooking.",cuisine:"global",prepTime:5},
+{id:78,name:"Egg & Quinoa Breakfast Bowl",sl:["B"],diff:2,tags:{vg:0,ve:1,pe:1,gf:1,df:1},kcal:[380,450],prot:[26,32],carbs:[38,46],fat:[14,18],pri:["eggs","quinoa","spinach"],mc:["iron","magnesium","b12","folate","fiber"],em:"🥣",ing:["60g cooked quinoa","2 poached or soft-boiled eggs","40g wilted spinach","½ avocado","1 tsp olive oil","Salt, pepper, lemon"],steps:["Cook quinoa ahead or use leftover. Warm in pan 2 min.","Wilt spinach in olive oil 2 min.","Poach or soft-boil eggs 4–6 min.","Build bowl: quinoa, spinach, avocado, eggs. Season with salt, pepper and lemon."],tip:"Quinoa + eggs provides all 9 essential amino acids and sustained morning energy.",cuisine:"global",prepTime:20},
+{id:79,name:"Turkey & Spinach Breakfast Wrap",sl:["B"],diff:1,tags:{vg:0,ve:0,pe:0,gf:0,df:0},kcal:[360,425],prot:[32,38],carbs:[30,36],fat:[10,14],pri:["turkey","eggs","spinach","bread"],mc:["b12","iron","zinc","folate"],em:"🌯",ing:["1 large wholegrain tortilla","80g lean turkey breast sliced","2 scrambled eggs","30g fresh spinach","2 tbsp salsa","1 tsp olive oil","Salt & pepper"],steps:["Scramble eggs in olive oil 2–3 min; season.","Warm tortilla 30 sec in dry pan.","Layer turkey, scrambled eggs, spinach and salsa on tortilla.","Roll tightly and eat immediately."],tip:"Prep the fillings in under 5 min. Turkey is one of the leanest animal proteins at around 30g per 100g.",cuisine:"global",prepTime:10},
+{id:80,name:"Protein Overnight Oats",sl:["B"],diff:1,tags:{vg:0,ve:1,pe:1,gf:1,df:0},kcal:[390,460],prot:[30,36],carbs:[48,58],fat:[8,12],pri:["oats","yogurt","seeds"],mc:["calcium","b12","magnesium","fiber"],em:"🥣",ing:["50g rolled oats","150g 0% Greek yogurt","25g vanilla protein powder","100ml milk","1 tbsp chia seeds","½ banana sliced","1 tsp honey"],steps:["Mix oats, yogurt, protein powder, milk and chia seeds in a jar.","Stir well. Seal and refrigerate overnight.","In the morning, top with banana and honey."],tip:"Protein powder in overnight oats is invisible in terms of texture — you just taste a creamy, sweet breakfast with 30g+ protein.",cuisine:"global",prepTime:5},
+{id:81,name:"Smashed Egg & White Bean Toast",sl:["B"],diff:1,tags:{vg:0,ve:1,pe:1,gf:0,df:1},kcal:[330,390],prot:[24,30],carbs:[36,44],fat:[10,14],pri:["eggs","beans","bread"],mc:["iron","folate","b12","fiber","potassium"],em:"🍳",ing:["2 slices sourdough bread","2 eggs","80g white beans drained","1 garlic clove","1 tsp olive oil","Juice of ½ lemon","Chilli flakes, salt, parsley"],steps:["Smash white beans with garlic, lemon, oil and salt until rough paste.","Toast sourdough.","Fry or poach eggs.","Spread bean smash on toast, top with egg. Add chilli and parsley."],tip:"White beans double the protein of standard avocado toast and add a full serving of fibre.",cuisine:"global",prepTime:10},
+{id:82,name:"Beef Jerky & Nut Trail Mix",sl:["S"],diff:1,tags:{vg:0,ve:0,pe:0,gf:1,df:1},kcal:[220,270],prot:[18,23],carbs:[8,12],fat:[12,16],pri:["beef","almonds","walnuts"],mc:["iron","zinc","b12","magnesium","omega3"],em:"🥩",ing:["30g beef jerky (low-sugar)","15g mixed nuts (almonds, walnuts, cashews)","10g pumpkin seeds","5g dark chocolate chips (optional)"],steps:["Weigh and combine all ingredients in a small bag or container.","Ready to go — no prep needed."],tip:"Beef jerky is 30–40g protein per 100g and travels perfectly. Choose brands with less than 3g sugar per serving.",cuisine:"global",prepTime:5},
+{id:83,name:"Cottage Cheese & Pineapple Pot",sl:["S"],diff:1,tags:{vg:0,ve:1,pe:1,gf:1,df:0},kcal:[175,215],prot:[18,23],carbs:[16,20],fat:[2,4],pri:["yogurt"],mc:["calcium","b12","vitC","zinc"],em:"🍍",ing:["150g low-fat cottage cheese","60g fresh or tinned pineapple (in juice)","Pinch cinnamon","Optional: 1 tsp honey"],steps:["Spoon cottage cheese into a bowl or container.","Top with pineapple and cinnamon.","Drizzle honey if desired."],tip:"Pineapple contains bromelain, an enzyme that aids protein digestion — a smart pairing with cottage cheese.",cuisine:"global",prepTime:5},
+{id:84,name:"Hard-Boiled Eggs & Hummus Box",sl:["S"],diff:1,tags:{vg:0,ve:1,pe:1,gf:1,df:1},kcal:[220,265],prot:[16,20],carbs:[12,16],fat:[13,17],pri:["eggs","chickpeas"],mc:["b12","iron","folate","calcium"],em:"🥚",ing:["2 hard-boiled eggs","80g hummus","1 carrot cut into sticks","1 celery stick","Smoked paprika"],steps:["Hard-boil eggs 9 min; cool, peel and halve. Sprinkle with paprika.","Pack with hummus and vegetable sticks."],tip:"Prep 6 eggs on Sunday and you have 3 days of protein-rich snacks ready instantly.",cuisine:"global",prepTime:10},
+{id:85,name:"Greek Yogurt & Almond Protein Pot",sl:["S"],diff:1,tags:{vg:0,ve:1,pe:1,gf:1,df:0},kcal:[210,255],prot:[18,23],carbs:[12,16],fat:[9,12],pri:["yogurt","almonds"],mc:["calcium","b12","magnesium","vitE"],em:"🫙",ing:["150g 0% Greek yogurt","15g almonds","1 tsp almond butter","1 tsp honey","Pinch cinnamon"],steps:["Spoon yogurt into a pot.","Top with whole almonds, almond butter, honey and cinnamon."],tip:"Greek yogurt is a complete protein source with probiotics. The almond butter adds healthy fat for satiety.",cuisine:"global",prepTime:5},
+{id:86,name:"Tuna Rice Cake Stack",sl:["S"],diff:1,tags:{vg:0,ve:0,pe:1,gf:1,df:1},kcal:[190,230],prot:[20,25],carbs:[14,18],fat:[4,7],pri:["tuna"],mc:["b12","omega3","vitD","potassium"],em:"🐟",ing:["80g canned tuna in water drained","3 rice cakes","1 tsp Dijon mustard","Squeeze of lemon","Salt, pepper, chives"],steps:["Mix tuna with mustard, lemon, salt and pepper.","Spoon onto rice cakes.","Top with fresh chives."],tip:"Canned tuna delivers around 25g protein per 100g at minimal cost. Keep a tin in your gym bag.",cuisine:"global",prepTime:5},
+{id:87,name:"Edamame & Boiled Egg Snack Box",sl:["S"],diff:1,tags:{vg:0,ve:1,pe:1,gf:1,df:1},kcal:[200,245],prot:[18,23],carbs:[8,12],fat:[10,14],pri:["edamame","eggs"],mc:["iron","calcium","folate","b12","potassium"],em:"🫛",ing:["100g frozen edamame in pods","2 hard-boiled eggs","Sea salt & chilli flakes","Squeeze of lime"],steps:["Boil edamame 5 min; drain. Season with salt, chilli and lime.","Hard-boil eggs 9 min; cool, peel and halve.","Pack together in a container."],tip:"This snack delivers complete protein from two sources: eggs and edamame, which both contain all essential amino acids.",cuisine:"global",prepTime:10},
+{id:88,name:"Smoked Salmon & Cream Cheese Oatcakes",sl:["S"],diff:1,tags:{vg:0,ve:0,pe:1,gf:0,df:0},kcal:[225,270],prot:[16,21],carbs:[18,22],fat:[9,13],pri:["salmon"],mc:["omega3","b12","vitD","calcium"],em:"🐟",ing:["4 oatcakes","50g smoked salmon","40g light cream cheese","Squeeze of lemon","Black pepper","Fresh dill"],steps:["Spread cream cheese on oatcakes.","Top with smoked salmon, a squeeze of lemon and dill.","Season with black pepper."],tip:"Oatcakes provide slow-release carbs that pair perfectly with salmon's omega-3 and protein content.",cuisine:"global",prepTime:5},
+{id:89,name:"Protein Smoothie",sl:["S"],diff:1,tags:{vg:0,ve:1,pe:1,gf:1,df:0},kcal:[270,320],prot:[25,32],carbs:[24,30],fat:[5,8],pri:["yogurt","banana","seeds"],mc:["calcium","b12","potassium","magnesium"],em:"🥤",ing:["25g vanilla protein powder","150g 0% Greek yogurt","1 frozen banana","150ml milk or plant milk","1 tbsp peanut butter","Handful of ice"],steps:["Blend all ingredients until smooth.","Adjust thickness with extra milk.","Drink immediately."],tip:"Adding Greek yogurt to a protein shake doubles the casein content, giving faster and slower-digesting proteins for better muscle recovery.",cuisine:"global",prepTime:5},
+{id:90,name:"Turkey & Avocado Rice Paper Rolls",sl:["S"],diff:2,tags:{vg:0,ve:0,pe:0,gf:1,df:1},kcal:[240,285],prot:[18,24],carbs:[18,24],fat:[8,12],pri:["turkey","avocado"],mc:["b12","folate","potassium","vitA"],em:"🌯",ing:["3 rice paper sheets","80g lean turkey breast sliced","¼ avocado sliced","¼ cucumber julienned","1 carrot grated","Fresh mint & coriander","Dipping sauce: 1 tbsp soy sauce, lime, chilli"],steps:["Soak rice paper in warm water 15–20 sec until pliable.","Lay flat; add turkey, avocado, cucumber, carrot and herbs.","Roll tightly, folding in the sides as you go.","Serve with dipping sauce."],tip:"Rice paper rolls are one of the lowest-calorie wraps available. High protein with a light, fresh profile.",cuisine:"asian",prepTime:20},
+{id:91,name:"Roasted Chickpea & Seed Mix",sl:["S"],diff:1,tags:{vg:1,ve:1,pe:1,gf:1,df:1},kcal:[210,255],prot:[10,14],carbs:[22,28],fat:[9,13],pri:["chickpeas","seeds"],mc:["iron","folate","magnesium","fiber","zinc"],em:"🫘",ing:["100g cooked chickpeas well dried","15g pumpkin seeds","10g sunflower seeds","1 tsp olive oil","½ tsp smoked paprika","½ tsp cumin","Pinch cayenne","Sea salt"],steps:["Preheat oven to 200°C. Pat chickpeas completely dry.","Toss chickpeas and seeds with oil and spices.","Roast 20–22 min until crunchy, shaking once.","Cool completely before storing — they crisp up further as they cool."],tip:"This mix stores in an open container for 3 days. Make a double batch for the week.",cuisine:"global",prepTime:25},
+];
+
+// ─── TIER & CAPABILITY OBJECT ────────────────────────
+const TIER = 'free'; // 'free' | 'basic' | 'premium'
+
+const can = {
+  // Always available
+  oneWeekPlan:      true,
+  dietType:         true,
+  caloriePresets:   true,
+  commonAllergens:  true,
+  // Basic + Premium
+  customMacros:     TIER !== 'free',
+  fullExclusions:   TIER !== 'free',
+  portionScaling:   TIER !== 'free',
+  multiWeekPlan:    TIER !== 'free',
+  shoppingList:     TIER !== 'free',
+  recipeSwap:       TIER !== 'free',
+  nutritionSummary: TIER !== 'free',
+  proteinTarget:    TIER === 'premium',
+  // Premium only
+  cuisineFilter:    TIER === 'premium',
+  prepTimeFilter:   TIER === 'premium',
+  savedFavourites:  TIER === 'premium',
+  macroBreakdown:   TIER === 'premium',
+};
+
+// Free tier recipe subset (30 balanced recipes)
+const FREE_IDS = new Set([1,4,5,6,7,9,12,13,18,20,22,25,26,28,29,30,32,36,38,39,41,44,45,46,50,55,58,62,65,69]);
+
+// ─── STATIC DATA ─────────────────────────────────────
+const ING_CATS=[
+  {label:"🥩 Animal Proteins",items:[{id:"chicken",l:"Chicken"},{id:"turkey",l:"Turkey"},{id:"beef",l:"Beef"},{id:"pork",l:"Pork"},{id:"eggs",l:"Eggs"}]},
+  {label:"🐟 Fish & Seafood",items:[{id:"salmon",l:"Salmon"},{id:"tuna",l:"Tuna"},{id:"cod",l:"Cod"},{id:"shrimp",l:"Shrimp"},{id:"mackerel",l:"Mackerel"},{id:"sea_bass",l:"Sea Bass"}]},
+  {label:"🌱 Plant Proteins",items:[{id:"tofu",l:"Tofu/Tempeh"},{id:"chickpeas",l:"Chickpeas"},{id:"lentils",l:"Lentils"},{id:"black_beans",l:"Black Beans"},{id:"edamame",l:"Edamame"},{id:"beans",l:"White Beans"}]},
+  {label:"🌾 Grains & Carbs",items:[{id:"pasta",l:"Pasta"},{id:"rice",l:"Rice"},{id:"couscous",l:"Couscous"},{id:"quinoa",l:"Quinoa"},{id:"oats",l:"Oats"},{id:"bread",l:"Bread"},{id:"gnocchi",l:"Gnocchi"}]},
+  {label:"🥦 Vegetables",items:[{id:"zucchini",l:"Zucchini"},{id:"spinach",l:"Spinach"},{id:"mushrooms",l:"Mushrooms"},{id:"broccoli",l:"Broccoli"},{id:"squash",l:"Squash"},{id:"carrots",l:"Carrots"},{id:"tomatoes",l:"Tomatoes"},{id:"sweet_potato",l:"Sweet Potato"},{id:"eggplant",l:"Eggplant"}]},
+  {label:"🧀 Dairy",items:[{id:"yogurt",l:"Greek Yogurt"},{id:"ricotta",l:"Ricotta"},{id:"feta",l:"Feta"},{id:"mozzarella",l:"Mozzarella"}]},
+  {label:"🥑 Fats & Seeds",items:[{id:"avocado",l:"Avocado"},{id:"almonds",l:"Almonds"},{id:"walnuts",l:"Walnuts"},{id:"peanut_butter",l:"Peanut Butter"},{id:"seeds",l:"Mixed Seeds"}]},
+];
+
+const ALLERGEN_CHIPS = [
+  {id:"gluten",l:"🌾 Gluten"},{id:"dairy",l:"🥛 Dairy"},{id:"nuts",l:"🥜 Nuts"},
+  {id:"eggs",l:"🥚 Eggs"},{id:"fish",l:"🐟 Fish"},{id:"shellfish",l:"🦐 Shellfish"},
+  {id:"soy",l:"🫘 Soy"},{id:"mushroom",l:"🍄 Mushroom"},
+];
+
+const MICROS=[
+  {id:"omega3",l:"🫀 Omega-3"},{id:"iron",l:"⚡ Iron"},{id:"calcium",l:"🦴 Calcium"},
+  {id:"magnesium",l:"🔋 Magnesium"},{id:"vitC",l:"🍋 Vitamin C"},{id:"vitD",l:"☀️ Vitamin D"},
+  {id:"folate",l:"🌿 Folate"},{id:"b12",l:"💊 Vitamin B12"},{id:"potassium",l:"🍌 Potassium"},{id:"fiber",l:"🌾 Fibre"},
+];
+
+const CUISINE_OPTS = [
+  {id:"all",l:"🌍 All"},{id:"italian",l:"🇮🇹 Italian"},{id:"asian",l:"🌏 Asian"},
+  {id:"mediterranean",l:"🥙 Mediterranean"},{id:"mexican",l:"🇲🇽 Mexican"},
+  {id:"middleeastern",l:"🌿 Middle Eastern"},{id:"indian",l:"🇮🇳 Indian"},
+  {id:"global",l:"🍳 International"},
+];
+
+const SLOT_LABELS={breakfast:"Breakfast",snack1:"Morning Snack",lunch:"Lunch",snack2:"Afternoon Snack",dinner:"Dinner"};
+const SLOT_ICONS={breakfast:"🌅",snack1:"🍎",lunch:"🍽️",snack2:"🍫",dinner:"🌙"};
+const SLOT_PROP={breakfast:.25,snack1:.10,lunch:.35,snack2:.10,dinner:.20};
+const SLOT_TYPE={breakfast:"B",snack1:"S",snack2:"S",lunch:"M",dinner:"M"};
+const SLOT_KCAL_CEIL={breakfast:500,snack1:250,snack2:250,lunch:650,dinner:650};
+const SLOT_PROT_CEIL={breakfast:35,snack1:15,snack2:15,lunch:40,dinner:40};
+const DAYS=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+
+const ALIASES={
+  nuts:["almond","walnut","peanut","cashew","pistachio","hazelnut","nut"],
+  fish:["salmon","tuna","cod","mackerel","sea bass","anchov","sardine","fish"],
+  shellfish:["shrimp","prawn","clam","mussel","oyster","crab"],
+  dairy:["milk","cheese","yogurt","ricotta","feta","mozzarella","parmesan","grana","cream","butter"],
+  gluten:["pasta","bread","flour","wheat","barley","rye","tortilla","pitta","couscous"],
+  eggs:["egg"],soy:["tofu","tempeh","edamame","soy","miso"],
+  mushroom:["mushroom"],coconut:["coconut"],avocado:["avocado"],
+};
+
+const SHOP_CATS={
+  produce:{label:"🥦 Produce & Vegetables",keys:["spinach","tomato","zucchini","carrot","onion","pepper","avocado","lemon","lime","mushroom","broccoli","kale","celery","cucumber","potato","sweet potato","squash","pumpkin","eggplant","lettuce","rocket","cabbage","coriander","parsley","basil","mint","ginger","garlic","pineapple","mango","banana","berry","apple","peach"]},
+  protein:{label:"🥩 Meat, Fish & Eggs",keys:["chicken","turkey","beef","pork","salmon","tuna","cod","prawn","shrimp","mackerel","sea bass","egg","tofu","tempeh","jerky"]},
+  dairy:{label:"🧀 Dairy & Refrigerated",keys:["yogurt","milk","cheese","ricotta","feta","mozzarella","parmesan","butter","cream","halloumi","cottage"]},
+  grains:{label:"🌾 Grains, Pasta & Bread",keys:["pasta","rice","couscous","quinoa","oats","bread","gnocchi","noodle","tortilla","pitta","bulgur","flour","cornflake","cracker","oatcake","sourdough"]},
+  pantry:{label:"🫙 Pantry & Tins",keys:["chickpea","lentil","bean","tomato tin","tomato paste","coconut milk","soy sauce","olive oil","honey","maple","vinegar","stock","broth","tahini","miso","curry","cumin","paprika","turmeric","cinnamon","cocoa","vanilla","sesame","peanut butter","almond butter","dark chocolate","granola","seed","nut","walnut","almond","peanut","protein powder","jerky"]},
+  frozen:{label:"❄️ Frozen",keys:["frozen","edamame","açaí","acai","ice"]},
+};
+
+// ─── STATE ───────────────────────────────────────────
+var S = {
+  diet:"omnivore", weeks:1,
+  slots:{breakfast:true,snack1:true,lunch:true,snack2:true,dinner:true},
+  kcal:1800, kcalUnk:false,
+  prot:80, protUnk:true,
+  excl:[], allergens:[],
+  ing:[], micros:[],
+  diff:2,
+  cuisines:["all"],
+  prepTimeMax:999,
+  plan:null, week:0, portions:1,
+  swapWeek:-1, swapDay:-1, swapSlot:"",
+  favourites: JSON.parse(localStorage.getItem('mp_favourites')||'[]'),
+};
+
+// ─── HELPERS ─────────────────────────────────────────
+function saveFavourites(){ localStorage.setItem('mp_favourites', JSON.stringify(S.favourites)); }
+
+function isExcluded(r){
+  var allExcl = S.allergens.concat(S.excl);
+  if(!allExcl.length) return false;
+  var txt=(r.ing.join(" ")+" "+r.name).toLowerCase();
+  return allExcl.some(function(ex){
+    var al=ALIASES[ex]||[ex];
+    return al.some(function(a){return txt.includes(a);});
+  });
+}
+
+function checkWarnings(){
+  var en=Object.keys(S.slots).filter(function(k){return S.slots[k];});
+  if(can.customMacros){
+    var kCeil=en.reduce(function(s,k){return s+SLOT_KCAL_CEIL[k];},0);
+    var cw=document.getElementById("calWarn"),cwt=document.getElementById("calWarnTxt");
+    if(!S.kcalUnk&&kCeil>0&&S.kcal>kCeil*1.2){
+      cwt.textContent=en.length+" meal"+(en.length>1?"s":"")+" realistically cover up to "+kCeil+" kcal/day.";
+      cw.classList.add("show");
+    } else { cw.classList.remove("show"); }
+  }
+  if(can.proteinTarget && !S.protUnk){
+    var pCeil=en.reduce(function(s,k){return s+SLOT_PROT_CEIL[k];},0);
+    var pw=document.getElementById("protWarn"),pwt=document.getElementById("protWarnTxt");
+    if(S.prot>pCeil){
+      pwt.textContent="With "+en.length+" meal"+(en.length>1?"s":"")+", realistic max is ~"+pCeil+"g protein/day.";
+      pw.classList.add("show");
+    } else { pw.classList.remove("show"); }
+  }
+}
+
+function toast(msg){
+  var t=document.getElementById("toast");
+  t.textContent=msg; t.classList.add("show");
+  setTimeout(function(){t.classList.remove("show");},2800);
+}
+
+function nudge(msg){
+  toast("🔒 "+msg);
+}
+
+// ─── GENERATE ────────────────────────────────────────
+function generate(){
+  var en=Object.keys(S.slots).filter(function(k){return S.slots[k];});
+  if(!en.length){toast("Please enable at least one meal slot");return;}
+  var tot=en.reduce(function(s,k){return s+SLOT_PROP[k];},0);
+  var sKcal={},sProt={};
+  en.forEach(function(k){
+    sKcal[k]=Math.round(S.kcal*SLOT_PROP[k]/tot);
+    sProt[k]=S.protUnk?0:Math.round(S.prot*SLOT_PROP[k]/tot*0.9);
+  });
+
+  // Build recipe pool based on tier
+  var pool = !can.multiWeekPlan ? R.filter(function(r){return FREE_IDS.has(r.id);}) : R;
+
+  var base=pool.filter(function(r){
+    if(S.diet==="vegan"&&!r.tags.vg) return false;
+    if(S.diet==="vegetarian"&&!r.tags.ve) return false;
+    if(S.diet==="pescatarian"&&!r.tags.pe) return false;
+    if(r.diff>S.diff) return false;
+    if(isExcluded(r)) return false;
+    if(can.cuisineFilter && !S.cuisines.includes("all") && !S.cuisines.includes(r.cuisine)) return false;
+    if(can.prepTimeFilter && r.prepTime > S.prepTimeMax) return false;
+    return true;
+  });
+
+  var slots={};
+  en.forEach(function(slot){
+    var t=SLOT_TYPE[slot];
+    var p=base.filter(function(r){return r.sl.includes(t);});
+    if(S.ing.length){
+      var f2=p.filter(function(r){return S.ing.some(function(i){return r.pri.includes(i);});});
+      if(f2.length>=2) p=f2;
+    }
+    if(!p.length) p=pool.filter(function(r){return r.sl.includes(t);});
+    slots[slot]=p;
+  });
+
+  for(var sl of en){
+    if(!slots[sl]||!slots[sl].length){toast("No recipes for "+SLOT_LABELS[sl]+". Try adjusting filters.");return;}
+  }
+
+  var used={};
+  var plan=[];
+  for(var w=0;w<S.weeks;w++){
+    var week=[];
+    for(var d=0;d<7;d++){
+      var day={};
+      en.forEach(function(slot){
+        var r=pick(slots[slot],sKcal[slot],sProt[slot],used);
+        day[slot]=r;
+        used[r.id]=(used[r.id]||0)+1;
+      });
+      week.push(day);
+    }
+    plan.push(week);
+  }
+  S.plan=plan; S.week=0; S.portions=1;
+  // reset portion UI
+  document.querySelectorAll(".portion-btn").forEach(function(b){
+    b.classList.toggle("sel",b.dataset.p==="1");
+  });
+  showPlan();
+}
+
+function pick(pool,tKcal,minProt,used){
+  var sc=pool.map(function(r){
+    var mk=(r.kcal[0]+r.kcal[1])/2;
+    var mp=(r.prot[0]+r.prot[1])/2;
+    var ks=Math.max(0,1-Math.abs(mk-tKcal)/400);
+    var pb=(!minProt||mp>=minProt)?0.2:0;
+    var up=(used[r.id]||0)*0.3;
+    var mb=S.micros.some(function(m){return r.mc.includes(m);})?0.25:0;
+    return{r:r,sc:ks+pb-up+mb+Math.random()*0.25};
+  });
+  sc.sort(function(a,b){return b.sc-a.sc;});
+  return sc[Math.floor(Math.random()*Math.min(4,sc.length))].r;
+}
+
+// ─── SHOW PLAN ───────────────────────────────────────
+function showPlan(){
+  var en=Object.keys(S.slots).filter(function(k){return S.slots[k];});
+  var dl={omnivore:"Omnivore",pescatarian:"Pescatarian",vegetarian:"Vegetarian",vegan:"Vegan"};
+  var sub=S.weeks+" wk · "+en.length+" meals/day · "+S.kcal+" kcal · "+dl[S.diet];
+  document.getElementById("planSub").textContent=sub;
+  var tabs=document.getElementById("weekTabs"); tabs.innerHTML="";
+  for(var w=0;w<S.weeks;w++){
+    (function(wi){
+      var t=document.createElement("button");
+      t.className="week-tab"+(wi===0?" active":"");
+      t.textContent="Week "+(wi+1);
+      t.addEventListener("click",function(){
+        document.querySelectorAll(".week-tab").forEach(function(x){x.classList.remove("active");});
+        t.classList.add("active"); S.week=wi;
+        renderWeek(wi); renderNutrition(wi);
+      });
+      tabs.appendChild(t);
+    })(w);
+  }
+  renderWeek(0); renderNutrition(0);
+  document.getElementById("setupPage").classList.remove("active");
+  document.getElementById("planPage").classList.add("active");
+}
+
+// ─── RENDER WEEK ─────────────────────────────────────
+function renderWeek(wi){
+  var en=Object.keys(S.slots).filter(function(k){return S.slots[k];});
+  var week=S.plan[wi];
+  var cont=document.getElementById("planContent"); cont.innerHTML="";
+  var gtc="72px repeat(7,1fr)";
+  var wrap=document.createElement("div"); wrap.className="week-grid";
+  var hrow=document.createElement("div");
+  hrow.className="grid-head";
+  hrow.style.cssText="display:grid;grid-template-columns:"+gtc+";gap:5px;";
+  hrow.innerHTML="<div></div>"+DAYS.map(function(d){return "<div class='day-hdr'>"+d+"</div>";}).join("");
+  wrap.appendChild(hrow);
+  en.forEach(function(slot){
+    var row=document.createElement("div");
+    row.className="slot-row";
+    row.style.cssText="display:grid;grid-template-columns:"+gtc+";gap:5px;";
+    var lbl=document.createElement("div"); lbl.className="slot-lbl";
+    lbl.innerHTML="<span class='slot-lbl-icon'>"+SLOT_ICONS[slot]+"</span><span class='slot-lbl-txt'>"+SLOT_LABELS[slot]+"</span>";
+    row.appendChild(lbl);
+    week.forEach(function(day,di){ row.appendChild(makeMealCard(day[slot],wi,di,slot)); });
+    wrap.appendChild(row);
+  });
+  var trow=document.createElement("div");
+  trow.className="day-tot-row";
+  trow.style.cssText="display:grid;grid-template-columns:"+gtc+";gap:5px;";
+  var tlbl=document.createElement("div");
+  tlbl.style.cssText="text-align:right;font-size:9px;color:var(--muted);padding:4px 2px 0;";
+  tlbl.textContent="Est. Total";
+  trow.appendChild(tlbl);
+  week.forEach(function(day){
+    var slots2=Object.keys(S.slots).filter(function(k){return S.slots[k];});
+    var lo=slots2.reduce(function(s,sl){return s+day[sl].kcal[0];},0);
+    var hi=slots2.reduce(function(s,sl){return s+day[sl].kcal[1];},0);
+    var cell=document.createElement("div"); cell.className="day-tot";
+    cell.innerHTML="<strong>"+Math.round((lo+hi)/2*S.portions)+"</strong>kcal";
+    trow.appendChild(cell);
+  });
+  wrap.appendChild(trow);
+  cont.appendChild(wrap);
+}
+
+function makeMealCard(r,wi,di,slot){
+  var card=document.createElement("div"); card.className="meal-card "+slot;
+  var mk=Math.round((r.kcal[0]+r.kcal[1])/2*S.portions);
+  var mp=Math.round((r.prot[0]+r.prot[1])/2*S.portions);
+  var isFav=S.favourites.includes(r.id);
+  var inner=document.createElement("div"); inner.className="mc-inner";
+  inner.innerHTML="<span class='mc-emoji'>"+r.em+"</span><div class='mc-name'>"+r.name+"</div><div class='mc-meta'>~"+mk+" kcal · "+mp+"g prot</div>";
+  inner.addEventListener("click",function(){openModal(r);});
+  card.appendChild(inner);
+  // Heart button
+  var heart=document.createElement("button");
+  heart.className="heart-btn"+(isFav?" fav":"");
+  heart.title=can.savedFavourites?"Toggle favourite":"Save favourites — upgrade to Premium";
+  heart.textContent=isFav?"❤️":"🤍";
+  heart.addEventListener("click",function(e){
+    e.stopPropagation();
+    if(!can.savedFavourites){nudge("Save favourites — available on Premium");return;}
+    var idx=S.favourites.indexOf(r.id);
+    if(idx>=0) S.favourites.splice(idx,1); else S.favourites.push(r.id);
+    saveFavourites();
+    heart.textContent=S.favourites.includes(r.id)?"❤️":"🤍";
+    heart.classList.toggle("fav",S.favourites.includes(r.id));
+  });
+  card.appendChild(heart);
+  // Swap button
+  var swapBtn=document.createElement("button"); swapBtn.className="swap-btn"; swapBtn.title="Swap recipe"; swapBtn.textContent="🔄";
+  swapBtn.addEventListener("click",function(e){
+    e.stopPropagation();
+    if(!can.recipeSwap){nudge("Recipe swap — available on Basic plan");return;}
+    openSwap(wi,di,slot);
+  });
+  card.appendChild(swapBtn);
+  return card;
+}
+
+// ─── NUTRITION SUMMARY ───────────────────────────────
+function renderNutrition(wi){
+  if(!can.nutritionSummary) return;
+  var en=Object.keys(S.slots).filter(function(k){return S.slots[k];});
+  var week=S.plan[wi];
+  var totK=0,totP=0,totC=0,totF=0;
+  var mCounts={}; MICROS.forEach(function(m){mCounts[m.id]=0;});
+  week.forEach(function(day){
+    en.forEach(function(slot){
+      var r=day[slot];
+      totK+=(r.kcal[0]+r.kcal[1])/2; totP+=(r.prot[0]+r.prot[1])/2;
+      totC+=(r.carbs[0]+r.carbs[1])/2; totF+=(r.fat[0]+r.fat[1])/2;
+      r.mc.forEach(function(m){if(mCounts[m]!==undefined) mCounts[m]++;});
+    });
+  });
+  var aK=Math.round(totK/7*S.portions),aP=Math.round(totP/7*S.portions);
+  var aC=Math.round(totC/7),aF=Math.round(totF/7);
+  var maxM=en.length*7;
+  var microRows=MICROS.map(function(m){
+    var pct=Math.round(mCounts[m.id]/maxM*100);
+    return "<div class='micro-bar-row'><span class='micro-bar-lbl'>"+m.l+"</span><div class='micro-bar-track'><div class='micro-bar-fill"+(pct>=70?" hi":"")+"' style='width:"+pct+"%'></div></div><span class='micro-bar-pct'>"+pct+"%</span></div>";
+  }).join("");
+  document.getElementById("nutrContent").innerHTML=
+    "<div class='nutr-macro-grid'>"+
+      "<div class='nutr-box'><div class='nutr-val'>"+aK+"</div><div class='nutr-lbl'>Avg kcal/day</div></div>"+
+      "<div class='nutr-box'><div class='nutr-val'>"+aP+"g</div><div class='nutr-lbl'>Avg protein</div></div>"+
+      "<div class='nutr-box'><div class='nutr-val'>"+aC+"g</div><div class='nutr-lbl'>Avg carbs</div></div>"+
+      "<div class='nutr-box'><div class='nutr-val'>"+aF+"g</div><div class='nutr-lbl'>Avg fat</div></div>"+
+    "</div>"+
+    "<div class='nutr-micro-title'>Micronutrient Coverage (% of meals containing each)</div>"+
+    "<div class='micro-bars'>"+microRows+"</div>";
+}
+
+// ─── SWAP ────────────────────────────────────────────
+function openSwap(wi,di,slot){
+  S.swapWeek=wi; S.swapDay=di; S.swapSlot=slot;
+  var t=SLOT_TYPE[slot];
+  var current=S.plan[wi][di][slot];
+  var pool=!can.multiWeekPlan?R.filter(function(r){return FREE_IDS.has(r.id);}):R;
+  var alts=pool.filter(function(r){
+    if(r.id===current.id||!r.sl.includes(t)) return false;
+    if(S.diet==="vegan"&&!r.tags.vg) return false;
+    if(S.diet==="vegetarian"&&!r.tags.ve) return false;
+    if(S.diet==="pescatarian"&&!r.tags.pe) return false;
+    if(r.diff>S.diff||isExcluded(r)) return false;
+    return true;
+  }).sort(function(){return Math.random()-.5;}).slice(0,5);
+  document.getElementById("swapSub").textContent='Replacing: "'+current.name+'"';
+  var list=document.getElementById("swapList"); list.innerHTML="";
+  alts.forEach(function(r){
+    var item=document.createElement("div"); item.className="swap-item";
+    var mk=Math.round((r.kcal[0]+r.kcal[1])/2), mp=Math.round((r.prot[0]+r.prot[1])/2);
+    item.innerHTML="<span class='swap-em'>"+r.em+"</span><div><div class='swap-item-name'>"+r.name+"</div><div class='swap-item-meta'>~"+mk+" kcal · "+mp+"g prot</div></div>";
+    item.addEventListener("click",function(){
+      S.plan[S.swapWeek][S.swapDay][S.swapSlot]=r;
+      closeSwap(); renderWeek(S.swapWeek); renderNutrition(S.swapWeek);
+      toast("Recipe swapped!");
+    });
+    list.appendChild(item);
+  });
+  document.getElementById("swapOv").classList.add("open");
+  document.body.style.overflow="hidden";
+}
+function closeSwap(){document.getElementById("swapOv").classList.remove("open");document.body.style.overflow="";}
+
+// ─── RECIPE MODAL ────────────────────────────────────
+function getProteinIngLines(ing){
+  var kws=["chicken","turkey","beef","pork","egg","salmon","tuna","cod","prawn","shrimp","mackerel","sea bass","tofu","tempeh","chickpea","lentil","black bean","edamame","bean","mince","steak","fillet","yogurt","cottage cheese","protein powder","jerky","walnut","almond","peanut","cashew","nut","seed","halloumi","ricotta","feta","mozzarella"];
+  return ing.map(function(line,i){
+    return kws.some(function(k){return line.toLowerCase().includes(k);})?i:-1;
+  }).filter(function(i){return i>=0;});
+}
+
+function scaleIngLine(line,factor){
+  return line.replace(/(\d+\.?\d*)/g,function(m,n){
+    var s=Math.round(parseFloat(n)*factor*10)/10;
+    return Number.isInteger(s)?String(s):String(s);
+  });
+}
+
+function macroBreakdownHTML(r,mk,mp,mc,mf){
+  if(!can.macroBreakdown){
+    return "<div class='macro-locked'>"+
+      "<div class='macro-locked-blur'>"+
+        "<div class='macro-donut-placeholder'></div>"+
+        "<div class='macro-bars-placeholder'></div>"+
+      "</div>"+
+      "<div class='upgrade-nudge'>🔒 Deep macro breakdown — <strong>upgrade to Premium</strong> to unlock full nutrition analysis</div>"+
+    "</div>";
+  }
+  var total=mp+mc+mf||1;
+  var pPct=Math.round(mp/total*100), cPct=Math.round(mc/total*100), fPct=Math.round(mf/total*100);
+  // conic-gradient donut
+  var pDeg=Math.round(pPct*3.6), cDeg=Math.round(cPct*3.6);
+  var donut="conic-gradient(#2A5C2E 0deg "+pDeg+"deg, #C4622D "+pDeg+"deg "+(pDeg+cDeg)+"deg, #E4A24A "+(pDeg+cDeg)+"deg 360deg)";
+  // % of daily target bars
+  var dKcal=S.kcal||1800;
+  var kPct=Math.min(100,Math.round(mk/dKcal*100*5)); // × slot count proxy
+  var pTPct=Math.min(100,Math.round(mp/(S.protUnk?80:S.prot)*100*5));
+  // fibre/sugar/sodium estimates
+  var fibre=Math.round((mc*(r.tags.vg?0.15:0.10)));
+  var sugar=Math.round(mc*0.2);
+  var sodium=Math.round(mk*0.4);
+  return "<div class='macro-detail'>"+
+    "<div class='macro-donut-wrap'>"+
+      "<div class='macro-donut' style='background:"+donut+"'></div>"+
+      "<div class='macro-donut-legend'>"+
+        "<div class='mdl-item'><span class='mdl-dot' style='background:#2A5C2E'></span>Protein "+pPct+"%</div>"+
+        "<div class='mdl-item'><span class='mdl-dot' style='background:#C4622D'></span>Carbs "+cPct+"%</div>"+
+        "<div class='mdl-item'><span class='mdl-dot' style='background:#E4A24A'></span>Fat "+fPct+"%</div>"+
+      "</div>"+
+    "</div>"+
+    "<div class='macro-target-bars'>"+
+      "<div class='mtb-lbl'>% of daily targets</div>"+
+      "<div class='mtb-row'><span>Calories</span><div class='mtb-track'><div class='mtb-fill' style='width:"+kPct+"%'></div></div><span>"+kPct+"%</span></div>"+
+      "<div class='mtb-row'><span>Protein</span><div class='mtb-track'><div class='mtb-fill' style='width:"+pTPct+"%'></div></div><span>"+pTPct+"%</span></div>"+
+    "</div>"+
+    "<div class='macro-extras'>"+
+      "<div class='mex-item'><span class='mex-lbl'>Est. Fibre</span><span class='mex-val'>"+fibre+"g</span></div>"+
+      "<div class='mex-item'><span class='mex-lbl'>Est. Sugar</span><span class='mex-val'>"+sugar+"g</span></div>"+
+      "<div class='mex-item'><span class='mex-lbl'>Est. Sodium</span><span class='mex-val'>"+sodium+"mg</span></div>"+
+    "</div>"+
+  "</div>";
+}
+
+function renderModalBody(r,scaled){
+  var tagDefs=[
+    [r.tags.vg,"tv","🌱 Vegan"],[r.tags.ve&&!r.tags.vg,"tvg","🥗 Veg"],
+    [r.tags.pe&&!r.tags.ve,"tp","🐟 Pesc"],[r.tags.gf,"tgf","🌾 GF"],
+    [r.tags.df,"tdf","🥛 DF"],[(r.prot[0]+r.prot[1])/2>=20,"thp","💪 High Protein"],
+    [(r.diff===1),"tq","⚡ Quick"]
+  ];
+  var tags=tagDefs.filter(function(t){return t[0];}).map(function(t){return "<span class='tag "+t[1]+"'>"+t[2]+"</span>";}).join("");
+  var protLines=getProteinIngLines(r.ing);
+  var pf=S.portions;
+  var mk=Math.round((r.kcal[0]+r.kcal[1])/2*(scaled?1.4:1)*pf);
+  var mp=Math.round((r.prot[0]+r.prot[1])/2*(scaled?1.8:1)*pf);
+  var mc=Math.round((r.carbs[0]+r.carbs[1])/2*pf);
+  var mf=Math.round((r.fat[0]+r.fat[1])/2*(scaled?1.5:1)*pf);
+  var ingHTML=r.ing.map(function(line,i){
+    var scalable=protLines.indexOf(i)>=0;
+    var protF=(scaled&&scalable)?2:1;
+    var dl=scaleIngLine(line,pf*protF);
+    var badge=(scaled&&scalable)?" <span class='scaled-badge'>2x prot</span>":"";
+    var cls=(scaled&&scalable)?" class='ing-scaled'":"";
+    return "<li"+cls+">"+dl+badge+"</li>";
+  }).join("");
+  var showScale=protLines.length>0&&can.macroBreakdown;
+  var scaleHTML=showScale?
+    "<div class='scale-bar'>"+
+      "<div><div class='scale-label'>"+(scaled?"💪 High Protein Active":"💪 Scale Up Protein")+"</div>"+
+      "<div class='scale-sub'>"+(scaled?"Protein source doubled · macros updated":"Double the protein source to hit your daily target")+"</div></div>"+
+      "<label class='scale-toggle'><input type='checkbox' id='scaleChk'"+(scaled?" checked":"")+"><span class='scale-track'></span></label>"+
+    "</div>":"";
+  var isFav=S.favourites.includes(r.id);
+  var portNote=pf>1?" <span style='font-size:12px;color:var(--muted);font-weight:400'>(×"+pf+")</span>":"";
+  var titleBadge=scaled?" <span class='scaled-badge' style='font-size:11px'>High Protein</span>":"";
+  document.getElementById("modalBody").innerHTML=
+    "<span class='m-emoji'>"+r.em+"</span>"+
+    "<div class='m-title-row'>"+
+      "<div class='m-title'>"+r.name+titleBadge+portNote+"</div>"+
+      "<button class='modal-heart"+(isFav?" fav":"")+"' id='modalHeart' title='"+(can.savedFavourites?"Toggle favourite":"Premium feature")+"'>"+(isFav?"❤️":"🤍")+"</button>"+
+    "</div>"+
+    "<div class='m-tags'>"+tags+"</div>"+
+    scaleHTML+
+    "<div class='macro-row'>"+
+      "<div class='macro-box'><div class='macro-val'>"+mp+"g</div><div class='macro-lbl'>Protein</div></div>"+
+      "<div class='macro-box'><div class='macro-val'>"+mc+"g</div><div class='macro-lbl'>Carbs</div></div>"+
+      "<div class='macro-box'><div class='macro-val'>"+mf+"g</div><div class='macro-lbl'>Fat</div></div>"+
+      "<div class='macro-box'><div class='macro-val'>"+mk+"</div><div class='macro-lbl'>Kcal</div></div>"+
+    "</div>"+
+    "<div class='m-sec'>📊 Nutrition Detail</div>"+
+    macroBreakdownHTML(r,mk,mp,mc,mf)+
+    "<div class='m-sec'>🛒 Ingredients</div>"+
+    "<ul class='ing-list'>"+ingHTML+"</ul>"+
+    "<div class='m-sec'>👨‍🍳 Instructions</div>"+
+    "<ol class='steps-list'>"+r.steps.map(function(s,i){return "<li class='step-item'><span class='step-num'>"+(i+1)+"</span><span class='step-txt'>"+s+"</span></li>";}).join("")+"</ol>"+
+    (r.tip?"<div class='tip-box'><div class='tip-lbl'>💡 Nutritionist Tip</div><div class='tip-txt'>"+r.tip+"</div></div>":"");
+  if(showScale){
+    document.getElementById("scaleChk").addEventListener("change",function(e){renderModalBody(r,e.target.checked);});
+  }
+  document.getElementById("modalHeart").addEventListener("click",function(){
+    if(!can.savedFavourites){nudge("Save favourites — available on Premium");return;}
+    var idx=S.favourites.indexOf(r.id);
+    if(idx>=0) S.favourites.splice(idx,1); else S.favourites.push(r.id);
+    saveFavourites();
+    var btn=document.getElementById("modalHeart");
+    var isFavNow=S.favourites.includes(r.id);
+    btn.textContent=isFavNow?"❤️":"🤍"; btn.classList.toggle("fav",isFavNow);
+  });
+}
+
+function openModal(r){ renderModalBody(r,false); document.getElementById("recipeModal").classList.add("open"); document.body.style.overflow="hidden"; }
+function closeModal(){ document.getElementById("recipeModal").classList.remove("open"); document.body.style.overflow=""; }
+
+// ─── SHOPPING LIST ───────────────────────────────────
+var PREP_WORDS=["diced","sliced","chopped","crushed","minced","grated","halved","peeled","cubed","shredded","julienned","torn","crumbled","mashed","roasted","cooked","dried","fresh","frozen","canned","tinned","raw","whole","ground","large","medium","small","ripe","firm","boneless","skinless","washed","trimmed","rinsed","drained","blanched","steamed"];
+function canonicalKey(desc){
+  var k=desc.toLowerCase().split(",")[0].split("(")[0].split(" in ")[0].trim();
+  PREP_WORDS.forEach(function(w){k=k.replace(new RegExp("\\b"+w+"\\b","g"),"");});
+  k=k.replace(/\s+/g," ").trim();
+  return k.replace(/es$/,"").replace(/s$/,"")||k;
+}
+function buildShoppingList(){
+  var en=Object.keys(S.slots).filter(function(k){return S.slots[k];});
+  var allIng=[];
+  S.plan.forEach(function(week){week.forEach(function(day){en.forEach(function(slot){day[slot].ing.forEach(function(line){allIng.push(line);});});});});
+  var itemMap={};
+  allIng.forEach(function(line){
+    var m=line.match(/^([\d\.\/]+)\s*(g|ml|kg|l|tbsp|tsp|cup|oz|lb|slice|piece|handful|bunch|clove|can|tin|sprig)?\s*/i);
+    var qty=m?parseFloat(m[1]):0, unit=m&&m[2]?m[2].toLowerCase():"";
+    var desc=line.replace(/^[\d\.\/]+\s*(g|ml|kg|l|tbsp|tsp|cup|oz|lb|slice|piece|handful|bunch|clove|can|tin|sprig)?\s*/i,"").trim();
+    var key=canonicalKey(desc);
+    if(!key) return;
+    if(!itemMap[key]){itemMap[key]={display:key.charAt(0).toUpperCase()+key.slice(1),qty:0,unit:unit};}
+    if(qty>0) itemMap[key].qty+=qty*S.portions;
+  });
+  var cats={}; Object.keys(SHOP_CATS).forEach(function(k){cats[k]=[];}); cats.other=[];
+  Object.keys(itemMap).forEach(function(key){
+    var matched=false;
+    var catKeys=Object.keys(SHOP_CATS);
+    for(var ci=0;ci<catKeys.length;ci++){
+      var cat=catKeys[ci];
+      if(SHOP_CATS[cat].keys.some(function(kw){return key.includes(kw)||kw.includes(key);})){
+        cats[cat].push({key:key,item:itemMap[key]}); matched=true; break;
+      }
+    }
+    if(!matched) cats.other.push({key:key,item:itemMap[key]});
+  });
+  return cats;
+}
+function openShopList(){
+  var cats=buildShoppingList();
+  var body=document.getElementById("shopBody"); body.innerHTML="";
+  var allCats=Object.keys(SHOP_CATS).concat(["other"]);
+  allCats.forEach(function(catId){
+    var items=cats[catId]; if(!items||!items.length) return;
+    var label=catId==="other"?"🗂️ Other":SHOP_CATS[catId].label;
+    var section=document.createElement("div"); section.className="shop-cat";
+    var titleEl=document.createElement("div"); titleEl.className="shop-cat-title"; titleEl.textContent=label;
+    section.appendChild(titleEl);
+    var itemsEl=document.createElement("div"); itemsEl.className="shop-items";
+    items.forEach(function(entry){
+      var it=entry.item;
+      var qtyStr=it.qty>0&&it.unit?(Math.round(it.qty*10)/10)+it.unit:"";
+      var el=document.createElement("div"); el.className="shop-item";
+      el.innerHTML="<div class='shop-item-check'></div><span class='shop-item-text'>"+it.display+"</span>"+(qtyStr?"<span class='shop-item-qty'>"+qtyStr+"</span>":"");
+      el.addEventListener("click",function(){
+        el.classList.toggle("checked");
+        el.querySelector(".shop-item-check").textContent=el.classList.contains("checked")?"✓":"";
+      });
+      itemsEl.appendChild(el);
+    });
+    section.appendChild(itemsEl); body.appendChild(section);
+  });
+  document.getElementById("shopPortionNote").textContent=S.portions>1?"Quantities for "+S.portions+" people · Week "+(S.week+1):"Week "+(S.week+1);
+  document.getElementById("shopOv").classList.add("open"); document.body.style.overflow="hidden";
+}
+function closeShopList(){ document.getElementById("shopOv").classList.remove("open"); document.body.style.overflow=""; }
+function copyShopList(){
+  var cats=buildShoppingList();
+  var lines=["🛒 SHOPPING LIST","Week "+(S.week+1)+(S.portions>1?" · "+S.portions+" people":""),""];
+  Object.keys(SHOP_CATS).concat(["other"]).forEach(function(catId){
+    var items=cats[catId]; if(!items||!items.length) return;
+    lines.push(catId==="other"?"Other":SHOP_CATS[catId].label);
+    items.forEach(function(e){
+      var it=e.item;
+      lines.push("  ☐ "+it.display+(it.qty>0&&it.unit?" ("+Math.round(it.qty*10)/10+it.unit+")":""));
+    });
+    lines.push("");
+  });
+  navigator.clipboard.writeText(lines.join("\n")).then(function(){toast("Shopping list copied!");}).catch(function(){toast("Copy failed — try selecting manually");});
+}
+
+// ─── HELP ────────────────────────────────────────────
+function openHelp(type){
+  var manHTML="<button class='help-x' id='helpX'>✕</button><h2 class='help-title'>📖 User Manual</h2><p class='help-sub'>Meal Planner — How to use</p>"+
+    "<div class='help-sec'><h3>Setup Wizard</h3><p>Work through the steps to set your diet type, meal slots, calorie goal and optional preferences. Tap Generate when ready.</p></div>"+
+    "<div class='help-sec'><h3>Portion Scaling (Basic+)</h3><p>Use the Serves 1–4 bar on the plan page. Ingredient quantities and macros in recipe modals scale automatically.</p></div>"+
+    "<div class='help-sec'><h3>Recipe Swap (Basic+)</h3><p>Hover a meal card and tap 🔄 to replace just that recipe without regenerating the whole plan.</p></div>"+
+    "<div class='help-sec'><h3>Shopping List (Basic+)</h3><p>Tap 🛒 List in the header. Ingredients are grouped by supermarket section, scaled for your portion count, and can be ticked off as you shop.</p></div>"+
+    "<div class='help-sec'><h3>Nutrition Summary (Basic+)</h3><p>Expand the panel below the header to see daily averages and a micronutrient coverage chart.</p></div>"+
+    "<div class='help-sec'><h3>Scale Up Protein (Premium)</h3><p>A toggle in the recipe modal doubles the protein ingredient quantities and recalculates macros.</p></div>"+
+    "<div class='help-sec'><h3>Cuisine & Prep Time Filters (Premium)</h3><p>Available in setup. Filter the recipe pool by cuisine and maximum cooking time.</p></div>"+
+    "<div class='help-sec'><h3>Saved Favourites (Premium)</h3><p>Tap ❤️ on any meal card or in the recipe modal to save favourites to your device. Pinned favourites are prioritised in future plans.</p></div>";
+  var faqHTML="<button class='help-x' id='helpX'>✕</button><h2 class='help-title'>❓ FAQ</h2><p class='help-sub'>Frequently asked questions</p>"+
+    "<div class='faq-item'><div class='faq-q'>Are calorie values exact?</div><div class='faq-a'>No — they are ±10% estimates based on typical portion sizes. Use them as guides.</div></div>"+
+    "<div class='faq-item'><div class='faq-q'>How do I swap one recipe?</div><div class='faq-a'>Hover any meal card and tap 🔄. This requires the Basic plan or above.</div></div>"+
+    "<div class='faq-item'><div class='faq-q'>How does ingredient exclusion work?</div><div class='faq-a'>The allergen chips cover the most common dietary restrictions. Typing 'nuts' also removes almonds, walnuts and peanut butter via automatic alias matching (Basic+).</div></div>"+
+    "<div class='faq-item'><div class='faq-q'>Does it work offline?</div><div class='faq-a'>Yes — all 91 recipes are embedded in the file. No internet needed after loading.</div></div>"+
+    "<div class='faq-item'><div class='faq-q'>What is the difference between tiers?</div><div class='faq-a'>Free gives a full 1-week plan with 30 recipes. Basic unlocks multi-week plans, shopping list, recipe swap and portion scaling. Premium adds protein targeting, cuisine filters, saved favourites and deep macro analysis.</div></div>";
+  document.getElementById("helpPanel").innerHTML=(type==="manual"?manHTML:faqHTML);
+  document.getElementById("helpOv").classList.add("open"); document.body.style.overflow="hidden";
+  document.getElementById("helpX").addEventListener("click",closeHelp);
+}
+function closeHelp(){ document.getElementById("helpOv").classList.remove("open"); document.body.style.overflow=""; }
+
+// ─── INIT ────────────────────────────────────────────
+(function init(){
+  // Show tier badge in header
+  var tierLabels={free:"Free Plan",basic:"Basic Plan",premium:"Premium Plan"};
+  document.getElementById("tierBadge").textContent=tierLabels[TIER];
+  document.getElementById("tierBadge").className="tier-pill tier-"+TIER;
+
+  // Diet cards
+  document.querySelectorAll(".diet-card").forEach(function(c){
+    c.addEventListener("click",function(){
+      document.querySelectorAll(".diet-card").forEach(function(x){x.classList.remove("sel");});
+      c.classList.add("sel"); S.diet=c.dataset.diet;
+    });
+  });
+
+  // Weeks slider
+  var ws=document.getElementById("wkSlider"),wv=document.getElementById("wkVal");
+  if(!can.multiWeekPlan){ ws.max=1; ws.disabled=true; }
+  ws.addEventListener("input",function(){S.weeks=+ws.value;wv.textContent=ws.value;});
+
+  // Meal slot toggles
+  document.querySelectorAll(".slot-tog").forEach(function(t){
+    var sl=t.dataset.slot;
+    var isSnack=sl==="snack1"||sl==="snack2";
+    if(isSnack&&!can.portionScaling){ // reuse portionScaling as proxy for "snacks unlocked"
+      S.slots[sl]=false; t.classList.remove("on");
+      t.classList.add("locked-slot");
+    }
+    t.addEventListener("click",function(){
+      if(isSnack&&!can.portionScaling){nudge("Snack slots — available on Basic plan");return;}
+      S.slots[sl]=!S.slots[sl];
+      t.classList.toggle("on",S.slots[sl]); checkWarnings();
+    });
+  });
+
+  // Calorie target
+  var cs=document.getElementById("calSlider"),cv=document.getElementById("calVal");
+  if(!can.customMacros){ cs.disabled=true; document.getElementById("calWrap").style.opacity="0.5"; }
+  cs.addEventListener("input",function(){S.kcal=+cs.value;cv.textContent=cs.value;checkWarnings();});
+  document.getElementById("calUnk").addEventListener("change",function(e){
+    S.kcalUnk=e.target.checked;
+    if(e.target.checked){S.kcal=1600;cs.value=1600;cv.textContent="1600";}
+    document.getElementById("calWrap").style.opacity=e.target.checked?"0.4":"1";
+    cs.disabled=e.target.checked; checkWarnings();
+  });
+
+  // Protein target (premium only)
+  var ps=document.getElementById("protSlider"),pv=document.getElementById("protVal");
+  if(!can.proteinTarget){
+    var protBody = document.getElementById("protWrap");
+    protBody.innerHTML = "<div class='upgrade-nudge'>🔒 Protein targeting — <a href='#'>upgrade to Premium ($29/yr)</a> to set a daily protein goal and optimise recipes accordingly</div>";
+    document.getElementById("protWarn").style.display="none";
+    document.getElementById("protUnk").closest(".check-row").style.display="none";
+  } else {
+    S.protUnk=false;
+    ps.addEventListener("input",function(){S.prot=+ps.value;pv.textContent=ps.value;checkWarnings();});
+    document.getElementById("protUnk").addEventListener("change",function(e){
+      S.protUnk=e.target.checked;
+      document.getElementById("protWrap").style.opacity=e.target.checked?"0.4":"1";
+      ps.disabled=e.target.checked; checkWarnings();
+    });
+  }
+
+  // Allergen chips (always available)
+  var ac=document.getElementById("allergenChips");
+  ALLERGEN_CHIPS.forEach(function(a){
+    var chip=document.createElement("div"); chip.className="chip"; chip.textContent=a.l;
+    chip.addEventListener("click",function(){
+      if(S.allergens.includes(a.id)){S.allergens=S.allergens.filter(function(x){return x!==a.id;});chip.classList.remove("sel");}
+      else{S.allergens.push(a.id);chip.classList.add("sel");}
+    });
+    ac.appendChild(chip);
+  });
+
+  // Custom exclusion input (basic+)
+  var exclSection=document.getElementById("exclCustomSection");
+  if(!can.fullExclusions){
+    exclSection.innerHTML="<div class='upgrade-nudge'>🔒 Custom ingredient exclusions — <a href='#'>upgrade to Basic ($8/yr)</a> to unlock full exclusion input with alias matching</div>";
+  } else {
+    function addExcl(val){
+      var v=val.trim().toLowerCase();
+      if(!v||S.excl.includes(v)) return;
+      S.excl.push(v); renderExcl();
+      document.getElementById("exclInput").value="";
+    }
+    function renderExcl(){
+      var el=document.getElementById("exclTags"); el.innerHTML="";
+      S.excl.forEach(function(ex,i){
+        var tag=document.createElement("div"); tag.className="excl-tag";
+        var sp=document.createElement("span"); sp.textContent="🚫 "+ex;
+        var btn=document.createElement("button"); btn.textContent="×";
+        (function(idx){btn.addEventListener("click",function(){S.excl.splice(idx,1);renderExcl();});})(i);
+        tag.appendChild(sp); tag.appendChild(btn); el.appendChild(tag);
+      });
+    }
+    document.getElementById("exclOk").addEventListener("click",function(){addExcl(document.getElementById("exclInput").value);});
+    document.getElementById("exclInput").addEventListener("keydown",function(e){if(e.key==="Enter")addExcl(e.target.value);});
+  }
+
+  // Cuisine filter (premium)
+  var cuisineSection=document.getElementById("cuisineSection");
+  if(!can.cuisineFilter){
+    cuisineSection.querySelector(".section-body").innerHTML="<div class='upgrade-nudge'>🔒 Cuisine filter — <a href='#'>upgrade to Premium ($29/yr)</a> to filter recipes by cuisine type</div>";
+  } else {
+    var cc=document.getElementById("cuisineChips");
+    CUISINE_OPTS.forEach(function(cu){
+      var chip=document.createElement("div"); chip.className="chip"+(cu.id==="all"?" sel":""); chip.textContent=cu.l;
+      chip.addEventListener("click",function(){
+        if(cu.id==="all"){
+          S.cuisines=["all"];
+          document.querySelectorAll("#cuisineChips .chip").forEach(function(c){c.classList.remove("sel");});
+          chip.classList.add("sel");
+        } else {
+          S.cuisines=S.cuisines.filter(function(x){return x!=="all";});
+          if(S.cuisines.includes(cu.id)){S.cuisines=S.cuisines.filter(function(x){return x!==cu.id;});chip.classList.remove("sel");}
+          else{S.cuisines.push(cu.id);chip.classList.add("sel");}
+          if(!S.cuisines.length){S.cuisines=["all"];document.querySelectorAll("#cuisineChips .chip").forEach(function(c){c.classList.remove("sel");});document.querySelector("#cuisineChips .chip").classList.add("sel");}
+          document.querySelector("#cuisineChips .chip[data-cu='all']");
+        }
+      });
+      chip.dataset.cu=cu.id;
+      cc.appendChild(chip);
+    });
+  }
+
+  // Prep time filter (premium)
+  var prepSection=document.getElementById("prepSection");
+  if(!can.prepTimeFilter){
+    prepSection.querySelector(".section-body").innerHTML="<div class='upgrade-nudge'>🔒 Prep time filter — <a href='#'>upgrade to Premium ($29/yr)</a> to filter by cooking time</div>";
+  } else {
+    document.querySelectorAll(".prep-btn").forEach(function(b){
+      b.addEventListener("click",function(){
+        document.querySelectorAll(".prep-btn").forEach(function(x){x.classList.remove("sel");});
+        b.classList.add("sel"); S.prepTimeMax=+b.dataset.prep;
+      });
+    });
+  }
+
+  // Favourite ingredients (basic+)
+  var ingSection=document.getElementById("ingSection");
+  if(!can.portionScaling){
+    ingSection.querySelector(".section-body").innerHTML="<div class='upgrade-nudge'>🔒 Ingredient preferences — <a href='#'>upgrade to Basic ($8/yr)</a> to prioritise your favourite ingredients</div>";
+  } else {
+    var ip=document.getElementById("ingPicker");
+    ING_CATS.forEach(function(cat){
+      var div=document.createElement("div"); div.className="ing-cat";
+      div.innerHTML="<div class='ing-cat-label'>"+cat.label+"</div><div class='chips'></div>";
+      var ch=div.querySelector(".chips");
+      cat.items.forEach(function(item){
+        var chip=document.createElement("div"); chip.className="chip"; chip.textContent=item.l;
+        chip.addEventListener("click",function(){
+          if(S.ing.includes(item.id)){S.ing=S.ing.filter(function(x){return x!==item.id;});chip.classList.remove("sel");}
+          else{S.ing.push(item.id);chip.classList.add("sel");}
+        });
+        ch.appendChild(chip);
+      });
+      ip.appendChild(div);
+    });
+  }
+
+  // Micronutrient focus (premium)
+  var microSection=document.getElementById("microSection");
+  if(!can.cuisineFilter){
+    microSection.querySelector(".section-body").innerHTML="<div class='upgrade-nudge'>🔒 Micronutrient focus — <a href='#'>upgrade to Premium ($29/yr)</a> to prioritise specific nutrients</div>";
+  } else {
+    var mp2=document.getElementById("microPicker");
+    MICROS.forEach(function(m){
+      var btn=document.createElement("div"); btn.className="micro-chip"; btn.textContent=m.l;
+      btn.addEventListener("click",function(){
+        if(S.micros.includes(m.id)){S.micros=S.micros.filter(function(x){return x!==m.id;});btn.classList.remove("sel");}
+        else{if(S.micros.length>=2){toast("Max 2 micronutrients");return;}S.micros.push(m.id);btn.classList.add("sel");}
+        document.getElementById("microNote").textContent=S.micros.length?S.micros.length+"/2 selected":"";
+      });
+      mp2.appendChild(btn);
+    });
+  }
+
+  // Difficulty
+  document.querySelectorAll(".diff-btn").forEach(function(b){
+    b.addEventListener("click",function(){
+      document.querySelectorAll(".diff-btn").forEach(function(x){x.classList.remove("sel");});
+      b.classList.add("sel"); S.diff=+b.dataset.diff;
+    });
+  });
+
+  // Portion buttons (basic+)
+  document.querySelectorAll(".portion-btn").forEach(function(b){
+    var p=+b.dataset.p;
+    if(p>1&&!can.portionScaling){
+      b.classList.add("locked-port");
+      b.addEventListener("click",function(){nudge("Portion scaling — available on Basic plan");});
+      return;
+    }
+    b.addEventListener("click",function(){
+      document.querySelectorAll(".portion-btn:not(.locked-port)").forEach(function(x){x.classList.remove("sel");});
+      b.classList.add("sel"); S.portions=p;
+      if(S.plan) renderWeek(S.week);
+    });
+  });
+
+  // Nutrition summary toggle (basic+)
+  if(!can.nutritionSummary){
+    var nt=document.getElementById("nutrToggle");
+    nt.innerHTML='<span class="nutr-toggle-label">📊 Weekly Nutrition Summary</span><span style="font-size:11px;color:var(--muted);margin-left:8px">Basic+</span>';
+    nt.addEventListener("click",function(){nudge("Nutrition summary — available on Basic plan");});
+  } else {
+    document.getElementById("nutrToggle").addEventListener("click",function(){
+      var bar=document.getElementById("nutrBar");
+      bar.classList.toggle("collapsed"); bar.classList.toggle("expanded");
+    });
+  }
+
+  // Generate
+  document.getElementById("genBtn").addEventListener("click",generate);
+
+  // Back buttons
+  document.getElementById("backBtn").addEventListener("click",function(){
+    document.getElementById("planPage").classList.remove("active");
+    document.getElementById("setupPage").classList.add("active");
+  });
+  document.getElementById("backBtn2").addEventListener("click",function(){
+    document.getElementById("planPage").classList.remove("active");
+    document.getElementById("setupPage").classList.add("active");
+  });
+
+  // Regen + print
+  document.getElementById("regenBtn").addEventListener("click",function(){S.plan=null;generate();});
+  document.getElementById("printBtn").addEventListener("click",function(){window.print();});
+
+  // Shopping list
+  var shopBtn=document.getElementById("shopBtn");
+  if(!can.shoppingList){
+    shopBtn.addEventListener("click",function(){nudge("Shopping list — available on Basic plan");});
+  } else {
+    shopBtn.addEventListener("click",openShopList);
+  }
+  document.getElementById("shopClose").addEventListener("click",closeShopList);
+  document.getElementById("shopCopy").addEventListener("click",copyShopList);
+  document.getElementById("shopPrint").addEventListener("click",function(){window.print();});
+  document.getElementById("shopOv").addEventListener("click",function(e){if(e.target===this)closeShopList();});
+
+  // Swap modal
+  document.getElementById("swapCancel").addEventListener("click",closeSwap);
+  document.getElementById("swapOv").addEventListener("click",function(e){if(e.target===this)closeSwap();});
+
+  // Recipe modal
+  document.getElementById("modalX").addEventListener("click",closeModal);
+  document.getElementById("recipeModal").addEventListener("click",function(e){if(e.target===this)closeModal();});
+
+  // Help
+  document.getElementById("manualBtn").addEventListener("click",function(){openHelp("manual");});
+  document.getElementById("faqBtn").addEventListener("click",function(){openHelp("faq");});
+  document.getElementById("helpOv").addEventListener("click",function(e){if(e.target===this)closeHelp();});
+
+  // Free tier header note
+  if(!can.multiWeekPlan){
+    document.querySelector(".setup-header p").textContent="Free plan · 1 week · 30 recipes · No account needed";
+  }
+})();
+
+</script>
+</body>
+</html>
