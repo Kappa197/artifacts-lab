@@ -6,6 +6,7 @@
 <title>Dashboard — The Artifacts Lab</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://js.stripe.com/v3/"></script>
 <style>
 :root {
   --navy:      #0B0F1A;
@@ -335,7 +336,114 @@ main {
   text-transform: uppercase;
 }
 
-/* ── RESPONSIVE ── */
+/* ── UPGRADE MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal-box {
+  background: var(--navy2);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 40px 36px;
+  width: 100%; max-width: 520px;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+  transform: translateY(16px);
+  transition: transform 0.25s;
+  position: relative;
+}
+.modal-overlay.open .modal-box { transform: translateY(0); }
+.modal-close {
+  position: absolute; top: 16px; right: 16px;
+  background: var(--navy3); border: 1px solid var(--border);
+  color: var(--text3); width: 28px; height: 28px;
+  border-radius: 50%; cursor: pointer; font-size: 0.9rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.modal-close:hover { color: var(--text); border-color: var(--text3); }
+.modal-eyebrow {
+  font-family: var(--mono); font-size: 0.58rem;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--amber); margin-bottom: 10px;
+}
+.modal-title {
+  font-family: var(--serif); font-size: 1.6rem;
+  font-weight: 700; color: var(--text);
+  margin-bottom: 8px; line-height: 1.2;
+}
+.modal-title em { font-style: italic; color: var(--amber2); }
+.modal-sub {
+  font-size: 0.82rem; color: var(--text2);
+  line-height: 1.7; margin-bottom: 28px;
+}
+.plan-options {
+  display: flex; flex-direction: column; gap: 12px;
+  margin-bottom: 24px;
+}
+.plan-option {
+  border: 1px solid var(--border2);
+  border-radius: 12px; padding: 16px 20px;
+  cursor: pointer; transition: all 0.2s;
+  background: var(--navy3);
+  display: flex; align-items: center;
+  justify-content: space-between; gap: 12px;
+}
+.plan-option:hover { border-color: var(--amber); background: var(--amber-dim); }
+.plan-option.selected { border-color: var(--amber); background: var(--amber-dim); }
+.plan-option-left {}
+.plan-option-name {
+  font-weight: 700; font-size: 0.95rem;
+  color: var(--text); margin-bottom: 3px;
+}
+.plan-option-desc {
+  font-size: 0.75rem; color: var(--text2); line-height: 1.5;
+}
+.plan-option-price {
+  font-family: var(--mono); font-size: 1.1rem;
+  font-weight: 700; color: var(--amber2);
+  white-space: nowrap; text-align: right;
+}
+.plan-option-price small {
+  display: block; font-size: 0.58rem;
+  color: var(--text3); font-weight: 400;
+}
+.checkout-btn {
+  width: 100%; padding: 15px;
+  background: var(--amber); color: var(--navy);
+  border: none; border-radius: 10px;
+  font-family: var(--body); font-size: 0.95rem;
+  font-weight: 700; cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 16px rgba(212,146,10,0.3);
+}
+.checkout-btn:hover {
+  background: var(--amber2); transform: translateY(-1px);
+}
+.checkout-btn:disabled {
+  opacity: 0.6; cursor: not-allowed; transform: none;
+}
+.modal-note {
+  font-family: var(--mono); font-size: 0.58rem;
+  letter-spacing: 0.06em; color: var(--text3);
+  text-align: center; margin-top: 14px;
+  text-transform: uppercase;
+}
+.test-mode-banner {
+  background: rgba(255,165,0,0.1);
+  border: 1px solid rgba(255,165,0,0.3);
+  border-radius: 8px; padding: 8px 14px;
+  font-family: var(--mono); font-size: 0.6rem;
+  color: orange; letter-spacing: 0.08em;
+  text-align: center; margin-bottom: 16px;
+}
+</style>
 @media (max-width: 768px) {
   header { padding: 0 20px; }
   .h-email { display: none; }
@@ -490,18 +598,76 @@ main {
 
 </main>
 
+<!-- UPGRADE MODAL -->
+<div class="modal-overlay" id="upgradeModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-eyebrow">Upgrade Your Plan</div>
+    <h2 class="modal-title">Unlock the full<br><em>Artifacts Lab.</em></h2>
+    <p class="modal-sub" id="modalSub">Choose the plan that works for you. Cancel or keep forever — your choice.</p>
+
+    <div class="test-mode-banner">⚠ Test mode — use card 4242 4242 4242 4242, any future date, any CVC</div>
+
+    <div class="plan-options" id="planOptions">
+
+      <div class="plan-option" id="optBasic" onclick="selectPlan('basic')">
+        <div class="plan-option-left">
+          <div class="plan-option-name">Basic Plan</div>
+          <div class="plan-option-desc">All 4 tools · CSV import · 3-month workout plans · 6-month history</div>
+        </div>
+        <div class="plan-option-price">$8<small>/ year</small></div>
+      </div>
+
+      <div class="plan-option selected" id="optPremiumAnnual" onclick="selectPlan('premium_annual')">
+        <div class="plan-option-left">
+          <div class="plan-option-name">Premium Annual ⭐</div>
+          <div class="plan-option-desc">Everything in Basic + stress test, household view, PDF export, 6-month plans</div>
+        </div>
+        <div class="plan-option-price">$29<small>/ year</small></div>
+      </div>
+
+      <div class="plan-option" id="optPremiumLifetime" onclick="selectPlan('premium_lifetime')">
+        <div class="plan-option-left">
+          <div class="plan-option-name">Premium Lifetime 🔑</div>
+          <div class="plan-option-desc">Everything in Premium · pay once · all future tools included</div>
+        </div>
+        <div class="plan-option-price">$49<small>one-time</small></div>
+      </div>
+
+    </div>
+
+    <button class="checkout-btn" id="checkoutBtn" onclick="startCheckout()">
+      Continue to Payment →
+    </button>
+    <div class="modal-note">Secured by Stripe · Cancel anytime · No hidden fees</div>
+  </div>
+</div>
+
 <script>
 const SUPABASE_URL  = 'https://fvgajfiksxmwioxnesry.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2Z2FqZmlrc3htd2lveG5lc3J5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NDU4OTEsImV4cCI6MjA4OTIyMTg5MX0.KwqAzx1oAGeh0F3q1LfeQPXYjtdOjaOrzS_c4eUGKJY';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+// Stripe test publishable key — replace with live key when going live
+const STRIPE_PK = 'pk_test_51TBrqlF7k2b7X0MjYENs2v0D0st5d31p5XVZwMpNKmIBLtZ1fwxVRoLE6nlrXpRzT3lZwBR2t17lUUwjb7XlbOVy00A3fZ4DgL';
+
+// Price IDs from Stripe
+const PRICES = {
+  basic:            'price_1TBrsdF7k2b7X0MjoEhddJIL',
+  premium_annual:   'price_1TBrttF7k2b7X0MjGJXrRR7V',
+  premium_lifetime: 'price_1TBruyF7k2b7X0MjNIZ1dCel',
+};
+
+let selectedPlan = 'premium_annual';
+let currentUserEmail = '';
 
 async function init() {
   const { data: { session } } = await db.auth.getSession();
   if (!session) { window.location.href = 'login.html'; return; }
 
   const user = session.user;
+  currentUserEmail = user.email;
 
-  // Fetch profile for tier
   const { data: profile } = await db
     .from('profiles')
     .select('tier, tier_expiry, created_at')
@@ -510,11 +676,9 @@ async function init() {
 
   const tier = profile?.tier ?? 'free';
 
-  // Show dashboard
   document.getElementById('loadingState').style.display = 'none';
   document.getElementById('dashState').style.display = '';
 
-  // Populate header + welcome
   const email = user.email;
   const name  = email.split('@')[0];
   document.getElementById('hEmail').textContent    = email;
@@ -522,14 +686,13 @@ async function init() {
   document.getElementById('acEmail').textContent   = email;
   document.getElementById('acSince').textContent   = new Date(profile?.created_at || user.created_at).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
 
-  // Tier badge
   const badge = document.getElementById('tierBadge');
   const icons = { free: '🆓', basic: '🔵', premium: '⭐' };
   const names = { free: 'Free Plan', basic: 'Basic Plan', premium: 'Premium Plan' };
   badge.className = `tier-badge ${tier}`;
-  document.getElementById('tierIcon').textContent  = icons[tier];
-  document.getElementById('tierName').textContent  = names[tier];
-  document.getElementById('acPlan').textContent    = names[tier];
+  document.getElementById('tierIcon').textContent = icons[tier];
+  document.getElementById('tierName').textContent = names[tier];
+  document.getElementById('acPlan').textContent   = names[tier];
 
   if (profile?.tier_expiry) {
     document.getElementById('tierExpiry').textContent =
@@ -541,33 +704,81 @@ async function init() {
   if (tier === 'premium') {
     banner.classList.add('hidden');
   } else if (tier === 'basic') {
-    document.getElementById('upgradeTitle').textContent = 'You\'re on Basic';
-    document.getElementById('upgradeDesc').textContent  = 'Upgrade to Premium for $29/year — unlock advanced retirement modelling, household view, PDF export and more.';
+    document.getElementById('upgradeTitle').textContent = 'Upgrade to Premium';
+    document.getElementById('upgradeDesc').textContent  = 'Unlock advanced retirement modelling, household view, PDF export and 6-month workout plans.';
     document.getElementById('upgradeBtn').textContent   = 'Upgrade to Premium →';
+    document.getElementById('upgradeBtn').onclick       = (e) => { e.preventDefault(); openModal(tier); };
+    // Hide basic option in modal for basic users
+    document.getElementById('optBasic').style.display = 'none';
+    selectedPlan = 'premium_annual';
+  } else {
+    // Free user — show full modal
+    document.getElementById('upgradeBtn').onclick = (e) => { e.preventDefault(); openModal(tier); };
   }
 
-  // Tool access gating
-  const hasBasic   = tier === 'basic'   || tier === 'premium';
-  const hasPremium = tier === 'premium';
-
-  // Free tools — always accessible
-  // Expense Tracker — basic+
+  // Tool gating
+  const hasBasic = tier === 'basic' || tier === 'premium';
   if (!hasBasic) {
     document.getElementById('cardExpense').classList.add('locked');
-    document.getElementById('btnExpense').outerHTML = `<a href="index.html#pricing" class="tc-upgrade-btn">🔒 Upgrade to unlock</a>`;
-  }
-  // Workout Planner — basic+
-  if (!hasBasic) {
+    document.getElementById('btnExpense').outerHTML = `<button class="tc-upgrade-btn" onclick="openModal('free')">🔒 Upgrade to unlock</button>`;
     document.getElementById('cardWorkout').classList.add('locked');
-    document.getElementById('btnWorkout').outerHTML = `<a href="index.html#pricing" class="tc-upgrade-btn">🔒 Upgrade to unlock</a>`;
+    document.getElementById('btnWorkout').outerHTML = `<button class="tc-upgrade-btn" onclick="openModal('free')">🔒 Upgrade to unlock</button>`;
   }
 
-  // Account features panel
-  const fmt = (ok) => ok
-    ? `<span class="ac-val green">✓ Included</span>`
-    : `<span class="ac-val">— Upgrade</span>`;
+  // Account features
   document.getElementById('featExpense').outerHTML = `<span id="featExpense">${hasBasic ? '<span class="ac-val green">✓ Included</span>' : '<span class="ac-val">— Basic+</span>'}</span>`;
   document.getElementById('featWorkout').outerHTML = `<span id="featWorkout">${hasBasic ? '<span class="ac-val green">✓ Included</span>' : '<span class="ac-val">— Basic+</span>'}</span>`;
+}
+
+// ── MODAL ────────────────────────────────────
+function openModal(currentTier) {
+  document.getElementById('upgradeModal').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('upgradeModal').classList.remove('open');
+}
+document.getElementById('upgradeModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+function selectPlan(plan) {
+  selectedPlan = plan;
+  document.querySelectorAll('.plan-option').forEach(el => el.classList.remove('selected'));
+  document.getElementById('opt' + plan.split('_').map((w,i) => i===0 ? w.charAt(0).toUpperCase()+w.slice(1) : w.charAt(0).toUpperCase()+w.slice(1)).join('')).classList.add('selected');
+}
+
+// ── STRIPE CHECKOUT ──────────────────────────
+async function startCheckout() {
+  const btn = document.getElementById('checkoutBtn');
+  btn.textContent = 'Redirecting to Stripe…';
+  btn.disabled = true;
+
+  try {
+    const stripe = Stripe(STRIPE_PK);
+    await stripe.redirectToCheckout({
+      lineItems: [{ price: PRICES[selectedPlan], quantity: 1 }],
+      mode: selectedPlan === 'premium_lifetime' ? 'payment' : 'subscription',
+      customerEmail: currentUserEmail,
+      successUrl: 'https://theartifactslab.com/dashboard.html?upgrade=success',
+      cancelUrl:  'https://theartifactslab.com/dashboard.html?upgrade=cancelled',
+    });
+  } catch (err) {
+    console.error('Stripe error:', err);
+    btn.textContent = 'Something went wrong — try again';
+    btn.disabled = false;
+  }
+}
+
+// ── SUCCESS TOAST ────────────────────────────
+const params = new URLSearchParams(window.location.search);
+if (params.get('upgrade') === 'success') {
+  setTimeout(() => {
+    const toast = document.createElement('div');
+    toast.style.cssText = `position:fixed;bottom:24px;right:24px;background:var(--green-dim);border:1px solid var(--green);border-radius:10px;padding:14px 20px;font-family:var(--mono);font-size:0.72rem;color:var(--green);z-index:999;box-shadow:0 8px 32px rgba(0,0,0,0.3);`;
+    toast.textContent = '✓ Payment successful! Your plan will update shortly.';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 5000);
+  }, 500);
 }
 
 async function signOut() {
@@ -577,5 +788,7 @@ async function signOut() {
 
 init();
 </script>
+
 </body>
 </html>
+
