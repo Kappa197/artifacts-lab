@@ -1,6 +1,29 @@
 const https = require('https');
 
-function makeSupabaseRequest(path, method, body, serviceKey, supabaseUrl) {
+function stripeRequest(path, secretKey) {
+  return new Promise((resolve, reject) => {
+    const options = {
+      hostname: 'api.stripe.com',
+      path: path,
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${secretKey}`,
+      }
+    };
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        try { resolve(JSON.parse(data)); }
+        catch(e) { reject(e); }
+      });
+    });
+    req.on('error', reject);
+    req.end();
+  });
+}
+
+function supabaseRequest(path, method, body, serviceKey, supabaseUrl) {
   return new Promise((resolve, reject) => {
     const data = JSON.stringify(body);
     const url = new URL(supabaseUrl);
@@ -43,8 +66,9 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid JSON' });
   }
 
-  const SUPABASE_URL = process.env.SUPABASE_URL;
-  const SERVICE_KEY  = process.env.SUPABASE_SERVICE_KEY;
+  const SUPABASE_URL  = process.env.SUPABASE_URL;
+  const SERVICE_KEY   = process.env.SUPABASE_SERVICE_KEY;
+  const STRIPE_SECRET = process.env.STRIPE_SECRET_KEY;
 
   const TIER_MAP = {
     'price_1TBrsdF7k2b7X0MjoEhddJIL': { tier: 'basic',   days: 365 },
@@ -52,64 +76,68 @@ export default async function handler(req, res) {
     'price_1TBruyF7k2b7X0MjNIZ1dCel': { tier: 'premium', days: 36500 },
   };
 
-  // Debug — log everything we can see
-  const debugInfo = {
-    eventType:     event.type,
-    email:         null,
-    priceId:       null,
-    tierMapMatch:  null,
-    supabaseUrl:   SUPABASE_URL ? 'set' : 'MISSING',
-    serviceKey:    SERVICE_KEY  ? 'set' : 'MISSING',
-  };
-
   try {
+    let email   = null;
+    let priceId = null;
+
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object;
-      debugInfo.email   = session.customer_email || session.customer_details?.email || 'NOT FOUND';
-      debugInfo.priceId = session.line_items?.data?.[0]?.price?.id || 'NOT IN SESSION - need expand';
-      debugInfo.tierMapMatch = TIER_MAP[debugInfo.priceId] ? 'YES' : 'NO';
+      email = session.customer_email || session.customer_details?.email;
 
-      // Try getting price from metadata or amount
-      debugInfo.sessionKeys    = Object.keys(session);
-      debugInfo.amountTotal    = session.amount_total;
-      debugInfo.paymentStatus  = session.payment_status;
-      debugInfo.subscriptionId = session.subscription;
+      // Fetch line items from Stripe API to get price ID
+      if (session.id) {
+        const lineItems = await stripeRequest(
+          `/v1/checkout/sessions/${session.id}/line_items`,
+          STRIPE_SECRET
+        );
+        priceId = lineItems?.data?.[0]?.price?.id;
+      }
     }
 
     if (event.type === 'invoice.payment_succeeded') {
       const invoice = event.data.object;
-      debugInfo.email   = invoice.customer_email || 'NOT FOUND';
-      debugInfo.priceId = invoice.lines?.data?.[0]?.price?.id || 'NOT FOUND';
-      debugInfo.tierMapMatch = TIER_MAP[debugInfo.priceId] ? 'YES' : 'NO';
-      debugInfo.subscriptionId = invoice.subscription;
+      email   = invoice.customer_email;
+      priceId = invoice.lines?.data?.[0]?.price?.id;
+
+      // If still not found, fetch invoice from Stripe
+      if (!priceId && invoice.id) {
+        const fullInvoice = await stripeRequest(
+          `/v1/invoices/${invoice.id}`,
+          STRIPE_SECRET
+        );
+        priceId = fullInvoice?.lines?.data?.[0]?.price?.id;
+      }
     }
 
-    // If we have email and priceId, try the update
-    if (debugInfo.email && debugInfo.email !== 'NOT FOUND' &&
-        debugInfo.priceId && TIER_MAP[debugInfo.priceId]) {
-
-      const { tier, days } = TIER_MAP[debugInfo.priceId];
+    // Update Supabase if we have everything
+    if (email && priceId && TIER_MAP[priceId]) {
+      const { tier, days } = TIER_MAP[priceId];
       const expiry = new Date();
       expiry.setDate(expiry.getDate() + days);
 
-      const result = await makeSupabaseRequest(
-        `/rest/v1/profiles?email=eq.${encodeURIComponent(debugInfo.email)}`,
+      await supabaseRequest(
+        `/rest/v1/profiles?email=eq.${encodeURIComponent(email)}`,
         'PATCH',
         { tier, tier_expiry: expiry.toISOString().split('T')[0] },
         SERVICE_KEY,
         SUPABASE_URL
       );
 
-      debugInfo.supabaseResult = result;
-      debugInfo.tierApplied    = tier;
+      return res.status(200).json({
+        received: true,
+        updated: { email, tier, expiry: expiry.toISOString().split('T')[0] }
+      });
     }
 
-  } catch (err) {
-    debugInfo.error = err.message;
-  }
+    return res.status(200).json({
+      received: true,
+      skipped: { email, priceId, reason: 'no tier match' }
+    });
 
-  // Return debug info in response so we can see it in Stripe
-  return res.status(200).json({ received: true, debug: debugInfo });
+  } catch (err) {
+    console.error('Webhook error:', err);
+    return res.status(200).json({ received: true, error: err.message });
+  }
 }
 
 export const config = {
