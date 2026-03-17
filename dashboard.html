@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — The Artifacts Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --navy:      #0B0F1A;
+  --navy2:     #111827;
+  --navy3:     #1A2235;
+  --navy4:     #243048;
+  --border:    #2A3B55;
+  --border2:   #334466;
+  --amber:     #D4920A;
+  --amber2:    #F5A623;
+  --amber-dim: rgba(212,146,10,0.12);
+  --green:     #2ECC8A;
+  --green-dim: rgba(46,204,138,0.1);
+  --blue:      #4A90D9;
+  --blue-dim:  rgba(74,144,217,0.1);
+  --purple:    #9B72CF;
+  --text:      #E8EDF5;
+  --text2:     #9BAAC4;
+  --text3:     #5A6A8A;
+  --mono:      'JetBrains Mono', monospace;
+  --body:      'Outfit', sans-serif;
+  --serif:     'Playfair Display', serif;
+}
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--body);
+  background: var(--navy);
+  color: var(--text);
+  min-height: 100vh;
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(212,146,10,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(212,146,10,0.025) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none; z-index: 0;
+}
+
+/* ── HEADER ── */
+header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(11,15,26,0.9);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 0 40px; height: 64px;
+}
+.h-logo {
+  display: flex; align-items: center; gap: 10px;
+  text-decoration: none;
+}
+.h-logo-icon {
+  width: 30px; height: 30px;
+  background: var(--amber-dim);
+  border: 1px solid var(--amber);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem;
+}
+.h-logo-text {
+  font-family: var(--serif); font-size: 1rem;
+  font-weight: 700; color: var(--amber2);
+}
+.h-right {
+  display: flex; align-items: center; gap: 16px;
+}
+.h-email {
+  font-family: var(--mono); font-size: 0.62rem;
+  color: var(--text3); letter-spacing: 0.06em;
+}
+.h-signout {
+  font-family: var(--mono); font-size: 0.6rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 7px 16px; border-radius: 6px;
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--text3); cursor: pointer;
+  transition: all 0.2s;
+}
+.h-signout:hover { border-color: var(--text3); color: var(--text); }
+
+/* ── MAIN ── */
+main {
+  position: relative; z-index: 1;
+  max-width: 1100px; margin: 0 auto;
+  padding: 40px 40px 80px;
+}
+
+/* ── WELCOME STRIP ── */
+.welcome {
+  display: flex; align-items: center;
+  justify-content: space-between; flex-wrap: wrap; gap: 16px;
+  margin-bottom: 36px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--border);
+}
+.welcome-text {}
+.welcome-eyebrow {
+  font-family: var(--mono); font-size: 0.58rem;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--text3); margin-bottom: 6px;
+}
+.welcome-title {
+  font-family: var(--serif); font-size: 1.8rem;
+  font-weight: 700; color: var(--text); line-height: 1.15;
+}
+.welcome-title em { font-style: italic; color: var(--amber2); }
+
+/* tier badge */
+.tier-badge {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: 1px solid;
+}
+.tier-badge.free    { background: rgba(90,106,138,0.1); border-color: var(--border2); }
+.tier-badge.basic   { background: var(--blue-dim);      border-color: var(--blue); }
+.tier-badge.premium { background: var(--amber-dim);     border-color: var(--amber); }
+
+.tier-icon { font-size: 1.4rem; }
+.tier-info {}
+.tier-label {
+  font-family: var(--mono); font-size: 0.55rem;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.tier-badge.free    .tier-label { color: var(--text3); }
+.tier-badge.basic   .tier-label { color: var(--blue); }
+.tier-badge.premium .tier-label { color: var(--amber2); }
+.tier-name {
+  font-family: var(--serif); font-size: 1rem;
+  font-weight: 700; color: var(--text);
+}
+.tier-expiry {
+  font-family: var(--mono); font-size: 0.58rem;
+  color: var(--text3); margin-top: 1px;
+}
+
+/* ── UPGRADE BANNER ── */
+.upgrade-banner {
+  background: var(--amber-dim);
+  border: 1px solid var(--amber);
+  border-radius: 12px;
+  padding: 16px 22px;
+  display: flex; align-items: center;
+  justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  margin-bottom: 32px;
+}
+.upgrade-banner.hidden { display: none; }
+.ub-text {
+  font-size: 0.85rem; color: var(--text2); line-height: 1.5;
+}
+.ub-text strong { color: var(--amber2); }
+.ub-btn {
+  font-family: var(--mono); font-size: 0.62rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 9px 20px; border-radius: 7px;
+  background: var(--amber); color: var(--navy);
+  border: none; cursor: pointer; font-weight: 700;
+  transition: all 0.2s; white-space: nowrap;
+  text-decoration: none;
+}
+.ub-btn:hover { background: var(--amber2); }
+
+/* ── SECTION TITLE ── */
+.section-label {
+  font-family: var(--mono); font-size: 0.6rem;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--text3); margin-bottom: 16px;
+}
+
+/* ── TOOLS GRID ── */
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px; margin-bottom: 48px;
+}
+
+.tool-card {
+  background: var(--navy2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.25s;
+}
+.tool-card::before {
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  opacity: 0; transition: opacity 0.25s;
+}
+.tool-card:not(.locked):hover {
+  border-color: var(--border2);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+}
+.tool-card:not(.locked):hover::before { opacity: 1; }
+
+.tc-expense::before  { background: linear-gradient(90deg, var(--blue), var(--amber)); }
+.tc-retire::before   { background: linear-gradient(90deg, var(--green), var(--blue)); }
+.tc-workout::before  { background: linear-gradient(90deg, var(--amber), #E8843A); }
+.tc-meal::before     { background: linear-gradient(90deg, var(--purple), var(--green)); }
+
+.tool-card.locked {
+  opacity: 0.5;
+  cursor: default;
+}
+.lock-overlay {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(11,15,26,0.6);
+  border-radius: 14px;
+  font-size: 1.5rem;
+  display: none;
+}
+.tool-card.locked .lock-overlay { display: flex; }
+
+.tc-head {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; margin-bottom: 14px;
+}
+.tc-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem;
+}
+.tc-expense .tc-icon  { background: rgba(74,144,217,0.12); border: 1px solid rgba(74,144,217,0.25); }
+.tc-retire  .tc-icon  { background: rgba(46,204,138,0.1);  border: 1px solid rgba(46,204,138,0.25); }
+.tc-workout .tc-icon  { background: var(--amber-dim);      border: 1px solid rgba(212,146,10,0.25); }
+.tc-meal    .tc-icon  { background: rgba(155,114,207,0.12);border: 1px solid rgba(155,114,207,0.25); }
+
+.tc-tier-tag {
+  font-family: var(--mono); font-size: 0.5rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 4px;
+}
+.tag-free    { background: rgba(90,106,138,0.15); color: var(--text3); border: 1px solid var(--border); }
+.tag-basic   { background: var(--blue-dim);       color: var(--blue);  border: 1px solid rgba(74,144,217,0.3); }
+.tag-premium { background: var(--amber-dim);      color: var(--amber2);border: 1px solid rgba(212,146,10,0.3); }
+
+.tc-name {
+  font-family: var(--serif); font-size: 1.1rem;
+  font-weight: 700; color: var(--text);
+  margin-bottom: 6px; line-height: 1.2;
+}
+.tc-desc {
+  font-size: 0.78rem; color: var(--text2);
+  line-height: 1.65; margin-bottom: 18px;
+}
+.tc-open-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 0.62rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 9px 18px; border-radius: 7px;
+  text-decoration: none; border: none; cursor: pointer;
+  transition: all 0.2s;
+  background: var(--navy3);
+  border: 1px solid var(--border2);
+  color: var(--amber2);
+}
+.tc-open-btn:hover {
+  background: var(--amber-dim);
+  border-color: var(--amber);
+}
+.tc-upgrade-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 0.62rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 9px 18px; border-radius: 7px;
+  text-decoration: none; border: none; cursor: pointer;
+  transition: all 0.2s;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text3);
+}
+.tc-upgrade-btn:hover { border-color: var(--amber); color: var(--amber2); }
+
+/* ── ACCOUNT SECTION ── */
+.account-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+}
+.account-card {
+  background: var(--navy2);
+  border: 1px solid var(--border);
+  border-radius: 14px; padding: 24px;
+}
+.ac-title {
+  font-family: var(--mono); font-size: 0.6rem;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text3); margin-bottom: 16px;
+}
+.ac-row {
+  display: flex; justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(42,59,85,0.5);
+  font-size: 0.8rem;
+}
+.ac-row:last-child { border-bottom: none; }
+.ac-key { color: var(--text3); }
+.ac-val { color: var(--text); font-family: var(--mono); font-size: 0.75rem; }
+.ac-val.green { color: var(--green); }
+.ac-val.amber { color: var(--amber2); }
+.ac-val.blue  { color: var(--blue); }
+
+/* ── LOADING STATE ── */
+.loading {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 60vh; flex-direction: column; gap: 16px;
+}
+.loading-spinner {
+  width: 36px; height: 36px;
+  border: 2px solid var(--border2);
+  border-top-color: var(--amber2);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text {
+  font-family: var(--mono); font-size: 0.65rem;
+  color: var(--text3); letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  header { padding: 0 20px; }
+  .h-email { display: none; }
+  main { padding: 28px 20px 60px; }
+  .tools-grid { grid-template-columns: 1fr; }
+  .account-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <a href="index.html" class="h-logo">
+    <div class="h-logo-icon">⚗️</div>
+    <div class="h-logo-text">The Artifacts Lab</div>
+  </a>
+  <div class="h-right">
+    <span class="h-email" id="hEmail">—</span>
+    <button class="h-signout" onclick="signOut()">Sign Out</button>
+  </div>
+</header>
+
+<!-- LOADING -->
+<main id="loadingState">
+  <div class="loading">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Loading your workspace…</div>
+  </div>
+</main>
+
+<!-- DASHBOARD (hidden until auth confirmed) -->
+<main id="dashState" style="display:none;">
+
+  <!-- Welcome -->
+  <div class="welcome">
+    <div class="welcome-text">
+      <div class="welcome-eyebrow">Your workspace</div>
+      <h1 class="welcome-title">Welcome back,<br><em id="firstName">—</em></h1>
+    </div>
+    <div class="tier-badge free" id="tierBadge">
+      <div class="tier-icon" id="tierIcon">🆓</div>
+      <div class="tier-info">
+        <div class="tier-label" id="tierLabel">Current Plan</div>
+        <div class="tier-name" id="tierName">Free</div>
+        <div class="tier-expiry" id="tierExpiry"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upgrade banner (shown for free/basic) -->
+  <div class="upgrade-banner" id="upgradeBanner">
+    <div class="ub-text">
+      <strong id="upgradeTitle">Unlock the full suite</strong> — 
+      <span id="upgradeDesc">Upgrade to Basic for $8/year and access all 4 tools with core features.</span>
+    </div>
+    <a href="index.html#pricing" class="ub-btn" id="upgradeBtn">Upgrade Now →</a>
+  </div>
+
+  <!-- Tools -->
+  <div class="section-label">Your Tools</div>
+  <div class="tools-grid">
+
+    <!-- Retirement Calculator -->
+    <div class="tool-card tc-retire" id="cardRetire">
+      <div class="lock-overlay">🔒</div>
+      <div class="tc-head">
+        <div class="tc-icon">📈</div>
+        <span class="tc-tier-tag tag-free">Free</span>
+      </div>
+      <div class="tc-name">Retirement Calculator</div>
+      <div class="tc-desc">Model your retirement across five life stages. Portfolio survival, withdrawal optimizer, and stress tests.</div>
+      <a href="retirement-calculator.html" class="tc-open-btn">Open Tool →</a>
+    </div>
+
+    <!-- Meal Planner -->
+    <div class="tool-card tc-meal" id="cardMeal">
+      <div class="lock-overlay">🔒</div>
+      <div class="tc-head">
+        <div class="tc-icon">🥗</div>
+        <span class="tc-tier-tag tag-free">Free</span>
+      </div>
+      <div class="tc-name">Meal Planner</div>
+      <div class="tc-desc">Generate a personalised 1–6 week meal plan from 91 recipes matched to your calorie targets and dietary preferences.</div>
+      <a href="meal-planner.html" class="tc-open-btn">Open Tool →</a>
+    </div>
+
+    <!-- Expense Tracker -->
+    <div class="tool-card tc-expense" id="cardExpense">
+      <div class="lock-overlay">🔒</div>
+      <div class="tc-head">
+        <div class="tc-icon">💰</div>
+        <span class="tc-tier-tag tag-basic" id="tagExpense">Basic</span>
+      </div>
+      <div class="tc-name">Expense Tracker</div>
+      <div class="tc-desc">Import your bank statements, auto-categorise transactions and track spending with beautiful charts.</div>
+      <a href="expense-tracker.html" class="tc-open-btn" id="btnExpense">Open Tool →</a>
+    </div>
+
+    <!-- Workout Planner -->
+    <div class="tool-card tc-workout" id="cardWorkout">
+      <div class="lock-overlay">🔒</div>
+      <div class="tc-head">
+        <div class="tc-icon">💪</div>
+        <span class="tc-tier-tag tag-basic" id="tagWorkout">Basic</span>
+      </div>
+      <div class="tc-name">Workout Planner</div>
+      <div class="tc-desc">Generate a personalised training plan from 122 exercises. Tailored to your goals, experience and schedule.</div>
+      <a href="workout-planner.html" class="tc-open-btn" id="btnWorkout">Open Tool →</a>
+    </div>
+
+  </div>
+
+  <!-- Account Info -->
+  <div class="section-label">Account</div>
+  <div class="account-grid">
+    <div class="account-card">
+      <div class="ac-title">Account Details</div>
+      <div class="ac-row">
+        <span class="ac-key">Email</span>
+        <span class="ac-val" id="acEmail">—</span>
+      </div>
+      <div class="ac-row">
+        <span class="ac-key">Member since</span>
+        <span class="ac-val" id="acSince">—</span>
+      </div>
+      <div class="ac-row">
+        <span class="ac-key">Current plan</span>
+        <span class="ac-val amber" id="acPlan">Free</span>
+      </div>
+    </div>
+    <div class="account-card">
+      <div class="ac-title">Plan Includes</div>
+      <div class="ac-row">
+        <span class="ac-key">Retirement Calculator</span>
+        <span class="ac-val green" id="featRetire">✓ Included</span>
+      </div>
+      <div class="ac-row">
+        <span class="ac-key">Meal Planner</span>
+        <span class="ac-val green" id="featMeal">✓ Included</span>
+      </div>
+      <div class="ac-row">
+        <span class="ac-key">Expense Tracker</span>
+        <span class="ac-val" id="featExpense">— Basic+</span>
+      </div>
+      <div class="ac-row">
+        <span class="ac-key">Workout Planner</span>
+        <span class="ac-val" id="featWorkout">— Basic+</span>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const SUPABASE_URL  = 'https://fvgajfiksxmwioxnesry.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2Z2FqZmlrc3htd2lveG5lc3J5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NDU4OTEsImV4cCI6MjA4OTIyMTg5MX0.KwqAzx1oAGeh0F3q1LfeQPXYjtdOjaOrzS_c4eUGKJY';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+async function init() {
+  const { data: { session } } = await db.auth.getSession();
+  if (!session) { window.location.href = 'login.html'; return; }
+
+  const user = session.user;
+
+  // Fetch profile for tier
+  const { data: profile } = await db
+    .from('profiles')
+    .select('tier, tier_expiry, created_at')
+    .eq('id', user.id)
+    .single();
+
+  const tier = profile?.tier ?? 'free';
+
+  // Show dashboard
+  document.getElementById('loadingState').style.display = 'none';
+  document.getElementById('dashState').style.display = '';
+
+  // Populate header + welcome
+  const email = user.email;
+  const name  = email.split('@')[0];
+  document.getElementById('hEmail').textContent    = email;
+  document.getElementById('firstName').textContent = name;
+  document.getElementById('acEmail').textContent   = email;
+  document.getElementById('acSince').textContent   = new Date(profile?.created_at || user.created_at).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
+
+  // Tier badge
+  const badge = document.getElementById('tierBadge');
+  const icons = { free: '🆓', basic: '🔵', premium: '⭐' };
+  const names = { free: 'Free Plan', basic: 'Basic Plan', premium: 'Premium Plan' };
+  badge.className = `tier-badge ${tier}`;
+  document.getElementById('tierIcon').textContent  = icons[tier];
+  document.getElementById('tierName').textContent  = names[tier];
+  document.getElementById('acPlan').textContent    = names[tier];
+
+  if (profile?.tier_expiry) {
+    document.getElementById('tierExpiry').textContent =
+      'Renews ' + new Date(profile.tier_expiry).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  // Upgrade banner
+  const banner = document.getElementById('upgradeBanner');
+  if (tier === 'premium') {
+    banner.classList.add('hidden');
+  } else if (tier === 'basic') {
+    document.getElementById('upgradeTitle').textContent = 'You\'re on Basic';
+    document.getElementById('upgradeDesc').textContent  = 'Upgrade to Premium for $29/year — unlock advanced retirement modelling, household view, PDF export and more.';
+    document.getElementById('upgradeBtn').textContent   = 'Upgrade to Premium →';
+  }
+
+  // Tool access gating
+  const hasBasic   = tier === 'basic'   || tier === 'premium';
+  const hasPremium = tier === 'premium';
+
+  // Free tools — always accessible
+  // Expense Tracker — basic+
+  if (!hasBasic) {
+    document.getElementById('cardExpense').classList.add('locked');
+    document.getElementById('btnExpense').outerHTML = `<a href="index.html#pricing" class="tc-upgrade-btn">🔒 Upgrade to unlock</a>`;
+  }
+  // Workout Planner — basic+
+  if (!hasBasic) {
+    document.getElementById('cardWorkout').classList.add('locked');
+    document.getElementById('btnWorkout').outerHTML = `<a href="index.html#pricing" class="tc-upgrade-btn">🔒 Upgrade to unlock</a>`;
+  }
+
+  // Account features panel
+  const fmt = (ok) => ok
+    ? `<span class="ac-val green">✓ Included</span>`
+    : `<span class="ac-val">— Upgrade</span>`;
+  document.getElementById('featExpense').outerHTML = `<span id="featExpense">${hasBasic ? '<span class="ac-val green">✓ Included</span>' : '<span class="ac-val">— Basic+</span>'}</span>`;
+  document.getElementById('featWorkout').outerHTML = `<span id="featWorkout">${hasBasic ? '<span class="ac-val green">✓ Included</span>' : '<span class="ac-val">— Basic+</span>'}</span>`;
+}
+
+async function signOut() {
+  await db.auth.signOut();
+  window.location.href = 'index.html';
+}
+
+init();
+</script>
+</body>
+</html>
