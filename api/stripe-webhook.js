@@ -32,12 +32,10 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Get raw body
   const chunks = [];
   for await (const chunk of req) chunks.push(chunk);
   const rawBody = Buffer.concat(chunks).toString('utf8');
 
-  // Parse event — skip signature verification for now to test
   let event;
   try {
     event = JSON.parse(rawBody);
@@ -54,46 +52,64 @@ export default async function handler(req, res) {
     'price_1TBruyF7k2b7X0MjNIZ1dCel': { tier: 'premium', days: 36500 },
   };
 
+  // Debug — log everything we can see
+  const debugInfo = {
+    eventType:     event.type,
+    email:         null,
+    priceId:       null,
+    tierMapMatch:  null,
+    supabaseUrl:   SUPABASE_URL ? 'set' : 'MISSING',
+    serviceKey:    SERVICE_KEY  ? 'set' : 'MISSING',
+  };
+
   try {
     if (event.type === 'checkout.session.completed') {
-      const session  = event.data.object;
-      const email    = session.customer_email
-                    || session.customer_details?.email;
-      const priceId  = session.line_items?.data?.[0]?.price?.id;
+      const session = event.data.object;
+      debugInfo.email   = session.customer_email || session.customer_details?.email || 'NOT FOUND';
+      debugInfo.priceId = session.line_items?.data?.[0]?.price?.id || 'NOT IN SESSION - need expand';
+      debugInfo.tierMapMatch = TIER_MAP[debugInfo.priceId] ? 'YES' : 'NO';
 
-      if (email && priceId && TIER_MAP[priceId]) {
-        const { tier, days } = TIER_MAP[priceId];
-        const expiry = new Date();
-        expiry.setDate(expiry.getDate() + days);
-
-        await makeSupabaseRequest(
-          `/rest/v1/profiles?email=eq.${encodeURIComponent(email)}`,
-          'PATCH',
-          { tier, tier_expiry: expiry.toISOString().split('T')[0] },
-          SERVICE_KEY,
-          SUPABASE_URL
-        );
-      }
+      // Try getting price from metadata or amount
+      debugInfo.sessionKeys    = Object.keys(session);
+      debugInfo.amountTotal    = session.amount_total;
+      debugInfo.paymentStatus  = session.payment_status;
+      debugInfo.subscriptionId = session.subscription;
     }
 
-    if (event.type === 'customer.subscription.deleted') {
-      const email = event.data.object?.customer_email;
-      if (email) {
-        await makeSupabaseRequest(
-          `/rest/v1/profiles?email=eq.${encodeURIComponent(email)}`,
-          'PATCH',
-          { tier: 'free', tier_expiry: null },
-          SERVICE_KEY,
-          SUPABASE_URL
-        );
-      }
+    if (event.type === 'invoice.payment_succeeded') {
+      const invoice = event.data.object;
+      debugInfo.email   = invoice.customer_email || 'NOT FOUND';
+      debugInfo.priceId = invoice.lines?.data?.[0]?.price?.id || 'NOT FOUND';
+      debugInfo.tierMapMatch = TIER_MAP[debugInfo.priceId] ? 'YES' : 'NO';
+      debugInfo.subscriptionId = invoice.subscription;
     }
+
+    // If we have email and priceId, try the update
+    if (debugInfo.email && debugInfo.email !== 'NOT FOUND' &&
+        debugInfo.priceId && TIER_MAP[debugInfo.priceId]) {
+
+      const { tier, days } = TIER_MAP[debugInfo.priceId];
+      const expiry = new Date();
+      expiry.setDate(expiry.getDate() + days);
+
+      const result = await makeSupabaseRequest(
+        `/rest/v1/profiles?email=eq.${encodeURIComponent(debugInfo.email)}`,
+        'PATCH',
+        { tier, tier_expiry: expiry.toISOString().split('T')[0] },
+        SERVICE_KEY,
+        SUPABASE_URL
+      );
+
+      debugInfo.supabaseResult = result;
+      debugInfo.tierApplied    = tier;
+    }
+
   } catch (err) {
-    console.error('Handler error:', err);
-    return res.status(500).json({ error: err.message });
+    debugInfo.error = err.message;
   }
 
-  return res.status(200).json({ received: true });
+  // Return debug info in response so we can see it in Stripe
+  return res.status(200).json({ received: true, debug: debugInfo });
 }
 
 export const config = {
