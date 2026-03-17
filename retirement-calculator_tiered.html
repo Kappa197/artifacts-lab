@@ -1,0 +1,3300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Retirement Runway Calculator</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #080b13 0%, #0f1625 50%, #0a1020 100%);
+    font-family: Georgia, serif;
+    color: #e2e8f0;
+    padding: 40px 24px;
+    font-size: 14px;
+  }
+  input[type=number] {
+    background: #0a0e1a; border: 1px solid #1e2535; border-radius: 6px;
+    color: #e2e8f0; padding: 8px 12px; font-size: 13px;
+    font-family: 'Courier New', monospace; width: 100%;
+    transition: border-color 0.2s; outline: none;
+  }
+  input[type=number]:focus { border-color: #c9a84c; }
+  .lbl { display: block; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #64748b; margin-bottom: 5px; font-family: 'Courier New', monospace; }
+  .field { margin-bottom: 14px; }
+  .card { background: rgba(255,255,255,0.03); border: 1px solid #1e2535; border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+  .stitle { font-family: Georgia, serif; font-size: 18px; font-weight: 600; color: #c9a84c; margin-bottom: 18px; letter-spacing: 0.05em; border-bottom: 1px solid #1e2535; padding-bottom: 10px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .grid5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+  .sbox { border-radius: 10px; padding: 14px 18px; }
+  .sbox-gold  { background: rgba(201,168,76,0.07);  border: 1px solid rgba(201,168,76,0.25); }
+  .sbox-blue  { background: rgba(96,165,250,0.07);  border: 1px solid rgba(96,165,250,0.25); }
+  .sbox-green { background: rgba(52,211,153,0.08);  border: 1px solid rgba(52,211,153,0.3);  }
+  .sbox-red   { background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.3); }
+  .slabel { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 5px; font-family: 'Courier New', monospace; }
+  .slabel-gold  { color: #c9a84c; }
+  .slabel-blue  { color: #60a5fa; }
+  .slabel-green { color: #34d399; }
+  .slabel-red   { color: #f87171; }
+  .sval { font-family: Georgia, serif; font-size: 24px; font-weight: 700; color: #fff; }
+  .ssub { font-size: 11px; color: #64748b; margin-top: 3px; font-family: 'Courier New', monospace; }
+  .outcome-banner { border-radius: 12px; padding: 18px 24px; margin-bottom: 20px; display: flex; align-items: center; gap: 16px; }
+  .toggle-sw { appearance: none; -webkit-appearance: none; width: 36px; height: 20px; background: #1e2535; border-radius: 10px; cursor: pointer; position: relative; transition: background 0.2s; flex-shrink: 0; }
+  .toggle-sw:checked { background: #c9a84c; }
+  .toggle-sw::after { content: ''; position: absolute; width: 14px; height: 14px; background: #fff; border-radius: 50%; top: 3px; left: 3px; transition: transform 0.2s; }
+  .toggle-sw:checked::after { transform: translateX(16px); }
+  .toggle-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .ms-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid #1e2535; font-family: 'Courier New', monospace; font-size: 12px; }
+  .seg-wrap { display: flex; justify-content: center; margin-bottom: 20px; }
+  .seg-btn { padding: 9px 22px; font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.08em; cursor: pointer; border: 1px solid #1e2535; background: #0a0e1a; color: #64748b; font-weight: 400; transition: all 0.2s; }
+  .seg-btn.active { background: #c9a84c; color: #0a0e1a; font-weight: 700; }
+  .seg-btn:first-child { border-right: none; border-radius: 8px 0 0 8px; }
+  .seg-btn:last-child  { border-radius: 0 8px 8px 0; }
+  .nest-preview { background: rgba(201,168,76,0.06); border: 1px solid rgba(201,168,76,0.15); border-radius: 8px; padding: 12px 14px; }
+  .period-strip { border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; }
+  .period-input-row { display: flex; align-items: center; gap: 10px; }
+  .period-badge { font-family: 'Courier New', monospace; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: 0.05em; flex-shrink: 0; }
+  .period-ages { font-family: 'Courier New', monospace; font-size: 11px; color: #64748b; flex: 1; }
+  .period-irr-wrap { display: flex; align-items: center; gap: 6px; }
+  .period-irr-wrap input { width: 80px; flex-shrink: 0; }
+  .period-irr-wrap .pct { font-family: 'Courier New', monospace; font-size: 12px; color: #94a3b8; }
+  #chartCanvas { width: 100%; display: block; }
+  .chart-wrap { position: relative; }
+  .chart-tooltip { position: absolute; background: #0f1117; border: 1px solid #2a2d3a; border-radius: 8px; padding: 10px 14px; pointer-events: none; display: none; z-index: 10; white-space: nowrap; }
+  .legend-row { display: flex; gap: 16px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-family: 'Courier New', monospace; font-size: 11px; color: #94a3b8; }
+  .legend-line { width: 24px; height: 3px; border-radius: 2px; flex-shrink: 0; }
+  .legend-dashed { background: repeating-linear-gradient(to right, #60a5fa 0, #60a5fa 6px, transparent 6px, transparent 10px); height: 2px; }
+  .delta-pill { display: inline-block; padding: 3px 10px; border-radius: 20px; font-family: 'Courier New', monospace; font-size: 13px; font-weight: 700; }
+  .delta-pos { background: rgba(52,211,153,0.15); color: #34d399; border: 1px solid rgba(52,211,153,0.3); }
+  .delta-neg { background: rgba(248,113,113,0.15); color: #f87171; border: 1px solid rgba(248,113,113,0.3); }
+  .solver-box { background: rgba(96,165,250,0.06); border: 1px solid rgba(96,165,250,0.2); border-radius: 10px; padding: 18px 20px; margin-bottom: 20px; }
+  .solver-title { font-family: Georgia, serif; font-size: 16px; font-weight: 600; color: #60a5fa; margin-bottom: 14px; }
+  .solver-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  /* ── Tab system ── */
+  .tab-bar { display: flex; gap: 6px; margin-bottom: 28px; border-bottom: 1px solid #1e2535; padding-bottom: 0; }
+  .tab-btn {
+    font-family: 'Courier New', monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 10px 22px; border: 1px solid transparent; border-bottom: none; border-radius: 8px 8px 0 0;
+    cursor: pointer; background: transparent; color: #475569; transition: all 0.18s; margin-bottom: -1px;
+  }
+  .tab-btn:hover { color: #94a3b8; background: rgba(255,255,255,0.03); }
+  .tab-btn.active { background: rgba(201,168,76,0.08); border-color: #1e2535; color: #c9a84c; border-bottom-color: #0f1625; }
+  /* ── Year-by-year table ── */
+  .yby-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid #1e2535; }
+  .yby-table { border-collapse: collapse; width: 100%; min-width: 900px; font-family: 'Courier New', monospace; font-size: 12px; }
+  .yby-table th { padding: 9px 12px; font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; font-weight: 600; position: sticky; top: 0; z-index: 5; background: #0d1120; border-bottom: 1px solid #2a3444; white-space: nowrap; }
+  .yby-table td { padding: 6px 12px; border-bottom: 1px solid #111827; white-space: nowrap; }
+  .yby-table tr:last-child td { border-bottom: none; }
+  .yby-table .col-sticky { position: sticky; left: 0; z-index: 4; background: #0d1120; border-right: 1px solid #1e2535; }
+  .yby-table th.col-sticky { z-index: 6; }
+  .yby-table .period-divider td { background: #080b13 !important; border-top: 2px solid #1e2535; padding: 4px 12px; }
+  .yby-table tr:hover td:not(.period-divider td) { background: rgba(255,255,255,0.025); }
+  .yby-table tr:hover .col-sticky { background: #121828; }
+  .yby-toggle { display:flex; align-items:center; gap:10px; font-family:'Courier New',monospace; font-size:11px; color:#64748b; }
+  .yby-toggle button { padding:5px 14px; border-radius:6px; border:1px solid #1e2535; background:transparent; color:#475569; font-family:'Courier New',monospace; font-size:11px; cursor:pointer; transition:all 0.15s; }
+  .yby-toggle button.active { background:rgba(201,168,76,0.12); border-color:rgba(201,168,76,0.4); color:#c9a84c; }
+  @media (max-width: 760px) { .grid2, .grid3, .grid5, .two-col, .solver-grid { grid-template-columns: 1fr; } }
+  /* ── Tier gating ── */
+  .tier-locked { opacity:0.42; filter:grayscale(0.3); pointer-events:none; user-select:none; }
+  .tier-nudge {
+    display:flex; align-items:center; gap:9px; pointer-events:auto;
+    padding:8px 13px; margin-bottom:10px;
+    background:rgba(201,168,76,0.07); border:1px solid rgba(201,168,76,0.22); border-radius:8px;
+    font-family:'Courier New',monospace; font-size:11px; color:#64748b;
+  }
+  .tier-nudge a { color:#c9a84c; text-decoration:none; font-weight:700; }
+  .tier-nudge a:hover { text-decoration:underline; }
+  .lock-icon { font-size:13px; flex-shrink:0; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div style="text-align:center;margin-bottom:40px">
+  <p style="font-family:'Courier New',monospace;font-size:11px;letter-spacing:0.25em;color:#c9a84c;margin-bottom:10px;text-transform:uppercase">Financial Independence Planner</p>
+  <h1 style="font-family:Georgia,serif;font-size:clamp(28px,5vw,50px);font-weight:300;color:#fff;line-height:1.1">Retirement Runway</h1>
+  <p style="color:#64748b;font-family:'Courier New',monospace;font-size:12px;margin-top:10px">Model your financial independence — adjust assumptions and see the impact</p>
+</div>
+
+<!-- Tab bar -->
+<div class="tab-bar">
+  <button class="tab-btn active" id="tabBtnDashboard" onclick="switchTab('dashboard')">📊 Dashboard</button>
+  <button class="tab-btn" id="tabBtnMC" onclick="switchTab('mc')">🎲 Monte Carlo</button>
+  <button class="tab-btn" id="tabBtnDetail" onclick="switchTab('detail')">📋 Year-by-Year</button>
+</div>
+
+<!-- ── DASHBOARD PANEL ──────────────────────────────────────────────────── -->
+<div id="panelDashboard">
+<div class="two-col">
+
+  <!-- LEFT COLUMN -->
+  <div>
+    <!-- Life params -->
+    <div class="card">
+      <div class="stitle">Life Parameters</div>
+      <div class="grid2">
+        <div class="field"><label class="lbl">Current Age</label><input type="number" id="currentAge" value="37" min="1" max="99"/></div>
+        <div class="field"><label class="lbl">Retirement Age</label><input type="number" id="retirementAge" value="53" min="1" max="99"/></div>
+        <div class="field"><label class="lbl">Lifespan Target</label><input type="number" id="lifespan" value="100" min="1" max="120"/></div>
+        <div class="field"><label class="lbl">Inflation Rate %</label><input type="number" id="inflation" value="3.0" step="0.1" min="0"/></div>
+      </div>
+      <div class="field"><label class="lbl">Current Yearly Expenses ($)</label><input type="number" id="currentExpenses" value="45600" min="0"/></div>
+    </div>
+
+    <!-- 5-period IRR -->
+    <div class="card" id="fivePeriodSection">
+      <div class="stitle">5-Period Return on Investment</div>
+      <p style="font-family:'Courier New',monospace;font-size:11px;color:#64748b;margin-bottom:16px" id="periodNote">Retirement split into 5 equal periods</p>
+      <div id="periodInputs"></div>
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid #1e2535;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-family:'Courier New',monospace;font-size:11px;color:#64748b">Weighted average IRR</span>
+        <span style="font-family:'Courier New',monospace;font-size:14px;font-weight:700;color:#c9a84c" id="avgIRRInline">—</span>
+      </div>
+    </div>
+
+    <!-- Sequence-of-returns callout -->
+    <div style="background:rgba(201,168,76,0.05);border:1px solid rgba(201,168,76,0.15);border-radius:10px;padding:14px 18px;margin-bottom:20px">
+      <p style="font-family:'Courier New',monospace;font-size:11px;color:#c9a84c;margin-bottom:6px;letter-spacing:0.05em">⚠ SEQUENCE OF RETURNS RISK</p>
+      <p style="font-size:12px;color:#94a3b8;line-height:1.6">Two portfolios with the same average IRR can have very different outcomes. Bad returns early force you to sell more units at low prices — the damage compounds. Use the 5 periods to simulate <em>when</em> bad years hit, not just how bad they are.</p>
+    </div>
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div>
+    <!-- Nest egg -->
+    <div class="card">
+      <div class="stitle">Nest Egg at Retirement</div>
+      <div class="toggle-row">
+        <input class="toggle-sw" type="checkbox" id="useManual" onchange="recalc()"/>
+        <label for="useManual" style="font-family:'Courier New',monospace;font-size:12px;color:#94a3b8;cursor:pointer">Enter nest egg manually</label>
+      </div>
+      <div id="autoInputs">
+        <!-- ── Asset class: Equities (always shown) ── -->
+        <div style="padding:12px;background:rgba(255,255,255,0.02);border:1px solid #1e2535;border-radius:8px;margin-bottom:10px">
+          <div style="font-family:'Courier New',monospace;font-size:10px;color:#c9a84c;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">📈 Equities</div>
+          <div class="grid3">
+            <div class="field" style="margin-bottom:0"><label class="lbl">Current Balance ($)</label><input type="number" id="currentSavings" value="250000" min="0" oninput="recalc()"/></div>
+            <div class="field" style="margin-bottom:0"><label class="lbl">Annual Contributions ($)</label><input type="number" id="annualContrib" value="40000" min="0" oninput="recalc()"/></div>
+            <div class="field" style="margin-bottom:0"><label class="lbl">Expected IRR %</label><input type="number" id="accumIRR" value="8.4" step="0.1" min="0" oninput="recalc()"/></div>
+          </div>
+        </div>
+
+        <div id="multiAssetSection">
+        <!-- ── Asset class: Bonds ── -->
+        <div style="margin-bottom:8px">
+          <div class="toggle-row" style="margin-bottom:0">
+            <input class="toggle-sw" type="checkbox" id="useBonds" onchange="toggleAsset('bonds');recalc()"/>
+            <label for="useBonds" style="font-family:'Courier New',monospace;font-size:12px;color:#94a3b8;cursor:pointer">🏛 Bonds</label>
+          </div>
+          <div id="bondsInputs" style="display:none;margin-top:8px;padding:12px;background:rgba(96,165,250,0.04);border:1px solid rgba(96,165,250,0.15);border-radius:8px">
+            <div class="grid3">
+              <div class="field" style="margin-bottom:0"><label class="lbl">Current Balance ($)</label><input type="number" id="bondsSavings" value="0" min="0" oninput="recalc()"/></div>
+              <div class="field" style="margin-bottom:0"><label class="lbl">Annual Contributions ($)</label><input type="number" id="bondsContrib" value="0" min="0" oninput="recalc()"/></div>
+              <div class="field" style="margin-bottom:0"><label class="lbl">Expected IRR %</label><input type="number" id="bondsIRR" value="4.0" step="0.1" min="0" oninput="recalc()"/></div>
+            </div>
+            <div style="font-family:'Courier New',monospace;font-size:10px;color:#60a5fa;margin-top:8px" id="bondsPreview"></div>
+          </div>
+        </div>
+
+        <!-- ── Asset class: Pension Fund ── -->
+        <div style="margin-bottom:8px">
+          <div class="toggle-row" style="margin-bottom:0">
+            <input class="toggle-sw" type="checkbox" id="usePensionFund" onchange="toggleAsset('pensionFund');recalc()"/>
+            <label for="usePensionFund" style="font-family:'Courier New',monospace;font-size:12px;color:#94a3b8;cursor:pointer">🏦 Pension Fund</label>
+          </div>
+          <div id="pensionFundInputs" style="display:none;margin-top:8px;padding:12px;background:rgba(52,211,153,0.04);border:1px solid rgba(52,211,153,0.15);border-radius:8px">
+            <div class="grid3">
+              <div class="field" style="margin-bottom:0"><label class="lbl">Current Balance ($)</label><input type="number" id="pensionFundSavings" value="0" min="0" oninput="recalc()"/></div>
+              <div class="field" style="margin-bottom:0"><label class="lbl">Annual Contributions ($)</label><input type="number" id="pensionFundContrib" value="0" min="0" oninput="recalc()"/></div>
+              <div class="field" style="margin-bottom:0"><label class="lbl">Expected IRR %</label><input type="number" id="pensionFundIRR" value="5.0" step="0.1" min="0" oninput="recalc()"/></div>
+            </div>
+            <div style="font-family:'Courier New',monospace;font-size:10px;color:#34d399;margin-top:8px" id="pensionFundPreview"></div>
+          </div>
+        </div>
+
+        <!-- ── Asset class: Insurance / Life Policy ── -->
+        <div style="margin-bottom:10px">
+          <div class="toggle-row" style="margin-bottom:0">
+            <input class="toggle-sw" type="checkbox" id="useInsurance" onchange="toggleAsset('insurance');recalc()"/>
+            <label for="useInsurance" style="font-family:'Courier New',monospace;font-size:12px;color:#94a3b8;cursor:pointer">🛡 Insurance / Policy</label>
+          </div>
+          <div id="insuranceInputs" style="display:none;margin-top:8px;padding:12px;background:rgba(192,132,252,0.04);border:1px solid rgba(192,132,252,0.15);border-radius:8px">
+            <div class="grid3">
+              <div class="field" style="margin-bottom:0"><label class="lbl">Current Cash Value ($)</label><input type="number" id="insuranceSavings" value="0" min="0" oninput="recalc()"/></div>
+              <div class="field" style="margin-bottom:0"><label class="lbl">Annual Premiums ($)</label><input type="number" id="insuranceContrib" value="0" min="0" oninput="recalc()"/></div>
+              <div class="field" style="margin-bottom:0"><label class="lbl">Expected IRR %</label><input type="number" id="insuranceIRR" value="3.0" step="0.1" min="0" oninput="recalc()"/></div>
+            </div>
+            <div style="font-family:'Courier New',monospace;font-size:10px;color:#c084fc;margin-top:8px" id="insurancePreview"></div>
+          </div>
+        </div>
+
+        </div><!-- end multiAssetSection -->
+        <!-- Nest egg preview breakdown -->
+        <div class="nest-preview">
+          <div style="font-family:'Courier New',monospace;font-size:11px;color:#c9a84c;margin-bottom:6px" id="nestLabel">Projected Nest Egg in 13y</div>
+          <div style="font-family:Georgia,serif;font-size:22px;font-weight:700;color:#fff;margin-bottom:6px" id="nestPreview">—</div>
+          <div id="nestBreakdown" style="font-family:'Courier New',monospace;font-size:10px;color:#475569;line-height:1.8"></div>
+        </div>
+      </div>
+      <div id="manualInputs" style="display:none">
+        <div class="field"><label class="lbl">Manual Nest Egg at Retirement ($)</label><input type="number" id="manualNestEgg" value="2000000" min="0"/></div>
+      </div>
+
+      <div id="incomeSection">
+      <!-- ── Supplemental Income ── -->
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid #1e2535">
+        <div style="font-family:'Courier New',monospace;font-size:10px;color:#64748b;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px">Supplemental Income (reduces portfolio withdrawals)</div>
+
+        <!-- Pension toggle -->
+        <div style="margin-bottom:8px">
+          <div class="toggle-row" style="margin-bottom:0">
+            <input class="toggle-sw" type="checkbox" id="usePension" onchange="toggleIncome('pension');recalc()"/>
+            <label for="usePension" style="font-family:'Courier New',monospace;font-size:12px;color:#94a3b8;cursor:pointer">🏛 Pension</label>
+          </div>
+          <div id="pensionInputs" style="display:none;margin-top:10px;padding:12px;background:rgba(96,165,250,0.04);border:1px solid rgba(96,165,250,0.15);border-radius:8px">
+            <div class="grid3">
+              <div class="field" style="margin-bottom:0">
+                <label class="lbl">Annual Amount ($)</label>
+                <input type="number" id="pensionAmount" value="18000" min="0" step="500" oninput="recalc()"/>
+              </div>
+              <div class="field" style="margin-bottom:0">
+                <label class="lbl">Start Age</label>
+                <input type="number" id="pensionStartAge" value="67" min="0" max="120" oninput="recalc()"/>
+              </div>
+              <div class="field" style="margin-bottom:0">
+                <label class="lbl">Annual Increase %</label>
+                <input type="number" id="pensionGrowth" value="2.0" step="0.1" min="0" oninput="recalc()"/>
+              </div>
+            </div>
+            <div style="font-family:'Courier New',monospace;font-size:10px;color:#475569;margin-top:8px" id="pensionPreview"></div>
+          </div>
+        </div>
+
+        <!-- Rental toggle -->
+        <div>
+          <div class="toggle-row" style="margin-bottom:0">
+            <input class="toggle-sw" type="checkbox" id="useRental" onchange="toggleIncome('rental');recalc()"/>
+            <label for="useRental" style="font-family:'Courier New',monospace;font-size:12px;color:#94a3b8;cursor:pointer">🏠 Rental Income</label>
+          </div>
+          <div id="rentalInputs" style="display:none;margin-top:10px;padding:12px;background:rgba(52,211,153,0.04);border:1px solid rgba(52,211,153,0.15);border-radius:8px">
+            <div class="grid3">
+              <div class="field" style="margin-bottom:0">
+                <label class="lbl">Annual Amount ($)</label>
+                <input type="number" id="rentalAmount" value="12000" min="0" step="500" oninput="recalc()"/>
+              </div>
+              <div class="field" style="margin-bottom:0">
+                <label class="lbl">Start Age</label>
+                <input type="number" id="rentalStartAge" value="53" min="0" max="120" oninput="recalc()"/>
+              </div>
+              <div class="field" style="margin-bottom:0">
+                <label class="lbl">Annual Increase %</label>
+                <input type="number" id="rentalGrowth" value="2.0" step="0.1" min="0" oninput="recalc()"/>
+              </div>
+            </div>
+            <div style="font-family:'Courier New',monospace;font-size:10px;color:#475569;margin-top:8px" id="rentalPreview"></div>
+          </div>
+        </div>
+
+        <!-- Total income indicator (shown when at least one is active) -->
+        <div id="incomeTotal" style="display:none;margin-top:10px;padding:8px 12px;background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.2);border-radius:6px;font-family:'Courier New',monospace;font-size:11px;color:#c9a84c"></div>
+      </div>
+    </div>
+      </div><!-- end incomeSection -->
+
+    <!-- Optimizer settings -->
+    <div class="card" id="optimizerSettingsSection">
+      <div class="stitle">Optimizer Settings</div>
+      <div class="field">
+        <label class="lbl">Minimum Legacy Balance ($)</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="number" id="minLegacy" value="0" min="0" style="flex:1"/>
+          <button onclick="lockToNominal()" title="Set to nominal scenario final balance — makes all 3 scenarios directly comparable" style="
+            font-family:'Courier New',monospace;font-size:10px;color:#c9a84c;
+            background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.25);
+            border-radius:6px;padding:5px 10px;cursor:pointer;white-space:nowrap;
+            transition:background 0.15s" 
+            onmouseover="this.style.background='rgba(201,168,76,0.18)'"
+            onmouseout="this.style.background='rgba(201,168,76,0.08)'">
+            🔒 Lock to Nominal
+          </button>
+        </div>
+        <p style="font-family:'Courier New',monospace;font-size:10px;color:#64748b;margin-top:5px">⚠ Re-lock after changing any parameters to keep scenarios comparable.</p>
+        <p style="font-family:'Courier New',monospace;font-size:11px;color:#475569;margin-top:4px">The portfolio balance you want to be left with at age <span id="lifespanRef">100</span>. Set to $0 to fully exhaust the portfolio. <span style="color:#64748b">Lock to Nominal makes all 3 stress-test scenarios end at the same target — so the only variable is return sequence, not ambition.</span></p>
+        <div id="lockToNominalHint" style="display:none;margin-top:6px;font-family:'Courier New',monospace;font-size:10px;color:#c9a84c"></div>
+      </div>
+
+    </div>
+
+    <!-- Tax Settings -->
+    <div class="card" id="taxSection">
+      <div class="stitle">💸 Tax Settings</div>
+      <div class="toggle-row" style="margin-bottom:12px">
+        <input class="toggle-sw" type="checkbox" id="useTax" onchange="toggleTax();recalc()"/>
+        <label for="useTax" style="font-family:'Courier New',monospace;font-size:12px;color:#94a3b8;cursor:pointer">Model tax impact on withdrawals</label>
+      </div>
+
+      <div id="taxInputs" style="display:none">
+        <!-- Account mix -->
+        <div style="margin-bottom:16px;padding:12px;background:rgba(255,255,255,0.02);border:1px solid #1e2535;border-radius:8px">
+          <div style="font-family:'Courier New',monospace;font-size:10px;color:#c9a84c;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">Portfolio Account Mix</div>
+          <p style="font-family:'Courier New',monospace;font-size:10px;color:#64748b;margin-bottom:12px">Must sum to 100%. Determines what portion of withdrawals faces each tax regime.</p>
+          <div class="grid3">
+            <div class="field" style="margin-bottom:0">
+              <label class="lbl">Pre-tax % <span style="color:#f87171">(401k/IRA)</span></label>
+              <input type="number" id="taxPrePct" value="60" min="0" max="100" step="5" oninput="onTaxMixChange('pre');recalc()"/>
+              <p style="font-family:'Courier New',monospace;font-size:10px;color:#475569;margin-top:4px">Fully taxable on withdrawal</p>
+            </div>
+            <div class="field" style="margin-bottom:0">
+              <label class="lbl">Post-tax % <span style="color:#34d399">(Roth)</span></label>
+              <input type="number" id="taxRothPct" value="20" min="0" max="100" step="5" oninput="onTaxMixChange('roth');recalc()"/>
+              <p style="font-family:'Courier New',monospace;font-size:10px;color:#475569;margin-top:4px">Tax-free withdrawals</p>
+            </div>
+            <div class="field" style="margin-bottom:0">
+              <label class="lbl">Brokerage % <span style="color:#60a5fa">(taxable)</span></label>
+              <input type="number" id="taxBrokerPct" value="20" min="0" max="100" step="5" oninput="onTaxMixChange('broker');recalc()"/>
+              <p style="font-family:'Courier New',monospace;font-size:10px;color:#475569;margin-top:4px">Gains only taxed</p>
+            </div>
+          </div>
+          <div id="taxMixWarning" style="margin-top:8px;font-family:'Courier New',monospace;font-size:10px;color:#f87171;display:none">⚠ Percentages must sum to 100%</div>
+          <div style="margin-top:10px;height:8px;border-radius:4px;overflow:hidden;display:flex">
+            <div id="taxBarPre"    style="background:#f87171;transition:width 0.2s"></div>
+            <div id="taxBarRoth"   style="background:#34d399;transition:width 0.2s"></div>
+            <div id="taxBarBroker" style="background:#60a5fa;transition:width 0.2s"></div>
+          </div>
+        </div>
+
+        <!-- Tax rates -->
+        <div style="margin-bottom:16px;padding:12px;background:rgba(255,255,255,0.02);border:1px solid #1e2535;border-radius:8px">
+          <div style="font-family:'Courier New',monospace;font-size:10px;color:#c9a84c;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">Effective Tax Rates</div>
+          <p style="font-family:'Courier New',monospace;font-size:10px;color:#64748b;margin-bottom:12px">Use your blended marginal rate including state/local tax. Country-agnostic — you know your situation best.</p>
+          <div class="grid2">
+            <div class="field" style="margin-bottom:0">
+              <label class="lbl">Pre-tax withdrawal rate %</label>
+              <input type="number" id="taxPreRate" value="25" min="0" max="60" step="1" oninput="recalc()"/>
+              <p style="font-family:'Courier New',monospace;font-size:10px;color:#475569;margin-top:4px">Federal + state on ordinary income</p>
+            </div>
+            <div class="field" style="margin-bottom:0">
+              <label class="lbl">Brokerage gains rate %</label>
+              <input type="number" id="taxBrokerRate" value="15" min="0" max="40" step="1" oninput="recalc()"/>
+              <p style="font-family:'Courier New',monospace;font-size:10px;color:#475569;margin-top:4px">Long-term capital gains rate</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Other income & basis -->
+        <div style="padding:12px;background:rgba(255,255,255,0.02);border:1px solid #1e2535;border-radius:8px">
+          <div style="font-family:'Courier New',monospace;font-size:10px;color:#c9a84c;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">Adjustments</div>
+          <div class="grid2">
+            <div class="field" style="margin-bottom:0">
+              <label class="lbl">Other taxable income ($/yr)</label>
+              <input type="number" id="taxOtherIncome" value="0" min="0" step="1000" oninput="recalc()"/>
+              <p style="font-family:'Courier New',monospace;font-size:10px;color:#475569;margin-top:4px">Pension, SS etc. that fills lower brackets first — reduces effective rate on withdrawals</p>
+            </div>
+            <div class="field" style="margin-bottom:0">
+              <label class="lbl">Brokerage cost basis %</label>
+              <input type="number" id="taxBasis" value="40" min="0" max="100" step="5" oninput="recalc()"/>
+              <p style="font-family:'Courier New',monospace;font-size:10px;color:#475569;margin-top:4px">% of brokerage portfolio that is original contribution (not gain) — only gains are taxed</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tax summary preview -->
+        <div id="taxPreview" style="margin-top:12px;padding:12px;background:rgba(248,113,113,0.04);border:1px solid rgba(248,113,113,0.15);border-radius:8px;font-family:'Courier New',monospace;font-size:11px;color:#94a3b8"></div>
+      </div>
+    </div>
+
+    <!-- Withdrawal milestones -->
+    <div class="card" id="milestonesSection">
+      <div class="stitle">Withdrawal by Period — Rolling Re-Optimizer</div>
+      <p style="font-family:'Courier New',monospace;font-size:11px;color:#64748b;margin-bottom:16px">At the start of each period, given the actual portfolio balance, the max sustainable withdrawal is re-solved through all remaining years and IRRs. P1's factor = the global optimum. Later periods show how sequence-of-returns risk accumulates.</p>
+      <div style="display:grid;grid-template-columns:110px 1fr 1fr 1fr;gap:0;padding:6px 0;border-bottom:1px solid #2a3444;margin-bottom:4px">
+        <div style="font-family:'Courier New',monospace;font-size:10px;color:#475569;letter-spacing:0.08em;text-transform:uppercase">Period</div>
+        <div style="font-family:'Courier New',monospace;font-size:10px;color:#94a3b8;letter-spacing:0.08em;text-transform:uppercase;text-align:right">Planned</div>
+        <div style="font-family:'Courier New',monospace;font-size:10px;color:#34d399;letter-spacing:0.08em;text-transform:uppercase;text-align:right">Max / yr</div>
+        <div style="font-family:'Courier New',monospace;font-size:10px;color:#34d399;letter-spacing:0.08em;text-transform:uppercase;text-align:right">Factor</div>
+      </div>
+      <div id="milestones"></div>
+      <!-- End-of-retirement summary -->
+      <div style="margin-top:14px;padding-top:12px;border-top:1px solid #2a3444" id="retirementEndRow"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Outcome banner -->
+<div id="outcomeBanner" class="outcome-banner"></div>
+
+<!-- ── KEY STATS ─────────────────────────────────────────────────────────── -->
+<div class="grid3" style="margin-bottom:20px">
+  <div class="sbox sbox-gold">
+    <div class="slabel slabel-gold" id="statNestLabel">Nest Egg at Retirement</div>
+    <div class="sval" id="statNest">—</div>
+    <div class="ssub" id="statNestFull">—</div>
+  </div>
+  <div class="sbox sbox-gold">
+    <div class="slabel slabel-gold">Baseline Year 1 Withdrawal</div>
+    <div class="sval" id="statWd">—</div>
+    <div class="ssub" id="statWdSub">SWR: —%</div>
+  </div>
+  <div class="sbox sbox-gold">
+    <div class="slabel slabel-gold">Avg Portfolio IRR</div>
+    <div class="sval" id="statAvgIRR">—</div>
+    <div class="ssub">weighted across 5 periods</div>
+  </div>
+</div>
+
+<!-- ── OPTIMIZER RESULTS ──────────────────────────────────────────────────── -->
+<div class="solver-box" id="optimizerSection">
+  <div class="solver-title">⚡ Withdrawal Optimizer Results</div>
+  <div class="solver-grid">
+    <div>
+      <div class="slabel slabel-blue">Max Affordable Year 1 Withdrawal</div>
+      <div style="font-family:Georgia,serif;font-size:26px;font-weight:700;color:#60a5fa" id="optWd">—</div>
+      <div class="ssub" id="optWdFull">—</div>
+    </div>
+    <div>
+      <div class="slabel slabel-blue">vs. Your Planned Spending</div>
+      <div style="margin-top:6px" id="spendingDelta">—</div>
+      <div class="ssub" id="optSWR">Optimized SWR: —%</div>
+    </div>
+    <div>
+      <div class="slabel slabel-blue">Legacy Balance at End</div>
+      <div style="font-family:Georgia,serif;font-size:26px;font-weight:700;color:#60a5fa" id="optLegacy">—</div>
+      <div class="ssub" id="optLegacySub">target minimum</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── TIMING TOGGLE ──────────────────────────────────────────────────────── -->
+<div class="seg-wrap">
+  <button class="seg-btn active" id="btnBeginning" onclick="setTiming('beginning')">⚠ Beginning-of-Year (Conservative)</button>
+  <button class="seg-btn" id="btnEnd" onclick="setTiming('end')">End-of-Year (Optimistic)</button>
+</div>
+
+<!-- ── CHART ──────────────────────────────────────────────────────────────── -->
+<div class="card" style="margin-bottom:20px">
+  <div class="stitle">
+    Portfolio Balance Through Retirement
+    <span style="font-family:'Courier New',monospace;font-size:11px;font-weight:400;color:#64748b;margin-left:10px" id="timingLabel">— withdraw → earn (conservative)</span>
+  </div>
+  <div class="legend-row">
+    <div class="legend-item"><div class="legend-line" style="background:#c9a84c"></div>Baseline (planned spending)</div>
+    <div class="legend-item"><div class="legend-line legend-dashed"></div>Optimized (max withdrawal)</div>
+    <div class="legend-item" id="legendPeriods"></div>
+  </div>
+  <div class="chart-wrap">
+    <canvas id="chartCanvas" height="340"></canvas>
+    <div class="chart-tooltip" id="tooltip">
+      <div style="color:#c9a84c;font-weight:700;font-family:'Courier New',monospace;font-size:12px;margin-bottom:6px" id="ttAge"></div>
+      <div style="color:#e2e8f0;font-size:13px;margin-bottom:3px" id="ttBase"></div>
+      <div style="color:#60a5fa;font-size:13px" id="ttOpt"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── WITHDRAWAL CHART ───────────────────────────────────────────────────── -->
+<div class="card" style="margin-bottom:20px">
+  <div class="stitle">Annual Withdrawal — Planned vs Max Affordable per Period</div>
+  <div class="legend-row">
+    <div class="legend-item"><div class="legend-line" style="background:#94a3b8"></div>Planned (inflation-adjusted)</div>
+    <div class="legend-item"><div class="legend-line" style="background:#34d399;height:3px;border-radius:0"></div>Max affordable (per-period, step)</div>
+  </div>
+  <div class="chart-wrap">
+    <canvas id="wdCanvas" height="260"></canvas>
+    <div class="chart-tooltip" id="wdTooltip">
+      <div style="color:#c9a84c;font-weight:700;font-family:'Courier New',monospace;font-size:12px;margin-bottom:6px" id="wdTtAge"></div>
+      <div style="color:#94a3b8;font-size:12px;margin-bottom:2px" id="wdTtPlanned"></div>
+      <div style="font-size:12px" id="wdTtMax"></div>
+      <div style="font-size:11px;margin-top:3px" id="wdTtFactor"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SEQUENCE RISK STRESS TEST ─────────────────────────────────────────── -->
+<div class="card" id="stressTestSection" style="margin-bottom:20px">
+  <div class="stitle">⚡ Sequence of Returns — Stress Test</div>
+  <p style="font-family:'Courier New',monospace;font-size:11px;color:#64748b;margin-bottom:14px">
+    Same 5 IRR values, two orderings. Any difference in outcome is <em>purely</em> sequence risk — not average return risk.
+    Pessimistic = worst returns first — the hardest possible scenario for a given IRR set.
+  </p>
+
+  <!-- α return sensitivity control -->
+  <div style="margin-bottom:18px;padding:14px 16px;background:rgba(255,255,255,0.02);border:1px solid #1e2535;border-radius:10px">
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+      <div style="flex:1;min-width:200px">
+        <div style="font-family:'Courier New',monospace;font-size:11px;color:#94a3b8;margin-bottom:3px">
+          Return Sensitivity (α) — how much period spending tracks each period's IRR
+        </div>
+        <div style="font-family:'Courier New',monospace;font-size:10px;color:#475569">
+          0 = flat uniform spending · 1 = fully IRR-driven · factors = α·√(IRRᵢ/avg) + (1−α)
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <input type="range" id="alphaSlider" min="0" max="1.0" step="0.05" value="0.7"
+          style="width:140px;accent-color:#c9a84c;cursor:pointer" oninput="onAlphaChange()"/>
+        <div style="text-align:center;min-width:42px">
+          <div style="font-family:Georgia,serif;font-size:22px;font-weight:700;color:#c9a84c" id="alphaDisplay">0.70</div>
+          <div style="font-family:'Courier New',monospace;font-size:9px;color:#475569">α</div>
+        </div>
+      </div>
+    </div>
+    <!-- Factor preview: shows the 5 resulting aᵢ values live -->
+    <div id="alphaFactorPreview" style="margin-top:12px;padding:10px 12px;background:rgba(0,0,0,0.15);border-radius:6px;
+      font-family:'Courier New',monospace;font-size:10px;color:#64748b;display:flex;gap:0;flex-wrap:wrap"></div>
+  </div>
+
+  <!-- 3-scenario IRR order display -->
+  <div id="scenarioIrrBadge" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px"></div>
+
+  <!-- 2-line portfolio chart -->
+  <div class="legend-row" style="margin-bottom:10px">
+    <div class="legend-item"><div class="legend-line" style="background:#c9a84c"></div>Your plan (as entered)</div>
+    <div class="legend-item"><div class="legend-line legend-dashed" style="background:repeating-linear-gradient(to right,#f87171 0,#f87171 6px,transparent 6px,transparent 10px)"></div>Pessimistic (worst first)</div>
+  </div>
+  <div class="chart-wrap" style="margin-bottom:20px">
+    <canvas id="seqCanvas" height="300"></canvas>
+    <div class="chart-tooltip" id="seqTooltip">
+      <div style="font-weight:700;font-family:'Courier New',monospace;font-size:12px;margin-bottom:6px;color:#c9a84c" id="seqTtAge"></div>
+      <div style="font-size:12px;color:#c9a84c;margin-bottom:2px" id="seqTtPlan"></div>
+      <div style="font-size:12px;color:#f87171" id="seqTtPess"></div>
+    </div>
+  </div>
+
+  <!-- Per-period comparison table -->
+  <div style="font-family:'Courier New',monospace;font-size:10px;color:#475569;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px">Max Withdrawal by Period — Your Plan vs Pessimistic</div>
+  <!-- header -->
+  <div style="display:grid;grid-template-columns:110px 1fr 1fr 1fr 1fr 1fr;gap:0;padding:6px 8px;border-bottom:1px solid #2a3444;margin-bottom:4px">
+    <div style="font-family:'Courier New',monospace;font-size:10px;color:#475569;text-transform:uppercase">Period</div>
+    <div style="font-family:'Courier New',monospace;font-size:10px;color:#94a3b8;text-transform:uppercase;text-align:right">Planned</div>
+    <div style="font-family:'Courier New',monospace;font-size:10px;color:#c9a84c;text-transform:uppercase;text-align:right">Plan Max</div>
+    <div style="font-family:'Courier New',monospace;font-size:10px;color:#f87171;text-transform:uppercase;text-align:right">Pess. Max</div>
+    <div style="font-family:'Courier New',monospace;font-size:10px;color:#64748b;text-transform:uppercase;text-align:right">Δ% nominal</div>
+    <div style="font-family:'Courier New',monospace;font-size:10px;color:#64748b;text-transform:uppercase;text-align:right">Seq. Risk</div>
+  </div>
+  <div id="seqTable"></div>
+
+  <!-- Summary row -->
+  <div style="margin-top:14px;padding-top:12px;border-top:1px solid #2a3444" id="seqSummary"></div>
+</div>
+
+
+<div style="text-align:center;font-family:'Courier New',monospace;font-size:10px;color:#334155;margin-top:24px">
+  For illustrative purposes only. Not financial advice. Projections assume constant inflation-adjusted withdrawals and fixed returns per period.
+</div>
+
+</div><!-- end #panelDashboard -->
+
+<!-- ── YEAR-BY-YEAR PANEL ────────────────────────────────────────────────── -->
+<div id="panelDetail" style="display:none">
+<div id="yearByYearSection">
+
+  <!-- Controls bar -->
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px">
+    <div>
+      <div style="font-family:Georgia,serif;font-size:20px;font-weight:600;color:#c9a84c;margin-bottom:4px">Year-by-Year Projection</div>
+      <div style="font-family:'Courier New',monospace;font-size:11px;color:#475569">5 scenarios · withdrawal at <span id="ybyTimingLabel">beginning</span> of year · geometric columns shown after running MC</div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <!-- $ vs % toggle -->
+      <div class="yby-toggle">
+        <span>Show as</span>
+        <button id="ybyBtnAbs" class="active" onclick="setYbyMode('abs')">$ Amounts</button>
+        <button id="ybyBtnPct" onclick="setYbyMode('pct')">% of Nominal</button>
+      </div>
+      <!-- Highlight toggle -->
+      <div class="yby-toggle">
+        <button id="ybyBtnHL" class="active" onclick="toggleHighlight()">🎨 Highlight</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend-row" style="margin-bottom:14px;flex-wrap:wrap;gap:10px">
+    <div class="legend-item"><div class="legend-line" style="background:#94a3b8"></div>Nominal Fixed</div>
+    <div class="legend-item"><div class="legend-line" style="background:#c084fc"></div>Nominal Geometric</div>
+    <div class="legend-item"><div class="legend-line" style="background:#34d399"></div>Nominal stress test (α)</div>
+    <div class="legend-item"><div class="legend-line" style="background:#f59e0b"></div>Pessimistic Geometric</div>
+    <div class="legend-item"><div class="legend-line" style="background:#f87171"></div>Pessimistic stress test (α)</div>
+    <div class="legend-item" style="margin-left:10px">
+      <div style="width:14px;height:14px;border-radius:3px;background:rgba(52,211,153,0.18);border:1px solid rgba(52,211,153,0.4)"></div>
+      <span>above nominal</span>
+    </div>
+    <div class="legend-item">
+      <div style="width:14px;height:14px;border-radius:3px;background:rgba(248,113,113,0.18);border:1px solid rgba(248,113,113,0.3)"></div>
+      <span>below nominal</span>
+    </div>
+    <div id="ybyMCNote" style="font-family:'Courier New',monospace;font-size:10px;color:#475569;font-style:italic;margin-left:auto"></div>
+  </div>
+
+  <!-- Table -->
+  <div class="yby-wrap">
+    <table class="yby-table" id="ybyTable">
+      <thead id="ybyHead"></thead>
+      <tbody id="ybyBody"></tbody>
+    </table>
+  </div>
+
+  <div style="text-align:center;font-family:'Courier New',monospace;font-size:10px;color:#334155;margin-top:20px">
+    For illustrative purposes only. Not financial advice.
+  </div>
+</div><!-- end yearByYearSection -->
+</div><!-- end #panelDetail -->
+
+<!-- ── MONTE CARLO PANEL ──────────────────────────────────────────────────── -->
+<div id="panelMC" style="display:none">
+<div id="monteCarloSection">
+
+  <!-- Header + run controls -->
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:20px">
+    <div style="flex:1;min-width:260px">
+      <div style="font-family:Georgia,serif;font-size:20px;font-weight:600;color:#c9a84c;margin-bottom:4px">Monte Carlo Simulation</div>
+      <div style="font-family:'Courier New',monospace;font-size:11px;color:#475569">Each run draws log-normally distributed annual returns where the <em>geometric</em> mean equals your IRR input — so the MC and deterministic models share the same effective return assumption. σ controls the year-to-year volatility around that geometric mean.</div>
+    </div>
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+      <div>
+        <label class="lbl">Simulations</label>
+        <select id="mcRuns" style="background:#0a0e1a;border:1px solid #1e2535;border-radius:6px;color:#e2e8f0;padding:7px 12px;font-family:'Courier New',monospace;font-size:13px;cursor:pointer">
+          <option value="1000">1,000</option>
+          <option value="5000" selected>5,000</option>
+          <option value="10000">10,000</option>
+        </select>
+      </div>
+      <div style="padding-top:18px">
+        <button id="mcRunBtn" onclick="runMonteCarlo()"
+          style="padding:10px 28px;border-radius:8px;border:none;
+            background:linear-gradient(135deg,#c9a84c,#a07c32);
+            color:#000;font-family:'Courier New',monospace;font-size:13px;
+            font-weight:700;cursor:pointer;letter-spacing:0.08em;
+            transition:opacity 0.2s">▶ RUN</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Geometric spending rule parameters -->
+  <div style="margin-bottom:20px;padding:14px 16px;background:rgba(192,132,252,0.04);border:1px solid rgba(192,132,252,0.2);border-radius:10px">
+    <div style="font-family:'Courier New',monospace;font-size:10px;color:#c084fc;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">🔢 Geometric Spending Rule Parameters</div>
+    <div style="font-family:'Courier New',monospace;font-size:10px;color:#64748b;margin-bottom:12px;line-height:1.7">
+      W(t) = α × W(t−1) × (1+inf) + (1−α) × p% × Portfolio(t) &nbsp;·&nbsp;
+      α = smoothing (inertia from last year) &nbsp;·&nbsp; p% = target withdrawal rate
+    </div>
+    <div class="grid3">
+      <div class="field" style="margin-bottom:0">
+        <label class="lbl">Smoothing rate α</label>
+        <input type="number" id="geoAlpha" value="0.75" min="0" max="0.99" step="0.05"/>
+        <p style="font-family:'Courier New',monospace;font-size:10px;color:#475569;margin-top:4px">0 = pure % of portfolio · 1 = pure inflation link</p>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label class="lbl">Target rate p % <span id="geoRateAutoLabel" style="color:#34d399;font-size:9px;letter-spacing:0.05em">· auto-synced to SWR</span></label>
+        <input type="number" id="geoRate" value="4.0" min="0.5" max="20" step="0.1" oninput="onGeoRateManualEdit()"/>
+        <p style="font-family:'Courier New',monospace;font-size:10px;color:#475569;margin-top:4px">% of current portfolio used as anchor each year — auto-set to your actual SWR so geometric spending is centred on your plan</p>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label class="lbl">Floor (% of W₀)</label>
+        <input type="number" id="geoFloor" value="70" min="10" max="100" step="5"/>
+        <p style="font-family:'Courier New',monospace;font-size:10px;color:#475569;margin-top:4px">Min spending as % of year-1 withdrawal</p>
+      </div>
+    </div>
+    <div id="geoPreview" style="margin-top:10px;font-family:'Courier New',monospace;font-size:10px;color:#c084fc"></div>
+  </div>
+
+  <!-- Progress bar (hidden until running) -->
+  <div id="mcProgress" style="display:none;margin-bottom:20px">
+    <div style="font-family:'Courier New',monospace;font-size:11px;color:#475569;margin-bottom:6px" id="mcProgressLabel">Running…</div>
+    <div style="background:#1e2535;border-radius:4px;height:6px;overflow:hidden">
+      <div id="mcProgressBar" style="height:100%;background:#c9a84c;width:0%;transition:width 0.1s"></div>
+    </div>
+  </div>
+
+  <!-- Results (hidden until run) -->
+  <div id="mcResults" style="display:none">
+
+    <!-- Success gauges row -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:20px" id="mcGauges"></div>
+
+    <!-- Fan + Cashflows: side by side on desktop, stacked on mobile -->
+    <!-- Fan chart — full width -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="stitle">Portfolio Balance Fan — Nominal Strategy Uncertainty</div>
+      <div class="legend-row" style="margin-bottom:12px">
+        <div class="legend-item"><div style="width:24px;height:10px;border-radius:2px;background:rgba(148,163,184,0.35)"></div>10th–90th %ile</div>
+        <div class="legend-item"><div style="width:24px;height:10px;border-radius:2px;background:rgba(148,163,184,0.6)"></div>25th–75th %ile</div>
+        <div class="legend-item"><div class="legend-line" style="background:#94a3b8"></div>Median</div>
+        <div class="legend-item"><div class="legend-line legend-dashed" style="background:repeating-linear-gradient(to right,#c9a84c 0,#c9a84c 5px,transparent 5px,transparent 9px)"></div>Deterministic plan</div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="mcFanCanvas" height="380"></canvas>
+        <div class="chart-tooltip" id="mcTooltip">
+          <div style="font-weight:700;font-family:'Courier New',monospace;font-size:12px;color:#c9a84c;margin-bottom:6px" id="mcTtAge"></div>
+          <div style="font-size:11px;color:#94a3b8;margin-bottom:3px" id="mcTt90"></div>
+          <div style="font-size:11px;color:#60a5fa;margin-bottom:3px" id="mcTt75"></div>
+          <div style="font-size:12px;color:#60a5fa;font-weight:700;margin-bottom:3px" id="mcTt50"></div>
+          <div style="font-size:11px;color:#60a5fa;margin-bottom:3px" id="mcTt25"></div>
+          <div style="font-size:11px;color:#94a3b8;margin-bottom:3px" id="mcTt10"></div>
+          <div style="font-size:11px;color:#c9a84c;margin-top:4px;border-top:1px solid #2a3444;padding-top:4px" id="mcTtNom"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Simulated Cashflows chart — full width -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="stitle">Simulated Annual Withdrawals — Percentile Fan</div>
+      <div style="font-family:'Courier New',monospace;font-size:10px;color:#64748b;margin-bottom:10px">
+        Year-by-year withdrawal amounts across all simulations. Vertical lines mark the start of each 5-period. Shaded bands = 10th–90th (light) and 25th–75th (dark) percentiles. Median = solid line.
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;margin-bottom:10px" id="cashflowsLegend"></div>
+      <div class="chart-wrap"><canvas id="mcCashflowsCanvas" height="380"></canvas></div>
+
+      <!-- Period snapshot table -->
+      <div style="margin-top:20px;padding-top:16px;border-top:1px solid #1e2535">
+        <div style="font-family:'Courier New',monospace;font-size:10px;color:#64748b;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">
+          Withdrawal Snapshot — Period Start Years &nbsp;·&nbsp; <span style="color:#475569">P50 median · <span style="color:#334155">P10–P90 range</span></span>
+        </div>
+        <div id="cashflowsPeriodTable" style="overflow-x:auto"></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+
+      <!-- Survival probability over time -->
+      <div class="card">
+        <div class="stitle" style="font-size:15px">Survival Probability — All Strategies</div>
+        <div class="legend-row" style="margin-bottom:8px;flex-wrap:wrap">
+          <div class="legend-item"><div class="legend-line" style="background:#94a3b8"></div>Nominal Fixed</div>
+          <div class="legend-item"><div class="legend-line" style="background:#c084fc"></div>Nominal Geometric</div>
+          <div class="legend-item"><div class="legend-line" style="background:#34d399"></div>Nominal stress test (α)</div>
+          <div class="legend-item"><div class="legend-line" style="background:#f59e0b"></div>Pessimistic Geometric</div>
+          <div class="legend-item"><div class="legend-line" style="background:#f87171"></div>Pessimistic stress test (α)</div>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="mcSurvivalCanvas" height="220"></canvas>
+        </div>
+      </div>
+
+      <!-- Withdrawal sensitivity table -->
+      <div class="card">
+        <div class="stitle" style="font-size:15px">Withdrawal Sensitivity</div>
+        <div style="font-family:'Courier New',monospace;font-size:10px;color:#475569;margin-bottom:10px">
+          Success rate at different year-1 withdrawal levels (% of your nominal plan)
+        </div>
+        <div id="mcSensTable"></div>
+      </div>
+
+    </div>
+
+    <!-- Histogram of final balances -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="stitle" style="font-size:15px">Final Balance Distribution at Age <span id="mcHistAge">—</span> — All Strategies</div>
+      <div class="chart-wrap">
+        <canvas id="mcHistCanvas" height="280"></canvas>
+      </div>
+    </div>
+
+  </div><!-- #mcResults -->
+</div><!-- end monteCarloSection -->
+</div><!-- #panelMC -->
+
+<script>
+// ── Tier & capability flags ────────────────────────────────────────────────
+const TIER = 'free'; // 'free' | 'basic' | 'premium'  ← swap via Supabase in Phase 2
+
+const can = {
+  // Always available
+  basicProjection:    true,
+  inflationAdjust:    true,
+  survivalChart:      true,
+  // Basic + Premium
+  legacyTarget:       TIER !== 'free',
+  yearByYear:         TIER !== 'free',
+  // Premium only
+  fivePeriodIRR:      TIER === 'premium',
+  multiAssetNestEgg:  TIER === 'premium',
+  optimizer:          TIER === 'premium',
+  stressTest:         TIER === 'premium',
+  rollingReopt:       TIER === 'premium',
+  taxAware:           TIER === 'premium',
+  incomeSeries:       TIER === 'premium',
+  monteCarlo:         TIER === 'premium',
+};
+
+function upgradeNudge(targetTier, featureDesc) {
+  const price = targetTier === 'basic' ? '$8/year' : '$29/year';
+  const label = targetTier === 'basic' ? 'Basic' : 'Premium';
+  return `<div class="tier-nudge">
+    <span class="lock-icon">🔒</span>
+    <span><strong style="color:#c9a84c">${featureDesc}</strong> is a
+    <strong style="color:#c9a84c">${label}</strong> feature —
+    <a href="#" onclick="return false">upgrade for ${price}</a> to unlock.</span>
+  </div>`;
+}
+
+// Apply locked visual state + inject nudge; or remove lock. Idempotent — safe to call multiple times.
+function applyLock(sectionId, requiredTier, featureName) {
+  const el = document.getElementById(sectionId);
+  if (!el) return;
+  const allowed = requiredTier === 'basic' ? can.legacyTarget : can.fivePeriodIRR;
+  // Remove any existing nudge injected by a previous applyLock call
+  const prev = el.previousElementSibling;
+  if (prev && prev.classList.contains('tier-nudge')) prev.remove();
+  if (!allowed) {
+    el.classList.add('tier-locked');
+    el.insertAdjacentHTML('beforebegin', upgradeNudge(requiredTier, featureName));
+  } else {
+    el.classList.remove('tier-locked');
+  }
+}
+
+// ── Constants ────────────────────────────────────────────────────────────────
+const PERIOD_COLORS  = ['#c9a84c','#60a5fa','#a78bfa','#34d399','#f87171'];
+const PERIOD_NAMES   = ['P1','P2','P3','P4','P5'];
+const DEFAULT_IRRS   = [7.0, 10.0, 9.0, 8.0, 8.0];
+let withdrawalTiming = 'beginning';
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+const fmt = v =>
+  Math.abs(v) >= 1e6 ? `$${(v/1e6).toFixed(2)}M` :
+  Math.abs(v) >= 1e3 ? `$${(v/1e3).toFixed(1)}K` : `$${v.toFixed(0)}`;
+
+const fmtFull = v =>
+  new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(v);
+
+const num = id => { const el = document.getElementById(id); return el ? (parseFloat(el.value) || 0) : 0; };
+
+// ── Supplemental income toggle ────────────────────────────────────────────────
+function toggleIncome(type) {
+  const show = document.getElementById(`use${type.charAt(0).toUpperCase()+type.slice(1)}`).checked;
+  document.getElementById(`${type}Inputs`).style.display = show ? 'block' : 'none';
+}
+
+// ── Build supplemental income series ─────────────────────────────────────────
+// Returns array[yr] = total supplemental income in retirement year yr (0-indexed).
+// Each source starts at its specified age, grows at its own rate from year 1.
+function buildIncomeSeries(retirementAge, retirementYears) {
+  const series = new Array(retirementYears).fill(0);
+
+  const sources = [
+    { active: 'usePension', amount: 'pensionAmount', startAge: 'pensionStartAge', growth: 'pensionGrowth' },
+    { active: 'useRental',  amount: 'rentalAmount',  startAge: 'rentalStartAge',  growth: 'rentalGrowth'  },
+  ];
+
+  sources.forEach(s => {
+    if (!document.getElementById(s.active).checked) return;
+    const baseAmt   = num(s.amount);
+    const startAge  = num(s.startAge);
+    const growthPct = num(s.growth) / 100;
+    const startYr   = Math.max(0, startAge - retirementAge);  // 0-indexed retirement year
+
+    for (let yr = startYr; yr < retirementYears; yr++) {
+      series[yr] += baseAmt * Math.pow(1 + growthPct, yr - startYr);
+    }
+  });
+
+  return series;
+}
+
+// ── Simulate year-by-year ────────────────────────────────────────────────────
+// incomeSeries[yr] = supplemental income that offsets portfolio withdrawal that year.
+// taxMult = gross withdrawal multiplier (1 / (1 - effectiveRate)). Default 1 = no tax.
+// Net portfolio withdrawal = max(0, gross_withdrawal × taxMult − incomeSeries[yr]).
+function simulate(nestEgg, startWd, retYears, periodLen, irrs, inflation, timing, incomeSeries = [], taxMult = 1) {
+  let balance   = nestEgg;
+  let withdrawal = startWd;
+  const data    = [];
+  let depletedAt = null;
+
+  for (let yr = 0; yr < retYears; yr++) {
+    const p   = Math.min(Math.floor(yr / periodLen), 4);
+    const irr = irrs[p] / 100;
+    const balanceBefore = balance;
+    const income = incomeSeries[yr] ?? 0;
+    // Apply tax multiplier: gross withdrawal = net spending × taxMult
+    const grossWd = withdrawal * taxMult;
+    const taxBill = grossWd - withdrawal;
+    const netWd   = Math.max(0, grossWd - income);  // portfolio covers gap after income
+
+    let interest;
+    if (timing === 'beginning') {
+      balance -= netWd;
+      interest = balance * irr;
+      balance += interest;
+    } else {
+      interest = balance * irr;
+      balance  = balance + interest - netWd;
+    }
+    data.push({ yr, balance: Math.max(balance, 0), balanceRaw: balance,
+                withdrawal, grossWd, taxBill, netWd, income, balanceBefore });
+    if (balance <= 0 && depletedAt === null) depletedAt = yr;
+    withdrawal *= (1 + inflation / 100);
+  }
+  return { data, finalBalance: balance, depletedAt };
+}
+
+// ── Binary-search solver ─────────────────────────────────────────────────────
+function solveMaxWithdrawal(nestEgg, minLegacy, retYears, periodLen, irrs, inflation, timing, incomeSeries = [], taxMult = 1) {
+  let lo = 0, hi = nestEgg * 3;
+  for (let i = 0; i < 100; i++) {
+    const mid = (lo + hi) / 2;
+    const { finalBalance } = simulate(nestEgg, mid, retYears, periodLen, irrs, inflation, timing, incomeSeries, taxMult);
+    if (finalBalance >= minLegacy) lo = mid; else hi = mid;
+  }
+  return (lo + hi) / 2;
+}
+
+// ── Simulate a SINGLE period with its own IRR only ───────────────────────────
+function simulateSinglePeriod(startBal, startWd, years, irrPct, inflation, timing) {
+  let balance = startBal;
+  let withdrawal = startWd;
+  let depleted = false;
+  const irr = irrPct / 100;
+  for (let yr = 0; yr < years; yr++) {
+    let interest;
+    if (timing === 'beginning') {
+      balance -= withdrawal; interest = balance * irr; balance += interest;
+    } else {
+      interest = balance * irr; balance = balance + interest - withdrawal;
+    }
+    if (balance <= 0) { balance = 0; depleted = true; break; }
+    withdrawal *= (1 + inflation / 100);
+  }
+  return { endBalance: depleted ? -1 : balance };
+}
+
+// ── Backward induction: required handoff balance at the start of each period ──
+// Works right-to-left. For each period p, finds the minimum starting balance
+// such that withdrawing inflation-adjusted optWd through period p (with p's own
+// IRR) still hands off minReq[p+1] to the next period.
+// This uses optWd as the reference (not W=0), giving realistic handoff targets.
+function computeHandoffTargets(optWd, minLegacy, retirementYears, periodLen, irrs, inflation, timing) {
+  const pCount = 5;
+  const minReq = new Array(pCount + 1).fill(0);
+  minReq[pCount] = minLegacy;
+  for (let p = pCount - 1; p >= 0; p--) {
+    const pYears  = p === 4 ? (retirementYears - 4 * periodLen) : periodLen;
+    // Withdrawal at the start of period p (inflation-adjusted from optWd)
+    const wdAtP   = optWd * Math.pow(1 + inflation / 100, p * periodLen);
+    const target  = minReq[p + 1];
+    // Find min startBal so simulateSinglePeriod ends >= target
+    // First check if even a huge startBal can reach target (IRR might be too low)
+    let lo = 0, hi = Math.max(target, 1);
+    for (let i = 0; i < 40; i++) {
+      const { endBalance } = simulateSinglePeriod(hi, wdAtP, pYears, irrs[p], inflation, timing);
+      if (endBalance >= target) break;
+      hi *= 2;
+    }
+    for (let i = 0; i < 100; i++) {
+      const mid = (lo + hi) / 2;
+      const { endBalance } = simulateSinglePeriod(mid, wdAtP, pYears, irrs[p], inflation, timing);
+      if (endBalance >= target) hi = mid; else lo = mid;
+    }
+    minReq[p] = (lo + hi) / 2;
+  }
+  return minReq; // minReq[p] = min balance needed at START of period p
+}
+
+// ── Solve max W for ONE period given a required handoff balance at period end ──
+// Uses ONLY this period's IRR — completely isolated from future periods.
+function solveMaxWdSinglePeriod(startBal, minEndBal, years, irrPct, inflation, timing) {
+  if (startBal <= 0) return 0;
+  // Check feasibility: can we reach minEndBal even with W=0?
+  const { endBalance: e0 } = simulateSinglePeriod(startBal, 0, years, irrPct, inflation, timing);
+  if (e0 < minEndBal) return 0; // impossible — IRR too low to even maintain without withdrawals
+  let lo = 0, hi = startBal;
+  for (let i = 0; i < 20; i++) {
+    const { endBalance } = simulateSinglePeriod(startBal, hi, years, irrPct, inflation, timing);
+    if (endBalance < minEndBal) break;
+    hi *= 2;
+  }
+  for (let i = 0; i < 100; i++) {
+    const mid = (lo + hi) / 2;
+    const { endBalance } = simulateSinglePeriod(startBal, mid, years, irrPct, inflation, timing);
+    if (endBalance >= minEndBal) lo = mid; else hi = mid;
+  }
+  return (lo + hi) / 2;
+}
+
+// ── Forward simulation over remaining periods (global solver only) ────────────
+function simulateForward(startBalance, startWd, remainingYears, periodLen, remainingIrrs, inflation, timing, taxMult = 1) {
+  let balance = startBalance;
+  let withdrawal = startWd;
+  let depleted = false;
+  for (let yr = 0; yr < remainingYears; yr++) {
+    const p   = Math.min(Math.floor(yr / periodLen), remainingIrrs.length - 1);
+    const irr = remainingIrrs[p] / 100;
+    const grossWd = withdrawal * taxMult;
+    let interest;
+    if (timing === 'beginning') {
+      balance -= grossWd; interest = balance * irr; balance += interest;
+    } else {
+      interest = balance * irr; balance = balance + interest - grossWd;
+    }
+    if (balance <= 0) { balance = 0; depleted = true; break; }
+    withdrawal *= (1 + inflation / 100);
+  }
+  return { finalBalance: depleted ? -1 : balance };
+}
+
+// ── Global solver (used for optWd only) ──────────────────────────────────────
+function solveFromBalance(startBalance, minLegacy, remainingYears, periodLen, remainingIrrs, inflation, timing, taxMult = 1) {
+  if (startBalance <= 0) return 0;
+  let lo = 0, hi = startBalance;
+  for (let i = 0; i < 20; i++) {
+    const { finalBalance } = simulateForward(startBalance, hi, remainingYears, periodLen, remainingIrrs, inflation, timing, taxMult);
+    if (finalBalance < minLegacy) break;
+    hi *= 2;
+  }
+  for (let i = 0; i < 100; i++) {
+    const mid = (lo + hi) / 2;
+    const { finalBalance } = simulateForward(startBalance, mid, remainingYears, periodLen, remainingIrrs, inflation, timing, taxMult);
+    if (finalBalance >= minLegacy) lo = mid; else hi = mid;
+  }
+  return (lo + hi) / 2;
+}
+
+// ── Excel-style factor-based simulation ──────────────────────────────────────
+// At each period start: withdrawal = nominalAtPeriodStart × factor
+// Within period: withdrawal inflates each year at inflation rate
+// This matches the user's spreadsheet model exactly.
+// ── Factor-based simulation ───────────────────────────────────────────────────
+// inflation is passed as a DECIMAL (e.g. 0.03). Each period starts at
+// nominal_at_period_start × factors[p], then inflates within the period.
+// factors is an array of 5 values, one per period.
+function simulateFactorBased(startBal, startNominal, years, periodLen, irrsPct, inflation, factors, minLegacy = 0, incomeSeries = [], taxMult = 1) {
+  let bal     = startBal;
+  let nominal = startNominal;
+  const data  = [];
+  let wd      = startNominal * factors[0];
+  for (let yr = 0; yr < years; yr++) {
+    const p      = Math.min(Math.floor(yr / periodLen), irrsPct.length - 1);
+    const irr    = irrsPct[p] / 100;
+    const income = incomeSeries[yr] ?? 0;
+    if (yr > 0 && yr % periodLen === 0) wd = nominal * factors[p];
+    const grossWd = wd * taxMult;
+    const taxBill = grossWd - wd;
+    const netWd   = Math.max(0, grossWd - income);
+    bal -= netWd;
+    bal *= (1 + irr);
+    data.push({ balance: Math.max(bal, 0), withdrawal: wd, grossWd, taxBill, netWd, income });
+    nominal *= (1 + inflation);
+    wd      *= (1 + inflation);
+  }
+  return { finalBalance: bal, data, depletedAt: data.findIndex(d => d.balance <= 0) === -1 ? null : data.findIndex(d => d.balance <= 0) };
+}
+
+// ── Solve IRR-relative spending factors ──────────────────────────────────────
+// Replaces the old geometric P5/P1 ratio approach.
+// Shape fixed by α (return sensitivity slider); binary search finds the global
+// scale multiplier f such that the portfolio exactly meets minLegacy.
+function solveProgressiveFactors(startBal, startNominal, years, periodLen, irrsPct, inflation, minLegacy = 0, incomeSeries = [], taxMult = 1) {
+  if (startBal <= 0) return new Array(5).fill(0);
+  const alpha   = getAlpha();
+  const shape   = computeAlphaFactors(irrsPct, alpha);  // normalised shape, mean=1
+
+  // Binary search: find scalar f so portfolio(f·shape) finalBalance = minLegacy
+  const sim = f => {
+    const factors = shape.map(s => f * s);
+    return simulateFactorBased(startBal, startNominal, years, periodLen, irrsPct, inflation, factors, minLegacy, incomeSeries, taxMult).finalBalance;
+  };
+  if (sim(0) < minLegacy) return new Array(5).fill(0);
+  let lo = 0, hi = 2.0;
+  for (let i = 0; i < 20; i++) { if (sim(hi) < minLegacy) break; hi *= 2; }
+  for (let i = 0; i < 80; i++) {
+    const mid = (lo + hi) / 2;
+    if (sim(mid) >= minLegacy) lo = mid; else hi = mid;
+  }
+  const f = (lo + hi) / 2;
+  return shape.map(s => f * s);
+}
+
+// ── Build period input strips ────────────────────────────────────────────────
+const DEFAULT_SIGMAS = [20.0, 15.0, 15.0, 15.0, 14.0];
+
+function buildPeriodInputs() {
+  const container = document.getElementById('periodInputs');
+  container.innerHTML = '';
+  for (let i = 0; i < 5; i++) {
+    const strip = document.createElement('div');
+    strip.className = 'period-strip';
+    strip.style.background = `rgba(${hexToRgb(PERIOD_COLORS[i])},0.06)`;
+    strip.style.border = `1px solid rgba(${hexToRgb(PERIOD_COLORS[i])},0.2)`;
+    strip.style.marginBottom = '8px';
+    strip.innerHTML = `
+      <div class="period-input-row">
+        <span class="period-badge" style="background:rgba(${hexToRgb(PERIOD_COLORS[i])},0.2);color:${PERIOD_COLORS[i]}">${PERIOD_NAMES[i]}</span>
+        <span class="period-ages" id="pAges${i}">—</span>
+        <div class="period-irr-wrap">
+          <input type="number" id="irr${i}" value="${DEFAULT_IRRS[i]}" step="0.1" min="0" style="width:72px"/>
+          <span class="pct">% μ</span>
+          <input type="number" id="sigma${i}" value="${DEFAULT_SIGMAS[i]}" step="0.1" min="0" style="width:64px;margin-left:8px"/>
+          <span class="pct">% σ</span>
+        </div>
+      </div>`;
+    container.appendChild(strip);
+    document.getElementById(`irr${i}`).addEventListener('input', () => {
+      const irrsPct = Array.from({length:5}, (_,j) => parseFloat(document.getElementById(`irr${j}`)?.value ?? 8));
+      updateAlphaPreview(irrsPct);
+      recalc();
+    });
+    document.getElementById(`sigma${i}`).addEventListener('input', () => { /* σ only used in MC */ });
+  }
+}
+
+function hexToRgb(hex) {
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return `${r},${g},${b}`;
+}
+
+// ── Update period age labels ─────────────────────────────────────────────────
+function updatePeriodLabels(retirementAge, periodLen, lifespan) {
+  for (let i = 0; i < 5; i++) {
+    const start = retirementAge + i * periodLen;
+    const end   = i === 4 ? lifespan : retirementAge + (i+1) * periodLen;
+    const el = document.getElementById(`pAges${i}`);
+    if (el) el.textContent = `Age ${start} – ${end}`;
+  }
+}
+
+// ── Draw chart ───────────────────────────────────────────────────────────────
+let chartMeta = null;
+
+function drawChart(baseData, optData, retirementAge, periodLen, lifespan, baselineDepletedAt) {
+  const canvas = document.getElementById('chartCanvas');
+  const wrap   = canvas.parentElement;
+  const dpr    = window.devicePixelRatio || 1;
+  const cssW   = getWrapWidth(wrap);
+  const cssH   = 340;
+  canvas.style.width  = cssW + 'px';
+  canvas.style.height = cssH + 'px';
+  canvas.width  = cssW * dpr;
+  canvas.height = cssH * dpr;
+
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const W = cssW, H = cssH;
+  const padL = 74, padR = 20, padT = 18, padB = 38;
+  const cW = W - padL - padR, cH = H - padT - padB;
+
+  const allBals = [...baseData.map(d=>d.balance), ...optData.map(d=>d.balance)];
+  const maxBal  = Math.max(...allBals, 1);
+  const minAge  = retirementAge;
+  const maxAge  = retirementAge + baseData.length - 1;
+
+  const xS = age => padL + ((age - minAge) / (maxAge - minAge)) * cW;
+  const yS = val => padT + cH - (Math.max(val,0) / maxBal) * cH;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Period background bands
+  for (let i = 0; i < 5; i++) {
+    const x1 = xS(retirementAge + i * periodLen);
+    const x2 = i === 4 ? xS(lifespan) : xS(retirementAge + (i+1) * periodLen);
+    const [r,g,b] = PERIOD_COLORS[i].slice(1).match(/.{2}/g).map(h=>parseInt(h,16));
+    ctx.fillStyle = `rgba(${r},${g},${b},0.04)`;
+    ctx.fillRect(x1, padT, x2 - x1, cH);
+  }
+
+  // Period dividers
+  ctx.strokeStyle = '#1e3a5f'; ctx.lineWidth = 1; ctx.setLineDash([3,3]);
+  for (let i = 1; i < 5; i++) {
+    const x = xS(retirementAge + i * periodLen);
+    ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, padT + cH); ctx.stroke();
+    ctx.fillStyle = '#1e3a5f'; ctx.font = '9px Courier New'; ctx.textAlign = 'center';
+    ctx.fillText(PERIOD_NAMES[i], x, padT - 4);
+  }
+  ctx.fillStyle = '#1e3a5f'; ctx.font = '9px Courier New'; ctx.textAlign = 'center';
+  ctx.fillText(PERIOD_NAMES[0], xS(retirementAge) + 16, padT - 4);
+  ctx.setLineDash([]);
+
+  // Grid
+  ctx.strokeStyle = '#1e2535'; ctx.lineWidth = 1;
+  ctx.font = '11px Courier New'; ctx.fillStyle = '#64748b'; ctx.textAlign = 'right';
+  const yTicks = 5;
+  for (let i = 0; i <= yTicks; i++) {
+    const val = (maxBal / yTicks) * i;
+    const y   = yS(val);
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
+    ctx.fillText(fmt(val), padL - 6, y + 4);
+  }
+
+  // X axis
+  ctx.textAlign = 'center'; ctx.fillStyle = '#64748b';
+  const step = Math.ceil((maxAge - minAge) / 10);
+  for (let age = minAge; age <= maxAge; age += step) {
+    const x = xS(age);
+    ctx.beginPath(); ctx.strokeStyle = '#1e2535'; ctx.moveTo(x, padT+cH); ctx.lineTo(x, padT+cH+4); ctx.stroke();
+    ctx.fillText(age, x, padT + cH + 16);
+  }
+  ctx.fillText('Age', W/2, H - 4);
+
+  // Depletion line (baseline only)
+  if (baselineDepletedAt !== null) {
+    const dx = xS(retirementAge + baselineDepletedAt);
+    ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 1.5; ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(dx, padT); ctx.lineTo(dx, padT+cH); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#ef4444'; ctx.font = '10px Courier New'; ctx.textAlign = 'left';
+    ctx.fillText('Baseline depleted', dx + 4, padT + 14);
+  }
+
+  // Optimized area fill
+  ctx.beginPath();
+  ctx.moveTo(xS(retirementAge), yS(optData[0].balance));
+  optData.forEach((d,i) => ctx.lineTo(xS(retirementAge+i), yS(d.balance)));
+  ctx.lineTo(xS(retirementAge + optData.length-1), padT+cH);
+  ctx.lineTo(xS(retirementAge), padT+cH);
+  ctx.closePath();
+  const grad2 = ctx.createLinearGradient(0, padT, 0, padT+cH);
+  grad2.addColorStop(0, 'rgba(96,165,250,0.15)');
+  grad2.addColorStop(1, 'rgba(96,165,250,0)');
+  ctx.fillStyle = grad2; ctx.fill();
+
+  // Baseline area fill
+  ctx.beginPath();
+  ctx.moveTo(xS(retirementAge), yS(baseData[0].balance));
+  baseData.forEach((d,i) => ctx.lineTo(xS(retirementAge+i), yS(d.balance)));
+  ctx.lineTo(xS(retirementAge + baseData.length-1), padT+cH);
+  ctx.lineTo(xS(retirementAge), padT+cH);
+  ctx.closePath();
+  const grad1 = ctx.createLinearGradient(0, padT, 0, padT+cH);
+  grad1.addColorStop(0, 'rgba(201,168,76,0.2)');
+  grad1.addColorStop(1, 'rgba(201,168,76,0)');
+  ctx.fillStyle = grad1; ctx.fill();
+
+  // Optimized line (dashed blue)
+  ctx.beginPath(); ctx.strokeStyle = '#60a5fa'; ctx.lineWidth = 2; ctx.setLineDash([6,4]);
+  optData.forEach((d,i) => {
+    const x = xS(retirementAge+i), y = yS(d.balance);
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  ctx.stroke(); ctx.setLineDash([]);
+
+  // Baseline line (solid gold)
+  ctx.beginPath(); ctx.strokeStyle = '#c9a84c'; ctx.lineWidth = 2;
+  baseData.forEach((d,i) => {
+    const x = xS(retirementAge+i), y = yS(d.balance);
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+
+  // Store for hover
+  chartMeta = { baseData, optData, xS, yS, retirementAge, padL, padR, padT, cH };
+}
+
+// ── Tooltip ──────────────────────────────────────────────────────────────────
+document.getElementById('chartCanvas').addEventListener('mousemove', function(e) {
+  if (!chartMeta) return;
+  const rect = this.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const { baseData, optData, xS, yS, retirementAge, padL, padR } = chartMeta;
+  if (mx < padL || mx > rect.width - padR) { document.getElementById('tooltip').style.display='none'; return; }
+
+  let nearest = null, bestDist = Infinity;
+  baseData.forEach((d,i) => {
+    const dx = Math.abs(xS(retirementAge+i) - mx);
+    if (dx < bestDist) { bestDist = dx; nearest = i; }
+  });
+  if (nearest === null) return;
+
+  const bd = baseData[nearest], od = optData[nearest];
+  const age = retirementAge + nearest;
+  document.getElementById('ttAge').textContent  = `Age ${age}`;
+  document.getElementById('ttBase').innerHTML   = `Baseline: <strong>${fmtFull(bd.balance)}</strong> <span style="color:#64748b;font-size:11px">(${fmt(bd.withdrawal)}/yr)</span>`;
+  document.getElementById('ttOpt').innerHTML    = `Optimized: <strong>${fmtFull(od.balance)}</strong> <span style="color:#64748b;font-size:11px">(${fmt(od.withdrawal)}/yr)</span>`;
+
+  const tt = document.getElementById('tooltip');
+  const tx = xS(retirementAge+nearest) + 12;
+  const ty = Math.min(yS(bd.balance), yS(od.balance)) - 10;
+  tt.style.left = tx + 'px'; tt.style.top = ty + 'px'; tt.style.display = 'block';
+});
+
+document.getElementById('chartCanvas').addEventListener('mouseleave', () => {
+  document.getElementById('tooltip').style.display = 'none';
+});
+
+// ── Withdrawal chart ─────────────────────────────────────────────────────────
+let wdChartMeta = null;
+
+function drawWdChart(baseData, periodMaxWd, periodFactor, retirementAge, periodLen, retirementYears) {
+  const canvas = document.getElementById('wdCanvas');
+  const wrap   = canvas.parentElement;
+  const dpr    = window.devicePixelRatio || 1;
+  const cssW   = getWrapWidth(wrap);
+  const cssH   = 260;
+  canvas.style.width  = cssW + 'px';
+  canvas.style.height = cssH + 'px';
+  canvas.width  = cssW * dpr;
+  canvas.height = cssH * dpr;
+
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const W = cssW, H = cssH;
+  const padL = 74, padR = 20, padT = 18, padB = 38;
+  const cW = W - padL - padR, cH = H - padT - padB;
+
+  // Build year-by-year data: planned wd and which period's max applies
+  const rows = baseData.map((d, yr) => {
+    const p = Math.min(Math.floor(yr / periodLen), 4);
+    return { yr, age: retirementAge + yr, planned: d.withdrawal, maxWd: periodMaxWd[p], period: p };
+  });
+
+  const maxVal = Math.max(...rows.map(r => Math.max(r.planned, r.maxWd)), 1);
+  const minAge = retirementAge;
+  const maxAge = retirementAge + rows.length - 1;
+
+  const xS = age => padL + ((age - minAge) / (maxAge - minAge)) * cW;
+  const yS = val  => padT + cH - (Math.max(val, 0) / maxVal) * cH;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Period background bands
+  for (let i = 0; i < 5; i++) {
+    const x1 = xS(retirementAge + i * periodLen);
+    const x2 = i === 4 ? xS(retirementAge + retirementYears - 1) : xS(retirementAge + (i+1) * periodLen);
+    const [r,g,b] = PERIOD_COLORS[i].slice(1).match(/.{2}/g).map(h=>parseInt(h,16));
+    ctx.fillStyle = `rgba(${r},${g},${b},0.04)`;
+    ctx.fillRect(x1, padT, x2 - x1, cH);
+  }
+
+  // Period dividers + labels
+  ctx.strokeStyle = '#1e3a5f'; ctx.lineWidth = 1; ctx.setLineDash([3,3]);
+  for (let i = 1; i < 5; i++) {
+    const x = xS(retirementAge + i * periodLen);
+    ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, padT+cH); ctx.stroke();
+  }
+  ctx.setLineDash([]);
+
+  // Grid lines
+  ctx.strokeStyle = '#1e2535'; ctx.lineWidth = 1;
+  ctx.font = '11px Courier New'; ctx.fillStyle = '#64748b'; ctx.textAlign = 'right';
+  for (let i = 0; i <= 4; i++) {
+    const val = (maxVal / 4) * i;
+    const y   = yS(val);
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
+    ctx.fillText(fmt(val) + '/yr', padL - 6, y + 4);
+  }
+
+  // X axis
+  ctx.textAlign = 'center'; ctx.fillStyle = '#64748b';
+  const step = Math.ceil((maxAge - minAge) / 10);
+  for (let age = minAge; age <= maxAge; age += step) {
+    const x = xS(age);
+    ctx.beginPath(); ctx.strokeStyle = '#1e2535'; ctx.moveTo(x, padT+cH); ctx.lineTo(x, padT+cH+4); ctx.stroke();
+    ctx.fillText(age, x, padT + cH + 16);
+  }
+  ctx.fillText('Age', W/2, H - 4);
+
+  // Max withdrawal — step function (one horizontal segment per period)
+  for (let p = 0; p < 5; p++) {
+    const startYr = p * periodLen;
+    const endYr   = p === 4 ? retirementYears - 1 : (p+1) * periodLen - 1;
+    const x1 = xS(retirementAge + startYr);
+    const x2 = xS(retirementAge + endYr);
+    const y  = yS(periodMaxWd[p]);
+    const [r,g,b] = PERIOD_COLORS[p].slice(1).match(/.{2}/g).map(h=>parseInt(h,16));
+    const factor = periodFactor[p];
+    const col = factor >= 0.98 ? '#34d399' : factor >= 0.80 ? '#f59e0b' : '#f87171';
+
+    // Fill area between planned and max
+    const plannedAtStart = rows[startYr]?.planned ?? 0;
+    const plannedAtEnd   = rows[Math.min(endYr, rows.length-1)]?.planned ?? 0;
+    ctx.beginPath();
+    ctx.moveTo(x1, yS(plannedAtStart));
+    ctx.lineTo(x2, yS(plannedAtEnd));
+    ctx.lineTo(x2, y);
+    ctx.lineTo(x1, y);
+    ctx.closePath();
+    const above = periodMaxWd[p] >= rows[startYr]?.planned;
+    ctx.fillStyle = above ? `rgba(52,211,153,0.08)` : `rgba(248,113,113,0.1)`;
+    ctx.fill();
+
+    // Step line
+    ctx.beginPath();
+    ctx.strokeStyle = col; ctx.lineWidth = 2.5; ctx.setLineDash([]);
+    ctx.moveTo(x1, y); ctx.lineTo(x2, y);
+    ctx.stroke();
+
+    // Vertical connector to next period
+    if (p < 4) {
+      const nextY = yS(periodMaxWd[p+1]);
+      ctx.beginPath(); ctx.strokeStyle = col; ctx.lineWidth = 1; ctx.setLineDash([2,3]);
+      ctx.moveTo(x2, y); ctx.lineTo(x2, nextY);
+      ctx.stroke(); ctx.setLineDash([]);
+    }
+
+    // Factor label above/below step
+    ctx.font = 'bold 11px Courier New'; ctx.textAlign = 'center';
+    ctx.fillStyle = col;
+    const labelX = (x1 + x2) / 2;
+    const labelY = above ? y - 8 : y + 14;
+    ctx.fillText(`×${factor.toFixed(2)}`, labelX, labelY);
+  }
+
+  // Planned withdrawal — smooth line
+  ctx.beginPath(); ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.5; ctx.setLineDash([4,3]);
+  rows.forEach((r, i) => {
+    const x = xS(r.age), y = yS(r.planned);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.stroke(); ctx.setLineDash([]);
+
+  wdChartMeta = { rows, xS, yS, periodMaxWd, periodFactor, retirementAge, padL, padR };
+}
+
+document.getElementById('wdCanvas').addEventListener('mousemove', function(e) {
+  if (!wdChartMeta) return;
+  const rect = this.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const { rows, xS, yS, periodMaxWd, periodFactor, retirementAge, padL, padR } = wdChartMeta;
+  if (mx < padL || mx > rect.width - padR) { document.getElementById('wdTooltip').style.display='none'; return; }
+
+  let nearest = null, bestDist = Infinity;
+  rows.forEach((r,i) => {
+    const dx = Math.abs(xS(r.age) - mx);
+    if (dx < bestDist) { bestDist = dx; nearest = i; }
+  });
+  if (nearest === null) return;
+
+  const r = rows[nearest];
+  const factor = periodFactor[r.period];
+  const factorColor = factor >= 0.98 ? '#34d399' : factor >= 0.80 ? '#f59e0b' : '#f87171';
+  document.getElementById('wdTtAge').textContent     = `Age ${r.age} · P${r.period+1}`;
+  document.getElementById('wdTtPlanned').textContent = `Planned: ${fmtFull(r.planned)}/yr`;
+  document.getElementById('wdTtMax').innerHTML       = `<span style="color:${factorColor}">Max: ${fmtFull(r.maxWd)}/yr</span>`;
+  document.getElementById('wdTtFactor').innerHTML    = `<span style="color:${factorColor}">Factor ×${factor.toFixed(2)} — ${factor >= 1 ? 'can spend more' : 'cut ' + ((1-factor)*100).toFixed(0)+'%'}</span>`;
+
+  const tt = document.getElementById('wdTooltip');
+  const ty = Math.min(yS(r.planned), yS(r.maxWd)) - 10;
+  tt.style.left = (xS(r.age) + 12) + 'px';
+  tt.style.top  = ty + 'px';
+  tt.style.display = 'block';
+});
+
+document.getElementById('wdCanvas').addEventListener('mouseleave', () => {
+  document.getElementById('wdTooltip').style.display = 'none';
+});
+
+// ── Sequence stress test chart ───────────────────────────────────────────────
+let seqChartMeta = null;
+
+function drawSeqChart(scenarios, retirementAge, periodLen, lifespan) {
+  const canvas = document.getElementById('seqCanvas');
+  if (!canvas) return;
+  const wrap = canvas.parentElement;
+  const dpr  = window.devicePixelRatio || 1;
+  const cssW = getWrapWidth(wrap), cssH = 300;
+  canvas.style.width = cssW + 'px'; canvas.style.height = cssH + 'px';
+  canvas.width = cssW * dpr; canvas.height = cssH * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const W = cssW, H = cssH;
+  const padL = 74, padR = 20, padT = 18, padB = 38;
+  const cW = W - padL - padR, cH = H - padT - padB;
+
+  const allBals = scenarios.flatMap(s => s.sim.data.map(d => d.balance));
+  const maxBal  = Math.max(...allBals, 1);
+  const retYears = scenarios[0].sim.data.length;
+  const minAge = retirementAge, maxAge = retirementAge + retYears - 1;
+  const xS = age => padL + ((age - minAge) / (maxAge - minAge)) * cW;
+  const yS = val  => padT + cH - (Math.max(val, 0) / maxBal) * cH;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Period background bands
+  for (let i = 0; i < 5; i++) {
+    const x1 = xS(retirementAge + i * periodLen);
+    const x2 = i === 4 ? xS(lifespan) : xS(retirementAge + (i+1) * periodLen);
+    const [r,g,b] = PERIOD_COLORS[i].slice(1).match(/.{2}/g).map(h=>parseInt(h,16));
+    ctx.fillStyle = `rgba(${r},${g},${b},0.03)`;
+    ctx.fillRect(x1, padT, x2 - x1, cH);
+  }
+
+  // Grid
+  ctx.font = '11px Courier New'; ctx.fillStyle = '#64748b'; ctx.textAlign = 'right';
+  for (let i = 0; i <= 4; i++) {
+    const val = (maxBal / 4) * i, y = yS(val);
+    ctx.strokeStyle = '#1e2535'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W-padR, y); ctx.stroke();
+    ctx.fillText(fmt(val), padL - 6, y + 4);
+  }
+  ctx.textAlign = 'center'; ctx.fillStyle = '#64748b';
+  const step = Math.ceil((maxAge - minAge) / 10);
+  for (let age = minAge; age <= maxAge; age += step) {
+    const x = xS(age);
+    ctx.beginPath(); ctx.strokeStyle = '#1e2535'; ctx.moveTo(x, padT+cH); ctx.lineTo(x, padT+cH+4); ctx.stroke();
+    ctx.fillText(age, x, padT+cH+16);
+  }
+  ctx.fillText('Age', W/2, H-4);
+
+  // Draw each scenario trajectory
+  const STYLES = [
+    { color: '#c9a84c', dash: [],    width: 2.5 },
+    { color: '#f87171', dash: [6,4], width: 2   },
+  ];
+  scenarios.forEach((s, si) => {
+    const st = STYLES[si];
+    // Gradient fill
+    ctx.beginPath();
+    ctx.moveTo(xS(retirementAge), yS(s.sim.data[0].balance));
+    s.sim.data.forEach((d,i) => ctx.lineTo(xS(retirementAge+i), yS(d.balance)));
+    ctx.lineTo(xS(retirementAge + s.sim.data.length - 1), padT+cH);
+    ctx.lineTo(xS(retirementAge), padT+cH);
+    ctx.closePath();
+    const [r,g,b] = st.color.slice(1).match(/.{2}/g).map(h=>parseInt(h,16));
+    const grad = ctx.createLinearGradient(0, padT, 0, padT+cH);
+    grad.addColorStop(0, `rgba(${r},${g},${b},0.12)`);
+    grad.addColorStop(1, `rgba(${r},${g},${b},0)`);
+    ctx.fillStyle = grad; ctx.fill();
+
+    // Line
+    ctx.beginPath(); ctx.strokeStyle = st.color; ctx.lineWidth = st.width; ctx.setLineDash(st.dash);
+    s.sim.data.forEach((d,i) => {
+      const x = xS(retirementAge+i), y = yS(d.balance);
+      i === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    });
+    ctx.stroke(); ctx.setLineDash([]);
+  });
+
+  seqChartMeta = { scenarios, xS, yS, retirementAge };
+}
+
+document.getElementById('seqCanvas').addEventListener('mousemove', function(e) {
+  if (!seqChartMeta) return;
+  const rect = this.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const { scenarios, xS, yS, retirementAge } = seqChartMeta;
+  const data = scenarios[0].sim.data;
+  let nearest = null, bestDist = Infinity;
+  data.forEach((_,i) => {
+    const dx = Math.abs(xS(retirementAge+i) - mx);
+    if (dx < bestDist) { bestDist = dx; nearest = i; }
+  });
+  if (nearest === null) return;
+  const age = retirementAge + nearest;
+  document.getElementById('seqTtAge').textContent  = `Age ${age}`;
+  document.getElementById('seqTtPlan').innerHTML   = `Your plan: <strong>${fmtFull(scenarios[0].sim.data[nearest].balance)}</strong>`;
+  document.getElementById('seqTtPess').innerHTML   = `Pessimistic: <strong>${fmtFull(scenarios[1].sim.data[nearest].balance)}</strong>`;
+  const tt = document.getElementById('seqTooltip');
+  tt.style.left = (xS(age) + 12) + 'px';
+  tt.style.top  = (yS(scenarios[0].sim.data[nearest].balance) - 10) + 'px';
+  tt.style.display = 'block';
+});
+document.getElementById('seqCanvas').addEventListener('mouseleave', () => {
+  document.getElementById('seqTooltip').style.display = 'none';
+});
+
+// ── α return sensitivity control ─────────────────────────────────────────────
+function getAlpha() {
+  return Math.min(Math.max(parseFloat(document.getElementById('alphaSlider')?.value ?? 0.7), 0), 1);
+}
+
+// Compute the 5 IRR-relative spending factors for a given IRR array and alpha.
+// aᵢ = α · √(IRRᵢ / avgIRR) + (1 − α)
+// Factors are then normalised so their weighted average = 1, preserving total spending envelope.
+function computeAlphaFactors(irrsPct, alpha) {
+  const avg = irrsPct.reduce((s,v)=>s+v,0) / irrsPct.length;
+  if (avg <= 0) return new Array(irrsPct.length).fill(1);
+  const raw = irrsPct.map(irr => alpha * Math.sqrt(Math.max(irr,0.01) / avg) + (1 - alpha));
+  // Normalise so mean = 1 (scalar shift, preserves shape)
+  const mean = raw.reduce((s,v)=>s+v,0) / raw.length;
+  return raw.map(v => v / mean);
+}
+
+function updateAlphaPreview(irrsPct) {
+  const alpha   = getAlpha();
+  const factors = computeAlphaFactors(irrsPct, alpha);
+  document.getElementById('alphaDisplay').textContent = alpha.toFixed(2);
+  const el = document.getElementById('alphaFactorPreview');
+  if (!el) return;
+  const avg = irrsPct.reduce((s,v)=>s+v,0) / irrsPct.length;
+  el.innerHTML = factors.map((f,i) => {
+    const irr = irrsPct[i];
+    const col = f > 1.05 ? '#34d399' : f < 0.95 ? '#f87171' : '#94a3b8';
+    return `<div style="flex:1;min-width:80px;padding:4px 8px;border-right:1px solid #1e2535;last-child:border:none">
+      <div style="color:#475569;margin-bottom:2px">P${i+1} · ${irr}%</div>
+      <div style="color:${col};font-size:12px;font-weight:700">×${f.toFixed(3)}</div>
+      <div style="color:#334155;font-size:9px">IRR/avg = ${(irr/avg).toFixed(2)}</div>
+    </div>`;
+  }).join('');
+}
+
+function onAlphaChange() {
+  // Collect current IRRs for preview
+  const irrsPct = Array.from({length:5}, (_,i) => parseFloat(document.getElementById(`irr${i}`)?.value ?? 8));
+  updateAlphaPreview(irrsPct);
+  recalc();
+}
+
+// ── Global table state (populated by recalc, read by renderYbyTable) ─────────
+let g_tableData = null;
+let g_chartData = null;
+
+// ── Monte Carlo engine ────────────────────────────────────────────────────────
+
+// Box-Muller normal random variate
+function randn() {
+  let u = 0, v = 0;
+  while (u === 0) u = Math.random();
+  while (v === 0) v = Math.random();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+
+// Log-normal annual return where the GEOMETRIC mean equals mu (as decimal).
+// This is the financially correct model: prices can't go negative, and
+// compounded returns follow a log-normal distribution.
+//
+// Derivation: if ln(1+R) ~ N(m, s²), then the geometric mean of (1+R) is
+// exp(m), so we need m = ln(1+mu) - s²/2, s = sqrt(ln(1 + (sigma/(1+mu))²)).
+// Result: E[geometric return] = mu exactly, regardless of sigma.
+function randLogNormalReturn(muPct, sigmaPct) {
+  const mu    = muPct    / 100;
+  const sigma = sigmaPct / 100;
+  const s2    = Math.log(1 + (sigma / (1 + mu)) ** 2);   // variance of ln(1+R)
+  const m     = Math.log(1 + mu) - s2 / 2;               // mean of ln(1+R)
+  return Math.exp(m + Math.sqrt(s2) * randn()) - 1;       // actual annual return
+}
+
+// Single MC simulation — returns year-by-year balance array
+function mcSimulateOne(nestEgg, startWd, retYears, periodLen, musPct, sigmasPct, inflation, timing) {
+  let bal = nestEgg, wd = startWd;
+  const bals = [];
+  for (let yr = 0; yr < retYears; yr++) {
+    const p    = Math.min(Math.floor(yr / periodLen), 4);
+    const ret  = randLogNormalReturn(musPct[p], sigmasPct[p]);  // log-normal, geometric mean = μ
+    if (timing === 'beginning') { bal -= wd; bal *= (1 + ret); }
+    else                        { bal = bal * (1 + ret) - wd;  }
+    bals.push(Math.max(bal, 0));
+    wd *= (1 + inflation / 100);
+  }
+  return bals;
+}
+
+// ── Robust canvas width helper ────────────────────────────────────────────────
+// clientWidth returns 0 when panel is hidden or layout hasn't completed on mobile.
+// getBoundingClientRect is more reliable; fallback chain ensures we always get >0.
+function getWrapWidth(wrap) {
+  return Math.max(
+    wrap.getBoundingClientRect().width,
+    wrap.clientWidth,
+    wrap.offsetWidth,
+    300
+  );
+}
+
+// Percentile helper
+function percentile(sorted, p) {
+  const i = (p / 100) * (sorted.length - 1);
+  const lo = Math.floor(i), hi = Math.ceil(i);
+  return sorted[lo] + (sorted[hi] - sorted[lo]) * (i - lo);
+}
+
+let mcState = null;  // stores last MC results for chart interaction
+
+// ── Single MC run — simulates all strategies with the SAME random return sequence ──
+// Returns { nominal, optimized, progressive, pessProgressive } — each an array of yr balances
+function mcSimulateFour(nestEgg, strategies, retYears, periodLen, musPct, sigmasPct, inflation, timing, incomeSeries = [], taxMult = 1) {
+  // One shared random return sequence per run — same luck for all strategies
+  const returns = Array.from({length: retYears}, (_, yr) => {
+    const p = Math.min(Math.floor(yr / periodLen), 4);
+    return randLogNormalReturn(musPct[p], sigmasPct[p]);
+  });
+
+  return strategies.map(strategy => {
+    let bal = nestEgg;
+    let wd  = strategy.startWd;
+    const bals = [], wds = [];
+
+    for (let yr = 0; yr < retYears; yr++) {
+      const ret    = returns[yr];
+      const income = incomeSeries[yr] ?? 0;
+      let grossWd;
+      if (strategy.type === 'geometric') {
+        const { alpha, rate, floor, inf } = strategy.geo;
+        const rawWd = alpha * wd * (1 + inf) + (1 - alpha) * rate * bal;
+        wd = Math.max(rawWd, floor);
+        grossWd = wd;
+      } else {
+        grossWd = strategy.getWd(yr);
+      }
+      const netWd = Math.max(0, grossWd * taxMult - income);
+      if (timing === 'beginning') { bal -= netWd; bal *= (1 + ret); }
+      else                        { bal = bal * (1 + ret) - netWd;  }
+      bals.push(Math.max(bal, 0));
+      wds.push(grossWd);
+    }
+    return { bals, wds };
+  });
+}
+
+async function runMonteCarlo() {
+  try {
+    await _runMonteCarloInner();
+  } catch(err) {
+    console.error('Monte Carlo error:', err);
+    document.getElementById('mcProgress').style.display  = 'none';
+    document.getElementById('mcRunBtn').style.opacity    = '1';
+    document.getElementById('mcRunBtn').disabled = false;
+    document.getElementById('mcProgressLabel').textContent = '⚠ Error: ' + err.message;
+    document.getElementById('mcProgress').style.display = '';
+  }
+}
+
+async function _runMonteCarloInner() {
+  // ── Gather inputs ──
+  const retirementAge   = num('retirementAge');
+  const lifespan        = num('lifespan');
+  const inflation       = num('inflation');
+  if (!lifespan || !retirementAge || lifespan <= retirementAge) return;
+  const retYears   = Math.max(lifespan - retirementAge, 1);
+  const periodLen  = Math.max(Math.floor(retYears / 5), 1);
+  const inf        = inflation / 100;
+
+  const currentAge      = num('currentAge');
+  const currentSavings  = num('currentSavings');
+  const annualContrib   = num('annualContrib');
+  const accumIRR        = num('accumIRR');
+  const currentExpenses = num('currentExpenses');
+  const useManual       = document.getElementById('useManual').checked;
+  const manualNestEgg   = num('manualNestEgg');
+  const yearsToRetire   = Math.max(retirementAge - currentAge, 0);
+  const nestEggCalc     = useManual ? manualNestEgg
+    : currentSavings * Math.pow(1 + accumIRR/100, yearsToRetire)
+      + annualContrib * (Math.pow(1 + accumIRR/100, yearsToRetire) - 1) / (accumIRR/100 || 1);
+  const baselineWd = currentExpenses * Math.pow(1 + inf, yearsToRetire);
+
+  const mus    = Array.from({length:5}, (_,i) => num(`irr${i}`));
+  const sigmas = Array.from({length:5}, (_,i) => num(`sigma${i}`));
+  const nRuns  = parseInt(document.getElementById('mcRuns').value);
+  const timing = withdrawalTiming;
+
+  // Pick up the income series already computed by recalc (avoids re-reading all inputs)
+  const incomeSeries = window._incomeSeries ?? [];
+
+  // ── Geometric spending rule parameters ──
+  const geoAlpha = parseFloat(document.getElementById('geoAlpha').value) || 0.75;
+  const geoRate  = (parseFloat(document.getElementById('geoRate').value)  || 4.0) / 100;
+  const geoFloor = (parseFloat(document.getElementById('geoFloor').value) || 70)  / 100;
+
+  // Pessimistic IRR ordering (worst first)
+  const pessIrrs = [...mus].sort((a,b) => a-b);
+
+  // Nominal withdrawal schedule (fixed, inflation-adjusted)
+  const nomWds = Array.from({length: retYears}, (_, yr) => baselineWd * Math.pow(1+inf, yr));
+
+  const taxMult = window._taxMult ?? 1;
+
+  // Pessimistic withdrawal schedule anchored to nominal outcome (same as stress test).
+  // Using base.finalBalance ensures pessimistic geometric starts BELOW nominal,
+  // not at an inflated "max extraction" level.
+  const minLegacy   = num('minLegacy');
+  const seqLegacy   = window._nominalFinalBalance > 0 ? window._nominalFinalBalance : minLegacy;
+  const pessFactors = solveProgressiveFactors(nestEggCalc, baselineWd, retYears, periodLen, pessIrrs, inf, seqLegacy, incomeSeries, taxMult);
+  const pessStartWd = baselineWd * pessFactors[0];
+  const pessWds = (() => {
+    const wds = []; let nominal = baselineWd;
+    let wd = pessStartWd;
+    for (let yr = 0; yr < retYears; yr++) {
+      const p = Math.min(Math.floor(yr / periodLen), 4);
+      if (yr > 0 && yr % periodLen === 0) wd = nominal * pessFactors[p];
+      wds.push(wd);
+      nominal *= (1+inf); wd *= (1+inf);
+    }
+    return wds;
+  })();
+
+  // ── Nominal stress test α-schedule (nominal IRR ordering) ──────────────────
+  const nomAlphaShape    = computeAlphaFactors(mus, getAlpha());
+  const nomAlphaStartWd  = baselineWd * nomAlphaShape[0];
+  const nomAlphaWds = (() => {
+    const wds = []; let nominal = baselineWd;
+    let wd = nomAlphaStartWd;
+    for (let yr = 0; yr < retYears; yr++) {
+      const p = Math.min(Math.floor(yr / periodLen), 4);
+      if (yr > 0 && yr % periodLen === 0) wd = nominal * nomAlphaShape[p];
+      wds.push(wd);
+      nominal *= (1+inf); wd *= (1+inf);
+    }
+    return wds;
+  })();
+
+  // ── Pessimistic stress test α-schedule (worst-first IRR ordering) ─────────
+  const pessAlphaShape   = computeAlphaFactors(pessIrrs, getAlpha());
+  const pessAlphaStartWd = baselineWd * pessAlphaShape[0];
+  const pessAlphaWds = (() => {
+    const wds = []; let nominal = baselineWd;
+    let wd = pessAlphaStartWd;
+    for (let yr = 0; yr < retYears; yr++) {
+      const p = Math.min(Math.floor(yr / periodLen), 4);
+      if (yr > 0 && yr % periodLen === 0) wd = nominal * pessAlphaShape[p];
+      wds.push(wd);
+      nominal *= (1+inf); wd *= (1+inf);
+    }
+    return wds;
+  })();
+
+  // 5 strategies: [0] Nominal Fixed · [1] Nominal Geometric · [2] Nominal stress test ·
+  //               [3] Pessimistic Geometric · [4] Pessimistic stress test
+  const strategies = [
+    { label: 'Nominal Fixed',                    color: '#94a3b8',
+      type: 'fixed',    startWd: baselineWd,       getWd: yr => nomWds[yr] },
+    { label: 'Nominal Geometric',                color: '#c084fc',
+      type: 'geometric', startWd: baselineWd,
+      geo: { alpha: geoAlpha, rate: geoRate, floor: geoFloor * baselineWd, inf } },
+    { label: 'Nominal - stress test (α-schedule)',  color: '#34d399',
+      type: 'fixed',    startWd: nomAlphaStartWd,  getWd: yr => nomAlphaWds[yr] },
+    { label: 'Pessimistic Geometric',            color: '#f59e0b',
+      type: 'geometric', startWd: pessStartWd,
+      geo: { alpha: geoAlpha, rate: geoRate, floor: geoFloor * pessStartWd, inf } },
+    { label: 'Pessimistic - stress test (α-schedule)', color: '#f87171',
+      type: 'fixed',    startWd: pessAlphaStartWd, getWd: yr => pessAlphaWds[yr] },
+  ];
+
+  // ── Show progress ──
+  document.getElementById('mcProgress').style.display = '';
+  document.getElementById('mcResults').style.display  = 'none';
+  document.getElementById('mcRunBtn').style.opacity   = '0.5';
+  document.getElementById('mcRunBtn').disabled = true;
+
+  // ── Run in chunks, all strategies share same random draws per run ──
+  const CHUNK = 200;
+  // allBals[stratIdx][runIdx] = yr[] balances
+  // allWds[stratIdx][yr] = sorted withdrawals across runs (for percentiles)
+  const allBals = strategies.map(() => []);
+  const allWdsPerYr = strategies.map(() => Array.from({length:retYears}, ()=>[]));
+  let done = 0;
+
+  const runChunk = () => new Promise(resolve => setTimeout(() => {
+    const end = Math.min(done + CHUNK, nRuns);
+    for (let i = done; i < end; i++) {
+      const results = mcSimulateFour(nestEggCalc, strategies, retYears, periodLen, mus, sigmas, inflation, timing, incomeSeries, taxMult);
+      results.forEach(({bals, wds}, si) => {
+        allBals[si].push(bals);
+        wds.forEach((w, yr) => allWdsPerYr[si][yr].push(w));
+      });
+    }
+    done = end;
+    const pct = (done / nRuns * 100).toFixed(0);
+    document.getElementById('mcProgressBar').style.width  = pct + '%';
+    document.getElementById('mcProgressLabel').textContent = `Running… ${done.toLocaleString()} / ${nRuns.toLocaleString()} simulations`;
+    resolve();
+  }, 0));
+
+  while (done < nRuns) await runChunk();
+
+  // ── Compute per-strategy stats ──
+  const stratStats = strategies.map((s, si) => {
+    const pctiles = {};
+    [10, 25, 50, 75, 90].forEach(p => pctiles[p] = []);
+    const survivalRates = [];
+    for (let yr = 0; yr < retYears; yr++) {
+      const col = allBals[si].map(r => r[yr]).sort((a,b) => a-b);
+      [10,25,50,75,90].forEach(p => pctiles[p].push(percentile(col, p)));
+      survivalRates.push(col.filter(v => v > 0).length / nRuns);
+    }
+    const finalBals = allBals[si].map(r => r[retYears-1]).sort((a,b)=>a-b);
+    // Withdrawal percentiles per year (sorted inline)
+    const wdPctiles = {};
+    [10,25,50,75,90].forEach(p => {
+      wdPctiles[p] = allWdsPerYr[si].map(col => {
+        const sorted = [...col].sort((a,b)=>a-b);
+        return percentile(sorted, p);
+      });
+    });
+    return { ...s, pctiles, survivalRates, finalBals, wdPctiles,
+             successRate: survivalRates[retYears-1],
+             medianFinal: percentile(finalBals, 50),
+             p10Final:    percentile(finalBals, 10) };
+  });
+
+  // Sensitivity on nominal fixed strategy only
+  const SENS_LEVELS = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3];
+  const sensResults = [];
+  for (const lvl of SENS_LEVELS) {
+    const sensStrat = [{ label:'sens', color:'', type:'fixed',
+                         startWd: baselineWd * lvl,
+                         getWd: yr => nomWds[yr] * lvl }];
+    let survived = 0;
+    const nSens = Math.min(nRuns, 2000);
+    for (let i = 0; i < nSens; i++) {
+      const res = mcSimulateFour(nestEggCalc, sensStrat, retYears, periodLen, mus, sigmas, inflation, timing, incomeSeries, taxMult);
+      if (res[0].bals[retYears-1] > 0) survived++;
+    }
+    sensResults.push({ lvl, pct: survived / nSens });
+  }
+
+  mcState = {
+    stratStats, retirementAge, retYears, periodLen, lifespan, nRuns,
+    baselineWd, nestEgg: nestEggCalc, sensResults,
+    nominalBals: g_tableData?.rows.map(r => r.nominal.bal) ?? [],
+    pessFactors,
+  };
+  window.mcState = mcState;
+
+  document.getElementById('mcProgress').style.display  = 'none';
+  document.getElementById('mcResults').style.display   = '';
+  document.getElementById('mcRunBtn').style.opacity    = '1';
+  document.getElementById('mcRunBtn').disabled = false;
+
+  renderMCResults();
+} // end _runMonteCarloInner
+
+function renderMCResults() {
+  const { stratStats, retirementAge, retYears, lifespan, nRuns,
+          baselineWd } = mcState;
+
+  // Refresh YbY table if it's been built — geo columns now available
+  if (g_tableData) renderYbyTable();
+
+  // ── Gauges — one per strategy ──
+  document.getElementById('mcGauges').innerHTML = stratStats.map(s => {
+    const col = s.successRate >= 0.9 ? '#34d399' : s.successRate >= 0.75 ? '#f59e0b' : '#f87171';
+    return `
+      <div class="sbox" style="background:rgba(255,255,255,0.02);border:1px solid #1e2535;border-left:3px solid ${s.color}">
+        <div class="slabel" style="color:${s.color}">${s.label}</div>
+        <div style="font-family:Georgia,serif;font-size:26px;font-weight:700;color:${col};margin:6px 0">${(s.successRate*100).toFixed(1)}%</div>
+        <div style="font-family:'Courier New',monospace;font-size:10px;color:#475569;margin-bottom:4px">success to age ${lifespan}</div>
+        <div style="font-family:'Courier New',monospace;font-size:11px;color:#64748b">median final: ${fmt(s.medianFinal)}</div>
+        <div style="font-family:'Courier New',monospace;font-size:11px;color:#64748b">10th pctile:  ${fmt(s.p10Final)}</div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('mcHistAge').textContent = lifespan;
+
+  drawMCFan();
+  drawMCSurvival();
+  drawMCHist();
+  drawMCCashflows();
+  renderCashflowsPeriodTable();
+  renderMCSensTable();
+}
+
+function drawMCFan() {
+  const { stratStats, retirementAge, retYears, nominalBals, periodLen } = mcState;
+  const { pctiles } = stratStats[0];  // fan always shows nominal strategy uncertainty
+  const canvas = document.getElementById('mcFanCanvas');
+  const wrap = canvas.parentElement;
+  const dpr = window.devicePixelRatio || 1;
+  const cssW = getWrapWidth(wrap);
+  const cssH = 380;
+  canvas.style.width = cssW+'px'; canvas.style.height = cssH+'px';
+  canvas.width = cssW*dpr; canvas.height = cssH*dpr;
+  const ctx = canvas.getContext('2d'); ctx.scale(dpr, dpr);
+  const W = cssW, H = cssH;
+  const padL=74, padR=20, padT=18, padB=38, cW=W-padL-padR, cH=H-padT-padB;
+
+  const maxBal = Math.max(...pctiles[90], ...nominalBals.filter(Boolean), 1);
+  const xS = yr => padL + (yr / (retYears-1)) * cW;
+  const yS = val => padT + cH - (Math.max(val,0)/maxBal)*cH;
+
+  ctx.clearRect(0,0,W,H);
+
+  // Period bands
+  for (let i=0; i<5; i++) {
+    const x1 = xS(i*periodLen), x2 = i===4 ? xS(retYears-1) : xS((i+1)*periodLen);
+    const [r,g,b] = PERIOD_COLORS[i].slice(1).match(/.{2}/g).map(h=>parseInt(h,16));
+    ctx.fillStyle = `rgba(${r},${g},${b},0.03)`;
+    ctx.fillRect(x1, padT, x2-x1, cH);
+  }
+
+  // Grid
+  ctx.font='11px Courier New'; ctx.fillStyle='#64748b'; ctx.textAlign='right';
+  for (let i=0; i<=4; i++) {
+    const val=(maxBal/4)*i, y=yS(val);
+    ctx.strokeStyle='#1e2535'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(W-padR,y); ctx.stroke();
+    ctx.fillText(fmt(val), padL-6, y+4);
+  }
+  ctx.textAlign='center'; ctx.fillStyle='#64748b';
+  const step = Math.ceil(retYears/10);
+  for (let yr=0; yr<retYears; yr+=step) {
+    const x=xS(yr);
+    ctx.beginPath(); ctx.strokeStyle='#1e2535'; ctx.moveTo(x,padT+cH); ctx.lineTo(x,padT+cH+4); ctx.stroke();
+    ctx.fillText(retirementAge+yr, x, padT+cH+16);
+  }
+  ctx.fillText('Age', W/2, H-4);
+
+  // Fan bands (nominal strategy uncertainty)
+  const drawBand = (lo, hi, alpha) => {
+    ctx.beginPath();
+    ctx.moveTo(xS(0), yS(pctiles[lo][0]));
+    for (let yr=0; yr<retYears; yr++) ctx.lineTo(xS(yr), yS(pctiles[lo][yr]));
+    for (let yr=retYears-1; yr>=0; yr--) ctx.lineTo(xS(yr), yS(pctiles[hi][yr]));
+    ctx.closePath();
+    ctx.fillStyle = `rgba(96,165,250,${alpha})`; ctx.fill();
+  };
+  drawBand(10, 90, 0.18);
+  drawBand(25, 75, 0.28);
+
+  // Median line
+  ctx.beginPath(); ctx.strokeStyle='#60a5fa'; ctx.lineWidth=2.5; ctx.setLineDash([]);
+  pctiles[50].forEach((v,yr) => yr===0 ? ctx.moveTo(xS(yr),yS(v)) : ctx.lineTo(xS(yr),yS(v)));
+  ctx.stroke();
+
+  // Nominal plan deterministic line
+  if (nominalBals.length) {
+    ctx.beginPath(); ctx.strokeStyle='#c9a84c'; ctx.lineWidth=1.5; ctx.setLineDash([5,4]);
+    nominalBals.forEach((v,yr) => yr===0 ? ctx.moveTo(xS(yr),yS(v)) : ctx.lineTo(xS(yr),yS(v)));
+    ctx.stroke(); ctx.setLineDash([]);
+  }
+
+  // Tooltip
+  mcState._fanXS = xS; mcState._fanYS = yS;
+  canvas.onmousemove = e => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    let nearYr = Math.round((mx - padL) / cW * (retYears-1));
+    nearYr = Math.max(0, Math.min(retYears-1, nearYr));
+    const tt = document.getElementById('mcTooltip');
+    document.getElementById('mcTtAge').textContent  = `Age ${retirementAge + nearYr} — Nominal strategy`;
+    document.getElementById('mcTt90').textContent   = `90th: ${fmt(pctiles[90][nearYr])}`;
+    document.getElementById('mcTt75').textContent   = `75th: ${fmt(pctiles[75][nearYr])}`;
+    document.getElementById('mcTt50').textContent   = `Median: ${fmt(pctiles[50][nearYr])}`;
+    document.getElementById('mcTt25').textContent   = `25th: ${fmt(pctiles[25][nearYr])}`;
+    document.getElementById('mcTt10').textContent   = `10th: ${fmt(pctiles[10][nearYr])}`;
+    const nom = nominalBals[nearYr];
+    document.getElementById('mcTtNom').textContent  = nom != null ? `Deterministic: ${fmt(nom)}` : '';
+    tt.style.left = (xS(nearYr) + 12) + 'px';
+    tt.style.top  = (yS(pctiles[50][nearYr]) - 10) + 'px';
+    tt.style.display = 'block';
+  };
+  canvas.onmouseleave = () => { document.getElementById('mcTooltip').style.display='none'; };
+}
+
+function drawMCSurvival() {
+  const { stratStats, retirementAge, retYears } = mcState;
+  const canvas = document.getElementById('mcSurvivalCanvas');
+  const wrap = canvas.parentElement;
+  const dpr = window.devicePixelRatio || 1;
+  const cssW = getWrapWidth(wrap), cssH = 220;
+  canvas.style.width=cssW+'px'; canvas.style.height=cssH+'px';
+  canvas.width=cssW*dpr; canvas.height=cssH*dpr;
+  const ctx=canvas.getContext('2d'); ctx.scale(dpr,dpr);
+  const W=cssW, H=cssH, padL=48, padR=16, padT=14, padB=32;
+  const cW=W-padL-padR, cH=H-padT-padB;
+  const xS = yr => padL + (yr/(retYears-1))*cW;
+  const yS = v  => padT + cH - v*cH;
+
+  ctx.clearRect(0,0,W,H);
+
+  // Grid
+  ctx.font='10px Courier New'; ctx.textAlign='right'; ctx.fillStyle='#64748b';
+  [0, 0.25, 0.5, 0.75, 0.9, 1].forEach(v => {
+    const y=yS(v);
+    ctx.strokeStyle='#1e2535'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(W-padR,y); ctx.stroke();
+    ctx.fillText((v*100).toFixed(0)+'%', padL-4, y+4);
+  });
+
+  // 80% danger zone
+  ctx.fillStyle='rgba(248,113,113,0.06)';
+  ctx.fillRect(padL, yS(0.8), cW, yS(0)-yS(0.8));
+  ctx.strokeStyle='rgba(248,113,113,0.3)'; ctx.lineWidth=1; ctx.setLineDash([3,3]);
+  ctx.beginPath(); ctx.moveTo(padL,yS(0.8)); ctx.lineTo(W-padR,yS(0.8)); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle='rgba(248,113,113,0.5)'; ctx.font='9px Courier New'; ctx.textAlign='left';
+  ctx.fillText('80%', padL+3, yS(0.8)-3);
+
+  // X axis
+  ctx.textAlign='center'; ctx.fillStyle='#64748b'; ctx.font='10px Courier New';
+  const step=Math.ceil(retYears/8);
+  for (let yr=0; yr<retYears; yr+=step) {
+    const x=xS(yr);
+    ctx.beginPath(); ctx.strokeStyle='#1e2535'; ctx.moveTo(x,padT+cH); ctx.lineTo(x,padT+cH+4); ctx.stroke();
+    ctx.fillText(retirementAge+yr, x, padT+cH+16);
+  }
+  ctx.fillText('Age', W/2, H-2);
+
+  // Draw each strategy's survival curve
+  const dashes = [[], [4,2], [6,3], [3,3], [8,3,2,3]];
+  stratStats.forEach((s, si) => {
+    // Gradient fill under first (nominal) only — others just lines
+    if (si === 0) {
+      ctx.beginPath();
+      ctx.moveTo(xS(0), yS(s.survivalRates[0]));
+      s.survivalRates.forEach((v,yr) => ctx.lineTo(xS(yr), yS(v)));
+      ctx.lineTo(xS(retYears-1), padT+cH); ctx.lineTo(xS(0), padT+cH); ctx.closePath();
+      const grad = ctx.createLinearGradient(0,padT,0,padT+cH);
+      const hex = s.color.slice(1).match(/.{2}/g).map(h=>parseInt(h,16));
+      grad.addColorStop(0,`rgba(${hex},0.15)`); grad.addColorStop(1,`rgba(${hex},0)`);
+      ctx.fillStyle=grad; ctx.fill();
+    }
+    ctx.setLineDash(dashes[si]);
+    ctx.beginPath(); ctx.strokeStyle=s.color; ctx.lineWidth = si===0 ? 2.5 : 2;
+    s.survivalRates.forEach((v,yr) => yr===0 ? ctx.moveTo(xS(yr),yS(v)) : ctx.lineTo(xS(yr),yS(v)));
+    ctx.stroke();
+  });
+  ctx.setLineDash([]);
+
+  // End-point labels
+  stratStats.forEach(s => {
+    const finalRate = s.survivalRates[retYears-1];
+    const x = xS(retYears-1) - 2, y = yS(finalRate);
+    ctx.fillStyle = s.color; ctx.font='bold 10px Courier New'; ctx.textAlign='right';
+    ctx.fillText((finalRate*100).toFixed(0)+'%', x, y-4);
+  });
+}
+
+function drawMCHist() {
+  const { stratStats } = mcState;
+  const canvas = document.getElementById('mcHistCanvas');
+  const wrap = canvas.parentElement;
+  const dpr = window.devicePixelRatio || 1;
+  const cssW = getWrapWidth(wrap);
+  const cssH = cssW < 500 ? 280 : 360;  // taller on desktop
+  canvas.style.width=cssW+'px'; canvas.style.height=cssH+'px';
+  canvas.width=cssW*dpr; canvas.height=cssH*dpr;
+  const ctx=canvas.getContext('2d'); ctx.scale(dpr,dpr);
+  const W=cssW, H=cssH;
+  ctx.clearRect(0,0,W,H);
+
+  // Layout: generous header rows, clear separation
+  const headerH = 42;   // space for title + subtitle at top of each panel
+  const failW   = 128;  // left panel width
+  const divX    = failW + 10;  // divider x
+  const succX   = divX + 10;  // right panel start
+  const succW   = W - succX;
+  const padB    = 42;
+  const barTop  = headerH;
+  const barH    = H - headerH - padB;
+
+  // ── Panel header backgrounds ──
+  ctx.fillStyle='rgba(255,255,255,0.025)';
+  ctx.fillRect(0, 0, failW, headerH-4);
+  ctx.fillRect(succX, 0, succW, headerH-4);
+
+  // ── Left panel header ──
+  ctx.textAlign='center'; ctx.fillStyle='#94a3b8';
+  ctx.font='bold 11px Courier New';
+  ctx.fillText('Failure Rate', failW/2, 16);
+  ctx.font='9px Courier New'; ctx.fillStyle='#475569';
+  ctx.fillText('% of runs depleted', failW/2, 30);
+
+  // ── Right panel header ──
+  ctx.fillStyle='#94a3b8'; ctx.font='bold 11px Courier New';
+  ctx.fillText('Final Balance Distribution', succX + succW/2, 16);
+  ctx.font='9px Courier New'; ctx.fillStyle='#475569';
+  ctx.fillText('surviving runs only · overlap = more strategies agree', succX + succW/2, 30);
+
+  // ── Divider ──
+  ctx.strokeStyle='#2a3444'; ctx.lineWidth=1; ctx.setLineDash([3,4]);
+  ctx.beginPath(); ctx.moveTo(divX, 0); ctx.lineTo(divX, H-padB); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // ── LEFT: failure rate bars ──
+  const nStrats = stratStats.length;
+  const barSlot = (failW - 12) / nStrats;
+  stratStats.forEach((s, si) => {
+    const failRate = 1 - s.successRate;
+    const bx  = 6 + si * barSlot;
+    const bh  = failRate * barH;
+    const by  = barTop + barH - bh;
+    const [r,g,b] = s.color.slice(1).match(/.{2}/g).map(h=>parseInt(h,16));
+    // Bar fill
+    ctx.fillStyle = `rgba(${r},${g},${b},0.45)`;
+    ctx.fillRect(bx, by, barSlot-4, bh);
+    // Bar border
+    ctx.strokeStyle = s.color; ctx.lineWidth=1;
+    ctx.strokeRect(bx, by, barSlot-4, bh);
+    // % label above bar
+    ctx.fillStyle = s.color; ctx.font='bold 10px Courier New'; ctx.textAlign='center';
+    ctx.fillText((failRate*100).toFixed(0)+'%', bx + (barSlot-4)/2, Math.max(by-4, barTop+8));
+    // Strategy initial below bar
+    ctx.fillStyle='#475569'; ctx.font='8px Courier New';
+    const shortLabel = s.label.replace('Nominal','N').replace('Pessimistic','P').replace('Fixed','Fix').replace('Geometric','Geo');
+    ctx.fillText(shortLabel, bx + (barSlot-4)/2, barTop+barH+14);
+  });
+  // Y-axis grid lines
+  ctx.strokeStyle='#1e2535'; ctx.lineWidth=0.5;
+  [0, 0.25, 0.5, 0.75, 1.0].forEach(f => {
+    const y = barTop + barH - f*barH;
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(failW-4, y); ctx.stroke();
+    ctx.fillStyle='#475569'; ctx.font='8px Courier New'; ctx.textAlign='left';
+    if (f===0 || f===0.5 || f===1.0)
+      ctx.fillText((f*100).toFixed(0)+'%', 2, y-2);
+  });
+
+  // ── RIGHT: success-only histogram ──
+  const successFinals = stratStats.map(s => s.finalBals.filter(v => v > 0));
+  const allSuccess = successFinals.flat();
+  if (allSuccess.length === 0) {
+    ctx.fillStyle='#f87171'; ctx.font='11px Courier New'; ctx.textAlign='center';
+    ctx.fillText('No surviving runs', succX+succW/2, H/2); return;
+  }
+  const gMax = Math.max(...allSuccess);
+  const BINS = 32;
+  const binW = gMax / BINS;
+  const padLsuc=8, padRsuc=8;
+  const cWs = succW - padLsuc - padRsuc;
+  const cHs = barH;
+  const bpx = cWs / BINS;
+
+  let maxCnt = 0;
+  const allCounts = successFinals.map(finals => {
+    const c = new Array(BINS).fill(0);
+    finals.forEach(v => { const b=Math.min(Math.floor(v/binW),BINS-1); c[b]++; });
+    maxCnt = Math.max(maxCnt, ...c);
+    return c;
+  });
+
+  const xS = v => succX + padLsuc + (v/gMax)*cWs;
+  const yS = c => barTop + cHs - (c/Math.max(maxCnt,1))*cHs;
+
+  // Grid lines
+  [0,0.25,0.5,0.75,1].forEach(f => {
+    const y = barTop + f*cHs;
+    ctx.strokeStyle='#1e2535'; ctx.lineWidth=0.5;
+    ctx.beginPath(); ctx.moveTo(succX, y); ctx.lineTo(succX+succW, y); ctx.stroke();
+  });
+
+  // Bars per strategy (staggered z-order: draw wider bars first)
+  allCounts.forEach((counts, si) => {
+    const s = stratStats[si];
+    const hex = s.color.slice(1).match(/.{2}/g).map(h=>parseInt(h,16));
+    counts.forEach((c, i) => {
+      if (!c) return;
+      const x = xS(i*binW), y = yS(c), bh = barTop+cHs-y;
+      ctx.fillStyle   = `rgba(${hex},0.4)`;
+      ctx.strokeStyle = `rgba(${hex},0.8)`;
+      ctx.lineWidth = 0.5;
+      ctx.fillRect(x+0.5, y, bpx-1, bh);
+      ctx.strokeRect(x+0.5, y, bpx-1, bh);
+    });
+  });
+
+  // X axis labels
+  ctx.textAlign='center'; ctx.fillStyle='#64748b'; ctx.font='10px Courier New';
+  [0, 0.5, 1].forEach(f => ctx.fillText(fmt(f*gMax), xS(f*gMax), barTop+cHs+16));
+  ctx.fillStyle='#475569'; ctx.font='9px Courier New';
+  ctx.fillText('Final balance at target age', succX+succW/2, H-4);
+
+  // Strategy colour legend inside right panel
+  stratStats.forEach((s,si) => {
+    const lx = succX+padLsuc + si*(cWs/nStrats);
+    ctx.fillStyle=s.color; ctx.fillRect(lx, barTop+cHs+22, 12, 3);
+    ctx.fillStyle='#475569'; ctx.font='8px Courier New'; ctx.textAlign='left';
+    ctx.fillText(s.label.replace('Nominal','N.').replace('Pessimistic','P.').replace('Fixed','Fix').replace('Geometric','Geo'), lx+15, barTop+cHs+26);
+  });
+}
+
+function drawMCCashflows() {
+  const { stratStats, retirementAge, retYears, periodLen, nestEgg } = mcState;
+  const canvas = document.getElementById('mcCashflowsCanvas');
+  if (!canvas) return;
+  const wrap = canvas.parentElement;
+  const dpr = window.devicePixelRatio || 1;
+  const cssW = getWrapWidth(wrap);
+  const cssH = 380;  // full width — consistent across all screen sizes
+  canvas.style.width=cssW+'px'; canvas.style.height=cssH+'px';
+  canvas.width=cssW*dpr; canvas.height=cssH*dpr;
+  const ctx=canvas.getContext('2d'); ctx.scale(dpr,dpr);
+  const W=cssW, H=cssH, padL=72, padR=16, padT=28, padB=38;
+  const cW=W-padL-padR, cH=H-padT-padB;
+  ctx.clearRect(0,0,W,H);
+
+  // Max value across all strategy 90th percentiles
+  const allP90 = stratStats.flatMap(s => s.wdPctiles[90]);
+  const maxWd = Math.max(...allP90, 1);
+  const xS = yr => padL + (yr / Math.max(retYears-1,1)) * cW;
+  const yS = v  => padT + cH - (Math.max(v,0) / maxWd) * cH;
+
+  // ── Y-axis grid + labels ──
+  ctx.strokeStyle='#1e2535'; ctx.lineWidth=0.5;
+  for (let i=0; i<=4; i++) {
+    const v = maxWd*i/4, y = yS(v);
+    ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(W-padR,y); ctx.stroke();
+    ctx.fillStyle='#64748b'; ctx.font='10px Courier New'; ctx.textAlign='right';
+    ctx.fillText(fmt(v), padL-4, y+4);
+  }
+
+  // ── Period boundary lines + labels ──
+  const PERIOD_COLORS_MC = ['#f59e0b','#34d399','#60a5fa','#c084fc','#f87171'];
+  for (let p=0; p<5; p++) {
+    const yr  = p * periodLen;
+    const x   = xS(Math.min(yr, retYears-1));
+    const age = retirementAge + yr;
+    // Dashed vertical line
+    ctx.setLineDash([3,4]);
+    ctx.strokeStyle = `rgba(${PERIOD_COLORS_MC[p].slice(1).match(/.{2}/g).map(h=>parseInt(h,16)).join(',')},0.3)`;
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, padT+cH); ctx.stroke();
+    ctx.setLineDash([]);
+    // Period label at top
+    ctx.fillStyle = `rgba(${PERIOD_COLORS_MC[p].slice(1).match(/.{2}/g).map(h=>parseInt(h,16)).join(',')},0.7)`;
+    ctx.font = 'bold 9px Courier New'; ctx.textAlign='center';
+    ctx.fillText(`P${p+1}`, x, padT-4);
+  }
+
+  // ── X-axis age labels ──
+  ctx.textAlign='center'; ctx.fillStyle='#64748b'; ctx.font='10px Courier New';
+  for (let p=0; p<5; p++) {
+    const yr = p * periodLen;
+    const x  = xS(Math.min(yr, retYears-1));
+    ctx.beginPath(); ctx.strokeStyle='#1e2535'; ctx.lineWidth=0.5;
+    ctx.moveTo(x, padT+cH); ctx.lineTo(x, padT+cH+4); ctx.stroke();
+    ctx.fillStyle='#64748b';
+    ctx.fillText(retirementAge + yr, x, padT+cH+16);
+  }
+  ctx.fillText('Age', W/2, H-2);
+
+  // ── Y-axis rotated label ──
+  ctx.save(); ctx.translate(13, padT+cH/2); ctx.rotate(-Math.PI/2);
+  ctx.textAlign='center'; ctx.fillStyle='#475569'; ctx.font='10px Courier New';
+  ctx.fillText('Annual Withdrawal', 0, 0); ctx.restore();
+
+  // ── Draw strategies: bands behind, medians in front ──
+  // Pass 1: outer 10-90 bands (all strategies, back to front)
+  stratStats.forEach(s => {
+    const [r,g,b] = s.color.slice(1).match(/.{2}/g).map(h=>parseInt(h,16));
+    ctx.beginPath();
+    for (let yr=0; yr<retYears; yr++) ctx.lineTo(xS(yr), yS(s.wdPctiles[90][yr]));
+    for (let yr=retYears-1; yr>=0; yr--) ctx.lineTo(xS(yr), yS(s.wdPctiles[10][yr]));
+    ctx.closePath();
+    ctx.fillStyle=`rgba(${r},${g},${b},0.07)`; ctx.fill();
+  });
+
+  // Pass 2: inner 25-75 bands
+  stratStats.forEach(s => {
+    const [r,g,b] = s.color.slice(1).match(/.{2}/g).map(h=>parseInt(h,16));
+    ctx.beginPath();
+    for (let yr=0; yr<retYears; yr++) ctx.lineTo(xS(yr), yS(s.wdPctiles[75][yr]));
+    for (let yr=retYears-1; yr>=0; yr--) ctx.lineTo(xS(yr), yS(s.wdPctiles[25][yr]));
+    ctx.closePath();
+    ctx.fillStyle=`rgba(${r},${g},${b},0.16)`; ctx.fill();
+  });
+
+  // Pass 3: median lines on top
+  stratStats.forEach(s => {
+    ctx.beginPath(); ctx.strokeStyle=s.color; ctx.lineWidth=2; ctx.setLineDash([]);
+    s.wdPctiles[50].forEach((v,yr) => yr===0 ? ctx.moveTo(xS(yr),yS(v)) : ctx.lineTo(xS(yr),yS(v)));
+    ctx.stroke();
+  });
+
+  // Pass 4: dot at each period start on each median
+  stratStats.forEach(s => {
+    for (let p=0; p<5; p++) {
+      const yr = Math.min(p * periodLen, retYears-1);
+      const x  = xS(yr), y = yS(s.wdPctiles[50][yr]);
+      ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI*2);
+      ctx.fillStyle = s.color; ctx.fill();
+      ctx.strokeStyle='#0f1623'; ctx.lineWidth=1; ctx.stroke();
+    }
+  });
+
+  // ── Legend (rendered in HTML div, not canvas) ──
+  const legendEl = document.getElementById('cashflowsLegend');
+  if (legendEl) {
+    legendEl.innerHTML = stratStats.map(s =>
+      `<div style="display:flex;align-items:center;gap:8px;font-family:'Courier New',monospace;font-size:10px;color:#94a3b8">
+        <div style="width:22px;height:3px;background:${s.color};border-radius:2px;flex-shrink:0"></div>${s.label}
+      </div>`
+    ).join('');
+  }
+}
+
+// ── Period snapshot table for cashflows ──────────────────────────────────────
+function renderCashflowsPeriodTable() {
+  const { stratStats, retirementAge, retYears, periodLen, nestEgg } = mcState;
+  const el = document.getElementById('cashflowsPeriodTable');
+  if (!el) return;
+
+  const PERIOD_NAMES_SHORT = ['P1','P2','P3','P4','P5'];
+
+  // Column widths: period col + one col per strategy
+  const cols = `70px ${stratStats.map(()=>'1fr').join(' ')}`;
+
+  let html = `<div style="display:grid;grid-template-columns:${cols};gap:0;min-width:320px">`;
+
+  // Header row
+  html += `<div style="font-family:'Courier New',monospace;font-size:9px;color:#475569;text-transform:uppercase;padding:6px 8px;border-bottom:1px solid #1e2535">Period<br>/ Age</div>`;
+  stratStats.forEach(s => {
+    html += `<div style="font-family:'Courier New',monospace;font-size:9px;text-transform:uppercase;padding:6px 8px;border-bottom:1px solid #1e2535;border-left:1px solid #1e2535;color:${s.color}">${s.label.replace('Nominal','Nom.').replace('Pessimistic','Pess.').replace('Fixed','Fix').replace('Geometric','Geo')}</div>`;
+  });
+
+  // Data rows — one per period
+  for (let p=0; p<5; p++) {
+    const yr  = Math.min(p * periodLen, retYears-1);
+    const age = retirementAge + yr;
+    const rowBg = p%2===0 ? '' : 'background:rgba(255,255,255,0.018)';
+
+    // Period label cell
+    html += `<div style="font-family:'Courier New',monospace;font-size:10px;color:#64748b;padding:8px;${rowBg};border-bottom:1px solid #0d1525">
+      <span style="font-weight:700;color:#94a3b8">${PERIOD_NAMES_SHORT[p]}</span><br>
+      <span style="font-size:9px">Age ${age}</span>
+    </div>`;
+
+    // Strategy cells
+    stratStats.forEach(s => {
+      const p50 = s.wdPctiles[50][yr] ?? 0;
+      const p10 = s.wdPctiles[10][yr] ?? 0;
+      const p90 = s.wdPctiles[90][yr] ?? 0;
+      const swr = nestEgg > 0 ? (p50 / nestEgg * 100).toFixed(1) : '—';
+      // Range width as % of p50 — indicates how tight/wide the spread is
+      const spread = p50 > 0 ? ((p90-p10)/p50*100).toFixed(0) : '0';
+      html += `<div style="font-family:'Courier New',monospace;padding:8px;${rowBg};border-bottom:1px solid #0d1525;border-left:1px solid #1e2535">
+        <div style="font-size:12px;font-weight:700;color:${s.color}">${fmt(p50)}</div>
+        <div style="font-size:9px;color:#475569;margin-top:2px">${fmt(p10)} – ${fmt(p90)}</div>
+        <div style="font-size:9px;color:#334155;margin-top:1px">SWR ${swr}% · ±${spread}% spread</div>
+      </div>`;
+    });
+  }
+
+  html += `</div>`;
+  html += `<div style="font-family:'Courier New',monospace;font-size:9px;color:#334155;margin-top:8px">SWR = withdrawal ÷ initial nest egg. Spread = (P90−P10) ÷ P50 — how wide the range of outcomes is. Fixed strategies have near-zero spread; geometric strategies widen with time.</div>`;
+  el.innerHTML = html;
+}
+
+function renderMCSensTable() {
+  const { sensResults, baselineWd } = mcState;
+  const fCol = p => p>=0.9?'#34d399':p>=0.75?'#f59e0b':'#f87171';
+  document.getElementById('mcSensTable').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;font-family:'Courier New',monospace;font-size:11px">
+      <div style="color:#475569;padding:5px 8px;border-bottom:1px solid #1e2535;text-transform:uppercase;font-size:10px">Year-1 Wd</div>
+      <div style="color:#475569;padding:5px 8px;border-bottom:1px solid #1e2535;text-transform:uppercase;font-size:10px">Amount</div>
+      <div style="color:#475569;padding:5px 8px;border-bottom:1px solid #1e2535;text-transform:uppercase;font-size:10px;text-align:right">Success</div>
+      ${sensResults.map((s,i)=>`
+        <div style="padding:5px 8px;${i%2?'background:rgba(255,255,255,0.01)':''};color:#94a3b8">${(s.lvl*100).toFixed(0)}% nom</div>
+        <div style="padding:5px 8px;${i%2?'background:rgba(255,255,255,0.01)':''};color:#e2e8f0">${fmt(baselineWd*s.lvl)}/yr</div>
+        <div style="padding:5px 8px;${i%2?'background:rgba(255,255,255,0.01)':''};text-align:right;font-weight:700;color:${fCol(s.pct)}">${(s.pct*100).toFixed(1)}%</div>
+      `).join('')}
+    </div>`;
+}
+
+// ── Tab switching (updated to include mc) ────────────────────────────────────
+let activeTab = 'dashboard';
+function switchTab(tab) {
+  activeTab = tab;
+  document.getElementById('panelDashboard').style.display = tab === 'dashboard' ? '' : 'none';
+  document.getElementById('panelDetail').style.display    = tab === 'detail'    ? '' : 'none';
+  document.getElementById('panelMC').style.display        = tab === 'mc'        ? '' : 'none';
+  document.getElementById('tabBtnDashboard').classList.toggle('active', tab === 'dashboard');
+  document.getElementById('tabBtnDetail').classList.toggle('active', tab === 'detail');
+  document.getElementById('tabBtnMC').classList.toggle('active', tab === 'mc');
+  // Defer redraws until after the panel is visible and layout has completed
+  requestAnimationFrame(() => {
+    if (tab === 'detail' && g_tableData) renderYbyTable();
+    if (tab === 'dashboard' && g_chartData) {
+      const { baseData, optData, retirementAge, periodLen, lifespan, depletedAt,
+              periodMaxWd, periodFactor, retirementYears } = g_chartData;
+      drawChart(baseData, optData, retirementAge, periodLen, lifespan, depletedAt);
+      drawWdChart(g_chartData.wdData, periodMaxWd, periodFactor, retirementAge, periodLen, retirementYears);
+    }
+    if (tab === 'mc' && mcState) { drawMCFan(); drawMCSurvival(); drawMCHist(); drawMCCashflows(); renderCashflowsPeriodTable(); }
+  });
+}
+
+// ── Year-by-year table state ───────────────────────────────────────────────────
+let ybyMode = 'abs';       // 'abs' | 'pct'
+let ybyHighlight = true;
+
+function setYbyMode(m) {
+  ybyMode = m;
+  document.getElementById('ybyBtnAbs').classList.toggle('active', m === 'abs');
+  document.getElementById('ybyBtnPct').classList.toggle('active', m === 'pct');
+  if (g_tableData) renderYbyTable();
+}
+function toggleHighlight() {
+  ybyHighlight = !ybyHighlight;
+  document.getElementById('ybyBtnHL').classList.toggle('active', ybyHighlight);
+  if (g_tableData) renderYbyTable();
+}
+
+// ── Render year-by-year table ─────────────────────────────────────────────────
+function renderYbyTable() {
+  if (!document.getElementById('ybyHead')) return;  // section replaced by upgrade message
+  const { rows, retirementAge, periodLen, retirementYears, timing } = g_tableData;
+
+  document.getElementById('ybyTimingLabel').textContent = timing === 'beginning' ? 'beginning' : 'end';
+
+  // ── MC geometric medians — available only after MC has been run ──
+  const mcAvail    = window.mcState?.stratStats?.length >= 4;
+  const nomGeoP50   = mcAvail ? window.mcState.stratStats[1].wdPctiles[50] : null;
+  const nomAlphaP50 = mcAvail ? window.mcState.stratStats[2].wdPctiles[50] : null;
+  const pessGeoP50  = mcAvail ? window.mcState.stratStats[3].wdPctiles[50] : null;
+  const pessAlphaP50= mcAvail ? window.mcState.stratStats[4].wdPctiles[50] : null;
+  const mcNoteEl   = document.getElementById('ybyMCNote');
+  if (mcNoteEl) mcNoteEl.textContent = mcAvail ? '' : '⚡ Run Monte Carlo to show geometric columns';
+
+  // ── Header ──
+  const SCEN = [
+    { key: 'nominal',    label: 'Nominal Fixed',          wdColor: '#94a3b8', balColor: '#94a3b8' },
+    { key: 'nomGeo',     label: 'Nom. Geo ‹P50›',         wdColor: '#c084fc', balColor: '#c084fc', mcOnly: true },
+    { key: 'nomAlpha',   label: 'Nom. stress test ‹P50›', wdColor: '#34d399', balColor: '#34d399', mcOnly: true },
+    { key: 'pessGeo',    label: 'Pess. Geo ‹P50›',        wdColor: '#f59e0b', balColor: '#f59e0b', mcOnly: true },
+    { key: 'pessAlpha',  label: 'Pess. stress ‹P50›',     wdColor: '#f87171', balColor: '#f87171', mcOnly: true },
+  ].filter(s => !s.mcOnly || mcAvail);
+
+  const isPct = ybyMode === 'pct';
+  const hasIncome = rows.some(r => r.income > 0);
+  const hasTax    = rows.some(r => (r.nominal.taxBill ?? 0) > 0);
+
+  document.getElementById('ybyHead').innerHTML = `
+    <tr>
+      <th class="col-sticky" rowspan="2" style="color:#475569;text-align:left;min-width:110px">Year / Age</th>
+      ${hasIncome ? `<th rowspan="2" style="color:#a78bfa;text-align:right;min-width:80px">Supp.<br>Income</th>` : ''}
+      ${hasTax    ? `<th rowspan="2" style="color:#f87171;text-align:right;min-width:80px">Tax<br>Bill</th>` : ''}
+      ${SCEN.map(s => `
+        <th colspan="2" style="color:${s.wdColor};text-align:center;border-left:1px solid #1e2535">${s.label}</th>
+      `).join('')}
+    </tr>
+    <tr>
+      ${SCEN.map(s => `
+        <th style="color:${s.wdColor};text-align:right;font-weight:400;border-left:1px solid #1e2535">
+          ${isPct ? 'Wd %nom' : 'Gross Wd'}</th>
+        <th style="color:${s.balColor};text-align:right;font-weight:400">
+          ${isPct ? 'Bal %nom' : 'Balance'}</th>
+      `).join('')}
+    </tr>`;
+
+  // ── Body ──
+  const fmtCell = (val, nomVal) => {
+    if (isPct) {
+      if (!nomVal || nomVal <= 0) return '—';
+      return ((val / nomVal) * 100).toFixed(1) + '%';
+    }
+    return fmt(val);
+  };
+
+  const hlStyle = (val, nomVal, isWd) => {
+    if (!ybyHighlight || !nomVal || nomVal <= 0 || !isWd) return '';
+    const ratio = val / nomVal;
+    if (ratio > 1.02)  return 'background:rgba(52,211,153,0.10);';
+    if (ratio < 0.98)  return 'background:rgba(248,113,113,0.10);';
+    return '';
+  };
+
+  let bodyHTML = '';
+  let lastPeriod = -1;
+
+  rows.forEach((row, i) => {
+    const p = Math.min(Math.floor(i / periodLen), 4);
+    const [pr,pg,pb] = PERIOD_COLORS[p].slice(1).match(/.{2}/g).map(h=>parseInt(h,16));
+
+    // Period divider row
+    if (p !== lastPeriod) {
+      lastPeriod = p;
+      const startAge = retirementAge + p * periodLen;
+      const endAge   = retirementAge + (p === 4 ? retirementYears - 1 : (p+1)*periodLen - 1);
+      const extraCols = (hasIncome ? 1 : 0) + (hasTax ? 1 : 0);
+      bodyHTML += `<tr class="period-divider">
+        <td colspan="${1 + extraCols + SCEN.length * 2}" style="
+          font-family:'Courier New',monospace;font-size:10px;font-weight:700;
+          color:${PERIOD_COLORS[p]};letter-spacing:0.1em;text-transform:uppercase;
+          background:rgba(${pr},${pg},${pb},0.06) !important;
+          border-top:2px solid rgba(${pr},${pg},${pb},0.3) !important;">
+          ${PERIOD_NAMES[p]} · Age ${startAge}–${endAge} · IRR ${row.irr}%
+        </td>
+      </tr>`;
+    }
+
+    const nomWd  = row.nominal.wd;
+    const nomBal = row.nominal.bal;
+    const taxBill = row.nominal.taxBill ?? 0;
+    const rowBg  = i % 2 === 0 ? '' : 'background:rgba(255,255,255,0.012)';
+
+    bodyHTML += `<tr style="${rowBg}">
+      <td class="col-sticky" style="color:#64748b;font-size:11px">
+        <span style="font-weight:700;color:#94a3b8">Yr ${i+1}</span>
+        <span style="color:#475569;margin-left:6px">Age ${retirementAge + i}</span>
+      </td>
+      ${hasIncome ? `<td style="text-align:right;color:#a78bfa;font-size:11px">${row.income > 0 ? fmt(row.income) : '—'}</td>` : ''}
+      ${hasTax    ? `<td style="text-align:right;color:#f87171;font-size:11px">${taxBill > 0 ? fmt(taxBill) : '—'}</td>` : ''}
+      ${SCEN.map((s, si) => {
+        // MC-only geo columns: read median withdrawal from mcState, no balance available
+        if (s.key === 'nomGeo' || s.key === 'nomAlpha' || s.key === 'pessGeo' || s.key === 'pessAlpha') {
+          const pctArr = s.key === 'nomGeo' ? nomGeoP50
+                       : s.key === 'nomAlpha' ? nomAlphaP50
+                       : s.key === 'pessGeo'  ? pessGeoP50
+                       : pessAlphaP50;
+          const wd = pctArr?.[i] ?? 0;
+          const wdStr = wd > 0 ? fmtCell(wd, nomWd) : '—';
+          return `
+            <td style="text-align:right;color:${s.wdColor};${hlStyle(wd, nomWd, true)}border-left:1px solid #0d1525">${wdStr}</td>
+            <td style="text-align:right;color:#334155;font-size:10px">—</td>`;
+        }
+        const wd  = row[s.key]?.grossWd ?? row[s.key]?.wd ?? 0;
+        const bal = row[s.key]?.bal ?? 0;
+        const depleted = row[s.key]?.depleted ?? false;
+        const wdStr  = depleted ? '<span style="color:#ef4444;font-size:10px">depleted</span>' : fmtCell(wd, nomWd);
+        const balStr = depleted ? '—' : fmtCell(bal, nomBal);
+        return `
+          <td style="text-align:right;color:${s.wdColor};${hlStyle(wd, nomWd, true)}border-left:1px solid #0d1525">${wdStr}</td>
+          <td style="text-align:right;color:${s.balColor};opacity:${depleted?0.4:0.85}">${balStr}</td>`;
+      }).join('')}
+    </tr>`;
+  });
+
+  document.getElementById('ybyBody').innerHTML = bodyHTML;
+}
+
+// ── Tax helpers ───────────────────────────────────────────────────────────────
+function toggleTax() {
+  const show = document.getElementById('useTax').checked;
+  document.getElementById('taxInputs').style.display = show ? 'block' : 'none';
+}
+
+function onTaxMixChange(changed) {
+  const pre    = parseFloat(document.getElementById('taxPrePct').value)    || 0;
+  const roth   = parseFloat(document.getElementById('taxRothPct').value)   || 0;
+  const broker = parseFloat(document.getElementById('taxBrokerPct').value) || 0;
+  const sum = pre + roth + broker;
+  // Update visual bar
+  document.getElementById('taxBarPre').style.width    = (pre/Math.max(sum,1)*100)+'%';
+  document.getElementById('taxBarRoth').style.width   = (roth/Math.max(sum,1)*100)+'%';
+  document.getElementById('taxBarBroker').style.width = (broker/Math.max(sum,1)*100)+'%';
+  // Warning
+  const warn = document.getElementById('taxMixWarning');
+  if (warn) warn.style.display = Math.abs(sum-100) > 0.5 ? 'block' : 'none';
+}
+
+// Returns the gross multiplier: how much to withdraw from portfolio to net $1 of spending.
+// taxParams: { prePct, rothPct, brokerPct, preRate, brokerRate, basisPct, otherIncome }
+// otherIncome reduces effective rate on pre-tax withdrawals by consuming lower brackets.
+// We model this as a simple rate reduction proportional to other income vs total income.
+function computeTaxMultiplier(taxParams) {
+  if (!taxParams) return 1;
+  const { prePct, rothPct, brokerPct, preRate, brokerRate, basisPct, otherIncome, baselineWd } = taxParams;
+  const total = prePct + rothPct + brokerPct;
+  if (total <= 0) return 1;
+  const wPre    = prePct    / total;
+  const wRoth   = rothPct   / total;
+  const wBroker = brokerPct / total;
+
+  // Other income reduces effective rate on pre-tax portion.
+  // Simple model: if other income covers X% of expected spending, reduce rate proportionally.
+  const incomeOffset = Math.min(otherIncome / Math.max(baselineWd, 1), 1);
+  const effectivePreRate    = (preRate    / 100) * Math.max(1 - incomeOffset, 0);
+  const effectiveBrokerRate = (brokerRate / 100) * (1 - basisPct / 100); // only gains taxed
+
+  // Effective blended tax rate on portfolio withdrawals
+  // Roth: 0 tax. Pre-tax: full ordinary rate. Broker: gains-only rate.
+  const blendedRate = wPre * effectivePreRate + wRoth * 0 + wBroker * effectiveBrokerRate;
+
+  // Gross multiplier: to net $1, need to withdraw $1 / (1 - blendedRate)
+  return 1 / Math.max(1 - blendedRate, 0.3); // floor at 0.3 prevents divide-by-near-zero
+}
+
+// Read tax params from UI. Returns null if tax not enabled.
+function getTaxParams(baselineWd) {
+  if (!document.getElementById('useTax').checked) return null;
+  return {
+    prePct:      parseFloat(document.getElementById('taxPrePct').value)     || 0,
+    rothPct:     parseFloat(document.getElementById('taxRothPct').value)    || 0,
+    brokerPct:   parseFloat(document.getElementById('taxBrokerPct').value)  || 0,
+    preRate:     parseFloat(document.getElementById('taxPreRate').value)    || 0,
+    brokerRate:  parseFloat(document.getElementById('taxBrokerRate').value) || 0,
+    basisPct:    parseFloat(document.getElementById('taxBasis').value)      || 0,
+    otherIncome: parseFloat(document.getElementById('taxOtherIncome').value)|| 0,
+    baselineWd,
+  };
+}
+
+// ── Toggle guardrails ─────────────────────────────────────────────────────────
+// ── Lock minLegacy to nominal final balance ───────────────────────────────────
+function lockToNominal() {
+  const val = window._nominalFinalBalance;
+  if (!val || val <= 0) {
+    alert('Run the calculator first — the nominal final balance will be captured automatically.');
+    return;
+  }
+  const minLegacyEl2 = document.getElementById('minLegacy');
+  if (minLegacyEl2) minLegacyEl2.value = Math.round(val);
+  const hint = document.getElementById('lockToNominalHint');
+  if (hint) {
+    hint.textContent = `🔒 Locked to ${fmt(val)} — all scenarios now share the same target endpoint.`;
+    hint.style.display = 'block';
+  }
+  recalc();
+}
+
+// ── Geo rate manual override tracking ────────────────────────────────────────
+function onGeoRateManualEdit() {
+  window._geoRateManualOverride = true;
+  const lbl = document.getElementById('geoRateAutoLabel');
+  if (lbl) lbl.innerHTML = '· <span style="color:#f59e0b">manually set</span> — <a href="#" onclick="resetGeoRateSync();return false;" style="color:#60a5fa;text-decoration:none">re-sync to SWR</a>';
+  recalc();
+}
+function resetGeoRateSync() {
+  window._geoRateManualOverride = false;
+  const lbl = document.getElementById('geoRateAutoLabel');
+  if (lbl) lbl.textContent = '· auto-synced to SWR';
+  recalc();
+}
+
+// ── Asset class toggle ───────────────────────────────────────────────────────
+function toggleAsset(id) {
+  const show = document.getElementById(`use${id.charAt(0).toUpperCase()+id.slice(1)}`).checked;
+  document.getElementById(`${id}Inputs`).style.display = show ? 'block' : 'none';
+}
+
+// Compute future value of a single asset class at retirement
+function assetFV(savings, annualContrib, irrPct, years) {
+  const r = irrPct / 100;
+  let fv = savings * Math.pow(1 + r, years);
+  for (let i = 0; i < years; i++) fv += annualContrib * Math.pow(1 + r, i);
+  return fv;
+}
+
+// ── Toggle timing ────────────────────────────────────────────────────────────
+function setTiming(t) {
+  withdrawalTiming = t;
+  document.getElementById('btnBeginning').classList.toggle('active', t==='beginning');
+  document.getElementById('btnEnd').classList.toggle('active', t==='end');
+  document.getElementById('timingLabel').textContent =
+    t==='beginning' ? '— withdraw → earn (conservative)' : '— earn → withdraw (optimistic)';
+  recalc();
+}
+
+// ── Main recalc ──────────────────────────────────────────────────────────────
+function recalc() {
+  const currentAge      = num('currentAge');
+  const retirementAge   = num('retirementAge');
+  const lifespan        = num('lifespan');
+  const currentExpenses = num('currentExpenses');
+  const inflation       = num('inflation');
+  const minLegacy       = num('minLegacy');
+  const useManual       = document.getElementById('useManual').checked;
+
+  // Guard: need at least 1 year of retirement to calculate anything meaningful
+  if (!lifespan || !retirementAge || lifespan <= retirementAge) return;
+
+  const yearsToRetire   = Math.max(retirementAge - currentAge, 0);
+  const retirementYears = Math.max(lifespan - retirementAge, 1);
+  const periodLen       = Math.max(Math.floor(retirementYears / 5), 1);
+
+  // Collect IRRs
+  const irrs = [];
+  for (let i = 0; i < 5; i++) irrs.push(num(`irr${i}`));
+  const avgIRR = irrs.reduce((a,b)=>a+b,0) / 5;
+
+  // ── Nest egg: sum of all asset classes ──
+  let nestEgg;
+  if (useManual) {
+    nestEgg = num('manualNestEgg');
+  } else {
+    // Equities (always active)
+    const eqFV = assetFV(num('currentSavings'), num('annualContrib'), num('accumIRR'), yearsToRetire);
+
+    // Optional asset classes
+    const ASSET_CLASSES = [
+      { id: 'bonds',       color: '#60a5fa', label: 'Bonds',        defaultIRR: 4.0 },
+      { id: 'pensionFund', color: '#34d399', label: 'Pension Fund',  defaultIRR: 5.0 },
+      { id: 'insurance',   color: '#c084fc', label: 'Insurance',     defaultIRR: 3.0 },
+    ];
+
+    const breakdown = [{ label: 'Equities', fv: eqFV, color: '#c9a84c' }];
+    let extraFV = 0;
+
+    ASSET_CLASSES.forEach(ac => {
+      const active = document.getElementById(`use${ac.id.charAt(0).toUpperCase()+ac.id.slice(1)}`)?.checked;
+      if (!active) return;
+      const fv = assetFV(num(`${ac.id}Savings`), num(`${ac.id}Contrib`), num(`${ac.id}IRR`), yearsToRetire);
+      extraFV += fv;
+      breakdown.push({ label: ac.label, fv, color: ac.color });
+
+      // Update per-class preview
+      const prev = document.getElementById(`${ac.id}Preview`);
+      if (prev) prev.textContent = `At retirement in ${yearsToRetire}y: ${fmt(fv)}`;
+    });
+
+    nestEgg = eqFV + extraFV;
+
+    // Update nest egg breakdown display
+    const nestBreakdownEl = document.getElementById('nestBreakdown');
+    if (nestBreakdownEl && breakdown.length > 1) {
+      nestBreakdownEl.innerHTML = breakdown.map(b =>
+        `<span style="color:${b.color}">${b.label}: ${fmt(b.fv)}</span>  `
+      ).join('') + `<span style="color:#64748b;font-size:9px">(${breakdown.length} asset classes)</span>`;
+    } else if (nestBreakdownEl) {
+      nestBreakdownEl.innerHTML = '';
+    }
+  }
+
+  const baselineWd = currentExpenses * Math.pow(1 + inflation/100, yearsToRetire);
+
+  // ── Tax multiplier ──
+  const taxParams = getTaxParams(baselineWd);
+  const taxMult   = computeTaxMultiplier(taxParams);
+  window._taxMult = taxMult;  // share with MC runner
+
+  // ── Supplemental income series ──
+  const incomeSeries = buildIncomeSeries(retirementAge, retirementYears);
+  const totalIncomeYr1 = incomeSeries[0];
+  const anyIncome = incomeSeries.some(v => v > 0);
+
+  // Update income previews
+  const updateIncomePreview = (type, label) => {
+    const active = document.getElementById(`use${type}`).checked;
+    const el = document.getElementById(`${type.toLowerCase()}Preview`);
+    if (!el || !active) return;
+    const startAge  = num(`${type.toLowerCase()}StartAge`);
+    const startYr   = Math.max(0, startAge - retirementAge);
+    const amt       = num(`${type.toLowerCase()}Amount`);
+    const growth    = num(`${type.toLowerCase()}Growth`);
+    const yr20      = startYr + 20 < retirementYears ? amt * Math.pow(1 + growth/100, 20) : null;
+    el.textContent  = `Starts age ${startAge} at ${fmt(amt)}/yr` +
+      (yr20 ? ` → ${fmt(yr20)}/yr by age ${startAge+20}` : '') +
+      (startAge > lifespan ? ' ⚠ after lifespan' : '');
+  };
+  updateIncomePreview('Pension', 'pension');
+  updateIncomePreview('Rental', 'rental');
+
+  // Income total indicator
+  const incomeTotalEl = document.getElementById('incomeTotal');
+  if (anyIncome) {
+    const maxIncome = Math.max(...incomeSeries);
+    incomeTotalEl.style.display = '';
+    incomeTotalEl.textContent =
+      `Total supplemental income: ${fmt(totalIncomeYr1)}/yr at retirement` +
+      (maxIncome > totalIncomeYr1 ? ` → up to ${fmt(maxIncome)}/yr peak` : '');
+  } else {
+    incomeTotalEl.style.display = 'none';
+  }
+
+  // Simulate baseline
+  const base = simulate(nestEgg, baselineWd, retirementYears, periodLen, irrs, inflation, withdrawalTiming, incomeSeries, taxMult);
+
+  // Solve optimized
+  const optWd = solveMaxWithdrawal(nestEgg, minLegacy, retirementYears, periodLen, irrs, inflation, withdrawalTiming, incomeSeries, taxMult);
+  const opt   = simulate(nestEgg, optWd, retirementYears, periodLen, irrs, inflation, withdrawalTiming, incomeSeries, taxMult);
+
+  const spendingDeltaPct = ((optWd - baselineWd) / baselineWd) * 100;
+  const baselineSurvives = base.depletedAt === null;
+
+  // ── Update period labels ──
+  updatePeriodLabels(retirementAge, periodLen, lifespan);
+  document.getElementById('periodNote').textContent =
+    `Retirement of ${retirementYears} years split into 5 equal periods of ~${periodLen} years`;
+  document.getElementById('lifespanRef').textContent = lifespan;
+
+  // ── Nest egg preview ──
+  document.getElementById('nestLabel').textContent = `Projected Nest Egg in ${yearsToRetire}y`;
+  document.getElementById('nestPreview').textContent = fmtFull(nestEgg);
+  document.getElementById('autoInputs').style.display  = useManual ? 'none' : 'block';
+  document.getElementById('manualInputs').style.display = useManual ? 'block' : 'none';
+
+  // ── Outcome banner ──
+  const banner = document.getElementById('outcomeBanner');
+  banner.style.background = baselineSurvives
+    ? 'linear-gradient(135deg,rgba(16,185,129,0.1),rgba(16,185,129,0.05))'
+    : 'linear-gradient(135deg,rgba(239,68,68,0.1),rgba(239,68,68,0.05))';
+  banner.style.border = `1px solid ${baselineSurvives ? 'rgba(16,185,129,0.3)':'rgba(239,68,68,0.3)'}`;
+  const finalBaseline = base.data[base.data.length-1]?.balance || 0;
+  banner.innerHTML = `
+    <div style="font-size:34px">${baselineSurvives ? '✅':'⚠️'}</div>
+    <div>
+      <p style="font-family:Georgia,serif;font-size:20px;font-weight:700;color:${baselineSurvives?'#10b981':'#ef4444'}">
+        ${baselineSurvives
+          ? `Baseline portfolio survives to age ${lifespan}`
+          : `Baseline portfolio depleted at age ${retirementAge + base.depletedAt}`}
+      </p>
+      <p style="font-family:'Courier New',monospace;font-size:12px;color:#64748b;margin-top:4px">
+        ${baselineSurvives
+          ? `Final balance: <span style="color:#10b981">${fmtFull(finalBaseline)}</span> — see optimizer below for max affordable spending`
+          : `${lifespan - (retirementAge + base.depletedAt)} years short — the optimizer shows your safe max withdrawal`}
+      </p>
+    </div>`;
+
+  // ── Key stats ──
+  document.getElementById('statNestLabel').textContent = `Nest Egg at ${retirementAge}`;
+  document.getElementById('statNest').textContent      = fmt(nestEgg);
+  document.getElementById('statNestFull').textContent  = fmtFull(nestEgg);
+  document.getElementById('statWd').textContent        = fmt(baselineWd);
+  document.getElementById('statWdSub').textContent     = `SWR: ${((baselineWd/nestEgg)*100).toFixed(2)}%`;
+
+  // ── Auto-sync geoRate to SWR unless user has manually overridden it ──
+  if (!window._geoRateManualOverride) {
+    const swr = (baselineWd / nestEgg) * 100;
+    const geoRateEl = document.getElementById('geoRate');
+    if (geoRateEl) geoRateEl.value = swr.toFixed(2);
+    const lbl = document.getElementById('geoRateAutoLabel');
+    if (lbl) lbl.textContent = `· auto-synced → ${swr.toFixed(2)}%`;
+  }
+  document.getElementById('statAvgIRR').textContent    = `${avgIRR.toFixed(2)}%`;
+  document.getElementById('avgIRRInline').textContent  = `${avgIRR.toFixed(2)}%`;
+
+  // ── Optimizer results ──
+  document.getElementById('optWd').textContent      = fmt(optWd);
+  document.getElementById('optWdFull').textContent  = fmtFull(optWd) + ' / year';
+  document.getElementById('optSWR').textContent     = `Optimized SWR: ${((optWd/nestEgg)*100).toFixed(2)}%`;
+  document.getElementById('optLegacy').textContent  = fmtFull(Math.max(opt.finalBalance, minLegacy));
+  document.getElementById('optLegacySub').textContent = `target: ${fmtFull(minLegacy)}`;
+
+  const pill = document.getElementById('spendingDelta');
+  const isPos = spendingDeltaPct >= 0;
+  pill.innerHTML = `<span class="delta-pill ${isPos?'delta-pos':'delta-neg'}">${isPos?'+':''}${spendingDeltaPct.toFixed(1)}%</span>
+    <div style="font-family:'Courier New',monospace;font-size:11px;color:#64748b;margin-top:6px">
+      ${isPos ? 'You can spend more than planned' : 'You need to reduce spending'}
+    </div>`;
+
+  // ── Per-period rolling re-optimizer ──────────────────────────────────────
+  // At the start of each period p, given the ACTUAL portfolio balance from the
+  // baseline simulation, solve the max sustainable withdrawal through ALL
+  // remaining years and IRRs. This is the correct financial planning tool:
+  // "given where I am now, what's the max I can afford going forward?"
+  //
+  // The global factor (optWd/baselineWd) is the single best answer for P1.
+  // Per-period re-optimization shows how the picture evolves as you progress.
+  const periodMaxWd = [], periodFactor = [];
+  for (let p = 0; p < 5; p++) {
+    const startYr       = p * periodLen;
+    const remainingYrs  = retirementYears - startYr;
+    const remainingIrrs = irrs.slice(p);
+    const nominalWdAtP  = baselineWd * Math.pow(1 + inflation / 100, p * periodLen);
+
+    // Actual balance at start of period p from the baseline simulation
+    const startBal = p === 0
+      ? nestEgg
+      : Math.max(base.data[startYr]?.balanceBefore ?? 0, 0);
+
+    const maxWp = solveFromBalance(startBal, minLegacy, remainingYrs, periodLen, remainingIrrs, inflation, withdrawalTiming, taxMult);
+    periodMaxWd.push(maxWp);
+    periodFactor.push(nominalWdAtP > 0 ? maxWp / nominalWdAtP : 0);
+  }
+
+  // ── Milestones (one row per period) ──
+  const PERIOD_HINTS = ['Growth-oriented','Balanced','Moderate','Cautious','Conservative'];
+  document.getElementById('milestones').innerHTML = Array.from({length:5}, (_,i) => {
+    const startYr    = i * periodLen;
+    const endYr      = i === 4 ? retirementYears - 1 : (i+1) * periodLen - 1;
+    const startAge   = retirementAge + startYr;
+    const endAge     = retirementAge + endYr;
+    const bd         = base.data[startYr];
+    if (!bd) return '';
+
+    const nominalWdAtP = baselineWd * Math.pow(1 + inflation / 100, i * periodLen);
+    const plannedWd    = nominalWdAtP / 1000;
+    const maxWp        = periodMaxWd[i] / 1000;
+    const factor       = periodFactor[i];
+    const factorColor  = factor >= 0.98 ? '#34d399' : factor >= 0.80 ? '#f59e0b' : '#f87171';
+    const [pr,pg,pb]   = PERIOD_COLORS[i].slice(1).match(/.{2}/g).map(h=>parseInt(h,16));
+
+    return `<div style="
+        display:grid;grid-template-columns:110px 1fr 1fr 1fr;gap:0;
+        padding:10px 10px;margin-bottom:6px;border-radius:8px;
+        background:rgba(${pr},${pg},${pb},0.05);
+        border:1px solid rgba(${pr},${pg},${pb},0.15);
+        align-items:start">
+      <div>
+        <span style="font-family:'Courier New',monospace;font-size:10px;font-weight:700;
+          padding:2px 6px;border-radius:4px;display:inline-block;margin-bottom:5px;
+          background:rgba(${pr},${pg},${pb},0.2);color:${PERIOD_COLORS[i]}">${PERIOD_NAMES[i]}</span>
+        <div style="font-family:'Courier New',monospace;font-size:11px;color:#e2e8f0">Age ${startAge}–${endAge}</div>
+        <div style="font-family:'Courier New',monospace;font-size:10px;color:#475569;margin-top:2px">${PERIOD_HINTS[i]} · ${irrs[i]}% IRR</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-family:'Courier New',monospace;font-size:13px;font-weight:700;color:#94a3b8">${plannedWd.toFixed(2)}K</div>
+        <div style="font-family:'Courier New',monospace;font-size:10px;color:#475569;margin-top:2px">planned / yr</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-family:'Courier New',monospace;font-size:13px;font-weight:700;color:${factorColor}">${maxWp.toFixed(2)}K</div>
+        <div style="font-family:'Courier New',monospace;font-size:10px;color:${factorColor};margin-top:2px">max / yr</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-family:'Courier New',monospace;font-size:20px;font-weight:700;color:${factorColor}">×${factor.toFixed(2)}</div>
+        <div style="font-family:'Courier New',monospace;font-size:10px;color:${factorColor};margin-top:2px">
+          ${factor >= 1 ? 'can spend more' : `cut ${((1-factor)*100).toFixed(0)}% vs planned`}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // End of retirement balance row
+  const lastBase = base.data[retirementYears-1];
+  const lastOpt  = opt.data[retirementYears-1];
+  document.getElementById('retirementEndRow').innerHTML = `
+    <div style="display:grid;grid-template-columns:110px 1fr 1fr 1fr;gap:0;align-items:center;padding:8px 10px;background:rgba(255,255,255,0.02);border-radius:6px">
+      <div style="font-family:'Courier New',monospace;font-size:10px;color:#475569;letter-spacing:0.06em;text-transform:uppercase;grid-column:1/3">Final Balance at Age ${lifespan}</div>
+      <div style="text-align:right;font-family:'Courier New',monospace;font-size:13px;font-weight:700;color:${(lastBase?.balance??0)>0?'#c9a84c':'#ef4444'};grid-column:3">${fmt(lastBase?.balance??0)}</div>
+      <div style="text-align:right;font-family:'Courier New',monospace;font-size:13px;font-weight:700;color:#60a5fa">${fmt(lastOpt?.balance??0)}</div>
+    </div>`;
+
+  // ── Sequence of returns stress test ──────────────────────────────────────
+  // Same 5 IRR values, 3 orderings: best-first (optimistic), as-entered, worst-first (pessimistic).
+  // For each scenario:
+  //   1. Solve max UNIFORM factor f (Excel-style: wd = nominal×f at period start, inflates within)
+  //   2. Rolling re-opt at each period boundary → later periods with better IRRs get higher factors
+  const sortedAsc  = [...irrs].sort((a,b) => a-b);
+  const seqScenarios = [
+    { label: 'Your Plan',  irrs: irrs,      color: '#c9a84c' },
+    { label: 'Pessimistic',irrs: sortedAsc, color: '#f87171' },
+  ];
+
+  const inf = inflation / 100;  // decimal once, used everywhere below
+
+  // Store incomeSeries and nominal final balance globally
+  window._incomeSeries = incomeSeries;
+  window._nominalFinalBalance = Math.max(base.finalBalance, 0);
+
+  seqScenarios.forEach(sc => {
+    // Use baseline final balance as legacy anchor — stress test always anchored to your actual plan
+    const seqLegacy = Math.max(base.finalBalance, 0);
+    sc.periodFactor = solveProgressiveFactors(nestEgg, baselineWd, retirementYears, periodLen, sc.irrs, inf, seqLegacy, incomeSeries, taxMult);
+    sc.periodMaxWd  = sc.periodFactor.map((f, p) => baselineWd * Math.pow(1 + inf, p * periodLen) * f);
+    sc.f1           = sc.periodFactor[0];
+    sc.f5           = sc.periodFactor[4];
+    sc.sim = simulateFactorBased(nestEgg, baselineWd, retirementYears, periodLen, sc.irrs, inf, sc.periodFactor, seqLegacy, incomeSeries, taxMult);
+  });
+
+  // ── IRR badge display ──
+  const PERIOD_HINTS_SHORT = ['P1','P2','P3','P4','P5'];
+  document.getElementById('scenarioIrrBadge').innerHTML = seqScenarios.map(sc => `
+    <div style="background:rgba(255,255,255,0.03);border:1px solid #1e2535;border-radius:8px;padding:10px 14px">
+      <div style="font-family:'Courier New',monospace;font-size:10px;font-weight:700;color:${sc.color};letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px">${sc.label}</div>
+      ${sc.irrs.map((irr,i) => `
+        <div style="display:flex;justify-content:space-between;font-family:'Courier New',monospace;font-size:11px;margin-bottom:3px">
+          <span style="color:#475569">${PERIOD_HINTS_SHORT[i]}</span>
+          <span style="color:#e2e8f0;font-weight:700">${irr}%</span>
+        </div>`).join('')}
+      <div style="margin-top:8px;padding-top:6px;border-top:1px solid #1e2535">
+        <div style="display:flex;justify-content:space-between;font-family:'Courier New',monospace;font-size:11px;margin-bottom:3px">
+          <span style="color:#475569">P1 factor (start)</span>
+          <span style="color:${sc.color};font-weight:700">×${sc.f1.toFixed(3)}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-family:'Courier New',monospace;font-size:11px">
+          <span style="color:#475569">P5 factor (end)</span>
+          <span style="color:${sc.color};font-weight:700">×${sc.f5.toFixed(3)}</span>
+        </div>
+        <div style="margin-top:5px;font-family:'Courier New',monospace;font-size:10px;color:#334155;text-align:center">α = ${getAlpha().toFixed(2)} · factors IRR-relative</div>
+      </div>
+    </div>`).join('');
+
+  // ── Per-period comparison table ──
+  document.getElementById('seqTable').innerHTML = Array.from({length:5}, (_,i) => {
+    const startAge   = retirementAge + i * periodLen;
+    const endAge     = retirementAge + (i === 4 ? retirementYears-1 : (i+1)*periodLen-1);
+    const nomWdAtP   = baselineWd * Math.pow(1 + inflation/100, i*periodLen);
+    const [pr,pg,pb] = PERIOD_COLORS[i].slice(1).match(/.{2}/g).map(h=>parseInt(h,16));
+    const scPlan = seqScenarios[0], scPess = seqScenarios[1];
+    const fPlan = scPlan.periodFactor[i], fPess = scPess.periodFactor[i];
+    const fCol = f => f >= 0.98 ? '#34d399' : f >= 0.80 ? '#f59e0b' : '#f87171';
+    return `<div style="
+        display:grid;grid-template-columns:110px 1fr 1fr 1fr 1fr 1fr;gap:0;
+        padding:8px 8px;margin-bottom:5px;border-radius:8px;
+        background:rgba(${pr},${pg},${pb},0.04);
+        border:1px solid rgba(${pr},${pg},${pb},0.12);
+        align-items:center">
+      <div>
+        <span style="font-family:'Courier New',monospace;font-size:10px;font-weight:700;
+          padding:2px 5px;border-radius:3px;display:inline-block;
+          background:rgba(${pr},${pg},${pb},0.2);color:${PERIOD_COLORS[i]}">${PERIOD_NAMES[i]}</span>
+        <div style="font-family:'Courier New',monospace;font-size:10px;color:#475569;margin-top:3px">Age ${startAge}–${endAge}</div>
+      </div>
+      <div style="text-align:right;font-family:'Courier New',monospace;font-size:12px;color:#94a3b8">${(nomWdAtP/1000).toFixed(1)}K</div>
+      <div style="text-align:right">
+        <div style="font-family:'Courier New',monospace;font-size:12px;font-weight:700;color:#c9a84c">${(scPlan.periodMaxWd[i]/1000).toFixed(1)}K</div>
+        <div style="font-family:'Courier New',monospace;font-size:10px;color:${fCol(fPlan)}">×${fPlan.toFixed(3)}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-family:'Courier New',monospace;font-size:12px;font-weight:700;color:#f87171">${(scPess.periodMaxWd[i]/1000).toFixed(1)}K</div>
+        <div style="font-family:'Courier New',monospace;font-size:10px;color:${fCol(fPess)}">×${fPess.toFixed(3)}</div>
+      </div>
+      <div style="text-align:right;font-family:'Courier New',monospace;font-size:11px">
+        <div style="color:#c9a84c">plan: ${fPlan>=1?'+':''}${((fPlan-1)*100).toFixed(1)}%</div>
+        <div style="color:#f87171">pess: ${fPess>=1?'+':''}${((fPess-1)*100).toFixed(1)}%</div>
+      </div>
+      <div style="text-align:right;font-family:'Courier New',monospace;font-size:11px">
+        <div style="color:#64748b;font-size:10px">risk gap</div>
+        <div style="color:#f87171;font-weight:700">${((fPlan-fPess)*100).toFixed(1)}pp</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // ── Summary ──
+  const seqRiskWd   = seqScenarios[0].periodMaxWd[0] - seqScenarios[1].periodMaxWd[0];
+  const seqRiskP5Wd = seqScenarios[0].periodMaxWd[4] - seqScenarios[1].periodMaxWd[4];
+  document.getElementById('seqSummary').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      ${seqScenarios.map(sc => {
+        const survives = sc.sim.depletedAt === null;
+        const lastBal  = sc.sim.data[retirementYears-1]?.balance ?? 0;
+        return `<div style="background:rgba(255,255,255,0.02);border:1px solid #1e2535;border-radius:8px;padding:12px">
+          <div style="font-family:'Courier New',monospace;font-size:10px;color:${sc.color};text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">${sc.label}</div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:2px">
+            <span style="font-family:'Courier New',monospace;font-size:10px;color:#475569">P1 →</span>
+            <span style="font-family:Georgia,serif;font-size:15px;font-weight:700;color:${sc.color}">${fmt(sc.periodMaxWd[0])}/yr</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+            <span style="font-family:'Courier New',monospace;font-size:10px;color:#475569">P5 →</span>
+            <span style="font-family:Georgia,serif;font-size:15px;font-weight:700;color:${sc.color}">${fmt(sc.periodMaxWd[4])}/yr</span>
+          </div>
+          <div style="font-family:'Courier New',monospace;font-size:11px;color:#64748b">Final: ${fmt(lastBal)}</div>
+          <div style="font-family:'Courier New',monospace;font-size:10px;margin-top:3px;color:${survives?'#34d399':'#ef4444'}">${survives ? '✓ survives to '+lifespan : '✗ depleted at age '+(retirementAge + sc.sim.depletedAt)}</div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div style="margin-top:12px;background:rgba(248,113,113,0.06);border:1px solid rgba(248,113,113,0.2);border-radius:8px;padding:12px;display:flex;align-items:center;gap:24px">
+      <div>
+        <div style="font-family:'Courier New',monospace;font-size:10px;color:#64748b;text-transform:uppercase;margin-bottom:4px">P1 Sequence Risk <span style="color:#334155">(early retirement)</span></div>
+        <div style="font-family:Georgia,serif;font-size:22px;font-weight:700;color:#f87171">${fmt(seqRiskWd)}/yr</div>
+        <div style="font-family:'Courier New',monospace;font-size:9px;color:#475569;margin-bottom:10px">withdrawal you give up if bad years hit first</div>
+        <div style="font-family:'Courier New',monospace;font-size:10px;color:#64748b;text-transform:uppercase;margin-bottom:4px">P5 Sequence Risk <span style="color:#334155">(late retirement)</span></div>
+        <div style="font-family:Georgia,serif;font-size:22px;font-weight:700;color:#f87171">${fmt(seqRiskP5Wd)}/yr</div>
+        <div style="font-family:'Courier New',monospace;font-size:9px;color:#475569">compounded spending gap 40+ years later</div>
+      </div>
+      <div style="font-family:'Courier New',monospace;font-size:11px;color:#64748b;flex:1">
+        Both scenarios use the same 5 IRR values — only the order differs. Worst returns hit in P1 (your first ~10 retirement years) in the Pessimistic case. P1 risk is the immediate cost: you must accept a lower starting withdrawal to survive an early crash, since selling depressed assets to fund spending permanently impairs the portfolio. P5 risk is the compounded cost: that smaller starting base, grown over 40+ years, means late-life spending power shrinks disproportionately — hence the much larger P5 gap.
+      </div>
+    </div>`;
+
+  // ── Populate year-by-year table data ─────────────────────────────────────
+  const pessScen  = seqScenarios[1];  // pessimistic
+  const tableRows = [];
+  for (let i = 0; i < retirementYears; i++) {
+    const p       = Math.min(Math.floor(i / periodLen), 4);
+    const nomRow  = base.data[i];
+    const optRow  = opt.data[i];
+    const pesSRow = pessScen.sim.data[i];
+    tableRows.push({
+      irr: irrs[p],
+      income: incomeSeries[i] ?? 0,
+      nominal:    { wd: nomRow?.withdrawal ?? 0,  grossWd: nomRow?.grossWd ?? nomRow?.withdrawal ?? 0,  taxBill: nomRow?.taxBill ?? 0,  netWd: nomRow?.netWd ?? 0,  bal: nomRow?.balance ?? 0,  depleted: (nomRow?.balance ?? 0) <= 0 && i > 0 },
+      optimized:  { wd: optRow?.withdrawal ?? 0,  grossWd: optRow?.grossWd ?? optRow?.withdrawal ?? 0,  taxBill: optRow?.taxBill ?? 0,  netWd: optRow?.netWd ?? 0,  bal: optRow?.balance ?? 0,  depleted: (optRow?.balance ?? 0) <= 0 && i > 0 },
+      pessimistic:{ wd: pesSRow?.withdrawal ?? 0, grossWd: pesSRow?.grossWd ?? pesSRow?.withdrawal ?? 0, taxBill: pesSRow?.taxBill ?? 0, netWd: pesSRow?.netWd ?? 0, bal: pesSRow?.balance ?? 0, depleted: (pesSRow?.balance ?? 0) <= 0 && i > 0 },
+    });
+  }
+  g_tableData = { rows: tableRows, retirementAge, periodLen, retirementYears, timing: withdrawalTiming };
+  if (activeTab === 'detail') renderYbyTable();
+
+  // ── Tax preview ──
+  const taxPreviewEl = document.getElementById('taxPreview');
+  if (taxPreviewEl && taxParams) {
+    const annualTax  = baselineWd * (taxMult - 1);
+    const grossWdYr1 = baselineWd * taxMult;
+    const lifetimeTax = annualTax * retirementYears; // rough estimate
+    taxPreviewEl.innerHTML =
+      `<span style="color:#f87171">Gross withdrawal needed:</span> ${fmt(grossWdYr1)}/yr &nbsp;·&nbsp; ` +
+      `<span style="color:#f87171">Tax bill:</span> ${fmt(annualTax)}/yr &nbsp;·&nbsp; ` +
+      `<span style="color:#f87171">Effective blended rate:</span> ${((1 - 1/taxMult)*100).toFixed(1)}% &nbsp;·&nbsp; ` +
+      `<span style="color:#64748b">Lifetime tax estimate: ${fmt(lifetimeTax)}</span>`;
+    taxPreviewEl.style.display = '';
+  } else if (taxPreviewEl) {
+    taxPreviewEl.style.display = 'none';
+  }
+  const geoAlpha = parseFloat(document.getElementById('geoAlpha')?.value) || 0.75;
+  const geoRate  = parseFloat(document.getElementById('geoRate')?.value)  || 4.0;
+  const geoFloor = parseFloat(document.getElementById('geoFloor')?.value) || 70;
+  const geoPreviewEl = document.getElementById('geoPreview');
+  if (geoPreviewEl) {
+    const yr1geo = geoAlpha * baselineWd * (1 + inflation/100) + (1 - geoAlpha) * (geoRate/100) * nestEgg;
+    geoPreviewEl.textContent =
+      `At retirement: W₀=${fmt(baselineWd)}/yr · Geometric yr-2 estimate≈${fmt(yr1geo)}/yr · Floor=${fmt(baselineWd * geoFloor/100)}/yr`;
+  }
+  // ── Store chart data globally for redraw on tab switch ──
+  g_chartData = {
+    baseData: base.data, optData: opt.data,
+    wdData: base.data,
+    retirementAge, periodLen, lifespan,
+    depletedAt: base.depletedAt,
+    periodMaxWd, periodFactor, retirementYears,
+  };
+
+  // Use requestAnimationFrame to ensure layout is complete before measuring canvas widths
+  requestAnimationFrame(() => {
+    drawChart(base.data, opt.data, retirementAge, periodLen, lifespan, base.depletedAt);
+    drawWdChart(base.data, periodMaxWd, periodFactor, retirementAge, periodLen, retirementYears);
+    drawSeqChart(seqScenarios, retirementAge, periodLen, lifespan);
+  });
+}
+
+// ── Wire inputs ──────────────────────────────────────────────────────────────
+['currentAge','retirementAge','lifespan','inflation','currentExpenses',
+ 'currentSavings','annualContrib','accumIRR','manualNestEgg',
+ 'bondsSavings','bondsContrib','bondsIRR',
+ 'pensionFundSavings','pensionFundContrib','pensionFundIRR',
+ 'insuranceSavings','insuranceContrib','insuranceIRR',
+ 'geoAlpha','geoFloor',
+ 'taxPreRate','taxBrokerRate','taxBasis','taxOtherIncome'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', recalc);
+});
+
+  const minLegacyEl = document.getElementById('minLegacy');
+  if (minLegacyEl) {
+    minLegacyEl.addEventListener('input', () => {
+      const hint = document.getElementById('lockToNominalHint');
+      if (hint) hint.style.display = 'none';
+      recalc();
+    });
+  }
+
+window.addEventListener('resize', recalc);
+
+// ── Tier-aware UI initialisation ─────────────────────────────────────────────
+// Full UI always shown. Locked sections get .tier-locked (gray + pointer-events:none)
+// with an inline upgrade nudge injected above them.
+function initUI() {
+  // ── Tabs: always visible — content gated inside each panel ─────────────────
+  document.getElementById('tabBtnMC').style.display     = '';
+  document.getElementById('tabBtnDetail').style.display = '';
+
+  if (!can.yearByYear) {
+    document.getElementById('yearByYearSection').innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+        padding:60px 24px;text-align:center">
+        <div style="font-size:40px;margin-bottom:20px">🔒</div>
+        <div style="font-family:Georgia,serif;font-size:22px;font-weight:600;color:#c9a84c;margin-bottom:10px">
+          Year-by-Year Detail
+        </div>
+        <div style="font-family:'Courier New',monospace;font-size:12px;color:#64748b;margin-bottom:24px;max-width:380px;line-height:1.7">
+          See every year of your retirement — withdrawals, portfolio balance,
+          and scenario comparisons across all strategies.
+        </div>
+        <div class="tier-nudge" style="max-width:420px;justify-content:center">
+          <span class="lock-icon">🔒</span>
+          <span>This is a <strong style="color:#c9a84c">Basic</strong> feature —
+          <a href="#" onclick="return false">upgrade for $8/year</a> to unlock.</span>
+        </div>
+      </div>`;
+  }
+
+  if (!can.monteCarlo) {
+    document.getElementById('monteCarloSection').innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+        padding:60px 24px;text-align:center">
+        <div style="font-size:40px;margin-bottom:20px">🔒</div>
+        <div style="font-family:Georgia,serif;font-size:22px;font-weight:600;color:#c9a84c;margin-bottom:10px">
+          Monte Carlo Simulation
+        </div>
+        <div style="font-family:'Courier New',monospace;font-size:12px;color:#64748b;margin-bottom:24px;max-width:380px;line-height:1.7">
+          Run thousands of simulations across 5 strategies to stress-test your plan
+          and see survival probabilities, fan charts, and withdrawal distributions.
+        </div>
+        <div class="tier-nudge" style="max-width:420px;justify-content:center">
+          <span class="lock-icon">🔒</span>
+          <span>This is a <strong style="color:#c9a84c">Premium</strong> feature —
+          <a href="#" onclick="return false">upgrade for $29/year</a> to unlock.</span>
+        </div>
+      </div>`;
+  }
+
+  // ── Input sections: shown but grayed with nudge when locked ──────────────
+  if (!can.fivePeriodIRR)
+    applyLock('fivePeriodSection',        'premium', '5-Period Return on Investment');
+  if (!can.multiAssetNestEgg)
+    applyLock('multiAssetSection',        'premium', 'Bonds, Pension Fund & Insurance asset classes');
+  if (!can.incomeSeries)
+    applyLock('incomeSection',            'premium', 'Supplemental Income (Pension & Rental)');
+  if (!can.legacyTarget)
+    applyLock('optimizerSettingsSection', 'basic',   'Legacy / inheritance target');
+  if (!can.taxAware)
+    applyLock('taxSection',               'premium', 'Tax-aware withdrawal simulation');
+
+  // ── Output sections: shown but grayed with nudge when locked ─────────────
+  if (!can.optimizer)
+    applyLock('optimizerSection',  'premium', 'Withdrawal Optimizer');
+  if (!can.stressTest)
+    applyLock('stressTestSection', 'premium', 'Sequence of Returns Stress Test');
+  if (!can.rollingReopt)
+    applyLock('milestonesSection', 'premium', 'Rolling Re-Optimizer');
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+buildPeriodInputs();
+const _initIrrs = Array.from({length:5}, (_,i) => parseFloat(document.getElementById(`irr${i}`)?.value ?? 8));
+updateAlphaPreview(_initIrrs);
+initUI();   // apply locks after DOM is ready
+recalc();
+</script>
+</body>
+</html>
