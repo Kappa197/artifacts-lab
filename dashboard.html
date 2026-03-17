@@ -6,7 +6,6 @@
 <title>Dashboard — The Artifacts Lab</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://js.stripe.com/v3/"></script>
 <style>
 :root {
   --navy:      #0B0F1A;
@@ -648,14 +647,11 @@ const SUPABASE_URL  = 'https://fvgajfiksxmwioxnesry.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2Z2FqZmlrc3htd2lveG5lc3J5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NDU4OTEsImV4cCI6MjA4OTIyMTg5MX0.KwqAzx1oAGeh0F3q1LfeQPXYjtdOjaOrzS_c4eUGKJY';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-// Stripe test publishable key — replace with live key when going live
-const STRIPE_PK = 'pk_test_51TBrqlF7k2b7X0MjYENs2v0D0st5d31p5XVZwMpNKmIBLtZ1fwxVRoLE6nlrXpRzT3lZwBR2t17lUUwjb7XlbOVy00A3fZ4DgL';
-
-// Price IDs from Stripe
-const PRICES = {
-  basic:            'price_1TBrsdF7k2b7X0MjoEhddJIL',
-  premium_annual:   'price_1TBrttF7k2b7X0MjGJXrRR7V',
-  premium_lifetime: 'price_1TBruyF7k2b7X0MjNIZ1dCel',
+// Stripe Payment Links
+const PAYMENT_LINKS = {
+  basic:            'https://buy.stripe.com/test_eVq6oHb3e0QQ71f6ZL77O02',
+  premium_annual:   'https://buy.stripe.com/test_28EbJ1dbm7fefxL4RD77O01',
+  premium_lifetime: 'https://buy.stripe.com/test_5kQbJ1dbmbvuetH1Fr77O00',
 };
 
 let selectedPlan = 'premium_annual';
@@ -748,25 +744,9 @@ function selectPlan(plan) {
 }
 
 // ── STRIPE CHECKOUT ──────────────────────────
-async function startCheckout() {
-  const btn = document.getElementById('checkoutBtn');
-  btn.textContent = 'Redirecting to Stripe…';
-  btn.disabled = true;
-
-  try {
-    const stripe = Stripe(STRIPE_PK);
-    await stripe.redirectToCheckout({
-      lineItems: [{ price: PRICES[selectedPlan], quantity: 1 }],
-      mode: selectedPlan === 'premium_lifetime' ? 'payment' : 'subscription',
-      customerEmail: currentUserEmail,
-      successUrl: 'https://theartifactslab.com/dashboard.html?upgrade=success',
-      cancelUrl:  'https://theartifactslab.com/dashboard.html?upgrade=cancelled',
-    });
-  } catch (err) {
-    console.error('Stripe error:', err);
-    btn.textContent = 'Something went wrong — try again';
-    btn.disabled = false;
-  }
+function startCheckout() {
+  const link = PAYMENT_LINKS[selectedPlan];
+  if (link) window.open(link, '_blank');
 }
 
 // ── SUCCESS TOAST ────────────────────────────
@@ -791,4 +771,5 @@ init();
 
 </body>
 </html>
+
 
