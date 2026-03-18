@@ -1050,10 +1050,6 @@ const SUPABASE_URL  = 'https://fvgajfiksxmwioxnesry.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2Z2FqZmlrc3htd2lveG5lc3J5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NDU4OTEsImV4cCI6MjA4OTIyMTg5MX0.KwqAzx1oAGeh0F3q1LfeQPXYjtdOjaOrzS_c4eUGKJY';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-// ── Resend ───────────────────────────────────
-const RESEND_KEY      = 're_am7X76b5_AupBiMVFVpnjUyo3AaJt1zzD';
-const RESEND_TEMPLATE = '025f2080-64c0-40b2-8f04-f7c235028ae7';
-
 async function sendWelcomeEmail(email) {
   try {
     await fetch('/api/send-welcome', {
@@ -1064,7 +1060,7 @@ async function sendWelcomeEmail(email) {
   } catch(e) {
     console.log('Welcome email error:', e);
   }
-}sendWelcomeEmail 
+}
 
 // ── Email form ───────────────────────────────
 async function handleSubmit(e) {
@@ -1083,24 +1079,29 @@ async function handleSubmit(e) {
 
     if (error) {
       if (error.code === '23505') {
-        // Already signed up
+        // Already signed up — still redirect nicely
         btn.textContent = '✓ Already registered!';
         btn.style.background = 'var(--amber)';
         btn.style.color = 'var(--navy)';
-        note.textContent = `${email} is already on the list — we'll be in touch!`;
+        note.textContent = `${email} is already on the list — redirecting…`;
         note.style.color = 'var(--amber2)';
+        setTimeout(() => {
+          window.location.href = `thankyou.html?email=${encodeURIComponent(email)}`;
+        }, 1200);
       } else {
         throw error;
       }
     } else {
-      // New signup — save confirmed, now send welcome email
-      await sendWelcomeEmail(email);
-
-      btn.textContent = '✓ You\'re on the list!';
+      // New signup — send welcome email then redirect
+      sendWelcomeEmail(email); // fire and forget
+      btn.textContent = '✓ You\'re in!';
       btn.style.background = 'var(--green)';
       btn.style.color = '#0a1f14';
-      note.textContent = `Welcome to the Lab, ${email} — check your inbox for a welcome email!`;
+      note.textContent = `Welcome! Redirecting…`;
       note.style.color = 'var(--green)';
+      setTimeout(() => {
+        window.location.href = `thankyou.html?email=${encodeURIComponent(email)}`;
+      }, 800);
     }
   } catch (err) {
     btn.textContent = 'Try again';
@@ -1121,4 +1122,3 @@ window.addEventListener('scroll', () => {
 </script>
 </body>
 </html>
-
