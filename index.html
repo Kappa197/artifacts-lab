@@ -1056,24 +1056,15 @@ const RESEND_TEMPLATE = '025f2080-64c0-40b2-8f04-f7c235028ae7';
 
 async function sendWelcomeEmail(email) {
   try {
-    await fetch('https://api.resend.com/emails', {
+    await fetch('/api/send-welcome', {
       method: 'POST',
-      headers: {
-        'Content-Type':  'application/json',
-        'Authorization': `Bearer ${RESEND_KEY}`,
-      },
-      body: JSON.stringify({
-        from:    'The Artifacts Lab <noreply@theartifactslab.com>',
-        to:      [email],
-        subject: "You're in — welcome to The Artifacts Lab ⚗️",
-        template_id: RESEND_TEMPLATE,
-      }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
     });
   } catch(e) {
     console.log('Welcome email error:', e);
-    // Silent fail — don't block the signup confirmation
   }
-}
+}sendWelcomeEmail 
 
 // ── Email form ───────────────────────────────
 async function handleSubmit(e) {
@@ -1130,3 +1121,4 @@ window.addEventListener('scroll', () => {
 </script>
 </body>
 </html>
+
