@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Check your inbox — The Artifacts Lab</title>
+<meta name="description" content="Almost there! Check your inbox to confirm your account.">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=JetBrains+Mono:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:      #0B0F1A;
+  --navy2:     #111827;
+  --navy3:     #1A2235;
+  --navy4:     #243048;
+  --border:    #2A3B55;
+  --border2:   #334466;
+  --amber:     #D4920A;
+  --amber2:    #F5A623;
+  --amber-dim: rgba(212,146,10,0.12);
+  --green:     #2ECC8A;
+  --green-dim: rgba(46,204,138,0.1);
+  --blue:      #4A90D9;
+  --blue-dim:  rgba(74,144,217,0.1);
+  --text:      #E8EDF5;
+  --text2:     #9BAAC4;
+  --text3:     #5A6A8A;
+  --mono:      'JetBrains Mono', monospace;
+  --body:      'Outfit', sans-serif;
+  --serif:     'Playfair Display', serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--body);
+  background: var(--navy);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  overflow-x: hidden;
+}
+
+/* Grid overlay */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(212,146,10,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(212,146,10,0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none; z-index: 0;
+}
+
+/* Radial glow — blue tint for account creation */
+body::after {
+  content: '';
+  position: fixed;
+  top: -100px; left: 50%; transform: translateX(-50%);
+  width: 700px; height: 500px;
+  background: radial-gradient(ellipse, rgba(74,144,217,0.07) 0%, transparent 65%);
+  pointer-events: none; z-index: 0;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 48px; height: 64px;
+  background: rgba(11,15,26,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(42,59,85,0.5);
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  text-decoration: none;
+}
+.nav-logo-icon {
+  width: 30px; height: 30px;
+  background: var(--amber-dim);
+  border: 1px solid var(--amber);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem;
+}
+.nav-logo-text {
+  font-family: var(--serif);
+  font-size: 1rem; font-weight: 700;
+  color: var(--amber2);
+}
+
+/* ── MAIN CONTENT ── */
+.content {
+  position: relative; z-index: 1;
+  width: 100%; max-width: 580px;
+  text-align: center;
+}
+
+/* Envelope animation */
+.envelope-wrap {
+  margin-bottom: 32px;
+  animation: fadeDown 0.6s ease 0.1s both;
+}
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.envelope {
+  width: 80px; height: 80px;
+  background: var(--blue-dim);
+  border: 1px solid rgba(74,144,217,0.3);
+  border-radius: 20px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.2rem;
+  margin: 0 auto;
+  animation: float 3s ease-in-out infinite;
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-6px); }
+}
+
+/* Step badge */
+.step-badge {
+  display: inline-flex;
+  align-items: center; gap: 8px;
+  padding: 7px 16px;
+  background: var(--blue-dim);
+  border: 1px solid rgba(74,144,217,0.3);
+  border-radius: 99px;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--blue);
+  margin-bottom: 24px;
+  animation: fadeUp 0.6s ease 0.15s both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.heading {
+  font-family: var(--serif);
+  font-size: clamp(2.2rem, 6vw, 3.8rem);
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 16px;
+  animation: fadeUp 0.6s ease 0.2s both;
+}
+.heading em {
+  font-style: italic;
+  color: var(--amber2);
+}
+
+.subtext {
+  font-size: 0.95rem;
+  color: var(--text2);
+  line-height: 1.8;
+  font-weight: 300;
+  max-width: 440px;
+  margin: 0 auto 32px;
+  animation: fadeUp 0.6s ease 0.25s both;
+}
+.subtext strong { color: var(--text); }
+
+/* Steps */
+.steps {
+  background: var(--navy2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  margin-bottom: 32px;
+  text-align: left;
+  animation: fadeUp 0.6s ease 0.3s both;
+}
+.steps-title {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 20px;
+}
+.step {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(42,59,85,0.5);
+}
+.step:last-child { border-bottom: none; padding-bottom: 0; }
+.step:first-of-type { padding-top: 0; }
+
+.step-num {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono);
+  font-size: 0.7rem; font-weight: 700;
+  flex-shrink: 0;
+}
+.step-num.done    { background: var(--green-dim); color: var(--green); border: 1px solid rgba(46,204,138,0.3); }
+.step-num.active  { background: var(--blue-dim);  color: var(--blue);  border: 1px solid rgba(74,144,217,0.3); }
+.step-num.pending { background: var(--navy3);     color: var(--text3); border: 1px solid var(--border); }
+
+.step-info {}
+.step-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+.step-label.muted { color: var(--text3); }
+.step-desc {
+  font-size: 0.75rem;
+  color: var(--text3);
+  line-height: 1.5;
+}
+
+/* Email hint */
+.email-hint {
+  background: var(--amber-dim);
+  border: 1px solid rgba(212,146,10,0.25);
+  border-radius: 10px;
+  padding: 14px 18px;
+  font-size: 0.8rem;
+  color: var(--text2);
+  line-height: 1.6;
+  margin-bottom: 28px;
+  animation: fadeUp 0.6s ease 0.35s both;
+}
+.email-hint strong { color: var(--amber2); }
+
+/* Actions */
+.actions {
+  display: flex;
+  gap: 12px; flex-wrap: wrap;
+  justify-content: center;
+  animation: fadeUp 0.6s ease 0.4s both;
+}
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 32px;
+  background: var(--amber);
+  color: var(--navy);
+  font-family: var(--body);
+  font-size: 0.9rem; font-weight: 700;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: all 0.2s;
+  box-shadow: 0 4px 20px rgba(212,146,10,0.3);
+}
+.btn-primary:hover {
+  background: var(--amber2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(212,146,10,0.4);
+}
+.btn-ghost {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 28px;
+  background: transparent;
+  color: var(--text2);
+  font-family: var(--body);
+  font-size: 0.9rem; font-weight: 500;
+  border-radius: 10px;
+  text-decoration: none;
+  border: 1px solid var(--border2);
+  transition: all 0.2s;
+}
+.btn-ghost:hover { border-color: var(--text3); color: var(--text); }
+
+/* Resend */
+.resend-row {
+  margin-top: 28px;
+  font-size: 0.78rem;
+  color: var(--text3);
+  animation: fadeUp 0.6s ease 0.45s both;
+}
+.resend-btn {
+  background: none; border: none;
+  color: var(--amber2); cursor: pointer;
+  font-family: var(--body); font-size: 0.78rem;
+  text-decoration: underline; padding: 0;
+  transition: color 0.2s;
+}
+.resend-btn:hover { color: var(--amber3); }
+.resend-msg {
+  display: none;
+  margin-top: 6px;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  color: var(--green);
+}
+
+/* Footer */
+footer {
+  position: relative; z-index: 1;
+  margin-top: 44px;
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  color: var(--text3);
+  letter-spacing: 0.08em;
+  text-align: center;
+  animation: fadeUp 0.6s ease 0.5s both;
+}
+footer a { color: var(--text3); text-decoration: none; }
+footer a:hover { color: var(--amber2); }
+
+@media (max-width: 540px) {
+  nav { padding: 0 20px; }
+  .heading { font-size: 2.2rem; }
+  .actions { flex-direction: column; align-items: center; }
+  .btn-primary, .btn-ghost { width: 100%; justify-content: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <div class="nav-logo-icon">&#9879;&#65039;</div>
+    <div class="nav-logo-text">The Artifacts Lab</div>
+  </a>
+</nav>
+
+<!-- MAIN -->
+<div class="content">
+
+  <div class="envelope-wrap">
+    <div class="envelope">&#9993;</div>
+  </div>
+
+  <div class="step-badge">Step 2 of 3</div>
+
+  <h1 class="heading">Check your<br><em>inbox.</em></h1>
+
+  <p class="subtext">
+    We've sent a confirmation link to <strong id="emailDisplay">your email address</strong>.
+    Click it to activate your account — it only takes a second.
+  </p>
+
+  <!-- Steps -->
+  <div class="steps">
+    <div class="steps-title">Getting started</div>
+
+    <div class="step">
+      <div class="step-num done">&#10003;</div>
+      <div class="step-info">
+        <div class="step-label">Account created</div>
+        <div class="step-desc">Your details are saved and ready.</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num active">2</div>
+      <div class="step-info">
+        <div class="step-label">Confirm your email</div>
+        <div class="step-desc">Click the link in the email we just sent you — check spam if you don't see it.</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num pending">3</div>
+      <div class="step-info">
+        <div class="step-label muted">Access your tools</div>
+        <div class="step-desc">Sign in and your free tools will be ready immediately.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Email hint -->
+  <div class="email-hint">
+    &#9993; Email sent from <strong>noreply@theartifactslab.com</strong> — if you don't see it within a minute, check your <strong>spam or junk folder</strong> and mark it as safe.
+  </div>
+
+  <!-- Actions -->
+  <div class="actions">
+    <a href="login.html" class="btn-primary">Go to Sign In &#8594;</a>
+    <a href="index.html" class="btn-ghost">&#8592; Back to home</a>
+  </div>
+
+  <!-- Resend -->
+  <div class="resend-row">
+    Didn't receive the email?
+    <button class="resend-btn" onclick="resendEmail()">Resend confirmation</button>
+    <div class="resend-msg" id="resendMsg">&#10003; Confirmation email resent!</div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p>&copy; 2025 The Artifacts Lab &nbsp;&middot;&nbsp;
+    <a href="index.html">theartifactslab.com</a> &nbsp;&middot;&nbsp;
+    <a href="#">Privacy</a>
+  </p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL  = 'https://fvgajfiksxmwioxnesry.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2Z2FqZmlrc3htd2lveG5lc3J5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NDU4OTEsImV4cCI6MjA4OTIyMTg5MX0.KwqAzx1oAGeh0F3q1LfeQPXYjtdOjaOrzS_c4eUGKJY';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+// Show email if passed in URL
+const params = new URLSearchParams(window.location.search);
+const email  = params.get('email');
+if (email) {
+  document.getElementById('emailDisplay').textContent = email;
+}
+
+// Redirect to dashboard if already confirmed
+db.auth.getSession().then(({ data: { session } }) => {
+  if (session) window.location.href = 'dashboard.html';
+});
+
+// Resend confirmation email
+async function resendEmail() {
+  const btn = document.querySelector('.resend-btn');
+  const msg = document.getElementById('resendMsg');
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+
+  const emailToUse = email || prompt('Enter your email address:');
+  if (!emailToUse) { btn.disabled = false; btn.textContent = 'Resend confirmation'; return; }
+
+  const { error } = await db.auth.resend({
+    type: 'signup',
+    email: emailToUse,
+    options: { emailRedirectTo: 'https://theartifactslab.com/dashboard.html' }
+  });
+
+  if (!error) {
+    msg.style.display = 'block';
+    btn.textContent = 'Sent!';
+  } else {
+    btn.textContent = 'Try again';
+    btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>
