@@ -160,6 +160,21 @@ export default async function handler(req, res) {
         SERVICE_KEY,
         SUPABASE_URL
       );
+
+      // Send payment confirmation email
+try {
+  await fetch('https://www.theartifactslab.com/api/send-payment-email', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, plan: tier }),
+  });
+} catch(e) { console.log('Payment email error:', e); }
+
+return res.status(200).json({
+  received: true,
+  updated: { email, tier, expiry: expiry.toISOString().split('T')[0] }
+});
+      
       return res.status(200).json({
         received: true,
         updated: { email, tier, expiry: expiry.toISOString().split('T')[0] }
