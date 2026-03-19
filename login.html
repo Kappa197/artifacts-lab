@@ -383,7 +383,10 @@ async function signUp() {
     showMsg('err', error.message);
     btn.textContent = 'Create Account →'; btn.disabled = false;
   } else {
-    showMsg('ok', '✓ Account created! Check your email to confirm, then sign in.');
+    showMsg('ok', '✓ Account created! Redirecting…');
+    setTimeout(() => {
+     window.location.href = `confirm-email.html?email=${encodeURIComponent(email)}`;
+    }, 1000);
     btn.textContent = 'Done!';
   }
 }
