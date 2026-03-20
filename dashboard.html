@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard — The Artifacts Lab</title>
+<link rel="preconnect" href="https://fvgajfiksxmwioxnesry.supabase.co">
+<link rel="dns-prefetch" href="https://fvgajfiksxmwioxnesry.supabase.co">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -584,13 +586,24 @@ async function init() {
   if (!session) { window.location.href = 'login.html'; return; }
 
   const user = session.user;
-  currentUserEmail = user.email;
 
-  const { data: profile } = await db
+  // Fetch profile in parallel with rendering skeleton
+  const profilePromise = db
     .from('profiles')
     .select('tier, tier_expiry, created_at')
     .eq('id', user.id)
     .single();
+
+  // Show dashboard immediately with placeholder data
+  document.getElementById('loadingState').style.display = 'none';
+  document.getElementById('dashState').style.display = '';
+  document.getElementById('hEmail').textContent    = user.email;
+  document.getElementById('firstName').textContent = user.email.split('@')[0];
+  document.getElementById('acEmail').textContent   = user.email;
+
+  // Now await the profile
+  const { data: profile } = await profilePromise;
+  const tier = profile?.tier ?? 'free';
 
   const tier = profile?.tier ?? 'free';
 
