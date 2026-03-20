@@ -1,0 +1,2767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pregnancy Roadmap — The Artifacts Lab</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ═══ TOKENS ═══ */
+    :root {
+      --navy:        #09101f;
+      --navy-card:   #111827;
+      --navy-mid:    #1a2438;
+      --navy-light:  #243049;
+      --amber:       #f5a623;
+      --amber-lt:    #fcd166;
+      --amber-dim:   rgba(245,166,35,.14);
+      --rose:        #fb7185;
+      --rose-dim:    rgba(251,113,133,.13);
+      --teal:        #2dd4bf;
+      --teal-dim:    rgba(45,212,191,.13);
+      --violet:      #a78bfa;
+      --violet-dim:  rgba(167,139,250,.13);
+      --green:       #4ade80;
+      --green-dim:   rgba(74,222,128,.13);
+      --orange:      #fb923c;
+      --sky:         #38bdf8;
+      --sky-dim:     rgba(56,189,248,.13);
+      --text:        #f0f4fc;
+      --text-muted:  #7a8caa;
+      --border:      rgba(245,166,35,.18);
+      --border-soft: rgba(240,244,252,.08);
+      --shadow:      0 4px 24px rgba(0,0,0,.45);
+      --font-d: 'Playfair Display',serif;
+      --font-b: 'Outfit',sans-serif;
+      --font-m: 'JetBrains Mono',monospace;
+      --r-sm: 8px; --r-md: 14px; --r-lg: 20px; --r-xl: 28px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--navy); color: var(--text); font-family: var(--font-b); font-size: 16px; line-height: 1.6; min-height: 100vh; }
+
+    /* ═══ NAV ═══ */
+    .top-nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(9,16,31,.93); backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 20px; height: 58px; gap: 12px;
+    }
+    .nav-brand { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    .nav-logo  { font-family: var(--font-m); font-size: 11px; font-weight: 700; color: var(--amber); letter-spacing: .08em; text-transform: uppercase; }
+    .nav-sep   { color: var(--border); font-size: 18px; }
+    .nav-title { font-family: var(--font-d); font-size: 17px; color: var(--text); }
+    .nav-tabs  { display: flex; gap: 3px; }
+    .nav-tab {
+      background: none; border: none; cursor: pointer;
+      font-family: var(--font-b); font-size: 13px; font-weight: 500;
+      color: var(--text-muted); padding: 6px 13px; border-radius: 20px;
+      transition: all .2s; white-space: nowrap;
+    }
+    .nav-tab:hover  { color: var(--text); background: var(--border); }
+    .nav-tab.active { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(245,166,35,.3); }
+    .nav-tier {
+      font-family: var(--font-m); font-size: 10px; font-weight: 700;
+      letter-spacing: .08em; text-transform: uppercase;
+      padding: 3px 10px; border-radius: 20px;
+      border: 1px solid var(--border); color: var(--text-muted); flex-shrink: 0;
+    }
+    .nav-tier.basic   { color: var(--teal);  border-color: var(--teal); }
+    .nav-tier.premium { color: var(--amber); border-color: var(--amber); }
+
+    /* ═══ PAGES ═══ */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ═══ INLINE UPGRADE NUDGE (platform pattern) ═══ */
+    .upgrade-nudge {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 16px; border-radius: var(--r-md);
+      background: var(--amber-dim); border: 1px solid rgba(245,166,35,.3);
+      font-size: 13px; color: var(--text-muted); line-height: 1.5;
+      margin: 8px 0;
+    }
+    .upgrade-nudge .lock-icon { font-size: 16px; flex-shrink: 0; }
+    .upgrade-nudge strong { color: var(--text); }
+    .upgrade-nudge a { color: var(--amber); font-weight: 600; text-decoration: none; cursor: pointer; }
+    .upgrade-nudge a:hover { text-decoration: underline; }
+
+    /* ═══════════════════════════════════════
+       SETUP PAGE
+    ═══════════════════════════════════════ */
+    .setup-page {
+      min-height: calc(100vh - 58px);
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 40px 20px;
+    }
+    .setup-hero { text-align: center; margin-bottom: 40px; }
+    .setup-eyebrow { font-family: var(--font-m); font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--amber); margin-bottom: 14px; }
+    .setup-title { font-family: var(--font-d); font-size: clamp(32px,6vw,56px); font-weight: 900; line-height: 1.1; color: var(--text); margin-bottom: 16px; }
+    .setup-title span { color: var(--amber); }
+    .setup-subtitle { font-size: 17px; color: var(--text-muted); max-width: 420px; margin: 0 auto; }
+    .setup-card { background: var(--navy-card); border: 1px solid var(--border); border-radius: var(--r-xl); padding: 40px; width: 100%; max-width: 520px; box-shadow: var(--shadow); }
+    .setup-card-title { font-family: var(--font-d); font-size: 22px; font-weight: 700; margin-bottom: 28px; color: var(--amber); }
+    .field { margin-bottom: 22px; }
+    .field label { display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: .06em; font-family: var(--font-m); }
+    .field input[type="text"], .field input[type="date"] {
+      width: 100%; background: var(--navy-mid); border: 1px solid var(--border-soft);
+      border-radius: var(--r-md); padding: 14px 18px;
+      font-family: var(--font-b); font-size: 16px; color: var(--text);
+      outline: none; transition: border-color .2s; -webkit-appearance: none; color-scheme: dark;
+    }
+    .field input:focus { border-color: var(--amber); }
+    .field .hint { margin-top: 6px; font-size: 12px; color: var(--text-muted); }
+    .date-toggle { display: flex; background: var(--navy-mid); border-radius: var(--r-md); padding: 4px; margin-bottom: 14px; }
+    .date-toggle-btn { flex: 1; padding: 10px; border: none; border-radius: 10px; font-family: var(--font-b); font-size: 13px; font-weight: 500; color: var(--text-muted); background: none; cursor: pointer; transition: all .2s; }
+    .date-toggle-btn.active { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(245,166,35,.3); }
+    .btn-primary { width: 100%; padding: 18px; background: var(--amber); color: var(--navy); border: none; border-radius: var(--r-md); font-family: var(--font-b); font-size: 17px; font-weight: 700; cursor: pointer; transition: all .2s; margin-top: 8px; }
+    .btn-primary:hover { background: var(--amber-lt); transform: translateY(-1px); box-shadow: 0 6px 24px rgba(245,166,35,.3); }
+    .btn-primary:active { transform: translateY(0); }
+    .error-msg { color: var(--rose); font-size: 13px; margin-top: 10px; display: none; }
+
+    /* ═══════════════════════════════════════
+       ROADMAP PAGE
+    ═══════════════════════════════════════ */
+    .roadmap-page { padding: 30px 20px 60px; max-width: 960px; margin: 0 auto; }
+
+    .roadmap-hero {
+      display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: center;
+      background: var(--navy-card); border: 1px solid var(--border);
+      border-radius: var(--r-xl); padding: 32px 36px; margin-bottom: 24px;
+      box-shadow: var(--shadow); position: relative; overflow: hidden;
+    }
+    .roadmap-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at top right, rgba(245,166,35,.06), transparent 70%); pointer-events: none; }
+    .hero-greeting { font-family: var(--font-m); font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--amber); margin-bottom: 8px; }
+    .hero-name { font-family: var(--font-d); font-size: clamp(26px,4vw,40px); font-weight: 900; line-height: 1.1; margin-bottom: 6px; }
+    .hero-sub { font-size: 15px; color: var(--text-muted); }
+    .hero-sub strong { color: var(--amber); }
+    .hero-actions { margin-top: 18px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn-outline { padding: 10px 20px; background: none; border: 1px solid var(--border); border-radius: 24px; font-family: var(--font-b); font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: all .2s; }
+    .btn-outline:hover { border-color: var(--amber); color: var(--amber); }
+    .btn-outline.danger:hover { border-color: var(--rose); color: var(--rose); }
+
+    .progress-ring-wrap { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+    .progress-ring-wrap svg { width: 150px; height: 150px; }
+    .ring-label { font-family: var(--font-m); font-size: 10px; text-align: center; color: var(--text-muted); margin-top: 6px; letter-spacing: .06em; }
+
+    .trimester-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 24px; }
+    .trimester-card { background: var(--navy-card); border: 1px solid var(--border-soft); border-radius: var(--r-lg); padding: 18px 20px; }
+    .trimester-card.active-t { border-color: var(--amber); }
+    .trimester-card.done-t   { opacity: .7; }
+    .t-label { font-family: var(--font-m); font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 6px; }
+    .t-label.t1 { color: var(--amber); } .t-label.t2 { color: var(--rose); } .t-label.t3 { color: var(--teal); }
+    .t-weeks { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; }
+    .t-bar-track { height: 6px; background: var(--navy-light); border-radius: 3px; overflow: hidden; }
+    .t-bar-fill { height: 100%; border-radius: 3px; transition: width .6s cubic-bezier(.4,0,.2,1); }
+    .t-bar-fill.t1 { background: var(--amber); } .t-bar-fill.t2 { background: var(--rose); } .t-bar-fill.t3 { background: var(--teal); }
+    .t-status { margin-top: 8px; font-size: 11px; color: var(--text-muted); }
+
+    .this-week-card {
+      background: var(--navy-card); border: 1px solid var(--amber);
+      border-radius: var(--r-xl); padding: 28px 32px; margin-bottom: 24px;
+      position: relative; overflow: hidden;
+      display: grid; grid-template-columns: auto 1fr; gap: 28px; align-items: center;
+    }
+    .this-week-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, var(--amber-dim), transparent 60%); pointer-events: none; }
+    .week-badge-wrap { position: relative; z-index: 1; text-align: center; }
+    .week-emoji { font-size: 56px; line-height: 1; display: block; margin-bottom: 8px; }
+    .week-fruit { font-family: var(--font-m); font-size: 10px; font-weight: 700; color: var(--amber); letter-spacing: .1em; text-transform: uppercase; }
+    .week-size  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .week-info  { position: relative; z-index: 1; }
+    .week-title { font-family: var(--font-d); font-size: 26px; font-weight: 700; color: var(--amber); margin-bottom: 8px; }
+    .week-desc  { font-size: 15px; color: var(--text); line-height: 1.65; margin-bottom: 14px; }
+    .week-tags  { display: flex; flex-wrap: wrap; gap: 8px; }
+    .week-tag   { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; background: var(--navy-mid); border: 1px solid var(--border-soft); color: var(--text-muted); }
+    .week-tag.appt { border-color: rgba(45,212,191,.35); color: var(--teal); }
+    .week-tag.test { border-color: rgba(251,113,133,.35); color: var(--rose); }
+
+    .countdown-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 24px; }
+    .countdown-cell { background: var(--navy-card); border: 1px solid var(--border-soft); border-radius: var(--r-lg); padding: 18px 20px; text-align: center; }
+    .countdown-num { font-family: var(--font-m); font-size: 34px; font-weight: 700; color: var(--amber); display: block; line-height: 1; }
+    .countdown-num.small { font-size: 18px; line-height: 1.3; margin-top: 4px; }
+    .countdown-lbl { font-size: 13px; color: var(--text-muted); margin-top: 6px; }
+
+    .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+    .section-title  { font-family: var(--font-d); font-size: 22px; font-weight: 700; }
+    .section-pill   { font-family: var(--font-m); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; padding: 3px 10px; border-radius: 20px; background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(245,166,35,.25); }
+
+    .timeline { position: relative; padding-left: 36px; }
+    .timeline::before { content: ''; position: absolute; left: 12px; top: 0; bottom: 0; width: 2px; background: linear-gradient(to bottom, var(--amber), var(--rose), var(--teal)); opacity: .3; }
+    .t-section-label { position: relative; margin-bottom: 12px; margin-top: 28px; }
+    .t-section-label:first-child { margin-top: 0; }
+    .t-section-label::before { content: ''; position: absolute; left: -36px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; border-radius: 50%; }
+    .t-section-label.t1::before { background: var(--amber-dim); border: 2px solid var(--amber); }
+    .t-section-label.t2::before { background: var(--rose-dim);  border: 2px solid var(--rose); }
+    .t-section-label.t3::before { background: var(--teal-dim);  border: 2px solid var(--teal); }
+    .t-section-label span { font-family: var(--font-m); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; }
+    .t-section-label.t1 span { color: var(--amber); } .t-section-label.t2 span { color: var(--rose); } .t-section-label.t3 span { color: var(--teal); }
+
+    .milestone-card { background: var(--navy-card); border: 1px solid var(--border-soft); border-radius: var(--r-lg); padding: 18px 20px; margin-bottom: 12px; position: relative; transition: border-color .2s, transform .2s; }
+    .milestone-card:hover { transform: translateX(3px); }
+    .milestone-card::before { content: ''; position: absolute; left: -30px; top: 50%; transform: translateY(-50%); width: 12px; height: 12px; border-radius: 50%; background: var(--navy-light); border: 2px solid var(--border-soft); }
+    .milestone-card.past   { opacity: .55; }
+    .milestone-card.past::before { background: var(--green); border-color: var(--green); }
+    .milestone-card.current { border-color: var(--amber); background: linear-gradient(135deg, rgba(245,166,35,.07), var(--navy-card)); }
+    .milestone-card.current::before { background: var(--amber); border-color: var(--amber); box-shadow: 0 0 12px rgba(245,166,35,.5); width: 14px; height: 14px; left: -31px; }
+    .milestone-card.locked { overflow: hidden; }
+    .milestone-card.locked .m-desc { filter: blur(4px); user-select: none; }
+    .milestone-lock-badge { position: absolute; right: 12px; top: 12px; background: var(--navy-mid); border: 1px solid var(--border); border-radius: 20px; font-size: 10px; font-weight: 700; font-family: var(--font-m); color: var(--text-muted); padding: 2px 8px; letter-spacing: .06em; cursor: pointer; }
+    .milestone-lock-badge:hover { color: var(--amber); border-color: var(--amber); }
+    .m-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+    .m-icon   { font-size: 22px; flex-shrink: 0; }
+    .m-week   { font-family: var(--font-m); font-size: 11px; font-weight: 700; color: var(--text-muted); letter-spacing: .08em; }
+    .m-week.current-wk { color: var(--amber); }
+    .m-title  { font-size: 15px; font-weight: 700; color: var(--text); }
+    .m-desc   { font-size: 13px; color: var(--text-muted); line-height: 1.55; }
+    .m-type-badge { font-family: var(--font-m); font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; padding: 2px 7px; border-radius: 10px; margin-left: auto; flex-shrink: 0; }
+    .m-type-badge.scan { background: var(--teal-dim); color: var(--teal); border: 1px solid rgba(45,212,191,.25); }
+    .m-type-badge.test { background: var(--rose-dim); color: var(--rose); border: 1px solid rgba(251,113,133,.25); }
+    .m-type-badge.milestone { display: none; }
+    .note-area { width: 100%; margin-top: 10px; background: var(--navy-mid); border: 1px solid var(--border-soft); border-radius: var(--r-sm); padding: 10px 12px; font-family: var(--font-b); font-size: 13px; color: var(--text); resize: vertical; min-height: 60px; outline: none; transition: border-color .2s; }
+    .note-area:focus { border-color: var(--amber); }
+    .note-save-btn { margin-top: 6px; padding: 6px 14px; background: var(--amber-dim); border: 1px solid rgba(245,166,35,.3); border-radius: var(--r-sm); font-family: var(--font-m); font-size: 10px; font-weight: 700; color: var(--amber); cursor: pointer; letter-spacing: .06em; text-transform: uppercase; transition: all .2s; }
+    .note-save-btn:hover { background: var(--amber); color: var(--navy); }
+    .note-saved { color: var(--green); font-size: 11px; margin-left: 8px; }
+
+    /* ═══════════════════════════════════════
+       WELLNESS PAGE
+    ═══════════════════════════════════════ */
+    .wellness-page { padding: 30px 20px 80px; max-width: 960px; margin: 0 auto; }
+    .wellness-hero { background: var(--navy-card); border: 1px solid var(--border); border-radius: var(--r-xl); padding: 28px 32px; margin-bottom: 28px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; position: relative; overflow: hidden; }
+    .wellness-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at bottom left, rgba(45,212,191,.05), transparent 70%); pointer-events: none; }
+    .wellness-hero-left { position: relative; z-index: 1; }
+    .wellness-eyebrow { font-family: var(--font-m); font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--teal); margin-bottom: 6px; }
+    .wellness-title { font-family: var(--font-d); font-size: clamp(22px,4vw,34px); font-weight: 900; margin-bottom: 6px; }
+    .wellness-subtitle { font-size: 14px; color: var(--text-muted); max-width: 480px; }
+    .trimester-switcher { position: relative; z-index: 1; flex-shrink: 0; }
+    .trimester-select { background: var(--navy-mid); border: 1px solid var(--border); border-radius: var(--r-md); padding: 12px 40px 12px 18px; font-family: var(--font-b); font-size: 14px; font-weight: 600; color: var(--text); cursor: pointer; outline: none; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='8' viewBox='0 0 14 8'%3E%3Cpath d='M1 1l6 6 6-6' stroke='%237a8caa' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; min-width: 220px; transition: border-color .2s; color-scheme: dark; }
+    .trimester-select:focus { border-color: var(--amber); }
+    option { background: var(--navy-mid); }
+    .trimester-strip { display: flex; gap: 10px; margin-bottom: 28px; flex-wrap: wrap; }
+    .t-strip-pill { padding: 8px 18px; border-radius: 24px; font-family: var(--font-m); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; border: 1px solid var(--border-soft); color: var(--text-muted); cursor: pointer; transition: all .2s; }
+    .t-strip-pill.t1.active { background: var(--amber-dim); color: var(--amber); border-color: rgba(245,166,35,.4); }
+    .t-strip-pill.t2.active { background: var(--rose-dim);  color: var(--rose);  border-color: rgba(251,113,133,.4); }
+    .t-strip-pill.t3.active { background: var(--teal-dim);  color: var(--teal);  border-color: rgba(45,212,191,.4); }
+    .t-strip-pill:hover { color: var(--text); border-color: var(--border); }
+    .wellness-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 16px; }
+    .wellness-card { background: var(--navy-card); border: 1px solid var(--border-soft); border-radius: var(--r-xl); overflow: hidden; transition: border-color .2s, transform .2s; }
+    .wellness-card:hover { transform: translateY(-2px); }
+    .wellness-card-header { display: flex; align-items: center; gap: 12px; padding: 18px 22px 14px; border-bottom: 1px solid var(--border-soft); }
+    .cat-icon  { font-size: 28px; flex-shrink: 0; }
+    .cat-title { font-family: var(--font-d); font-size: 18px; font-weight: 700; }
+    .wellness-card-body { display: grid; grid-template-columns: 1fr 1fr; }
+    .do-col, .dont-col { padding: 16px 18px; }
+    .do-col { border-right: 1px solid var(--border-soft); }
+    .col-header { font-family: var(--font-m); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+    .col-header.do-hdr   { color: var(--green); } .col-header.do-hdr::before   { content: '✓'; font-size: 14px; }
+    .col-header.dont-hdr { color: var(--rose);  } .col-header.dont-hdr::before { content: '✗'; font-size: 14px; }
+    .do-item, .dont-item { font-size: 13px; line-height: 1.5; padding: 6px 0; border-bottom: 1px solid var(--border-soft); display: flex; gap: 8px; align-items: flex-start; color: var(--text-muted); }
+    .do-item:last-child, .dont-item:last-child { border-bottom: none; }
+    .do-item::before   { content: '·'; color: var(--green); flex-shrink: 0; margin-top: 1px; }
+    .dont-item::before { content: '·'; color: var(--rose);  flex-shrink: 0; margin-top: 1px; }
+    .wellness-card[data-cat="sport"]     .wellness-card-header { border-top: 3px solid var(--amber); }
+    .wellness-card[data-cat="nutrition"] .wellness-card-header { border-top: 3px solid var(--green); }
+    .wellness-card[data-cat="sleep"]     .wellness-card-header { border-top: 3px solid var(--violet); }
+    .wellness-card[data-cat="mind"]      .wellness-card-header { border-top: 3px solid var(--rose); }
+    .wellness-card[data-cat="travel"]    .wellness-card-header { border-top: 3px solid var(--sky); }
+    .wellness-card[data-cat="beauty"]    .wellness-card-header { border-top: 3px solid var(--orange); }
+    .wellness-card[data-cat="social"]    .wellness-card-header { border-top: 3px solid var(--teal); }
+    .wellness-card[data-cat="birth"]     .wellness-card-header { border-top: 3px solid var(--amber-lt); }
+    .wellness-notice { background: rgba(251,113,133,.08); border: 1px solid rgba(251,113,133,.2); border-radius: var(--r-lg); padding: 16px 20px; margin-top: 20px; font-size: 13px; color: var(--text-muted); display: flex; gap: 12px; align-items: flex-start; }
+    .wellness-notice strong { color: var(--text); }
+
+    /* ═══════════════════════════════════════
+       WEEKLY PAGE
+    ═══════════════════════════════════════ */
+    .weekly-page { padding: 30px 20px 80px; max-width: 960px; margin: 0 auto; }
+
+    /* Weekly hero */
+    .weekly-hero { background: var(--navy-card); border: 1px solid var(--border); border-radius: var(--r-xl); padding: 28px 32px; margin-bottom: 28px; position: relative; overflow: hidden; }
+    .weekly-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at top right, rgba(167,139,250,.06), transparent 70%); pointer-events: none; }
+    .weekly-eyebrow { font-family: var(--font-m); font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--violet); margin-bottom: 6px; position: relative; z-index: 1; }
+    .weekly-title { font-family: var(--font-d); font-size: clamp(22px,4vw,34px); font-weight: 900; margin-bottom: 6px; position: relative; z-index: 1; }
+    .weekly-subtitle { font-size: 14px; color: var(--text-muted); max-width: 560px; position: relative; z-index: 1; }
+    .weekly-week-badge { position: absolute; right: 32px; top: 50%; transform: translateY(-50%); text-align: center; z-index: 1; }
+    .weekly-week-num { font-family: var(--font-m); font-size: 48px; font-weight: 700; color: var(--violet); line-height: 1; }
+    .weekly-week-lbl { font-family: var(--font-m); font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); margin-top: 2px; }
+
+    /* Two column layout */
+    .weekly-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+    /* Check-in card */
+    .checkin-card { background: var(--navy-card); border: 1px solid var(--border-soft); border-radius: var(--r-xl); overflow: hidden; }
+    .checkin-card-hdr { padding: 20px 24px 16px; border-bottom: 1px solid var(--border-soft); border-top: 3px solid var(--violet); display: flex; align-items: center; justify-content: space-between; }
+    .checkin-card-title { font-family: var(--font-d); font-size: 18px; font-weight: 700; }
+    .checkin-week-tag { font-family: var(--font-m); font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; background: var(--violet-dim); color: var(--violet); border: 1px solid rgba(167,139,250,.3); }
+    .checkin-card-body { padding: 20px 24px; }
+
+    /* Mood selector */
+    .checkin-label { font-family: var(--font-m); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--text-muted); margin-bottom: 10px; display: block; }
+    .mood-row { display: flex; gap: 8px; margin-bottom: 20px; }
+    .mood-btn { flex: 1; background: var(--navy-mid); border: 1px solid var(--border-soft); border-radius: var(--r-md); padding: 10px 6px; text-align: center; cursor: pointer; transition: all .2s; font-size: 22px; line-height: 1; }
+    .mood-btn:hover { border-color: var(--violet); transform: scale(1.08); }
+    .mood-btn.selected { background: var(--violet-dim); border-color: var(--violet); box-shadow: 0 0 12px rgba(167,139,250,.25); }
+    .mood-lbl { font-size: 10px; color: var(--text-muted); margin-top: 5px; display: block; font-family: var(--font-m); }
+
+    /* Symptom chips */
+    .symptom-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 20px; }
+    .symptom-chip { padding: 6px 12px; background: var(--navy-mid); border: 1px solid var(--border-soft); border-radius: 20px; font-size: 12px; font-weight: 500; color: var(--text-muted); cursor: pointer; transition: all .2s; user-select: none; }
+    .symptom-chip:hover { border-color: var(--violet); color: var(--text); }
+    .symptom-chip.active { background: var(--violet-dim); border-color: var(--violet); color: var(--violet); }
+
+    /* Note textarea */
+    .checkin-note { width: 100%; background: var(--navy-mid); border: 1px solid var(--border-soft); border-radius: var(--r-md); padding: 12px 14px; font-family: var(--font-b); font-size: 13px; color: var(--text); resize: vertical; min-height: 72px; outline: none; transition: border-color .2s; margin-bottom: 16px; }
+    .checkin-note::placeholder { color: var(--text-muted); }
+    .checkin-note:focus { border-color: var(--violet); }
+
+    /* Save check-in button */
+    .btn-save-checkin { width: 100%; padding: 14px; background: var(--violet-dim); border: 1px solid rgba(167,139,250,.4); border-radius: var(--r-md); font-family: var(--font-b); font-size: 14px; font-weight: 700; color: var(--violet); cursor: pointer; transition: all .2s; }
+    .btn-save-checkin:hover { background: var(--violet); color: var(--navy); }
+    .checkin-saved-toast { text-align: center; font-size: 13px; color: var(--green); margin-top: 8px; min-height: 20px; }
+
+    /* History section */
+    .history-section { margin-top: 20px; }
+    .history-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .history-title { font-family: var(--font-m); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--text-muted); }
+    .history-card { background: var(--navy-mid); border: 1px solid var(--border-soft); border-radius: var(--r-lg); padding: 14px 16px; margin-bottom: 8px; cursor: pointer; transition: border-color .2s; }
+    .history-card:hover { border-color: var(--violet); }
+    .history-card.expanded { border-color: var(--violet); background: linear-gradient(135deg, var(--violet-dim), var(--navy-mid)); }
+    .history-card-top { display: flex; align-items: center; justify-content: space-between; }
+    .history-card-top-left { display: flex; align-items: center; gap: 10px; }
+    .history-week-lbl { font-family: var(--font-m); font-size: 10px; font-weight: 700; color: var(--violet); letter-spacing: .08em; text-transform: uppercase; }
+    .history-mood-lbl { font-size: 11px; color: var(--text-muted); }
+    .history-date { font-size: 11px; color: var(--text-muted); }
+    .history-mood { font-size: 18px; }
+    .history-chevron { font-size: 12px; color: var(--text-muted); transition: transform .25s; flex-shrink: 0; margin-left: 6px; }
+    .history-card.expanded .history-chevron { transform: rotate(180deg); }
+    /* Collapsed: show chips + note preview in a single muted line */
+    .history-preview { font-size: 12px; color: var(--text-muted); margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    /* Expanded detail block */
+    .history-detail { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-soft); }
+    .history-card.expanded .history-detail { display: block; }
+    .history-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+    .history-chip { font-size: 10px; padding: 2px 8px; border-radius: 10px; background: var(--violet-dim); color: var(--violet); border: 1px solid rgba(167,139,250,.2); }
+    .history-note-text { font-size: 13px; color: var(--text-muted); font-style: italic; line-height: 1.6; }
+    .history-no-note { font-size: 12px; color: var(--text-muted); opacity: .6; }
+
+    /* Export button */
+    .btn-export { display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: none; border: 1px solid var(--border-soft); border-radius: 20px; font-family: var(--font-m); font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); cursor: pointer; transition: all .2s; }
+    .btn-export:hover { border-color: var(--amber); color: var(--amber); }
+
+    /* ─── TO-DO CARD ─── */
+    .todo-card { background: var(--navy-card); border: 1px solid var(--border-soft); border-radius: var(--r-xl); overflow: hidden; }
+    .todo-card-hdr { padding: 20px 24px 16px; border-bottom: 1px solid var(--border-soft); border-top: 3px solid var(--amber); }
+    .todo-card-title { font-family: var(--font-d); font-size: 18px; font-weight: 700; margin-bottom: 14px; }
+    .todo-trim-tabs { display: flex; gap: 4px; }
+    .todo-trim-tab { flex: 1; padding: 8px 6px; background: var(--navy-mid); border: none; border-radius: var(--r-sm); font-family: var(--font-m); font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); cursor: pointer; transition: all .2s; text-align: center; }
+    .todo-trim-tab.active { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(245,166,35,.3); }
+    .todo-trim-tab:hover:not(.active) { color: var(--text); }
+    .todo-card-body { padding: 20px 24px; }
+
+    /* Progress bar */
+    .todo-progress-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .todo-progress-track { flex: 1; height: 5px; background: var(--navy-light); border-radius: 3px; overflow: hidden; }
+    .todo-progress-fill { height: 100%; background: var(--amber); border-radius: 3px; transition: width .4s ease; }
+    .todo-progress-lbl { font-family: var(--font-m); font-size: 10px; font-weight: 700; color: var(--amber); white-space: nowrap; }
+
+    /* Task items */
+    .todo-item { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border-soft); cursor: pointer; transition: opacity .2s; }
+    .todo-item:last-child { border-bottom: none; }
+    .todo-item:hover .todo-check { border-color: var(--amber); }
+    .todo-check { flex-shrink: 0; width: 20px; height: 20px; border-radius: 6px; border: 2px solid var(--border-soft); background: var(--navy-mid); display: flex; align-items: center; justify-content: center; transition: all .2s; margin-top: 2px; }
+    .todo-check.done { background: var(--amber); border-color: var(--amber); }
+    .todo-check.done::after { content: '✓'; color: var(--navy); font-size: 12px; font-weight: 700; }
+    .todo-text { font-size: 14px; color: var(--text); line-height: 1.5; transition: color .2s; }
+    .todo-item.completed .todo-text { color: var(--text-muted); text-decoration: line-through; }
+    .todo-badge { font-family: var(--font-m); font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; padding: 2px 7px; border-radius: 10px; flex-shrink: 0; margin-top: 4px; }
+    .todo-badge.core    { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(245,166,35,.2); }
+    .todo-badge.premium { background: var(--teal-dim); color: var(--teal); border: 1px solid rgba(45,212,191,.2); }
+
+    /* ═══════════════════════════════════════
+       PHASE 2 — KICK COUNTER & CONTRACTION TIMER
+    ═══════════════════════════════════════ */
+
+    /* Shared two-tool row */
+    .tools-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+    .tool-card  { background: var(--navy-card); border: 1px solid var(--border-soft); border-radius: var(--r-xl); overflow: hidden; }
+    .tool-card-hdr { padding: 18px 24px 14px; border-bottom: 1px solid var(--border-soft); display: flex; align-items: center; justify-content: space-between; }
+    .tool-card-title { font-family: var(--font-d); font-size: 18px; font-weight: 700; }
+    .tool-card-body  { padding: 22px 24px; }
+    .tool-eyebrow { font-family: var(--font-m); font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 2px; }
+
+    /* ── KICK COUNTER ── */
+    .tool-card.kick .tool-card-hdr { border-top: 3px solid var(--green); }
+    .tool-eyebrow.kick-ey { color: var(--green); }
+
+    .kick-display { text-align: center; padding: 8px 0 20px; }
+    .kick-count-num { font-family: var(--font-m); font-size: 80px; font-weight: 700; color: var(--green); line-height: 1; display: block; transition: transform .1s; }
+    .kick-count-num.bump { transform: scale(1.18); }
+    .kick-count-lbl { font-size: 13px; color: var(--text-muted); margin-top: 4px; display: block; }
+    .kick-timer-lbl { font-family: var(--font-m); font-size: 12px; color: var(--text-muted); margin-top: 8px; display: block; }
+
+    .btn-kick {
+      width: 100%; padding: 20px;
+      background: var(--green-dim); border: 2px solid var(--green);
+      border-radius: var(--r-lg); font-family: var(--font-d);
+      font-size: 20px; font-weight: 700; color: var(--green);
+      cursor: pointer; transition: all .12s; user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-kick:hover  { background: var(--green); color: var(--navy); }
+    .btn-kick:active { transform: scale(.96); background: var(--green); color: var(--navy); }
+
+    .kick-actions { display: flex; gap: 8px; margin-top: 12px; }
+    .btn-kick-sm  { flex: 1; padding: 9px; background: none; border: 1px solid var(--border-soft); border-radius: var(--r-md); font-family: var(--font-m); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); cursor: pointer; transition: all .2s; }
+    .btn-kick-sm:hover { border-color: var(--green); color: var(--green); }
+
+    .kick-alert { display: none; background: var(--rose-dim); border: 1px solid rgba(251,113,133,.3); border-radius: var(--r-md); padding: 10px 14px; margin-top: 12px; font-size: 13px; color: var(--rose); line-height: 1.5; }
+    .kick-alert strong { display: block; margin-bottom: 2px; }
+
+    .kick-guidance { background: var(--green-dim); border: 1px solid rgba(74,222,128,.2); border-radius: var(--r-md); padding: 10px 14px; margin-top: 12px; font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+    .kick-guidance strong { color: var(--green); }
+
+    /* Session log */
+    .kick-log-title { font-family: var(--font-m); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--text-muted); margin: 16px 0 8px; }
+    .kick-log-item  { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--border-soft); font-size: 12px; color: var(--text-muted); }
+    .kick-log-item:last-child { border-bottom: none; }
+    .kick-log-count { font-family: var(--font-m); font-weight: 700; color: var(--green); font-size: 14px; }
+    .kick-log-empty { font-size: 12px; color: var(--text-muted); text-align: center; padding: 12px 0; opacity: .6; }
+
+    /* ── CONTRACTION TIMER ── */
+    .tool-card.contraction .tool-card-hdr { border-top: 3px solid var(--rose); }
+    .tool-eyebrow.con-ey { color: var(--rose); }
+
+    .con-display { text-align: center; padding: 8px 0 20px; }
+    .con-status-lbl { font-family: var(--font-m); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 6px; }
+    .con-timer-num { font-family: var(--font-m); font-size: 64px; font-weight: 700; line-height: 1; display: block; transition: color .3s; }
+    .con-timer-num.idle      { color: var(--text-muted); }
+    .con-timer-num.active    { color: var(--rose); }
+    .con-timer-num.resting   { color: var(--teal); }
+    .con-sub-lbl { font-size: 13px; color: var(--text-muted); display: block; margin-top: 6px; min-height: 20px; }
+
+    .btn-contraction {
+      width: 100%; padding: 18px;
+      border: 2px solid var(--rose); border-radius: var(--r-lg);
+      font-family: var(--font-d); font-size: 18px; font-weight: 700;
+      cursor: pointer; transition: all .2s; user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-contraction.start { background: var(--rose-dim); color: var(--rose); }
+    .btn-contraction.start:hover { background: var(--rose); color: var(--navy); }
+    .btn-contraction.stop  { background: var(--rose); color: var(--navy); border-color: var(--rose); }
+    .btn-contraction.stop:hover { opacity: .85; }
+
+    .con-stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+    .con-stat { background: var(--navy-mid); border: 1px solid var(--border-soft); border-radius: var(--r-md); padding: 10px 12px; text-align: center; }
+    .con-stat-num { font-family: var(--font-m); font-size: 20px; font-weight: 700; color: var(--rose); display: block; }
+    .con-stat-lbl { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .con-stat-num.teal { color: var(--teal); }
+
+    .con-reset-btn { width: 100%; margin-top: 10px; padding: 9px; background: none; border: 1px solid var(--border-soft); border-radius: var(--r-md); font-family: var(--font-m); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); cursor: pointer; transition: all .2s; }
+    .con-reset-btn:hover { border-color: var(--rose); color: var(--rose); }
+
+    /* 5-1-1 guidance panel */
+    .con-guidance { border-radius: var(--r-md); padding: 12px 14px; margin-top: 12px; font-size: 12px; line-height: 1.6; }
+    .con-guidance.default { background: var(--navy-mid); border: 1px solid var(--border-soft); color: var(--text-muted); }
+    .con-guidance.warn    { background: rgba(245,166,35,.1); border: 1px solid rgba(245,166,35,.3); color: var(--amber); }
+    .con-guidance.alert   { background: var(--rose-dim); border: 1px solid rgba(251,113,133,.4); color: var(--rose); }
+    .con-guidance strong  { display: block; font-size: 13px; margin-bottom: 3px; }
+
+    /* Contraction log */
+    .con-log-title { font-family: var(--font-m); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--text-muted); margin: 16px 0 8px; }
+    .con-log-item  { display: grid; grid-template-columns: auto 1fr 1fr 1fr; gap: 8px; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--border-soft); font-size: 11px; color: var(--text-muted); }
+    .con-log-item:last-child { border-bottom: none; }
+    .con-log-num   { font-family: var(--font-m); font-size: 10px; color: var(--rose); font-weight: 700; }
+    .con-log-dur   { font-family: var(--font-m); font-size: 12px; color: var(--text); font-weight: 700; }
+    .con-log-gap   { font-family: var(--font-m); font-size: 11px; color: var(--teal); }
+    .con-log-time  { font-size: 10px; text-align: right; }
+    .con-log-hdr   { font-family: var(--font-m); font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); opacity: .7; }
+    .con-log-empty { font-size: 12px; color: var(--text-muted); text-align: center; padding: 12px 0; opacity: .6; }
+
+    @media (max-width: 720px) {
+      .tools-row { grid-template-columns: 1fr; }
+      .kick-count-num { font-size: 64px; }
+      .con-timer-num  { font-size: 52px; }
+    }
+
+    /* ── APPOINTMENT LOG ── */
+    .appt-card { background: var(--navy-card); border: 1px solid var(--border-soft); border-radius: var(--r-xl); overflow: hidden; margin-top: 20px; }
+    .appt-card-hdr { padding: 18px 24px 14px; border-bottom: 1px solid var(--border-soft); border-top: 3px solid var(--sky); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .appt-card-title { font-family: var(--font-d); font-size: 18px; font-weight: 700; }
+    .appt-tier-badge { font-family: var(--font-m); font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; background: var(--sky-dim); color: var(--sky); border: 1px solid rgba(56,189,248,.3); }
+    .appt-card-body { padding: 20px 24px; }
+
+    /* Add form */
+    .appt-form { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 10px; align-items: end; margin-bottom: 20px; }
+    .appt-form-field { display: flex; flex-direction: column; gap: 5px; }
+    .appt-form-label { font-family: var(--font-m); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); }
+    .appt-input, .appt-select {
+      background: var(--navy-mid); border: 1px solid var(--border-soft);
+      border-radius: var(--r-md); padding: 10px 14px;
+      font-family: var(--font-b); font-size: 14px; color: var(--text);
+      outline: none; transition: border-color .2s; color-scheme: dark;
+      -webkit-appearance: none;
+    }
+    .appt-input:focus, .appt-select:focus { border-color: var(--sky); }
+    .appt-select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a8caa' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 12px center;
+      padding-right: 32px;
+    }
+    .appt-note-input { grid-column: 1 / -1; }
+    .btn-add-appt { padding: 10px 20px; background: var(--sky-dim); border: 1px solid rgba(56,189,248,.4); border-radius: var(--r-md); font-family: var(--font-b); font-size: 13px; font-weight: 700; color: var(--sky); cursor: pointer; transition: all .2s; white-space: nowrap; align-self: end; }
+    .btn-add-appt:hover { background: var(--sky); color: var(--navy); }
+
+    /* Appointment list */
+    .appt-section-lbl { font-family: var(--font-m); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--text-muted); margin: 4px 0 10px; }
+    .appt-item { display: flex; align-items: flex-start; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--border-soft); }
+    .appt-item:last-child { border-bottom: none; }
+    .appt-item.past { opacity: .55; }
+    .appt-icon-wrap { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+    .appt-icon-wrap.upcoming { background: var(--sky-dim); border: 1px solid rgba(56,189,248,.25); }
+    .appt-icon-wrap.past-ic  { background: var(--navy-light); border: 1px solid var(--border-soft); }
+    .appt-info { flex: 1; min-width: 0; }
+    .appt-type-lbl { font-size: 14px; font-weight: 700; color: var(--text); }
+    .appt-date-lbl { font-family: var(--font-m); font-size: 11px; color: var(--sky); margin-top: 1px; }
+    .appt-note-lbl { font-size: 12px; color: var(--text-muted); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 360px; }
+    .appt-days-badge { font-family: var(--font-m); font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
+    .appt-days-badge.soon   { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(245,166,35,.3); }
+    .appt-days-badge.future { background: var(--sky-dim); color: var(--sky); border: 1px solid rgba(56,189,248,.2); }
+    .appt-days-badge.done   { background: var(--navy-light); color: var(--text-muted); border: 1px solid var(--border-soft); }
+    .btn-del-appt { background: none; border: none; color: var(--text-muted); font-size: 16px; cursor: pointer; padding: 4px 6px; border-radius: 6px; transition: all .2s; flex-shrink: 0; }
+    .btn-del-appt:hover { color: var(--rose); background: var(--rose-dim); }
+    .appt-empty { text-align: center; padding: 20px 0; font-size: 13px; color: var(--text-muted); opacity: .7; }
+
+    @media (max-width: 720px) {
+      .appt-form { grid-template-columns: 1fr 1fr; }
+      .btn-add-appt { grid-column: 1 / -1; width: 100%; }
+      .appt-note-input { grid-column: 1 / -1; }
+    }
+    @media (max-width: 480px) {
+      .appt-form { grid-template-columns: 1fr; }
+    }
+
+    /* ── CALENDAR OPEN MODAL ── */
+    .cal-modal-box {
+      background: var(--navy-card); border: 1px solid var(--sky);
+      border-radius: var(--r-xl); padding: 32px 28px;
+      max-width: 440px; width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,.6);
+    }
+    .cal-modal-icon  { font-size: 44px; margin-bottom: 12px; text-align: center; }
+    .cal-modal-title { font-family: var(--font-d); font-size: 22px; font-weight: 700; color: var(--sky); margin-bottom: 8px; text-align: center; }
+    .cal-modal-desc  { font-size: 14px; color: var(--text-muted); text-align: center; margin-bottom: 20px; line-height: 1.6; }
+    .cal-open-btn {
+      width: 100%; padding: 15px; margin-bottom: 10px;
+      background: var(--sky); color: var(--navy);
+      border: none; border-radius: var(--r-md);
+      font-family: var(--font-b); font-size: 15px; font-weight: 700;
+      cursor: pointer; transition: all .2s;
+    }
+    .cal-open-btn:hover { opacity: .9; }
+    .cal-platforms { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+    .cal-platform  { background: var(--navy-mid); border: 1px solid var(--border-soft); border-radius: var(--r-md); padding: 10px 8px; text-align: center; font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+    .cal-platform-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+    .cal-platform strong { color: var(--text); display: block; font-size: 12px; }
+    .cal-step { font-size: 11px; color: var(--text-muted); opacity: .8; }
+    .cal-download-link { display: block; text-align: center; font-size: 13px; color: var(--text-muted); cursor: pointer; padding: 8px; text-decoration: underline; }
+    .cal-download-link:hover { color: var(--text); }
+
+    /* ── PARTNER SHARE MODAL ── */
+    .share-modal-box {
+      background: var(--navy-card); border: 1px solid var(--teal);
+      border-radius: var(--r-xl); padding: 36px 32px;
+      max-width: 480px; width: 100%; text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,.6);
+    }
+    .share-modal-icon  { font-size: 44px; margin-bottom: 14px; }
+    .share-modal-title { font-family: var(--font-d); font-size: 24px; font-weight: 700; margin-bottom: 8px; color: var(--teal); }
+    .share-modal-desc  { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.6; }
+    .share-link-wrap   { display: flex; gap: 8px; margin-bottom: 16px; }
+    .share-link-input  { flex: 1; background: var(--navy-mid); border: 1px solid var(--border-soft); border-radius: var(--r-md); padding: 11px 14px; font-family: var(--font-m); font-size: 11px; color: var(--text-muted); outline: none; overflow: hidden; text-overflow: ellipsis; }
+    .btn-copy-link { padding: 11px 18px; background: var(--teal-dim); border: 1px solid rgba(45,212,191,.4); border-radius: var(--r-md); font-family: var(--font-m); font-size: 11px; font-weight: 700; color: var(--teal); cursor: pointer; transition: all .2s; white-space: nowrap; }
+    .btn-copy-link:hover    { background: var(--teal); color: var(--navy); }
+    .btn-copy-link.copied   { background: var(--teal); color: var(--navy); }
+    .share-info-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+    .share-info-cell { background: var(--navy-mid); border-radius: var(--r-md); padding: 12px; text-align: left; }
+    .share-info-label { font-family: var(--font-m); font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--text-muted); margin-bottom: 3px; }
+    .share-info-val   { font-size: 13px; color: var(--text); font-weight: 600; }
+
+    /* Partner view banner */
+    .partner-banner { background: linear-gradient(135deg, var(--teal-dim), rgba(45,212,191,.06)); border: 1px solid rgba(45,212,191,.3); border-radius: var(--r-lg); padding: 14px 20px; margin: 16px 20px 0; display: flex; align-items: center; gap: 12px; }
+    .partner-banner-icon  { font-size: 24px; flex-shrink: 0; }
+    .partner-banner-text  { font-size: 14px; color: var(--text-muted); }
+    .partner-banner-text strong { color: var(--teal); }
+
+    /* ═══════════════════════════════════════
+       HELP PAGE
+    ═══════════════════════════════════════ */
+    .doc-page { max-width: 760px; margin: 0 auto; padding: 40px 20px 80px; }
+    .doc-hero  { margin-bottom: 40px; }
+    .doc-eyebrow { font-family: var(--font-m); font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--amber); margin-bottom: 10px; }
+    .doc-title { font-family: var(--font-d); font-size: clamp(28px,5vw,44px); font-weight: 900; color: var(--text); margin-bottom: 12px; }
+    .doc-intro { font-size: 16px; color: var(--text-muted); max-width: 560px; line-height: 1.7; }
+
+    /* Help section tabs */
+    .help-tabs { display: flex; gap: 6px; margin-bottom: 28px; }
+    .help-tab-btn { padding: 10px 22px; background: var(--navy-card); border: 1px solid var(--border-soft); border-radius: 24px; font-family: var(--font-b); font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: all .2s; }
+    .help-tab-btn.active { background: var(--amber-dim); color: var(--amber); border-color: rgba(245,166,35,.3); }
+    .help-tab-btn:hover:not(.active) { color: var(--text); border-color: var(--border); }
+    .help-panel { display: none; }
+    .help-panel.active { display: block; }
+
+    .doc-section { background: var(--navy-card); border: 1px solid var(--border-soft); border-radius: var(--r-lg); padding: 28px 30px; margin-bottom: 16px; }
+    .doc-section-title { font-family: var(--font-d); font-size: 18px; font-weight: 700; color: var(--amber); margin-bottom: 12px; }
+    .doc-section p, .doc-section li { font-size: 15px; color: var(--text-muted); line-height: 1.7; }
+    .doc-section ul { padding-left: 20px; }
+    .doc-section li { margin-bottom: 6px; }
+    .doc-section li::marker { color: var(--amber); }
+    .doc-step { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 16px; }
+    .doc-step:last-child { margin-bottom: 0; }
+    .step-num { flex-shrink: 0; width: 32px; height: 32px; background: var(--amber-dim); border: 1px solid rgba(245,166,35,.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-m); font-size: 12px; font-weight: 700; color: var(--amber); }
+    .step-body { flex: 1; }
+    .step-title { font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .step-desc  { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+
+    .tier-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    .tier-table th, .tier-table td { padding: 10px 14px; font-size: 14px; border-bottom: 1px solid var(--border-soft); text-align: left; }
+    .tier-table th { font-family: var(--font-m); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--amber); }
+    .tier-table td:first-child { color: var(--text); }
+    .tier-table td:not(:first-child) { text-align: center; color: var(--text-muted); }
+    .check { color: var(--green); font-size: 16px; }
+    .cross { color: var(--text-muted); font-size: 16px; }
+
+    .faq-item { background: var(--navy-card); border: 1px solid var(--border-soft); border-radius: var(--r-lg); margin-bottom: 10px; overflow: hidden; }
+    .faq-q { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; font-size: 15px; font-weight: 600; color: var(--text); cursor: pointer; transition: color .2s; user-select: none; }
+    .faq-q:hover { color: var(--amber); }
+    .faq-q .faq-arrow { font-size: 18px; transition: transform .3s; flex-shrink: 0; margin-left: 12px; }
+    .faq-item.open .faq-arrow { transform: rotate(180deg); }
+    .faq-a { display: none; padding: 0 24px 20px; font-size: 14px; color: var(--text-muted); line-height: 1.7; border-top: 1px solid var(--border-soft); }
+    .faq-item.open .faq-a { display: block; }
+    .faq-a p { margin-top: 14px; }
+    .faq-a ul { padding-left: 18px; margin-top: 8px; }
+    .faq-a li { margin-bottom: 5px; }
+    .faq-a li::marker { color: var(--amber); }
+
+    /* ═══ MODAL ═══ */
+    .modal-overlay { display: none; position: fixed; inset: 0; z-index: 500; background: rgba(9,16,31,.85); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 20px; }
+    .modal-overlay.show { display: flex; }
+    .modal-box { background: var(--navy-card); border: 1px solid var(--amber); border-radius: var(--r-xl); padding: 36px 32px; max-width: 420px; width: 100%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,.6); }
+    .modal-icon  { font-size: 48px; margin-bottom: 16px; }
+    .modal-title { font-family: var(--font-d); font-size: 24px; font-weight: 700; margin-bottom: 10px; color: var(--amber); }
+    .modal-desc  { font-size: 15px; color: var(--text-muted); margin-bottom: 24px; }
+    .modal-desc strong { color: var(--text); }
+    .modal-actions  { display: flex; flex-direction: column; gap: 10px; }
+    .modal-btn-primary { padding: 14px; background: var(--amber); color: var(--navy); border: none; border-radius: var(--r-md); font-family: var(--font-b); font-size: 15px; font-weight: 700; cursor: pointer; transition: all .2s; }
+    .modal-btn-primary:hover { background: var(--amber-lt); }
+    .modal-btn-ghost { padding: 12px; background: none; color: var(--text-muted); border: 1px solid var(--border-soft); border-radius: var(--r-md); font-family: var(--font-b); font-size: 14px; cursor: pointer; transition: all .2s; }
+    .modal-btn-ghost:hover { color: var(--text); border-color: var(--border); }
+
+    /* ═══ RESPONSIVE ═══ */
+    @media (max-width: 720px) {
+      .top-nav { padding: 0 14px; }
+      .nav-logo, .nav-sep { display: none; }
+      .nav-title { font-size: 14px; }
+      .nav-tab { font-size: 12px; padding: 5px 9px; }
+      .roadmap-hero { grid-template-columns: 1fr; padding: 24px 22px; }
+      .progress-ring-wrap { order: -1; } .progress-ring-wrap svg { width: 110px; height: 110px; }
+      .trimester-grid, .countdown-row { grid-template-columns: 1fr; }
+      .this-week-card { grid-template-columns: 1fr; padding: 22px 20px; }
+      .week-badge-wrap { display: flex; align-items: center; gap: 14px; }
+      .setup-card { padding: 28px 22px; }
+      .setup-page { justify-content: flex-start; padding-top: 30px; }
+      .wellness-grid { grid-template-columns: 1fr; }
+      .wellness-card-body { grid-template-columns: 1fr; }
+      .do-col { border-right: none; border-bottom: 1px solid var(--border-soft); }
+      .wellness-hero { padding: 22px; }
+      .weekly-cols { grid-template-columns: 1fr; }
+      .weekly-week-badge { position: static; transform: none; text-align: left; margin-top: 16px; }
+      .weekly-week-num { font-size: 32px; }
+      .doc-section { padding: 22px 18px; }
+      .faq-q { padding: 16px 18px; }
+      .faq-a { padding: 0 18px 16px; }
+    }
+    @media (max-width: 400px) {
+      .nav-tabs { gap: 1px; }
+      .nav-tab  { font-size: 11px; padding: 5px 7px; }
+    }
+
+    /* ═══ UTILITY ═══ */
+    .hidden { display: none !important; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    .anim-in    { animation: fadeInUp .4s ease both; }
+    .anim-in-d1 { animation-delay: .08s; }
+    .anim-in-d2 { animation-delay: .16s; }
+    .anim-in-d3 { animation-delay: .24s; }
+    .anim-in-d4 { animation-delay: .32s; }
+  </style>
+</head>
+<body>
+
+<!-- ══════ NAV ══════ -->
+<nav class="top-nav">
+  <div class="nav-brand">
+    <span class="nav-logo">The Artifacts Lab</span>
+    <span class="nav-sep">·</span>
+    <span class="nav-title">Pregnancy Roadmap</span>
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active"  onclick="switchPage('roadmap')">Roadmap</button>
+    <button class="nav-tab"         onclick="switchPage('wellness')">Wellness</button>
+    <button class="nav-tab"         onclick="switchPage('weekly')">Weekly</button>
+    <button class="nav-tab"         onclick="switchPage('help')">Help</button>
+  </div>
+  <span class="nav-tier" id="tierBadge">Free</span>
+</nav>
+
+<!-- ══════════════════════════════════════════════
+     ROADMAP PAGE
+══════════════════════════════════════════════ -->
+<div id="page-roadmap" class="page active">
+
+  <!-- SETUP SCREEN -->
+  <div id="setup-screen" class="setup-page">
+    <div class="setup-hero">
+      <p class="setup-eyebrow">The Artifacts Lab · Pregnancy Roadmap</p>
+      <h1 class="setup-title">Your journey,<br><span>beautifully mapped.</span></h1>
+      <p class="setup-subtitle">Enter a few details and we'll build your personalised week-by-week pregnancy roadmap.</p>
+    </div>
+    <div class="setup-card anim-in">
+      <h2 class="setup-card-title">Set Up Your Roadmap</h2>
+      <div class="field">
+        <label>I know my…</label>
+        <div class="date-toggle">
+          <button class="date-toggle-btn active" id="btnDueDate" onclick="setDateMode('due')">Due Date</button>
+          <button class="date-toggle-btn"         id="btnLMP"     onclick="setDateMode('lmp')">First Day of Last Period</button>
+        </div>
+        <div id="dueDateField">
+          <label for="inputDate">Estimated Due Date</label>
+          <input type="date" id="inputDate" />
+          <p class="hint">Your doctor or midwife will have given you this date.</p>
+        </div>
+        <div id="lmpField" class="hidden">
+          <label for="inputLMP">First Day of Last Period</label>
+          <input type="date" id="inputLMP" />
+          <p class="hint">We'll calculate your due date (40 weeks from this date).</p>
+        </div>
+      </div>
+      <div class="field">
+        <label for="inputName">Your First Name <span style="color:var(--text-muted);font-weight:400;">(optional)</span></label>
+        <input type="text" id="inputName" placeholder="e.g. Sarah" maxlength="40" />
+      </div>
+      <div class="field">
+        <label for="inputBaby">Baby's Nickname <span style="color:var(--text-muted);font-weight:400;">(optional)</span></label>
+        <input type="text" id="inputBaby" placeholder="e.g. Sprout, Little One…" maxlength="40" />
+      </div>
+      <button class="btn-primary" onclick="generateRoadmap()">Generate My Roadmap →</button>
+      <p class="error-msg" id="setupError"></p>
+    </div>
+  </div>
+
+  <!-- ROADMAP OUTPUT SCREEN -->
+  <div id="roadmap-screen" class="roadmap-page hidden">
+    <div class="roadmap-hero anim-in">
+      <div>
+        <p class="hero-greeting">Your Pregnancy Roadmap</p>
+        <h2 class="hero-name" id="heroName"></h2>
+        <p class="hero-sub"  id="heroSub"></p>
+        <div class="hero-actions">
+          <button class="btn-outline" onclick="window.print()">🖨 Print / Save PDF</button>
+          <button class="btn-outline" onclick="openShareModal()">🔗 Share with Partner</button>
+          <button class="btn-outline danger" onclick="resetRoadmap()">↺ Start Over</button>
+        </div>
+      </div>
+      <div class="progress-ring-wrap">
+        <svg viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="80" cy="80" r="68" fill="none" stroke="#1a2438" stroke-width="10"/>
+          <circle id="progressArc" cx="80" cy="80" r="68" fill="none"
+            stroke="#f5a623" stroke-width="10" stroke-linecap="round"
+            stroke-dasharray="427.3" stroke-dashoffset="427.3"
+            transform="rotate(-90 80 80)"/>
+          <text id="ringWeek" x="80" y="73" text-anchor="middle" fill="#f5a623" font-size="34" font-weight="700" font-family="'JetBrains Mono',monospace">—</text>
+          <text x="80" y="93" text-anchor="middle" fill="#7a8caa" font-size="11" font-family="'Outfit',sans-serif">of 40 weeks</text>
+          <text id="ringPct" x="80" y="113" text-anchor="middle" fill="#7a8caa" font-size="10" font-family="'Outfit',sans-serif">0% done</text>
+        </svg>
+        <p class="ring-label" id="ringDays"></p>
+      </div>
+    </div>
+
+    <div class="trimester-grid anim-in anim-in-d1">
+      <div class="trimester-card" id="tCard1"><p class="t-label t1">First Trimester</p><p class="t-weeks">Weeks 1–13</p><div class="t-bar-track"><div class="t-bar-fill t1" id="tBar1" style="width:0%"></div></div><p class="t-status" id="tStatus1">—</p></div>
+      <div class="trimester-card" id="tCard2"><p class="t-label t2">Second Trimester</p><p class="t-weeks">Weeks 14–27</p><div class="t-bar-track"><div class="t-bar-fill t2" id="tBar2" style="width:0%"></div></div><p class="t-status" id="tStatus2">—</p></div>
+      <div class="trimester-card" id="tCard3"><p class="t-label t3">Third Trimester</p><p class="t-weeks">Weeks 28–40</p><div class="t-bar-track"><div class="t-bar-fill t3" id="tBar3" style="width:0%"></div></div><p class="t-status" id="tStatus3">—</p></div>
+    </div>
+
+    <div id="thisWeekCard" class="this-week-card anim-in anim-in-d2"></div>
+
+    <div class="countdown-row anim-in anim-in-d3">
+      <div class="countdown-cell"><span class="countdown-num" id="cdWeeks">—</span><div class="countdown-lbl">Weeks remaining</div></div>
+      <div class="countdown-cell"><span class="countdown-num" id="cdDays">—</span><div class="countdown-lbl">Days until due date</div></div>
+      <div class="countdown-cell"><span class="countdown-num small" id="cdNextWeek">—</span><div class="countdown-lbl">Next week starts on</div></div>
+    </div>
+
+    <div class="anim-in anim-in-d4">
+      <div class="section-header">
+        <h3 class="section-title">Milestone Timeline</h3>
+        <span class="section-pill">40 Weeks</span>
+      </div>
+      <div class="timeline" id="milestoneTimeline"></div>
+    </div>
+  </div><!-- /roadmap-screen -->
+</div><!-- /page-roadmap -->
+
+
+<!-- ══════════════════════════════════════════════
+     WELLNESS PAGE
+══════════════════════════════════════════════ -->
+<div id="page-wellness" class="page">
+  <div class="wellness-page">
+    <div class="wellness-hero">
+      <div class="wellness-hero-left">
+        <p class="wellness-eyebrow">Trimester Wellness Guide</p>
+        <h1 class="wellness-title">DOs &amp; DON'Ts</h1>
+        <p class="wellness-subtitle">Evidence-based guidance across exercise, nutrition, sleep, mental wellbeing, travel, beauty, and more — tailored to each stage of pregnancy.</p>
+      </div>
+      <div class="trimester-switcher">
+        <select class="trimester-select" id="wellnessTrimSelect" onchange="renderWellness()">
+          <option value="1">🌱 First Trimester (Wks 1–13)</option>
+          <option value="2">☀️ Second Trimester (Wks 14–27)</option>
+          <option value="3">🌙 Third Trimester (Wks 28–40)</option>
+        </select>
+      </div>
+    </div>
+    <div class="trimester-strip">
+      <span class="t-strip-pill t1 active" id="wpill1" onclick="setWellnessTrim(1)">🌱 First Trimester</span>
+      <span class="t-strip-pill t2"         id="wpill2" onclick="setWellnessTrim(2)">☀️ Second Trimester</span>
+      <span class="t-strip-pill t3"         id="wpill3" onclick="setWellnessTrim(3)">🌙 Third Trimester</span>
+    </div>
+    <div class="wellness-grid" id="wellnessGrid"></div>
+    <div class="wellness-notice">
+      <span style="font-size:20px;flex-shrink:0;">⚕️</span>
+      <div><strong>Always consult your healthcare provider.</strong> This guide is for general informational purposes only. Every pregnancy is unique. If you have any pre-existing conditions, complications, or concerns, please follow the specific advice of your doctor or midwife before making any changes to your routine.</div>
+    </div>
+  </div>
+</div><!-- /page-wellness -->
+
+
+<!-- ══════════════════════════════════════════════
+     WEEKLY PAGE
+══════════════════════════════════════════════ -->
+<div id="page-weekly" class="page">
+  <div class="weekly-page">
+
+    <!-- Hero -->
+    <div class="weekly-hero anim-in">
+      <p class="weekly-eyebrow">Weekly Companion</p>
+      <h1 class="weekly-title">This Week with You</h1>
+      <p class="weekly-subtitle">Log how you're feeling each week and tick off your pregnancy to-do list. Your entries build a personal diary of your journey.</p>
+      <div class="weekly-week-badge">
+        <div class="weekly-week-num" id="weeklyWeekNum">—</div>
+        <div class="weekly-week-lbl">Current Week</div>
+      </div>
+    </div>
+
+    <!-- No roadmap warning -->
+    <div id="weeklyNoRoadmap" class="hidden">
+      <div class="upgrade-nudge" style="margin-bottom:24px;">
+        <span class="lock-icon">📍</span>
+        <div><strong>Set up your roadmap first.</strong> <a onclick="switchPage('roadmap')">Go to Roadmap →</a> to enter your due date. Your weekly check-ins will then be automatically tagged to the right pregnancy week.</div>
+      </div>
+    </div>
+
+    <div id="weeklyContent" class="weekly-cols">
+
+      <!-- LEFT: CHECK-IN -->
+      <div>
+        <div class="checkin-card">
+          <div class="checkin-card-hdr">
+            <span class="checkin-card-title">Weekly Check-in</span>
+            <span class="checkin-week-tag" id="checkinWeekTag">Week —</span>
+          </div>
+          <div class="checkin-card-body">
+
+            <span class="checkin-label">How are you feeling today?</span>
+            <div class="mood-row" id="moodRow">
+              <div class="mood-btn" data-mood="1" onclick="selectMood(1)"><span>😩</span><span class="mood-lbl">Rough</span></div>
+              <div class="mood-btn" data-mood="2" onclick="selectMood(2)"><span>😔</span><span class="mood-lbl">Low</span></div>
+              <div class="mood-btn" data-mood="3" onclick="selectMood(3)"><span>😐</span><span class="mood-lbl">Okay</span></div>
+              <div class="mood-btn" data-mood="4" onclick="selectMood(4)"><span>😊</span><span class="mood-lbl">Good</span></div>
+              <div class="mood-btn" data-mood="5" onclick="selectMood(5)"><span>😄</span><span class="mood-lbl">Great</span></div>
+            </div>
+
+            <span class="checkin-label">Any symptoms this week? (select all that apply)</span>
+            <div class="symptom-chips" id="symptomChips">
+              <div class="symptom-chip" onclick="toggleSymptom(this)">Fatigue</div>
+              <div class="symptom-chip" onclick="toggleSymptom(this)">Nausea</div>
+              <div class="symptom-chip" onclick="toggleSymptom(this)">Back pain</div>
+              <div class="symptom-chip" onclick="toggleSymptom(this)">Heartburn</div>
+              <div class="symptom-chip" onclick="toggleSymptom(this)">Swollen feet</div>
+              <div class="symptom-chip" onclick="toggleSymptom(this)">Insomnia</div>
+              <div class="symptom-chip" onclick="toggleSymptom(this)">Mood swings</div>
+              <div class="symptom-chip" onclick="toggleSymptom(this)">Cravings</div>
+              <div class="symptom-chip" onclick="toggleSymptom(this)">Headache</div>
+              <div class="symptom-chip" onclick="toggleSymptom(this)">Breathlessness</div>
+              <div class="symptom-chip" onclick="toggleSymptom(this)">Braxton Hicks</div>
+              <div class="symptom-chip" onclick="toggleSymptom(this)">None this week</div>
+            </div>
+
+            <span class="checkin-label">What do you want to remember about this week?</span>
+            <textarea class="checkin-note" id="checkinNote" placeholder="A moment, a feeling, something baby did, something you're looking forward to…" maxlength="500"></textarea>
+
+            <button class="btn-save-checkin" onclick="saveCheckin()">Save This Week's Check-in ✓</button>
+            <div class="checkin-saved-toast" id="checkinToast"></div>
+
+            <!-- History section -->
+            <div class="history-section">
+              <div class="history-hdr">
+                <span class="history-title">Past Check-ins</span>
+                <button class="btn-export" id="exportBtn" onclick="exportDiary()">📄 Export Diary</button>
+              </div>
+
+              <!-- Free nudge: shown when no history access -->
+              <div id="historyNudge" class="upgrade-nudge hidden">
+                <span class="lock-icon">🔒</span>
+                <div><strong>Basic feature</strong> — <a onclick="showNudgeModal('basic')">Upgrade for $8/year</a> to view your full check-in history and track patterns over time.</div>
+              </div>
+
+              <!-- Premium nudge: for export button -->
+              <div id="exportNudge" class="upgrade-nudge hidden" style="margin-top:8px;">
+                <span class="lock-icon">🔒</span>
+                <div><strong>Premium feature</strong> — <a onclick="showNudgeModal('premium')">Upgrade for $29/year</a> to export your complete pregnancy diary as a printable keepsake.</div>
+              </div>
+
+              <div id="historyList"></div>
+              <div id="historyEmpty" class="hidden" style="text-align:center;padding:20px 0;color:var(--text-muted);font-size:13px;">No past check-ins yet. Your entries will appear here each week.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: TO-DO -->
+      <div>
+        <div class="todo-card">
+          <div class="todo-card-hdr">
+            <div class="todo-card-title">Pregnancy To-Do List</div>
+            <div class="todo-trim-tabs">
+              <button class="todo-trim-tab" id="ttab1" onclick="setTodoTrim(1)">T1</button>
+              <button class="todo-trim-tab" id="ttab2" onclick="setTodoTrim(2)">T2</button>
+              <button class="todo-trim-tab" id="ttab3" onclick="setTodoTrim(3)">T3</button>
+            </div>
+          </div>
+          <div class="todo-card-body">
+            <div class="todo-progress-row">
+              <div class="todo-progress-track"><div class="todo-progress-fill" id="todoProgressFill" style="width:0%"></div></div>
+              <span class="todo-progress-lbl" id="todoProgressLbl">0 / 0</span>
+            </div>
+            <div id="todoList"></div>
+            <!-- Basic nudge for extra tasks -->
+            <div id="todoNudge" class="upgrade-nudge hidden" style="margin-top:12px;">
+              <span class="lock-icon">🔒</span>
+              <div><strong>Basic feature</strong> — <a onclick="showNudgeModal('basic')">Upgrade for $8/year</a> to unlock the full 12-task checklist per trimester.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /weekly-cols -->
+
+    <!-- ── PHASE 2 TOOLS ── -->
+    <div class="tools-row" id="phase2Tools">
+
+      <!-- KICK COUNTER -->
+      <div class="tool-card kick">
+        <div class="tool-card-hdr">
+          <div>
+            <p class="tool-eyebrow kick-ey">From Week 28</p>
+            <span class="tool-card-title">Kick Counter</span>
+          </div>
+          <span style="font-size:28px;">🦶</span>
+        </div>
+        <div class="tool-card-body">
+          <div class="kick-display">
+            <span class="kick-count-num" id="kickCount">0</span>
+            <span class="kick-count-lbl">movements this session</span>
+            <span class="kick-timer-lbl" id="kickTimerLbl">Session not started</span>
+          </div>
+
+          <button class="btn-kick" id="kickBtn" onclick="recordKick()">
+            Tap each time baby moves
+          </button>
+
+          <div class="kick-actions">
+            <button class="btn-kick-sm" onclick="saveKickSession()">Save &amp; End Session</button>
+            <button class="btn-kick-sm" onclick="resetKickSession()">Reset</button>
+          </div>
+
+          <div class="kick-alert" id="kickAlert">
+            <strong>⚠ Fewer than 10 movements in 2 hours</strong>
+            If you're concerned about reduced movement, contact your midwife or maternity unit straight away. Do not wait until the next day.
+          </div>
+
+          <div class="kick-guidance">
+            <strong>What to count?</strong> Any movement — kick, roll, flutter, or jab. Most care providers recommend at least <strong>10 movements in 2 hours</strong> from week 28. If you notice a change in your baby's usual pattern, always contact your midwife.
+          </div>
+
+          <p class="kick-log-title">Recent Sessions</p>
+          <div id="kickLogList"><p class="kick-log-empty">No sessions saved yet.</p></div>
+        </div>
+      </div>
+
+      <!-- CONTRACTION TIMER -->
+      <div class="tool-card contraction">
+        <div class="tool-card-hdr">
+          <div>
+            <p class="tool-eyebrow con-ey">Labour Preparation</p>
+            <span class="tool-card-title">Contraction Timer</span>
+          </div>
+          <span style="font-size:28px;">⏱️</span>
+        </div>
+        <div class="tool-card-body">
+          <div class="con-display">
+            <span class="con-status-lbl" id="conStatusLbl">Ready to start</span>
+            <span class="con-timer-num idle" id="conTimerNum">0:00</span>
+            <span class="con-sub-lbl" id="conSubLbl">Press the button when a contraction begins</span>
+          </div>
+
+          <button class="btn-contraction start" id="conBtn" onclick="toggleContraction()">
+            Contraction Started
+          </button>
+
+          <div class="con-stats-row">
+            <div class="con-stat">
+              <span class="con-stat-num" id="conAvgDur">—</span>
+              <div class="con-stat-lbl">Avg duration</div>
+            </div>
+            <div class="con-stat">
+              <span class="con-stat-num teal" id="conAvgGap">—</span>
+              <div class="con-stat-lbl">Avg interval</div>
+            </div>
+          </div>
+
+          <button class="con-reset-btn" onclick="resetContractions()">Reset Session</button>
+
+          <div class="con-guidance default" id="conGuidance">
+            <strong>The 5-1-1 rule</strong>
+            Contractions 5 min apart, lasting 1 min each, for at least 1 hour — time to call your hospital or midwife.
+          </div>
+
+          <p class="con-log-title">Contraction Log</p>
+          <div class="con-log-item con-log-hdr" id="conLogHdr" style="display:none;">
+            <span>#</span><span>Duration</span><span>Gap from prev.</span><span style="text-align:right;">Time</span>
+          </div>
+          <div id="conLogList"><p class="con-log-empty">No contractions recorded yet.</p></div>
+        </div>
+      </div>
+
+    </div><!-- /tools-row -->
+
+    <!-- ── APPOINTMENT LOG ── -->
+    <div class="appt-card">
+      <div class="appt-card-hdr">
+        <span class="appt-card-title">📅 Appointment Log</span>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <button class="btn-export" id="apptExportBtn" onclick="exportApptICS()" title="Export all appointments as a .ics calendar file">📆 Export to Calendar</button>
+          <span class="appt-tier-badge">Basic feature</span>
+        </div>
+      </div>
+      <div class="appt-card-body">
+
+        <!-- Free nudge -->
+        <div id="apptNudge" class="upgrade-nudge hidden">
+          <span class="lock-icon">🔒</span>
+          <div><strong>Basic feature</strong> — <a onclick="showNudgeModal('basic')">Upgrade for $8/year</a> to log upcoming scans, blood tests, midwife visits, and hospital appointments — all in one place.</div>
+        </div>
+
+        <!-- Add form (Basic+) -->
+        <div id="apptForm">
+          <div class="appt-form">
+            <div class="appt-form-field">
+              <label class="appt-form-label">Date</label>
+              <input type="date" class="appt-input" id="apptDate" color-scheme="dark" />
+            </div>
+            <div class="appt-form-field">
+              <label class="appt-form-label">Time <span style="font-weight:400;opacity:.7;">(optional)</span></label>
+              <input type="time" class="appt-input" id="apptTime" color-scheme="dark" />
+            </div>
+            <div class="appt-form-field">
+              <label class="appt-form-label">Type</label>
+              <select class="appt-select" id="apptType">
+                <option value="Midwife">🧑‍⚕️ Midwife</option>
+                <option value="Scan">🔬 Scan / Ultrasound</option>
+                <option value="Blood test">🩸 Blood Test</option>
+                <option value="Doctor">👨‍⚕️ Doctor / GP</option>
+                <option value="Hospital">🏥 Hospital</option>
+                <option value="Antenatal class">📚 Antenatal Class</option>
+                <option value="Other">📋 Other</option>
+              </select>
+            </div>
+            <button class="btn-add-appt" onclick="addAppt()">+ Add</button>
+            <div class="appt-form-field appt-note-input">
+              <label class="appt-form-label">Notes (optional)</label>
+              <input type="text" class="appt-input" id="apptNote" placeholder="e.g. 20-week anatomy scan, bring your partner…" maxlength="120" />
+            </div>
+          </div>
+          <div id="apptList"></div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div><!-- /page-weekly -->
+
+
+<!-- ══════════════════════════════════════════════
+     SHARE MODAL
+══════════════════════════════════════════════ -->
+<div class="modal-overlay" id="shareModal">
+  <div class="share-modal-box">
+    <div class="share-modal-icon">🔗</div>
+    <h2 class="share-modal-title">Share with Your Partner</h2>
+    <p class="share-modal-desc">Send this link to your partner or anyone you'd like to share your pregnancy roadmap with. They'll see a read-only view — no login needed.</p>
+    <div class="share-info-row" id="shareInfoRow"></div>
+    <div class="share-link-wrap">
+      <input class="share-link-input" id="shareLinkInput" readonly />
+      <button class="btn-copy-link" id="copyLinkBtn" onclick="copyShareLink()">Copy Link</button>
+    </div>
+    <p style="font-size:12px;color:var(--text-muted);margin-bottom:20px;">The link contains only your name, baby nickname, and due date — nothing else is shared.</p>
+    <button class="modal-btn-ghost" style="width:100%;" onclick="closeShareModal()">Done</button>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     CALENDAR OPEN MODAL
+══════════════════════════════════════════════ -->
+<div class="modal-overlay" id="calModal">
+  <div class="cal-modal-box">
+    <div class="cal-modal-icon">📆</div>
+    <h2 class="cal-modal-title">Open in Your Calendar</h2>
+    <p class="cal-modal-desc" id="calModalDesc">Your appointments file is ready. Tap below to open it directly in your calendar app.</p>
+
+    <!-- Primary: direct open (best on mobile) -->
+    <button class="cal-open-btn" id="calOpenBtn" onclick="calDirectOpen()">
+      Open in Calendar App →
+    </button>
+
+    <!-- Platform instructions -->
+    <div class="cal-platforms">
+      <div class="cal-platform">
+        <span class="cal-platform-icon">🍎</span>
+        <strong>iPhone / iPad</strong>
+        <span class="cal-step">Tap Open → Add All Events</span>
+      </div>
+      <div class="cal-platform">
+        <span class="cal-platform-icon">📅</span>
+        <strong>Google Calendar</strong>
+        <span class="cal-step">Settings → Import → select file</span>
+      </div>
+      <div class="cal-platform">
+        <span class="cal-platform-icon">🗂️</span>
+        <strong>Outlook / Mac</strong>
+        <span class="cal-step">Double-click the downloaded file</span>
+      </div>
+    </div>
+
+    <!-- Fallback: manual download -->
+    <a class="cal-download-link" id="calDownloadLink" onclick="calManualDownload()">
+      Just download the .ics file instead
+    </a>
+
+    <button class="modal-btn-ghost" style="width:100%;margin-top:12px;" onclick="closeCalModal()">Done</button>
+  </div>
+</div>
+<div id="page-help" class="page">
+  <div class="doc-page">
+    <div class="doc-hero">
+      <p class="doc-eyebrow">Help Centre</p>
+      <h1 class="doc-title">Manual &amp; FAQ</h1>
+      <p class="doc-intro">Everything you need to get the most from the Pregnancy Roadmap. Browse the user manual or jump straight to frequently asked questions.</p>
+    </div>
+
+    <div class="help-tabs">
+      <button class="help-tab-btn active" onclick="switchHelpTab('manual',this)">📖 User Manual</button>
+      <button class="help-tab-btn"        onclick="switchHelpTab('faq',this)">❓ FAQ</button>
+    </div>
+
+    <!-- MANUAL PANEL -->
+    <div class="help-panel active" id="help-panel-manual">
+      <div class="doc-section">
+        <h2 class="doc-section-title">Getting Started in 3 Steps</h2>
+        <div class="doc-step"><div class="step-num">1</div><div class="step-body"><p class="step-title">Choose your date type</p><p class="step-desc">Enter either your <strong>Estimated Due Date</strong> (given by your doctor or midwife) or the <strong>First Day of Your Last Period</strong>. Either works — we'll calculate everything from whichever you provide.</p></div></div>
+        <div class="doc-step"><div class="step-num">2</div><div class="step-body"><p class="step-title">Add your name and baby's nickname (optional)</p><p class="step-desc">These personalise your roadmap. Your name and nickname stay on your device only — nothing is shared.</p></div></div>
+        <div class="doc-step"><div class="step-num">3</div><div class="step-body"><p class="step-title">Tap "Generate My Roadmap"</p><p class="step-desc">Your personalised roadmap appears instantly with your current week, progress ring, trimester bars, This Week card, countdown, and full milestone timeline.</p></div></div>
+      </div>
+
+      <div class="doc-section">
+        <h2 class="doc-section-title">Understanding the Roadmap Screen</h2>
+        <ul>
+          <li><strong>Progress Ring</strong> — Circular dial showing how far along your pregnancy is as a % of 40 weeks.</li>
+          <li><strong>Trimester Bars</strong> — Three colour-coded progress bars for T1 (amber), T2 (rose), T3 (teal).</li>
+          <li><strong>This Week Card</strong> — Baby's size (as a fruit!), key development events, and upcoming appointments.</li>
+          <li><strong>Countdown Row</strong> — Weeks remaining, days to due date, and the date your next pregnancy week begins.</li>
+          <li><strong>Milestone Timeline</strong> — All key events across 40 weeks. Past milestones are greyed with a green dot; current week is highlighted in amber.</li>
+        </ul>
+      </div>
+
+      <div class="doc-section">
+        <h2 class="doc-section-title">The Weekly Companion</h2>
+        <ul>
+          <li><strong>Weekly Check-in</strong> — Each week, log your mood (5-emoji scale), any symptoms, and a personal note. Free users can log the current week. Basic+ users can view their full check-in history. Premium users can export their diary as a printable keepsake.</li>
+          <li><strong>Pregnancy To-Do List</strong> — Curated tasks per trimester with checkboxes. Free users get the 5 core tasks per trimester. Basic+ unlocks the full 12-task list.</li>
+        </ul>
+      </div>
+
+      <div class="doc-section">
+        <h2 class="doc-section-title">The Wellness Guide</h2>
+        <p>The <strong>Wellness tab</strong> provides trimester-by-trimester DOs and DON'Ts across eight categories: sport &amp; exercise, nutrition, sleep, mental wellbeing, travel, beauty &amp; skincare, social life, and birth preparation. Use the dropdown or pill buttons to switch between trimesters. It automatically opens on your current trimester. <strong>The full Wellness Guide is free for all plans.</strong></p>
+      </div>
+
+      <div class="doc-section">
+        <h2 class="doc-section-title">Feature Overview by Plan</h2>
+        <table class="tier-table">
+          <thead><tr><th>Feature</th><th>Free</th><th>Basic</th><th>Premium</th></tr></thead>
+          <tbody>
+            <tr><td>Roadmap + progress ring + this-week card</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+            <tr><td>Full Wellness Guide (all 3 trimesters)</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+            <tr><td>Weekly check-in (log current week)</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+            <tr><td>Core to-do list (5 tasks per trimester)</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+            <tr><td>Second &amp; third trimester milestones</td><td><span class="cross">—</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+            <tr><td>Full check-in history (last 8 weeks)</td><td><span class="cross">—</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+            <tr><td>Full to-do list (12 tasks per trimester)</td><td><span class="cross">—</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+            <tr><td>Personal notes on milestones</td><td><span class="cross">—</span></td><td><span class="cross">—</span></td><td><span class="check">✓</span></td></tr>
+            <tr><td>Export pregnancy diary (PDF)</td><td><span class="cross">—</span></td><td><span class="cross">—</span></td><td><span class="check">✓</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="doc-section" style="border-color:rgba(251,113,133,.3);">
+        <h2 class="doc-section-title" style="color:var(--rose);">⚠ Medical Disclaimer</h2>
+        <p>This tool is for <strong>informational and organisational purposes only</strong>. It does not replace advice from your doctor, midwife, or healthcare provider. Every pregnancy is unique. Always consult a qualified healthcare professional with any concerns about your health or your baby's development.</p>
+      </div>
+    </div>
+
+    <!-- FAQ PANEL -->
+    <div class="help-panel" id="help-panel-faq">
+      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">What information do I need to get started? <span class="faq-arrow">▾</span></div><div class="faq-a"><p>Just one date — your <strong>estimated due date</strong> (EDD) from your doctor, or the <strong>first day of your last period</strong> (LMP). Everything else is optional.</p></div></div>
+      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">Where is my data stored? Is it private? <span class="faq-arrow">▾</span></div><div class="faq-a"><p>Everything is stored <strong>only on your device</strong> in your browser's local storage. Nothing is sent to any server. If you clear your browser data or switch devices, you'll need to re-enter your details.</p></div></div>
+      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">What does "Next week starts on" mean? <span class="faq-arrow">▾</span></div><div class="faq-a"><p>Pregnancy weeks change on a fixed day relative to your due date. This counter tells you the exact calendar date when you'll move into the next pregnancy week — so you know exactly when Week 12 (or any week) officially begins for you.</p></div></div>
+      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">What does "Week X" actually mean? <span class="faq-arrow">▾</span></div><div class="faq-a"><p>Pregnancy weeks are counted from the first day of your last menstrual period. Conception typically happens around week 2, so when your doctor says "4 weeks pregnant" your baby is about 2 weeks old. This standard method (gestational age) is used universally by healthcare providers and is what this tool uses. A full-term pregnancy is 40 weeks.</p></div></div>
+      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">My due date changed — how do I update it? <span class="faq-arrow">▾</span></div><div class="faq-a"><p>Click <strong>"↺ Start Over"</strong> in the roadmap header, enter your new date, and regenerate. Your previous check-ins and to-do progress are preserved in your browser — only the dates will recalculate.</p></div></div>
+      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">Why are some milestones locked? <span class="faq-arrow">▾</span></div><div class="faq-a"><p>The Free plan includes full first trimester detail. Second and third trimester milestones require a <strong>Basic or Premium plan</strong>. Click any locked milestone's "Upgrade" badge to learn more.</p></div></div>
+      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">What can I log in the Weekly Check-in? <span class="faq-arrow">▾</span></div><div class="faq-a"><p>Each week you can log your mood (5 levels from rough to great), any symptoms you're experiencing (fatigue, nausea, back pain, and more), and a personal note — a memory, a feeling, or anything you want to remember. Free users can log the current week. Basic+ users can also view their history of past check-ins. Premium users can export the full diary.</p></div></div>
+      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">Is the Wellness Guide available on the Free plan? <span class="faq-arrow">▾</span></div><div class="faq-a"><p>Yes — the full Wellness Guide with all three trimesters and all eight categories is completely free. It's our gift to every expecting parent.</p></div></div>
+      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">Can I use this on my phone or tablet? <span class="faq-arrow">▾</span></div><div class="faq-a"><p>Absolutely. The tool is fully responsive and works on smartphones, tablets, and desktops. The layout adjusts automatically to your screen size.</p></div></div>
+      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">I'm past my due date — what does the tool show? <span class="faq-arrow">▾</span></div><div class="faq-a"><p>The tool will show <strong>Week 40+</strong> and the final milestone card. Please stay in close contact with your healthcare provider if you go past 40 weeks. We hope your little one arrives safely very soon! 💛</p></div></div>
+      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">Is this a medical app? <span class="faq-arrow">▾</span></div><div class="faq-a"><p>No. The Pregnancy Roadmap is an informational and organisational tool, not a medical device. Always consult your doctor, midwife, or obstetrician for medical advice, diagnosis, or treatment.</p></div></div>
+    </div>
+  </div>
+</div><!-- /page-help -->
+
+
+<!-- ══════ NUDGE MODAL ══════ -->
+<div class="modal-overlay" id="nudgeModal">
+  <div class="modal-box">
+    <div class="modal-icon" id="nudgeIcon">✨</div>
+    <h2 class="modal-title" id="nudgeTitle">Unlock More</h2>
+    <p class="modal-desc" id="nudgeDesc"></p>
+    <div class="modal-actions">
+      <button class="modal-btn-primary" onclick="closeNudge()">View Plans &amp; Upgrade</button>
+      <button class="modal-btn-ghost"   onclick="closeNudge()">Maybe Later</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     SCRIPT
+══════════════════════════════════════════════ -->
+<script>
+/* ═══════════════════════════════════════════════
+   SUPABASE + TIER INIT
+═══════════════════════════════════════════════ */
+const SUPABASE_URL = 'https://fvgajfiksxmwioxnesry.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2Z2FqZmlrc3htd2lveG5lc3J5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDMwMDYxNzEsImV4cCI6MjA1ODU4MjE3MX0.r8DUeAiVRi8xpwpEIqw7CXkIBHJBDmqkFCKQnVVPRFA';
+
+let TIER = 'free';
+let can  = buildCan('free');
+
+function buildCan(t) {
+  return {
+    // Free + Basic + Premium
+    roadmap:        true,
+    wellnessGuide:  true,
+    checkinLog:     true,
+    symptomLog:     true,
+    todoBasic:      true,
+    // Basic + Premium
+    fullTimeline:   t !== 'free',
+    checkinHistory: t !== 'free',
+    symptomHistory: t !== 'free',
+    todoFull:       t !== 'free',
+    apptLog:        t !== 'free',
+    partnerShare:   t !== 'free',
+    // Premium only
+    notes:          t === 'premium',
+    checkinExport:  t === 'premium',
+  };
+}
+
+async function initTier() {
+  try {
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const { data: { user } } = await sb.auth.getUser();
+    if (user) {
+      const { data } = await sb.from('profiles').select('tier').eq('id', user.id).single();
+      TIER = data?.tier || 'free';
+    }
+  } catch (_) {}
+  can = buildCan(TIER);
+  updateTierBadge();
+  if (!document.getElementById('roadmap-screen').classList.contains('hidden')) renderTimeline();
+}
+
+function updateTierBadge() {
+  const b = document.getElementById('tierBadge');
+  b.textContent = TIER.charAt(0).toUpperCase() + TIER.slice(1);
+  b.className   = 'nav-tier ' + TIER;
+}
+
+window.addEventListener('load', initTier);
+
+/* ═══════════════════════════════════════════════
+   PREGNANCY DATA
+═══════════════════════════════════════════════ */
+const BABY_SIZES = {
+   4:{fruit:'Poppy Seed',       size:'~1 mm',   emoji:'🌸'},
+   5:{fruit:'Sesame Seed',      size:'~2 mm',   emoji:'🌿'},
+   6:{fruit:'Lentil',           size:'~5 mm',   emoji:'🫘'},
+   7:{fruit:'Blueberry',        size:'~1 cm',   emoji:'🫐'},
+   8:{fruit:'Kidney Bean',      size:'~1.6 cm', emoji:'🫘'},
+   9:{fruit:'Grape',            size:'~2.3 cm', emoji:'🍇'},
+  10:{fruit:'Kumquat',          size:'~3.1 cm', emoji:'🍊'},
+  11:{fruit:'Fig',              size:'~4.1 cm', emoji:'🍃'},
+  12:{fruit:'Lime',             size:'~5.4 cm', emoji:'🍋'},
+  13:{fruit:'Peach',            size:'~7.4 cm', emoji:'🍑'},
+  14:{fruit:'Lemon',            size:'~8.7 cm', emoji:'🍋'},
+  15:{fruit:'Apple',            size:'~10 cm',  emoji:'🍎'},
+  16:{fruit:'Avocado',          size:'~11.6 cm',emoji:'🥑'},
+  17:{fruit:'Pear',             size:'~13 cm',  emoji:'🍐'},
+  18:{fruit:'Bell Pepper',      size:'~14.2 cm',emoji:'🫑'},
+  19:{fruit:'Mango',            size:'~15.3 cm',emoji:'🥭'},
+  20:{fruit:'Banana',           size:'~16.4 cm',emoji:'🍌'},
+  21:{fruit:'Carrot',           size:'~26 cm',  emoji:'🥕'},
+  22:{fruit:'Spaghetti Squash', size:'~28 cm',  emoji:'🎃'},
+  23:{fruit:'Grapefruit',       size:'~29 cm',  emoji:'🍊'},
+  24:{fruit:'Corn on the Cob',  size:'~30 cm',  emoji:'🌽'},
+  25:{fruit:'Cauliflower',      size:'~34 cm',  emoji:'🥦'},
+  26:{fruit:'Kale Bunch',       size:'~35 cm',  emoji:'🥬'},
+  27:{fruit:'Head of Lettuce',  size:'~36 cm',  emoji:'🥬'},
+  28:{fruit:'Eggplant',         size:'~37 cm',  emoji:'🍆'},
+  29:{fruit:'Butternut Squash', size:'~38 cm',  emoji:'🎃'},
+  30:{fruit:'Cabbage',          size:'~40 cm',  emoji:'🥬'},
+  31:{fruit:'Coconut',          size:'~41 cm',  emoji:'🥥'},
+  32:{fruit:'Jicama',           size:'~42 cm',  emoji:'🌰'},
+  33:{fruit:'Pineapple',        size:'~43 cm',  emoji:'🍍'},
+  34:{fruit:'Cantaloupe',       size:'~45 cm',  emoji:'🍈'},
+  35:{fruit:'Honeydew Melon',   size:'~46 cm',  emoji:'🍈'},
+  36:{fruit:'Romaine Head',     size:'~47 cm',  emoji:'🥬'},
+  37:{fruit:'Swiss Chard',      size:'~49 cm',  emoji:'🥬'},
+  38:{fruit:'Leek',             size:'~50 cm',  emoji:'🌿'},
+  39:{fruit:'Mini Watermelon',  size:'~51 cm',  emoji:'🍉'},
+  40:{fruit:'Small Pumpkin',    size:'~51 cm',  emoji:'🎃'},
+};
+
+const WEEK_INFO = {
+   4:{desc:'Your baby is just beginning to form as a tiny cluster of cells. The neural tube that will become the brain and spine is starting to develop. Your placenta is also forming this week.',                       tags:['Positive test time']},
+   5:{desc:'The heart begins to take shape. Basic organs are starting to form. You may notice early pregnancy symptoms like fatigue and breast tenderness.',                                                             tags:[]},
+   6:{desc:'A tiny heartbeat may be detectable by transvaginal ultrasound — beating around 100–160 times per minute. The face is beginning to take shape.',                                                             tags:['Heartbeat possible']},
+   7:{desc:'Brain and face are developing rapidly. Arm and leg buds are appearing. The embryo is about the size of a blueberry and growing fast!',                                                                      tags:[]},
+   8:{desc:'All major organs have begun forming. Fingers and toes are webbed and will separate soon. Your baby is now officially called a fetus rather than an embryo.',                                                tags:[]},
+   9:{desc:'Baby can now make tiny movements. The eyes are fully formed (though fused shut). Taste buds are forming. The heartbeat should be clearly visible on an ultrasound.',                                        tags:[]},
+  10:{desc:'Vital organs are all in place and functional. External genitalia are starting to develop. The face looks distinctly human now, with well-defined features.',                                                tags:[]},
+  11:{desc:'Baby is moving more actively, though you won\'t feel it yet. Fingernails and tooth buds are forming. Baby can open and close its fists.',                                                                   tags:[]},
+  12:{desc:'A major milestone! The risk of miscarriage drops significantly. The nuchal translucency ultrasound is typically offered this week to screen for chromosomal conditions.',                                    tags:['Nuchal scan due']},
+  13:{desc:'Welcome to the second trimester! Energy often returns as morning sickness fades. Baby can now suck its thumb. Fingerprints are forming — completely unique already.',                                        tags:['T2 begins soon']},
+  14:{desc:'Facial muscles are developing, allowing expressions. The lanugo (fine hair) begins to cover the skin for warmth. Your bump may be becoming visible.',                                                       tags:[]},
+  15:{desc:'Baby can sense light even through the womb. Legs are now longer than the arms. Bones are hardening. You may begin to feel subtle fluttering movements (quickening) soon.',                                  tags:[]},
+  16:{desc:'An anatomy scan may be able to reveal baby\'s sex this week. Baby can hear sounds, including your heartbeat and voice. The skeleton is visible on ultrasound.',                                             tags:['Gender may be visible']},
+  17:{desc:'Baby is putting on fat under the skin. Sweat glands are forming. You may start to feel definite movements — like soft bubbles or gentle flutters.',                                                         tags:[]},
+  18:{desc:'Your detailed anomaly scan is typically offered between weeks 18–21. This checks the development of all organs and structures.',                                                                             tags:['Anatomy scan due']},
+  19:{desc:'Baby is covered in vernix caseosa (a white waxy coating) to protect the skin in amniotic fluid. Brain areas for all five senses are forming this week.',                                                    tags:[]},
+  20:{desc:'Halfway there! 🎉 Your baby is now about 10 inches long from head to heel. You should be feeling regular movements by now.',                                                                                tags:['Halfway milestone!']},
+  21:{desc:'Baby now swallows amniotic fluid regularly, which helps develop the digestive system. Fingernails are fully formed. You\'ll likely feel distinct kicks and jabs.',                                           tags:[]},
+  22:{desc:'Baby\'s lips, eyebrows and eyelids are more distinct. The inner ear is developed enough that balance is now functioning. Movements should feel stronger each week.',                                        tags:[]},
+  23:{desc:'Baby can now recognise your voice and may respond to familiar sounds. The lungs are developing rapidly but are not yet ready for breathing air. Baby weighs about 500g.',                                   tags:[]},
+  24:{desc:'A critical milestone — viability. With intensive medical care, babies born from this point have a chance of survival. Baby\'s face is almost fully formed.',                                                tags:['Viability milestone']},
+  25:{desc:'Baby\'s nostrils begin to open and practice breathing movements begin, though lungs are still maturing. You may notice baby has predictable periods of activity and rest.',                                  tags:[]},
+  26:{desc:'Baby\'s eyes are beginning to open. Brain wave activity is developing for hearing and sight. Baby responds to your touch on your belly. Weight is around 760g.',                                            tags:[]},
+  27:{desc:'Welcome to the third trimester! Baby\'s brain is growing rapidly. Eyes can open and close. Baby may begin to recognise music and voices heard regularly.',                                                  tags:['T3 begins soon']},
+  28:{desc:'The glucose tolerance test (GTT) is typically offered around now to screen for gestational diabetes. Baby can blink and has developed eyelashes. Weighs about 1 kg.',                                       tags:['Glucose test due']},
+  29:{desc:'Baby\'s bones are fully developed but still flexible. Muscles and lungs are continuing to mature. You may feel Braxton Hicks contractions (practice contractions) begin.',                                  tags:[]},
+  30:{desc:'Baby is filling the uterus and movements may feel different as space decreases. The brain is growing so rapidly that folds are forming.',                                                                    tags:[]},
+  31:{desc:'Baby is gaining weight rapidly — about 230g per week. All five senses are now functioning. The immune system is building up with antibodies passed from you.',                                              tags:[]},
+  32:{desc:'Most babies turn head-down in preparation for birth around this time. If baby is still breech, your midwife will discuss options. Nails have grown to the tips of fingers.',                                tags:['Head-down check']},
+  33:{desc:'Baby\'s bones are hardening (except the skull, which stays soft for delivery). The lungs are almost fully mature. Amniotic fluid is at its maximum level this week.',                                       tags:[]},
+  34:{desc:'Baby\'s central nervous system and lungs are almost fully developed. Fat layers are being added. Weekly appointments may begin from this point.',                                                            tags:[]},
+  35:{desc:'Baby is gaining about an ounce of fat per day. The kidneys are fully developed. Most internal organs are ready — it\'s primarily brain and lung development now.',                                          tags:['Weekly check-ups begin']},
+  36:{desc:'Almost full term! Baby may "drop" lower into the pelvis (engagement), which can make breathing easier but add pelvic pressure. You might notice more Braxton Hicks.',                                       tags:['Engagement possible']},
+  37:{desc:'Baby is now classified as "early term". Lungs are continuing to mature right up until birth. Brain development is still underway — each day counts.',                                                       tags:['Early term']},
+  38:{desc:'Baby is coated in vernix and lanugo. Most lanugo sheds before birth. Baby is practising breathing by inhaling amniotic fluid. Your body is preparing for labour.',                                          tags:[]},
+  39:{desc:'Full term! Baby is ready for the world. You may notice early labour signs: bloody show, cramps, or waters breaking.',                                                                                       tags:['Full term']},
+  40:{desc:'Your estimated due date has arrived! Only about 5% of babies are born on their actual due date — most arrive within two weeks either side. Stay in close touch with your healthcare team.',                 tags:['Due date']},
+};
+
+const MILESTONES = [
+  {week:4,  title:'Positive Test',            icon:'🌱', type:'milestone', trim:1},
+  {week:6,  title:'Heartbeat Begins',         icon:'💗', type:'milestone', trim:1},
+  {week:8,  title:'Embryo Becomes Fetus',     icon:'⭐', type:'milestone', trim:1},
+  {week:10, title:'All Organs Forming',       icon:'✨', type:'milestone', trim:1},
+  {week:12, title:'Nuchal Translucency Scan', icon:'🔬', type:'scan',      trim:1},
+  {week:13, title:'Second Trimester Begins',  icon:'☀️', type:'milestone', trim:2},
+  {week:16, title:'Gender May Be Visible',    icon:'👶', type:'milestone', trim:2},
+  {week:18, title:'Anatomy Scan (Anomaly)',   icon:'🩺', type:'scan',      trim:2},
+  {week:20, title:'Halfway There! 🎊',        icon:'🎊', type:'milestone', trim:2},
+  {week:24, title:'Viability Milestone',      icon:'🛡️', type:'milestone', trim:2},
+  {week:27, title:'Third Trimester Begins',   icon:'🌙', type:'milestone', trim:3},
+  {week:28, title:'Glucose Tolerance Test',   icon:'🧪', type:'test',      trim:3},
+  {week:32, title:'Baby Turns Head-Down',     icon:'🔄', type:'milestone', trim:3},
+  {week:35, title:'Weekly Check-ups Begin',   icon:'📋', type:'test',      trim:3},
+  {week:36, title:'Almost Full Term',         icon:'⭐', type:'milestone', trim:3},
+  {week:37, title:'Early Term',               icon:'🌟', type:'milestone', trim:3},
+  {week:39, title:'Full Term',                icon:'✅', type:'milestone', trim:3},
+  {week:40, title:'Due Date',                 icon:'🎀', type:'milestone', trim:3},
+];
+
+/* ═══════════════════════════════════════════════
+   TODO DATA
+   free: first 5 items per trimester
+   full: all 12 items (Basic+)
+═══════════════════════════════════════════════ */
+const TODO_DATA = {
+  1: [
+    // Core (free) — first 5
+    {id:'t1_1', text:'Book your first midwife or GP appointment',         tier:'core'},
+    {id:'t1_2', text:'Start taking folic acid 400 mcg daily',             tier:'core'},
+    {id:'t1_3', text:'Read up on your maternity rights at work',          tier:'core'},
+    {id:'t1_4', text:'Research your preferred hospital or birth centre',  tier:'core'},
+    {id:'t1_5', text:'Cut alcohol and reduce caffeine to under 200 mg/day', tier:'core'},
+    // Full (Basic+) — next 7
+    {id:'t1_6', text:'Book your 12-week nuchal translucency scan',        tier:'full'},
+    {id:'t1_7', text:'Register with a dentist — free dental care during pregnancy', tier:'full'},
+    {id:'t1_8', text:'Look into antenatal / NCT classes — they fill up quickly', tier:'full'},
+    {id:'t1_9', text:'Tell your employer about your pregnancy when ready', tier:'full'},
+    {id:'t1_10',text:'Take out travel insurance that covers pregnancy',   tier:'full'},
+    {id:'t1_11',text:'Begin reading one evidence-based pregnancy book',   tier:'full'},
+    {id:'t1_12',text:'Discuss your birth preferences outline with your partner', tier:'full'},
+  ],
+  2: [
+    {id:'t2_1', text:'Book your 20-week anatomy scan (if not already done)', tier:'core'},
+    {id:'t2_2', text:'Tell your employer formally about your pregnancy',   tier:'core'},
+    {id:'t2_3', text:'Start sleeping on your left side',                  tier:'core'},
+    {id:'t2_4', text:'Begin daily pelvic floor exercises',                tier:'core'},
+    {id:'t2_5', text:'Research pram and car seat options',                tier:'core'},
+    {id:'t2_6', text:'Attend your 20-week anatomy scan',                  tier:'full'},
+    {id:'t2_7', text:'Set up a baby registry or shared wish list',        tier:'full'},
+    {id:'t2_8', text:'Tour your chosen hospital or birth centre',         tier:'full'},
+    {id:'t2_9', text:'Book your antenatal / NCT classes',                 tier:'full'},
+    {id:'t2_10',text:'Begin writing your birth preferences outline',      tier:'full'},
+    {id:'t2_11',text:'Research childcare options — waitlists can be very long', tier:'full'},
+    {id:'t2_12',text:'Check maternity pay entitlements and plan leave dates', tier:'full'},
+  ],
+  3: [
+    {id:'t3_1', text:'Pack your hospital bag (aim for week 36)',          tier:'core'},
+    {id:'t3_2', text:'Install and test your car seat',                    tier:'core'},
+    {id:'t3_3', text:'Register at your chosen hospital or birth centre',  tier:'core'},
+    {id:'t3_4', text:'Know when to call the hospital (contractions, waters, bleeding)', tier:'core'},
+    {id:'t3_5', text:'Prepare a postpartum support plan',                 tier:'core'},
+    {id:'t3_6', text:'Attend glucose tolerance test (around week 28)',    tier:'full'},
+    {id:'t3_7', text:'Write and share your birth preferences with your midwife', tier:'full'},
+    {id:'t3_8', text:'Book a newborn first aid course',                   tier:'full'},
+    {id:'t3_9', text:'Set up the nursery or sleeping space',              tier:'full'},
+    {id:'t3_10',text:'Stock up on newborn essentials (nappies, wipes, clothing)', tier:'full'},
+    {id:'t3_11',text:'Discuss cord clamping and skin-to-skin preferences', tier:'full'},
+    {id:'t3_12',text:'Batch-cook and freeze meals for the postpartum period', tier:'full'},
+  ],
+};
+
+/* ═══════════════════════════════════════════════
+   WELLNESS DATA
+═══════════════════════════════════════════════ */
+const WELLNESS = {
+  1:[
+    {cat:'sport',     icon:'🏃‍♀️', title:'Sport & Exercise',
+     dos:['Walking 20–30 min daily is ideal — gentle and effective','Swimming and water aerobics are safe and relieve nausea','Low-impact prenatal yoga aids flexibility and calms the mind','Light cycling on a stationary bike is fine','Pelvic floor exercises (Kegels) from day one — invaluable','Listen to your body: rest when exhausted, move when you can'],
+     donts:['Avoid contact sports — football, martial arts, boxing','No high-altitude exercise (above 2,500 m) until cleared','Skip hot yoga or Bikram — overheating is risky for baby','Don\'t start an intense new training programme from scratch','Avoid lying flat on your back for prolonged exercise after week 12','Scuba diving — the pressure risks are too high']},
+    {cat:'nutrition', icon:'🥗', title:'Nutrition & Diet',
+     dos:['Take folic acid 400 mcg daily (ideally from before conception)','Eat small, frequent meals to manage nausea','Stay well hydrated — aim for 8–10 glasses of water daily','Choose iron-rich foods: lean meat, lentils, spinach, fortified cereals','Eat calcium-rich foods: dairy, fortified plant milk, leafy greens','Ginger tea or ginger biscuits can ease morning sickness'],
+     donts:['Avoid raw or undercooked meat, fish, and eggs','No unpasteurised cheeses (brie, camembert, blue cheese)','Limit oily fish to 2 portions/week — salmon and sardines are fine','No alcohol — no safe limit has been established','Limit caffeine to under 200 mg/day (~2 small coffees)','Avoid raw shellfish, pâté, and liver products']},
+    {cat:'sleep',     icon:'😴', title:'Sleep & Rest',
+     dos:['Sleep as much as you need — fatigue in T1 is intense and normal','A short nap of 20–30 min can be a lifesaver','Experiment with pillow placement to find comfort','Go to bed earlier than usual if evening sickness is bad','Rest with your feet slightly elevated to ease circulation'],
+     donts:['Don\'t feel guilty about sleeping 10+ hours — your body needs it','Avoid heavy meals or spicy food late at night (worsens reflux)','Don\'t lie flat on your back for long stretches from week 12','Limit screens for 30 min before bed to improve sleep quality','Don\'t push through severe exhaustion — fatigue is a signal']},
+    {cat:'mind',      icon:'🧠', title:'Mental Wellbeing',
+     dos:['Share your news with a trusted person early — support matters','Journal how you\'re feeling — it helps process emotional shifts','Gentle breathing exercises and mindfulness are very beneficial','Connect with other pregnant women (apps, local groups, forums)','Be kind to yourself — mood swings are hormonal and completely normal','Talk to your midwife if anxiety feels overwhelming'],
+     donts:['Don\'t suffer in silence if you feel persistently low or anxious','Avoid doom-scrolling pregnancy horror stories online','Don\'t isolate yourself — connection is medicine','Don\'t compare your pregnancy to others\' — every journey is unique','Avoid people and situations that increase stress where possible']},
+    {cat:'travel',    icon:'✈️', title:'Travel',
+     dos:['T1 is generally safe for travel if you feel well enough','Keep your maternity records with you when travelling','Stay hydrated on flights — cabin air is very dry','Move your legs every hour on long flights to prevent clots','Check your travel insurance covers pregnancy from the start'],
+     donts:['Avoid travel to Zika-risk destinations','Don\'t plan travel if you have heavy bleeding or severe symptoms','Avoid bumpy or very strenuous journeys if at risk of miscarriage','Delay non-essential travel until nausea improves','Check airline policies — many require a letter after 28 weeks']},
+    {cat:'beauty',    icon:'💆‍♀️', title:'Beauty & Skincare',
+     dos:['Use a gentle, fragrance-free SPF 30+ sunscreen daily','Apply a rich moisturiser to bump, breasts, and thighs from early on','A fragrance-free body oil (coconut, almond) is wonderful for skin elasticity','Switch to pregnancy-safe nail polish brands (3-free or 5-free)','Gentle facial massage and cool compresses soothe skin'],
+     donts:['Avoid retinoids (retinol, tretinoin) — linked to birth defects','Skip high-dose vitamin A skincare products','Avoid salicylic acid in high concentrations (BHA peels)','No spray tans in T1 — limited data on chemical absorption','Skip professional chemical peels until after birth','Avoid acupressure points on the feet and ankles']},
+    {cat:'social',    icon:'🤝', title:'Social & Lifestyle',
+     dos:['Tell work when you\'re ready — you don\'t have to share early','Prepare a polite "no, thank you" for alcohol at social events','Ask for adjustments at work if nausea or fatigue affect you','Accept help when it\'s offered — you don\'t have to do it all','Begin researching maternity leave options and entitlements'],
+     donts:['Avoid smoke-filled environments — passive smoking is harmful','Don\'t feel obliged to attend every event if you\'re exhausted','Avoid hot tubs, saunas, and steam rooms — overheating is risky','Don\'t lift heavy objects at work without asking for alternatives','Avoid harsh cleaning chemicals — wear gloves and ventilate rooms']},
+    {cat:'birth',     icon:'📋', title:'Planning Ahead',
+     dos:['Research midwife-led vs consultant-led care and ask questions','Start thinking about your birth preferences early','Look into local antenatal / NCT classes — they fill up fast','Begin reading positive, evidence-based birth books','Consider which hospital or birthing centre you\'d prefer'],
+     donts:['Don\'t feel you need to decide everything in week 5','Avoid deep-diving into traumatic birth stories early on','Don\'t sign up to a birth plan you feel pressured into','Avoid overwhelm — break decisions into trimester chunks','Don\'t delay booking your midwife or first appointment']},
+  ],
+  2:[
+    {cat:'sport',     icon:'🏃‍♀️', title:'Sport & Exercise',
+     dos:['T2 is often the easiest trimester for exercise — energy returns!','Prenatal yoga, Pilates, and aqua aerobics are excellent choices','Aim for 150 minutes of moderate activity per week','Walking, light jogging (if pre-pregnancy habit), and cycling are fine','Strength training with lighter weights is beneficial for posture','Pelvic girdle and back support exercises are increasingly important'],
+     donts:['Avoid exercises lying flat on your back after week 20','No contact sports, horse riding, or skiing','Stop if you feel dizzy, short of breath, chest pain, or cramping','Avoid exercising in extreme heat or humidity','Don\'t push through pelvic pain — get a physio referral','Avoid high-intensity interval training without a prior fitness base']},
+    {cat:'nutrition', icon:'🥗', title:'Nutrition & Diet',
+     dos:['Increase daily intake by only ~300 kcal — not "eating for two"','Continue folic acid; add Vitamin D 10 mcg daily','Eat oily fish 1–2×/week for omega-3 (supports brain development)','Iron intake is crucial now — pair with vitamin C for absorption','Snack smart: nuts, hummus, fruit, yoghurt, whole grains','Drink plenty of water — constipation is common in T2'],
+     donts:['Still avoid raw fish, undercooked meat, and unpasteurised dairy','Don\'t skip meals even if nausea has eased — stable blood sugar matters','Limit added sugar and ultra-processed foods','No alcohol — still no safe level at any stage','Cap caffeine at under 200 mg/day','Avoid excess liquorice root — can affect fetal hormones']},
+    {cat:'sleep',     icon:'😴', title:'Sleep & Rest',
+     dos:['Sleep on your left side from mid-T2 — improves blood flow to baby','Use a pregnancy pillow (between knees, supporting bump) for comfort','Try a warm (not hot) bath before bed to relax muscles','Elevate the head of your bed slightly if reflux is a problem','Regular gentle exercise during the day improves night-time sleep'],
+     donts:['Avoid sleeping flat on your back from week 20 onwards','Don\'t drink large amounts of fluids right before bed','Avoid napping too late in the day if it disrupts night sleep','Don\'t ignore restless legs — mention it to your midwife','Avoid caffeine after 2 pm']},
+    {cat:'mind',      icon:'🧠', title:'Mental Wellbeing',
+     dos:['The 20-week scan can bring real emotional relief — celebrate it','Open up with your partner about fears and expectations for parenthood','Consider couples\' therapy or birth-prep sessions together','Continue or begin gentle mindfulness and breathing practices','Write a list of what excites you about becoming a parent'],
+     donts:['Don\'t suppress anxiety about the birth — talk it through','Avoid taking on more work projects as the bump grows','Don\'t brush off persistent sadness — antenatal depression is real','Avoid media that consistently triggers fear about birth','Don\'t wait until T3 to address relationship tensions']},
+    {cat:'travel',    icon:'✈️', title:'Travel',
+     dos:['T2 (weeks 14–27) is the safest and most comfortable time to travel','Book "babymoon" trips ideally between weeks 18–24','Carry your maternity notes everywhere when travelling','Aisle seats on flights give you more freedom to move around','Research local hospital locations at your destination just in case'],
+     donts:['Avoid Zika-risk destinations throughout pregnancy','Don\'t travel to destinations with limited maternity services','Avoid very long-haul flights without stopping to walk and stretch','Check airline restriction windows — many stop at 28–32 weeks','Don\'t wear compression tights that are too tight']},
+    {cat:'beauty',    icon:'💆‍♀️', title:'Beauty & Skincare',
+     dos:['SPF daily is even more important — skin is prone to melasma in T2','Azelaic acid is safe for pigmentation and mild acne in pregnancy','Vitamin C serum is safe and brightening — use in the morning','Keep moisturising your growing bump generously twice daily','Your hair may feel thicker and shinier — enjoy it!','Hair dyeing in T2 is generally considered lower risk than T1'],
+     donts:['Still avoid retinoids and high-dose vitamin A','Avoid hydroquinone (skin lightener) — not approved in pregnancy','Limit chemical hair treatments (relaxers, keratin) where possible','Don\'t use essential oils undiluted on skin','Avoid waxing very sensitive areas if skin is inflamed','Don\'t use sunbeds at any point during pregnancy']},
+    {cat:'social',    icon:'🤝', title:'Social & Lifestyle',
+     dos:['Many people share their news publicly after the 12-week scan','Celebrate milestones — the 20-week scan, the halfway point, feeling kicks','Start nesting instincts early: research prams, car seats, nursery','Set up a baby registry — it gives family a helpful guide','Begin thinking about childcare options — waitlists can be very long'],
+     donts:['Avoid passive smoking and smoky environments','Don\'t stand for long periods without breaks (varicose veins)','Avoid heavy lifting — ask for help, use trolleys','Don\'t overdo it with baby shopping stress — build a list and pace it','Avoid overcommitting socially if you need rest']},
+    {cat:'birth',     icon:'📋', title:'Planning Ahead',
+     dos:['Book your antenatal classes now — they often start in T3','Write your birth preferences outline by week 24–26','Tour your chosen hospital or birth centre','Research pain relief options: epidural, gas & air, water birth, hypnobirthing','Discuss cord clamping and delayed cord clamping with your midwife'],
+     donts:['Don\'t finalise your birth plan rigidly — flexibility is wise','Avoid sources that present only one "right" way to give birth','Don\'t delay packing a hospital bag — ideally done by week 32','Avoid leaving your partner out of birth discussions','Don\'t dismiss your own instincts about what feels right for you']},
+  ],
+  3:[
+    {cat:'sport',     icon:'🏃‍♀️', title:'Sport & Exercise',
+     dos:['Gentle walking remains excellent right up to birth','Swimming is brilliant in T3 — weightlessness relieves pressure','Prenatal yoga focuses on breathing, hip opening, and birth preparation','Pelvic floor exercises are critical now — practise daily','Birthing ball: figure-of-eights and gentle bouncing aid baby\'s positioning','Short, frequent walks are better than one long one as energy dips'],
+     donts:['Avoid any impact or bouncing exercises','No lying flat on your back — left side or reclined at 45° only','Stop immediately if you have contractions, bleeding, or fluid loss','Avoid exercises that require strong balance — falls risk increases','Don\'t exercise in heat — body temperature regulation is harder now','Scuba diving and contact sports remain off the table']},
+    {cat:'nutrition', icon:'🥗', title:'Nutrition & Diet',
+     dos:['Eat small, frequent meals — the uterus compresses your stomach now','Focus on nutrient-dense foods: lean protein, wholegrains, vegetables','Omega-3s (oily fish, walnuts) support baby\'s brain development','Iron and folate remain important — leafy greens, red meat, lentils','Stay very well hydrated — Braxton Hicks can worsen with dehydration','Eat colostrum-supporting foods: oats, fennel, leafy greens'],
+     donts:['Avoid large meals — they worsen reflux significantly in T3','Still no alcohol, raw fish, or undercooked meat','Avoid spicy or fatty foods late at night (reflux is worst at night)','Limit sodium to reduce swelling in hands and feet','Don\'t eat pineapple or raspberry leaf tea excessively without guidance','No unpasteurised foods — immune system is stretched in late pregnancy']},
+    {cat:'sleep',     icon:'😴', title:'Sleep & Rest',
+     dos:['Use a full-length pregnancy pillow — genuinely life-changing','Sleep on your left side — optimises blood flow and kidney function','Short naps (20–30 min) are beneficial as night sleep fragments','Elevate your upper body slightly if heartburn is keeping you awake','A warm bath before bed can ease muscle cramps and back pain','Practise your labour breathing techniques at bedtime — great preparation'],
+     donts:['Avoid sleeping on your back — uterine weight can compress major blood vessels','Don\'t ignore persistent leg cramps — increase magnesium-rich foods','Avoid heavy dinners within 2 hours of bedtime','Don\'t take sleeping pills without medical supervision','Avoid caffeine after midday completely in T3','Don\'t ignore reduced fetal movement — contact your midwife straight away']},
+    {cat:'mind',      icon:'🧠', title:'Mental Wellbeing',
+     dos:['Attend your antenatal classes — they reduce anxiety significantly','Practise hypnobirthing or guided relaxation tracks daily','Write a birth plan — the thinking-through process is reassuring in itself','Talk openly with your partner about practical and emotional preparations','Accept that some fear is normal — your body is designed for this','Prepare a postpartum support plan — who will visit, who will help?'],
+     donts:['Don\'t avoid thinking about birth — preparation reduces fear','Don\'t isolate yourself in the final weeks — social support matters','Avoid people who share unsolicited horror stories about their birth','Don\'t put off conversations about mental health — postpartum plans start now','Don\'t compare your bump size, weight gain, or symptoms to others','Avoid over-scheduling your final weeks — you need margin for rest']},
+    {cat:'travel',    icon:'✈️', title:'Travel',
+     dos:['Keep travel close to home from week 32 onwards','Always carry your maternity notes if you go anywhere','If travelling by car, take breaks every 90 min and walk around','Know where the nearest hospital is wherever you are','Discuss any travel plans with your midwife or doctor first'],
+     donts:['Most airlines will not carry you after 36 weeks (check your airline)','Don\'t travel to destinations with limited obstetric care','Avoid very long car journeys without significant planning in late T3','Don\'t travel internationally after week 34 without specific medical sign-off','Avoid travel during a heatwave — regulating temperature is harder']},
+    {cat:'beauty',    icon:'💆‍♀️', title:'Beauty & Skincare',
+     dos:['Continue generous moisturising of the bump — skin is at maximum stretch','Perineal massage from week 34 can help prepare for birth (ask your midwife)','Use a cooling spritz for hot, swollen skin','Gentle lymphatic drainage massage can ease ankle and leg swelling','Rest with legs elevated on pillows to reduce oedema','A gentle scalp and shoulder massage can relieve tension beautifully'],
+     donts:['Still avoid retinoids and any strong acids on the skin','Avoid nail salons with poor ventilation — fumes can be strong','Don\'t use clary sage essential oil — it can stimulate contractions','Avoid reflexology points that can trigger labour without professional supervision','Don\'t stand for long periods — circulation is really taxed now','Avoid tight waistbands or anything that compresses the bump']},
+    {cat:'social',    icon:'🤝', title:'Social & Lifestyle',
+     dos:['A babymoon (quiet getaway with your partner) before week 32 is lovely','Accept all offers of cooked meals, cleaning, and practical help','Set gentle boundaries with well-meaning visitors post-birth in advance','Enjoy one-on-one time with older children before baby arrives','Prepare pets for the new arrival with gradual changes','Allow yourself to nest — it\'s instinctive and productive'],
+     donts:['Don\'t attend late-night events or anything exhausting in the final weeks','Avoid alcohol at celebrations — mocktails are wonderful alternatives','Don\'t feel obliged to share birth or feeding choices before you\'re ready','Avoid over-committing to visits in the first weeks postpartum','Don\'t delay setting up a postpartum support rota for family and friends']},
+    {cat:'birth',     icon:'📋', title:'Birth Preparation',
+     dos:['Pack your hospital bag by week 36 — use a checklist','Finalise and share your birth preferences with your birth partner and midwife','Install and test your car seat before week 37','Register at your chosen hospital or birth centre','Practise your pain management techniques daily: breathing, visualisation','Know when to call the hospital: contractions timing, waters, bleeding'],
+     donts:['Don\'t leave hospital bag packing until the last minute','Avoid assuming labour will start exactly as in books — every birth is unique','Don\'t rely solely on one pain management plan — have a backup','Don\'t forget to charge your phone and camera before week 38','Avoid dismissing "this doesn\'t feel right" — always call your midwife','Don\'t be afraid to advocate for yourself during labour and birth']},
+  ],
+};
+
+/* ═══════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════ */
+let state    = { dueDate: null, name: '', baby: '' };
+let dateMode = 'due';
+
+/* ═══════════════════════════════════════════════
+   SETUP
+═══════════════════════════════════════════════ */
+function setDateMode(mode) {
+  dateMode = mode;
+  document.getElementById('btnDueDate').classList.toggle('active', mode === 'due');
+  document.getElementById('btnLMP').classList.toggle('active', mode === 'lmp');
+  document.getElementById('dueDateField').classList.toggle('hidden', mode !== 'due');
+  document.getElementById('lmpField').classList.toggle('hidden', mode !== 'lmp');
+}
+
+function generateRoadmap() {
+  const errEl = document.getElementById('setupError');
+  errEl.style.display = 'none';
+  let dueDate;
+  if (dateMode === 'due') {
+    const v = document.getElementById('inputDate').value;
+    if (!v) { errEl.textContent = 'Please enter a valid date to continue.'; errEl.style.display = 'block'; return; }
+    dueDate = new Date(v + 'T12:00:00');
+  } else {
+    const v = document.getElementById('inputLMP').value;
+    if (!v) { errEl.textContent = 'Please enter a valid date to continue.'; errEl.style.display = 'block'; return; }
+    dueDate = new Date(new Date(v + 'T12:00:00').getTime() + 280 * 86400000);
+  }
+  const today  = new Date(); today.setHours(12,0,0,0);
+  if (dueDate > new Date(today.getTime() + 42*7*86400000) || dueDate < new Date(today.getTime() - 44*7*86400000)) {
+    errEl.textContent = 'Please check your date — it seems too far in the past or future.';
+    errEl.style.display = 'block'; return;
+  }
+  state.dueDate = dueDate;
+  state.name    = document.getElementById('inputName').value.trim();
+  state.baby    = document.getElementById('inputBaby').value.trim();
+  localStorage.setItem('preg_state', JSON.stringify({ dueDate: dueDate.toISOString(), name: state.name, baby: state.baby }));
+  showRoadmap();
+}
+
+function resetRoadmap() {
+  localStorage.removeItem('preg_state');
+  localStorage.removeItem('preg_notes');
+  document.getElementById('setup-screen').classList.remove('hidden');
+  document.getElementById('roadmap-screen').classList.add('hidden');
+  ['inputDate','inputLMP','inputName','inputBaby'].forEach(id => { document.getElementById(id).value = ''; });
+}
+
+function loadSavedState() {
+  try {
+    const raw = localStorage.getItem('preg_state');
+    if (!raw) return false;
+    const s = JSON.parse(raw);
+    state.dueDate = new Date(s.dueDate);
+    state.name    = s.name || '';
+    state.baby    = s.baby || '';
+    return true;
+  } catch (_) { return false; }
+}
+
+/* ═══════════════════════════════════════════════
+   WEEK CALCULATION
+═══════════════════════════════════════════════ */
+function calcWeek() {
+  const today    = new Date(); today.setHours(12,0,0,0);
+  const daysLeft = Math.round((state.dueDate - today) / 86400000);
+  const rawWeek  = 40 - daysLeft / 7;
+  const week     = Math.min(42, Math.max(1, Math.floor(rawWeek)));
+  return { week, daysLeft };
+}
+
+function nextWeekStartDate() {
+  const lmp = new Date(state.dueDate.getTime() - 280 * 86400000);
+  const { week } = calcWeek();
+  return new Date(lmp.getTime() + week * 7 * 86400000);
+}
+
+/* ═══════════════════════════════════════════════
+   RENDER ROADMAP
+═══════════════════════════════════════════════ */
+function showRoadmap() {
+  document.getElementById('setup-screen').classList.add('hidden');
+  document.getElementById('roadmap-screen').classList.remove('hidden');
+  renderAll();
+}
+
+function renderAll() {
+  const { week, daysLeft } = calcWeek();
+  const progress = Math.min(100, Math.max(0, (week / 40) * 100));
+
+  // Hero
+  document.getElementById('heroName').textContent = state.name ? `Hello, ${state.name}! 👋` : 'Your Pregnancy Journey';
+  const dueStr = state.dueDate.toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  const babyStr = state.baby || 'your baby';
+  document.getElementById('heroSub').innerHTML = `You are in <strong>Week ${week}</strong> of your pregnancy — ${babyStr}'s due date is <strong>${dueStr}</strong>.`;
+
+  // Ring
+  document.getElementById('progressArc').style.strokeDashoffset = 427.3 * (1 - progress / 100);
+  document.getElementById('ringWeek').textContent = week > 40 ? '40+' : week;
+  document.getElementById('ringPct').textContent  = Math.round(progress) + '% done';
+  document.getElementById('ringDays').textContent = daysLeft > 0 ? `${daysLeft} days to go` : daysLeft === 0 ? 'Due today! 🎉' : `${Math.abs(daysLeft)} days past due`;
+
+  // Trimester bars
+  [{id:'1',s:1,e:13},{id:'2',s:14,e:27},{id:'3',s:28,e:40}].forEach(t => {
+    const pct = week < t.s ? 0 : week > t.e ? 100 : Math.round(((week - t.s) / (t.e - t.s)) * 100);
+    document.getElementById(`tBar${t.id}`).style.width = pct + '%';
+    const card = document.getElementById(`tCard${t.id}`);
+    card.className = 'trimester-card' + (week >= t.s && week <= t.e ? ' active-t' : week > t.e ? ' done-t' : '');
+    document.getElementById(`tStatus${t.id}`).textContent = week < t.s ? 'Not yet started' : week > t.e ? '✓ Complete' : `${pct}% through`;
+  });
+
+  // This Week
+  const w = Math.max(4, Math.min(40, week));
+  const sz = BABY_SIZES[w] || BABY_SIZES[40];
+  const wi = WEEK_INFO[w]  || WEEK_INFO[40];
+  const tags = (wi.tags||[]).map(t => {
+    const cls = t.toLowerCase().includes('scan') ? 'appt' : t.toLowerCase().includes('test') || t.toLowerCase().includes('glucose') ? 'test' : '';
+    return `<span class="week-tag ${cls}">${t}</span>`;
+  }).join('');
+  document.getElementById('thisWeekCard').innerHTML = `
+    <div class="week-badge-wrap">
+      <span class="week-emoji">${sz.emoji}</span>
+      <p class="week-fruit">${sz.fruit}</p>
+      <p class="week-size">${sz.size}</p>
+    </div>
+    <div class="week-info">
+      <h3 class="week-title">Week ${week}${week>40?' (Post-term)':''}</h3>
+      <p class="week-desc">${wi.desc}</p>
+      ${tags?`<div class="week-tags">${tags}</div>`:''}
+    </div>`;
+
+  // Countdown
+  document.getElementById('cdWeeks').textContent   = Math.max(0, 40 - week);
+  document.getElementById('cdDays').textContent    = Math.max(0, daysLeft);
+  document.getElementById('cdNextWeek').textContent = nextWeekStartDate().toLocaleDateString('en-GB', {weekday:'short',day:'numeric',month:'short'});
+
+  renderTimeline(week);
+}
+
+/* ═══════════════════════════════════════════════
+   MILESTONE TIMELINE
+═══════════════════════════════════════════════ */
+function renderTimeline(currentWeek) {
+  if (currentWeek === undefined) { const {week} = calcWeek(); currentWeek = week; }
+  const notes = JSON.parse(localStorage.getItem('preg_notes') || '{}');
+  const container = document.getElementById('milestoneTimeline');
+  container.innerHTML = '';
+  let lastTrim = 0;
+
+  MILESTONES.forEach(m => {
+    if (m.trim !== lastTrim) {
+      lastTrim = m.trim;
+      const lbl = document.createElement('div');
+      lbl.className = `t-section-label t${m.trim}`;
+      lbl.innerHTML = `<span>${m.trim===1?'First Trimester — Weeks 1–13':m.trim===2?'Second Trimester — Weeks 14–27':'Third Trimester — Weeks 28–40'}</span>`;
+      container.appendChild(lbl);
+    }
+    const isPast   = m.week < currentWeek;
+    const isCurr   = m.week === currentWeek;
+    const isLocked = !can.fullTimeline && m.trim > 1;
+    const card     = document.createElement('div');
+    card.className = 'milestone-card ' + (isPast&&!isCurr?'past':isCurr?'current':'future') + (isLocked?' locked':'');
+    const typeBadge = m.type !== 'milestone' ? `<span class="m-type-badge ${m.type}">${m.type}</span>` : '';
+    const lockBadge = isLocked ? `<span class="milestone-lock-badge" onclick="showNudgeModal('basic')">🔒 Upgrade</span>` : '';
+    const noteSection = can.notes && !isLocked ? `
+      <textarea class="note-area" id="note-${m.week}" placeholder="Add a personal note for week ${m.week}…" onblur="saveNote(${m.week})">${notes[m.week]||''}</textarea>
+      <div><button class="note-save-btn" onclick="saveNote(${m.week})">Save Note</button><span class="note-saved hidden" id="saved-${m.week}">✓ Saved</span></div>` : '';
+    card.innerHTML = `${lockBadge}
+      <div class="m-header">
+        <span class="m-icon">${m.icon}</span>
+        <div><p class="m-week ${isCurr?'current-wk':''}">${isPast&&!isCurr?'✓ ':''}Week ${m.week}</p><p class="m-title">${m.title}</p></div>
+        ${typeBadge}
+      </div>
+      <p class="m-desc">${isLocked?'Unlock to see full milestone detail and upcoming appointment information.':(WEEK_INFO[m.week]?.desc||'')}</p>
+      ${isLocked?'':noteSection}`;
+    container.appendChild(card);
+  });
+
+  // Inline upgrade nudge after T1 milestones for free users
+  if (!can.fullTimeline) {
+    const nudge = document.createElement('div');
+    nudge.className = 'upgrade-nudge';
+    nudge.style.marginTop = '8px';
+    nudge.innerHTML = `<span class="lock-icon">🔒</span><div><strong>Basic feature</strong> — <a onclick="showNudgeModal('basic')">Upgrade for $8/year</a> to unlock all second and third trimester milestones, scans, and appointment reminders.</div>`;
+    container.appendChild(nudge);
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   NOTES (Premium)
+═══════════════════════════════════════════════ */
+function saveNote(week) {
+  const ta = document.getElementById(`note-${week}`);
+  if (!ta) return;
+  const notes = JSON.parse(localStorage.getItem('preg_notes') || '{}');
+  notes[week] = ta.value;
+  localStorage.setItem('preg_notes', JSON.stringify(notes));
+  const s = document.getElementById(`saved-${week}`);
+  if (s) { s.classList.remove('hidden'); setTimeout(() => s.classList.add('hidden'), 2000); }
+}
+
+/* ═══════════════════════════════════════════════
+   WELLNESS
+═══════════════════════════════════════════════ */
+let wellnessTrim = 1;
+
+function setWellnessTrim(n) {
+  wellnessTrim = n;
+  document.getElementById('wellnessTrimSelect').value = n;
+  [1,2,3].forEach(i => {
+    document.getElementById(`wpill${i}`).className = `t-strip-pill t${i}` + (i===n?' active':'');
+  });
+  renderWellness();
+}
+
+function renderWellness() {
+  const n = parseInt(document.getElementById('wellnessTrimSelect').value);
+  wellnessTrim = n;
+  [1,2,3].forEach(i => { document.getElementById(`wpill${i}`).className = `t-strip-pill t${i}` + (i===n?' active':''); });
+  const grid = document.getElementById('wellnessGrid');
+  grid.innerHTML = '';
+  (WELLNESS[n]||[]).forEach(c => {
+    const card = document.createElement('div');
+    card.className = 'wellness-card';
+    card.setAttribute('data-cat', c.cat);
+    card.innerHTML = `
+      <div class="wellness-card-header"><span class="cat-icon">${c.icon}</span><h3 class="cat-title">${c.title}</h3></div>
+      <div class="wellness-card-body">
+        <div class="do-col"><div class="col-header do-hdr">DOs</div>${c.dos.map(d=>`<div class="do-item">${d}</div>`).join('')}</div>
+        <div class="dont-col"><div class="col-header dont-hdr">DON'Ts</div>${c.donts.map(d=>`<div class="dont-item">${d}</div>`).join('')}</div>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   WEEKLY — CHECK-IN
+═══════════════════════════════════════════════ */
+let checkinMood = 0;
+let checkinTodoTrim = 1;
+
+function selectMood(n) {
+  checkinMood = n;
+  document.querySelectorAll('.mood-btn').forEach(b => {
+    b.classList.toggle('selected', parseInt(b.dataset.mood) === n);
+  });
+}
+
+function toggleSymptom(el) {
+  el.classList.toggle('active');
+}
+
+function getSelectedSymptoms() {
+  return Array.from(document.querySelectorAll('.symptom-chip.active')).map(c => c.textContent);
+}
+
+function saveCheckin() {
+  if (!state.dueDate) { showNudgeModal('setup'); return; }
+  const { week } = calcWeek();
+  const note     = document.getElementById('checkinNote').value.trim();
+  const symptoms = getSelectedSymptoms();
+  if (!checkinMood && !symptoms.length && !note) {
+    document.getElementById('checkinToast').textContent = 'Nothing to save — add a mood, symptom, or note first.';
+    document.getElementById('checkinToast').style.color = 'var(--rose)';
+    setTimeout(() => { document.getElementById('checkinToast').textContent = ''; }, 3000);
+    return;
+  }
+  const checkins = JSON.parse(localStorage.getItem('preg_checkins') || '{}');
+  checkins[week] = { week, mood: checkinMood, symptoms, note, date: new Date().toISOString() };
+  localStorage.setItem('preg_checkins', JSON.stringify(checkins));
+
+  // Reset UI
+  checkinMood = 0;
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('.symptom-chip').forEach(c => c.classList.remove('active'));
+  document.getElementById('checkinNote').value = '';
+  document.getElementById('checkinToast').style.color = 'var(--green)';
+  document.getElementById('checkinToast').textContent = '✓ Week ' + week + ' check-in saved!';
+  setTimeout(() => { document.getElementById('checkinToast').textContent = ''; }, 3000);
+
+  renderCheckinHistory();
+}
+
+const MOOD_EMOJIS = ['','😩','😔','😐','😊','😄'];
+const MOOD_LABELS = ['','Rough','Low','Okay','Good','Great'];
+
+function renderCheckinHistory() {
+  const list        = document.getElementById('historyList');
+  const emptyEl     = document.getElementById('historyEmpty');
+  const nudgeEl     = document.getElementById('historyNudge');
+  const exportNudge = document.getElementById('exportNudge');
+  const exportBtn   = document.getElementById('exportBtn');
+
+  // Export button visibility
+  exportBtn.classList.toggle('hidden', !can.checkinExport);
+  exportNudge.classList.toggle('hidden', can.checkinExport);
+
+  const checkins = JSON.parse(localStorage.getItem('preg_checkins') || '{}');
+  const weeks    = Object.keys(checkins).map(Number).sort((a,b) => b-a);
+
+  if (!can.checkinHistory) {
+    nudgeEl.classList.remove('hidden');
+    list.innerHTML = '';
+    emptyEl.classList.add('hidden');
+    return;
+  }
+  nudgeEl.classList.add('hidden');
+
+  const recent = weeks.slice(0, 8); // last 8 weeks
+  list.innerHTML = '';
+
+  if (!recent.length) { emptyEl.classList.remove('hidden'); return; }
+  emptyEl.classList.add('hidden');
+
+  recent.forEach(w => {
+    const c    = checkins[w];
+    const dt   = new Date(c.date).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
+    const mood = c.mood ? `${MOOD_EMOJIS[c.mood]} ${MOOD_LABELS[c.mood]}` : '';
+
+    // Collapsed preview: symptom names + note snippet in one line
+    const symNames  = (c.symptoms||[]).filter(s => s !== 'None this week');
+    const previewParts = [];
+    if (symNames.length) previewParts.push(symNames.join(', '));
+    if (c.note)          previewParts.push(`"${c.note.substring(0, 60)}${c.note.length > 60 ? '…' : ''}"`);
+    const previewText = previewParts.length ? previewParts.join(' · ') : 'Tap to see details';
+
+    // Expanded detail: full symptom chips + full note
+    const symsHtml = symNames.length
+      ? `<div class="history-chips">${symNames.map(s=>`<span class="history-chip">${s}</span>`).join('')}</div>`
+      : '';
+    const noteHtml = c.note
+      ? `<p class="history-note-text">"${c.note}"</p>`
+      : `<p class="history-no-note">No note recorded for this week.</p>`;
+
+    const div = document.createElement('div');
+    div.className = 'history-card';
+    div.innerHTML = `
+      <div class="history-card-top">
+        <div class="history-card-top-left">
+          <span class="history-week-lbl">Week ${w}</span>
+          ${mood ? `<span class="history-mood">${MOOD_EMOJIS[c.mood]}</span><span class="history-mood-lbl">${MOOD_LABELS[c.mood]}</span>` : ''}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="history-date">${dt}</span>
+          <span class="history-chevron">▾</span>
+        </div>
+      </div>
+      <p class="history-preview">${previewText}</p>
+      <div class="history-detail">
+        ${symsHtml}
+        ${noteHtml}
+      </div>`;
+
+    div.addEventListener('click', () => {
+      const isOpen = div.classList.contains('expanded');
+      // Collapse all others
+      list.querySelectorAll('.history-card.expanded').forEach(d => d.classList.remove('expanded'));
+      if (!isOpen) div.classList.add('expanded');
+    });
+
+    list.appendChild(div);
+  });
+}
+
+function exportDiary() {
+  if (!can.checkinExport) { showNudgeModal('premium'); return; }
+  const checkins = JSON.parse(localStorage.getItem('preg_checkins') || '{}');
+  const weeks    = Object.keys(checkins).map(Number).sort((a,b) => a-b);
+  if (!weeks.length) { alert('No check-ins to export yet.'); return; }
+
+  let html = `<html><head><style>
+    body{font-family:'Outfit',sans-serif;max-width:700px;margin:40px auto;color:#1a2438;line-height:1.6}
+    h1{font-family:'Playfair Display',serif;font-size:2.2rem;margin-bottom:4px}
+    .sub{color:#7a8caa;margin-bottom:32px}
+    .entry{border:1px solid #e5e7eb;border-radius:12px;padding:20px 24px;margin-bottom:16px}
+    .wk{font-weight:700;font-size:1.1rem;color:#f5a623}
+    .dt{font-size:13px;color:#9ca3af;margin-bottom:8px}
+    .mood{font-size:22px}
+    .syms{margin:8px 0;display:flex;gap:8px;flex-wrap:wrap}
+    .sym{background:#f3f4f6;border-radius:20px;padding:3px 10px;font-size:12px}
+    .note{font-style:italic;color:#6b7280;margin-top:6px}
+    @media print{body{margin:20px}}
+  </style></head><body>
+  <h1>Pregnancy Diary</h1>
+  <p class="sub">Generated from the Pregnancy Roadmap · The Artifacts Lab${state.name?' · '+state.name:''}</p>`;
+
+  weeks.forEach(w => {
+    const c  = checkins[w];
+    const dt = new Date(c.date).toLocaleDateString('en-GB', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    const syms = (c.symptoms||[]).length ? `<div class="syms">${c.symptoms.map(s=>`<span class="sym">${s}</span>`).join('')}</div>` : '';
+    html += `<div class="entry">
+      <div class="wk">Week ${w} ${c.mood?`<span class="mood">${MOOD_EMOJIS[c.mood]}</span>`:''}</div>
+      <div class="dt">${dt}</div>
+      ${syms}
+      ${c.note?`<p class="note">"${c.note}"</p>`:''}
+    </div>`;
+  });
+
+  html += '</body></html>';
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+  setTimeout(() => win.print(), 600);
+}
+
+/* ═══════════════════════════════════════════════
+   WEEKLY — TO-DO
+═══════════════════════════════════════════════ */
+function setTodoTrim(n) {
+  checkinTodoTrim = n;
+  [1,2,3].forEach(i => {
+    document.getElementById(`ttab${i}`).classList.toggle('active', i===n);
+  });
+  renderTodoList();
+}
+
+function renderTodoList() {
+  const n      = checkinTodoTrim;
+  const tasks  = TODO_DATA[n] || [];
+  const todos  = JSON.parse(localStorage.getItem('preg_todos') || '{}');
+  const list   = document.getElementById('todoList');
+  const nudge  = document.getElementById('todoNudge');
+  list.innerHTML = '';
+
+  // Show core always; show full items only if can.todoFull
+  const visible = can.todoFull ? tasks : tasks.filter(t => t.tier === 'core');
+  nudge.classList.toggle('hidden', can.todoFull);
+
+  let done = 0;
+  visible.forEach(task => {
+    const isDone = !!todos[task.id];
+    if (isDone) done++;
+    const item = document.createElement('div');
+    item.className = 'todo-item' + (isDone?' completed':'');
+    item.onclick = () => toggleTodo(task.id, n);
+    item.innerHTML = `
+      <div class="todo-check ${isDone?'done':''}"></div>
+      <span class="todo-text">${task.text}</span>
+      <span class="todo-badge ${task.tier==='core'?'core':'premium'}">${task.tier==='core'?'Core':'Extra'}</span>`;
+    list.appendChild(item);
+  });
+
+  // Progress
+  const total = visible.length;
+  document.getElementById('todoProgressFill').style.width = total ? Math.round((done/total)*100)+'%' : '0%';
+  document.getElementById('todoProgressLbl').textContent  = `${done} / ${total}`;
+}
+
+function toggleTodo(id, trim) {
+  const todos = JSON.parse(localStorage.getItem('preg_todos') || '{}');
+  todos[id] = !todos[id];
+  if (!todos[id]) delete todos[id];
+  localStorage.setItem('preg_todos', JSON.stringify(todos));
+  renderTodoList();
+}
+
+/* ═══════════════════════════════════════════════
+   PHASE 2 — KICK COUNTER
+═══════════════════════════════════════════════ */
+let kickSessionCount  = 0;
+let kickSessionStart  = null;
+let kickTimerInterval = null;
+
+function recordKick() {
+  if (!kickSessionStart) {
+    kickSessionStart = Date.now();
+    kickTimerInterval = setInterval(updateKickTimer, 1000);
+  }
+  kickSessionCount++;
+
+  // Bump animation
+  const num = document.getElementById('kickCount');
+  num.textContent = kickSessionCount;
+  num.classList.remove('bump');
+  void num.offsetWidth; // force reflow
+  num.classList.add('bump');
+  setTimeout(() => num.classList.remove('bump'), 120);
+
+  // Alert logic: < 10 kicks and >= 2 hours elapsed
+  checkKickAlert();
+}
+
+function updateKickTimer() {
+  if (!kickSessionStart) return;
+  const elapsed = Math.floor((Date.now() - kickSessionStart) / 1000);
+  const mins    = Math.floor(elapsed / 60);
+  const secs    = elapsed % 60;
+  document.getElementById('kickTimerLbl').textContent =
+    `Session time: ${mins}m ${String(secs).padStart(2,'0')}s`;
+  checkKickAlert();
+}
+
+function checkKickAlert() {
+  if (!kickSessionStart) return;
+  const elapsedMins = (Date.now() - kickSessionStart) / 60000;
+  const show = elapsedMins >= 120 && kickSessionCount < 10;
+  document.getElementById('kickAlert').style.display = show ? 'block' : 'none';
+}
+
+function saveKickSession() {
+  if (!kickSessionStart && kickSessionCount === 0) return;
+  const elapsed = kickSessionStart ? Math.floor((Date.now() - kickSessionStart) / 60000) : 0;
+  const week    = state.dueDate ? calcWeek().week : null;
+  const sessions = JSON.parse(localStorage.getItem('preg_kicks') || '[]');
+  sessions.unshift({
+    date: new Date().toISOString(),
+    week,
+    count:    kickSessionCount,
+    duration: elapsed,
+  });
+  localStorage.setItem('preg_kicks', JSON.stringify(sessions.slice(0, 10))); // keep last 10
+  resetKickSession();
+  renderKickLog();
+}
+
+function resetKickSession() {
+  clearInterval(kickTimerInterval);
+  kickTimerInterval  = null;
+  kickSessionCount   = 0;
+  kickSessionStart   = null;
+  document.getElementById('kickCount').textContent   = '0';
+  document.getElementById('kickTimerLbl').textContent = 'Session not started';
+  document.getElementById('kickAlert').style.display = 'none';
+}
+
+function renderKickLog() {
+  const sessions = JSON.parse(localStorage.getItem('preg_kicks') || '[]');
+  const el       = document.getElementById('kickLogList');
+  if (!sessions.length) {
+    el.innerHTML = '<p class="kick-log-empty">No sessions saved yet.</p>';
+    return;
+  }
+  el.innerHTML = sessions.slice(0, 5).map(s => {
+    const dt  = new Date(s.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'});
+    const tm  = new Date(s.date).toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
+    const wk  = s.week ? `Wk ${s.week} · ` : '';
+    const dur = s.duration > 0 ? `${s.duration}m` : '< 1m';
+    return `<div class="kick-log-item">
+      <span class="kick-log-count">${s.count}</span>
+      <span>${wk}${dt} ${tm}</span>
+      <span>in ${dur}</span>
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════
+   PHASE 2 — CONTRACTION TIMER
+═══════════════════════════════════════════════ */
+let conState         = 'idle';    // 'idle' | 'active' | 'resting'
+let conStartTime     = null;      // when current contraction started
+let conEndTime       = null;      // when last contraction ended
+let conTimerInterval = null;
+let conLog           = [];        // [{start, end, duration, gap}]
+
+function toggleContraction() {
+  if (conState === 'idle' || conState === 'resting') {
+    // Start a contraction
+    conState     = 'active';
+    conStartTime = Date.now();
+    document.getElementById('conBtn').textContent = 'Contraction Ended';
+    document.getElementById('conBtn').className   = 'btn-contraction stop';
+    document.getElementById('conStatusLbl').textContent = 'Contraction in progress…';
+    document.getElementById('conTimerNum').className    = 'con-timer-num active';
+    document.getElementById('conSubLbl').textContent    = 'Tap again when it ends';
+    clearInterval(conTimerInterval);
+    conTimerInterval = setInterval(updateConTimer, 500);
+  } else if (conState === 'active') {
+    // End a contraction
+    conEndTime = Date.now();
+    const duration = Math.round((conEndTime - conStartTime) / 1000); // seconds
+    const gap = conLog.length
+      ? Math.round((conStartTime - conLog[conLog.length-1].end) / 1000)
+      : null;
+    conLog.push({ start: conStartTime, end: conEndTime, duration, gap });
+    conState = 'resting';
+
+    document.getElementById('conBtn').textContent = 'Contraction Started';
+    document.getElementById('conBtn').className   = 'btn-contraction start';
+    document.getElementById('conStatusLbl').textContent = 'Resting — gap timer running';
+    document.getElementById('conTimerNum').className    = 'con-timer-num resting';
+    document.getElementById('conSubLbl').textContent    = 'Tap when the next one begins';
+
+    clearInterval(conTimerInterval);
+    conTimerInterval = setInterval(updateConTimer, 500);
+
+    updateConStats();
+    renderConLog();
+    updateConGuidance();
+  }
+}
+
+function updateConTimer() {
+  const now = Date.now();
+  let secs;
+  if (conState === 'active') {
+    secs = Math.floor((now - conStartTime) / 1000);
+  } else if (conState === 'resting' && conEndTime) {
+    secs = Math.floor((now - conEndTime) / 1000);
+  } else {
+    return;
+  }
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  document.getElementById('conTimerNum').textContent = `${m}:${String(s).padStart(2,'0')}`;
+}
+
+function updateConStats() {
+  if (!conLog.length) return;
+  const durations = conLog.map(c => c.duration);
+  const gaps      = conLog.map(c => c.gap).filter(g => g !== null);
+  const avgDur    = Math.round(durations.reduce((a,b)=>a+b,0) / durations.length);
+  const avgGap    = gaps.length ? Math.round(gaps.reduce((a,b)=>a+b,0) / gaps.length) : null;
+
+  document.getElementById('conAvgDur').textContent = fmtSecs(avgDur);
+  document.getElementById('conAvgGap').textContent = avgGap !== null ? fmtSecs(avgGap) : '—';
+}
+
+function fmtSecs(s) {
+  if (s < 60) return `${s}s`;
+  return `${Math.floor(s/60)}m ${s%60}s`;
+}
+
+function updateConGuidance() {
+  const el   = document.getElementById('conGuidance');
+  const gaps = conLog.map(c=>c.gap).filter(g=>g!==null);
+  if (conLog.length < 3) {
+    el.className = 'con-guidance default';
+    el.innerHTML = '<strong>The 5-1-1 rule</strong>Contractions 5 min apart, lasting 1 min each, for at least 1 hour — time to call your hospital or midwife.';
+    return;
+  }
+  const avgDur = conLog.reduce((a,c)=>a+c.duration,0) / conLog.length;
+  const avgGap = gaps.length ? gaps.reduce((a,b)=>a+b,0) / gaps.length : null;
+  const dur1m  = avgDur >= 50;                   // ~1 minute
+  const gap5m  = avgGap !== null && avgGap <= 330; // ~5 minutes (giving 30s grace)
+  const hrData = conLog.length >= 6;              // rough proxy for "1 hour of pattern"
+
+  if (dur1m && gap5m && hrData) {
+    el.className = 'con-guidance alert';
+    el.innerHTML = '<strong>📞 Time to call your hospital</strong>Your contractions match the 5-1-1 pattern (5 min apart, 1 min long, sustained pattern). Call your maternity unit or midwife now.';
+  } else if (dur1m && gap5m) {
+    el.className = 'con-guidance warn';
+    el.innerHTML = '<strong>⚡ Pattern developing</strong>Contractions are around 5 min apart and lasting close to 1 min. Keep timing and call your maternity unit when this has continued for about an hour.';
+  } else {
+    el.className = 'con-guidance default';
+    const gapStr = avgGap ? ` (currently ~${fmtSecs(Math.round(avgGap))} apart)` : '';
+    el.innerHTML = `<strong>Keep timing</strong>Avg duration: ${fmtSecs(Math.round(avgDur))}${gapStr}. Call your midwife when contractions are 5 min apart, 1 min long, for 1 hour.`;
+  }
+}
+
+function renderConLog() {
+  const logEl  = document.getElementById('conLogList');
+  const hdrEl  = document.getElementById('conLogHdr');
+  if (!conLog.length) {
+    logEl.innerHTML = '<p class="con-log-empty">No contractions recorded yet.</p>';
+    hdrEl.style.display = 'none';
+    return;
+  }
+  hdrEl.style.display = 'grid';
+  logEl.innerHTML = [...conLog].reverse().map((c, i) => {
+    const num  = conLog.length - i;
+    const tm   = new Date(c.start).toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
+    const gap  = c.gap !== null ? fmtSecs(c.gap) : '—';
+    return `<div class="con-log-item">
+      <span class="con-log-num">#${num}</span>
+      <span class="con-log-dur">${fmtSecs(c.duration)}</span>
+      <span class="con-log-gap">${gap}</span>
+      <span class="con-log-time">${tm}</span>
+    </div>`;
+  }).join('');
+}
+
+function resetContractions() {
+  clearInterval(conTimerInterval);
+  conState     = 'idle';
+  conStartTime = null;
+  conEndTime   = null;
+  conLog       = [];
+  conTimerInterval = null;
+  document.getElementById('conBtn').textContent = 'Contraction Started';
+  document.getElementById('conBtn').className   = 'btn-contraction start';
+  document.getElementById('conStatusLbl').textContent = 'Ready to start';
+  document.getElementById('conTimerNum').textContent  = '0:00';
+  document.getElementById('conTimerNum').className    = 'con-timer-num idle';
+  document.getElementById('conSubLbl').textContent    = 'Press the button when a contraction begins';
+  document.getElementById('conAvgDur').textContent    = '—';
+  document.getElementById('conAvgGap').textContent    = '—';
+  renderConLog();
+  const el = document.getElementById('conGuidance');
+  el.className = 'con-guidance default';
+  el.innerHTML = '<strong>The 5-1-1 rule</strong>Contractions 5 min apart, lasting 1 min each, for at least 1 hour — time to call your hospital or midwife.';
+  document.getElementById('conLogHdr').style.display = 'none';
+}
+
+/* ═══════════════════════════════════════════════
+   WEEKLY PAGE INIT
+═══════════════════════════════════════════════ */
+function initWeeklyPage() {
+  const hasRoadmap = !!state.dueDate;
+  document.getElementById('weeklyNoRoadmap').classList.toggle('hidden', hasRoadmap);
+  document.getElementById('weeklyContent').classList.toggle('hidden', !hasRoadmap);
+
+  if (hasRoadmap) {
+    const { week } = calcWeek();
+    document.getElementById('weeklyWeekNum').textContent = week > 40 ? '40+' : week;
+    document.getElementById('checkinWeekTag').textContent = `Week ${week > 40 ? '40+' : week}`;
+
+    // Auto-select todo trimester
+    const trim = week <= 13 ? 1 : week <= 27 ? 2 : 3;
+    setTodoTrim(trim);
+    // Highlight the current tab
+    [1,2,3].forEach(i => { document.getElementById(`ttab${i}`).classList.toggle('active', i===trim); });
+  } else {
+    document.getElementById('weeklyWeekNum').textContent = '—';
+    checkinTodoTrim = 1;
+    setTodoTrim(1);
+  }
+
+  // Pre-fill from saved checkin for current week
+  if (hasRoadmap) {
+    const { week }   = calcWeek();
+    const checkins   = JSON.parse(localStorage.getItem('preg_checkins') || '{}');
+    const existing   = checkins[week];
+    if (existing) {
+      selectMood(existing.mood || 0);
+      (existing.symptoms||[]).forEach(sym => {
+        document.querySelectorAll('.symptom-chip').forEach(c => {
+          if (c.textContent === sym) c.classList.add('active');
+        });
+      });
+      document.getElementById('checkinNote').value = existing.note || '';
+    }
+  }
+
+  renderCheckinHistory();
+  renderKickLog();
+  initApptLog();
+}
+
+/* ═══════════════════════════════════════════════
+   NUDGE MODAL
+═══════════════════════════════════════════════ */
+const NUDGE_CONTENT = {
+  basic: {
+    icon: '✨',
+    title: 'Unlock More with Basic',
+    desc: '<strong>Basic ($8/year)</strong> unlocks: full second &amp; third trimester milestones, your complete check-in history, the full 12-task to-do list per trimester, and unlimited roadmap data retention.',
+  },
+  premium: {
+    icon: '⭐',
+    title: 'Go Premium',
+    desc: '<strong>Premium ($29/year)</strong> adds: personal notes on every milestone, full pregnancy diary export as a printable keepsake PDF, and everything in the Basic plan.',
+  },
+  setup: {
+    icon: '📍',
+    title: 'Set Up Your Roadmap First',
+    desc: 'Go to the <strong>Roadmap tab</strong> and enter your due date to activate the Weekly Companion and all personalised features.',
+  },
+};
+
+function showNudgeModal(type) {
+  const c = NUDGE_CONTENT[type] || NUDGE_CONTENT.basic;
+  document.getElementById('nudgeIcon').textContent  = c.icon;
+  document.getElementById('nudgeTitle').textContent = c.title;
+  document.getElementById('nudgeDesc').innerHTML    = c.desc;
+  document.getElementById('nudgeModal').classList.add('show');
+}
+function closeNudge() { document.getElementById('nudgeModal').classList.remove('show'); }
+document.getElementById('nudgeModal').addEventListener('click', function(e) { if (e.target===this) closeNudge(); });
+
+/* ═══════════════════════════════════════════════
+   APPOINTMENT LOG
+═══════════════════════════════════════════════ */
+const APPT_ICONS = {
+  'Midwife':         '🧑‍⚕️',
+  'Scan':            '🔬',
+  'Blood test':      '🩸',
+  'Doctor':          '👨‍⚕️',
+  'Hospital':        '🏥',
+  'Antenatal class': '📚',
+  'Other':           '📋',
+};
+
+function initApptLog() {
+  const nudge  = document.getElementById('apptNudge');
+  const form   = document.getElementById('apptForm');
+  if (!can.apptLog) {
+    nudge.classList.remove('hidden');
+    form.classList.add('hidden');
+    return;
+  }
+  nudge.classList.add('hidden');
+  form.classList.remove('hidden');
+  // Default date to today
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('apptDate').value = today;
+  renderApptList();
+}
+
+function addAppt() {
+  if (!can.apptLog) { showNudgeModal('basic'); return; }
+  const date = document.getElementById('apptDate').value;
+  const time = document.getElementById('apptTime').value;
+  const type = document.getElementById('apptType').value;
+  const note = document.getElementById('apptNote').value.trim();
+  if (!date) { document.getElementById('apptDate').focus(); return; }
+
+  const appts = JSON.parse(localStorage.getItem('preg_appts') || '[]');
+  appts.push({ id: Date.now(), date, time: time || null, type, note });
+  appts.sort((a,b) => {
+    const da = a.date + (a.time || '00:00');
+    const db = b.date + (b.time || '00:00');
+    return da.localeCompare(db);
+  });
+  localStorage.setItem('preg_appts', JSON.stringify(appts));
+  document.getElementById('apptNote').value = '';
+  document.getElementById('apptTime').value = '';
+  renderApptList();
+}
+
+function deleteAppt(id) {
+  const appts = JSON.parse(localStorage.getItem('preg_appts') || '[]');
+  localStorage.setItem('preg_appts', JSON.stringify(appts.filter(a => a.id !== id)));
+  renderApptList();
+}
+
+function exportApptICS() {
+  if (!can.apptLog) { showNudgeModal('basic'); return; }
+  const appts = JSON.parse(localStorage.getItem('preg_appts') || '[]');
+  if (!appts.length) {
+    alert('No appointments to export yet. Add some appointments first.');
+    return;
+  }
+
+  // Sanitise text for ICS spec
+  function icsText(str) {
+    return (str || '').replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
+  }
+
+  // Format datetime for ICS — with time if provided, all-day if not
+  function icsDateTime(dateStr, timeStr) {
+    if (!dateStr) return 'DTSTART;VALUE=DATE:19700101'; // fallback for corrupt data
+    const d = dateStr.replace(/-/g, '');
+    if (timeStr) {
+      return `DTSTART:${d}T${timeStr.replace(/:/g, '')}00`;
+    }
+    return `DTSTART;VALUE=DATE:${d}`;
+  }
+
+  function icsDTEnd(dateStr, timeStr) {
+    if (!dateStr) return 'DTEND;VALUE=DATE:19700102';
+    const d = dateStr.replace(/-/g, '');
+    if (timeStr) {
+      const [h, m] = timeStr.split(':').map(Number);
+      if (h === 23) {
+        // Midnight rollover — end on next day at 00:MM
+        const nextDay = new Date(dateStr + 'T23:59:00');
+        nextDay.setMinutes(nextDay.getMinutes() + 1);
+        const nd = nextDay.toISOString().split('T')[0].replace(/-/g, '');
+        return `DTEND:${nd}T${String(0).padStart(2,'0')}${String(m).padStart(2,'0')}00`;
+      }
+      return `DTEND:${d}T${String(h + 1).padStart(2,'0')}${String(m).padStart(2,'0')}00`;
+    }
+    const endDt = new Date(dateStr + 'T12:00:00');
+    endDt.setDate(endDt.getDate() + 1);
+    return `DTEND;VALUE=DATE:${endDt.toISOString().split('T')[0].replace(/-/g, '')}`;
+  }
+
+  const calName = state.name ? `${state.name}'s Pregnancy Appointments` : 'Pregnancy Appointments';
+  const stamp   = new Date().toISOString().replace(/[-:]/g,'').split('.')[0] + 'Z';
+
+  const events = appts.map(a => {
+    const uid     = `preg-appt-${a.id}@theartifactslab.com`;
+    const summary = icsText(a.type + (a.note ? ` — ${a.note}` : ''));
+    const desc    = icsText(a.note || '');
+    // Add time label to display if present
+    const timeLabel = a.time ? ` at ${a.time}` : '';
+    const fullSummary = icsText(a.type + timeLabel + (a.note ? ` — ${a.note}` : ''));
+
+    return [
+      'BEGIN:VEVENT',
+      `UID:${uid}`,
+      `DTSTAMP:${stamp}`,
+      icsDateTime(a.date, a.time),
+      icsDTEnd(a.date, a.time),
+      `SUMMARY:${fullSummary}`,
+      desc ? `DESCRIPTION:${desc}` : '',
+      'END:VEVENT',
+    ].filter(Boolean).join('\r\n');
+  });
+
+  const icsContent = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//The Artifacts Lab//Pregnancy Roadmap//EN',
+    `X-WR-CALNAME:${icsText(calName)}`,
+    'X-WR-TIMEZONE:UTC',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    ...events,
+    'END:VCALENDAR',
+  ].join('\r\n');
+
+  // Store content + build blob for manual download fallback
+  window._icsContent  = icsContent;
+  window._icsBlobUrl  = URL.createObjectURL(
+    new Blob([icsContent], { type: 'text/calendar;charset=utf-8' })
+  );
+
+  // Show the calendar open modal
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  const hasShare = !!(navigator.canShare);
+  document.getElementById('calModalDesc').textContent = hasShare
+    ? 'Tap the button below — your device will show a share sheet where you can pick Google Calendar, Apple Calendar, or any other calendar app.'
+    : isMobile
+      ? 'Tap "Open in Calendar App" to add your appointments directly to your calendar.'
+      : 'On desktop, download the .ics file below then double-click it to import into your calendar.';
+  document.getElementById('calOpenBtn').textContent  = hasShare ? 'Share to Calendar App →' : 'Open in Calendar App →';
+  document.getElementById('calOpenBtn').style.display = isMobile ? 'block' : 'none';
+  document.getElementById('calModal').classList.add('show');
+}
+
+// Direct open — three-tier approach:
+// 1. Web Share API with File (Android Chrome + iOS Safari) → native share sheet → Google/Apple Calendar
+// 2. Data URI anchor click (iOS Safari fallback) → OS MIME interception
+// 3. Force download (desktop / anything else)
+async function calDirectOpen() {
+  if (!window._icsContent) return;
+
+  const fileName = 'pregnancy-appointments.ics';
+  const file     = new File([window._icsContent], fileName, { type: 'text/calendar' });
+
+  // Tier 1: Web Share API with files — works on Android Chrome 76+ and iOS Safari 15+
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({
+        files: [file],
+        title: 'Pregnancy Appointments',
+      });
+      return; // success — share sheet handled it
+    } catch (err) {
+      if (err.name === 'AbortError') return; // user cancelled — do nothing
+      // Otherwise fall through to next tier
+    }
+  }
+
+  // Tier 2: data URI anchor without download attr — iOS Safari intercepts text/calendar
+  try {
+    const reader = new FileReader();
+    reader.onload = function() {
+      const a  = document.createElement('a');
+      a.href   = reader.result; // data:text/calendar;base64,...
+      a.rel    = 'noopener';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    };
+    reader.readAsDataURL(file);
+    return;
+  } catch (_) {}
+
+  // Tier 3: force download as last resort
+  calManualDownload();
+}
+
+// Manual download fallback (desktop)
+function calManualDownload() {
+  if (!window._icsBlobUrl) return;
+  const a    = document.createElement('a');
+  a.href     = window._icsBlobUrl;
+  a.download = 'pregnancy-appointments.ics';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => {
+    URL.revokeObjectURL(window._icsBlobUrl);
+    window._icsBlobUrl = null;
+  }, 1000);
+}
+
+function closeCalModal() {
+  document.getElementById('calModal').classList.remove('show');
+  if (window._icsBlobUrl) {
+    URL.revokeObjectURL(window._icsBlobUrl);
+    window._icsBlobUrl = null;
+  }
+  window._icsContent = null;
+}
+document.getElementById('calModal').addEventListener('click', function(e) {
+  if (e.target === this) closeCalModal();
+});
+
+function renderApptList() {
+  const el    = document.getElementById('apptList');
+  const appts = JSON.parse(localStorage.getItem('preg_appts') || '[]');
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  if (!appts.length) {
+    el.innerHTML = '<p class="appt-empty">No appointments added yet. Use the form above to log your upcoming scans, tests, and visits.</p>';
+    return;
+  }
+
+  const upcoming = appts.filter(a => new Date(a.date + 'T12:00:00') >= today);
+  const past     = appts.filter(a => new Date(a.date + 'T12:00:00') <  today);
+
+  let html = '';
+  if (upcoming.length) {
+    html += `<p class="appt-section-lbl">Upcoming (${upcoming.length})</p>`;
+    html += upcoming.map(a => apptItemHtml(a, false)).join('');
+  }
+  if (past.length) {
+    html += `<p class="appt-section-lbl" style="margin-top:${upcoming.length?'16px':'4px'};">Past (${past.length})</p>`;
+    html += past.map(a => apptItemHtml(a, true)).join('');
+  }
+  el.innerHTML = html;
+}
+
+function apptItemHtml(a, isPast) {
+  const icon    = APPT_ICONS[a.type] || '📋';
+  const dt      = new Date(a.date + 'T12:00:00');
+  const today   = new Date(); today.setHours(0,0,0,0);
+  const diffMs  = dt - today;
+  const diffD   = Math.round(diffMs / 86400000);
+  const dateStr = dt.toLocaleDateString('en-GB', {weekday:'short', day:'numeric', month:'short', year:'numeric'});
+  const timeStr = a.time
+    ? ` · ${new Date(`${a.date}T${a.time}`).toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'})}`
+    : '';
+
+  let badge = '';
+  if (!isPast) {
+    if      (diffD === 0) badge = `<span class="appt-days-badge soon">Today!</span>`;
+    else if (diffD === 1) badge = `<span class="appt-days-badge soon">Tomorrow</span>`;
+    else if (diffD <= 7)  badge = `<span class="appt-days-badge soon">In ${diffD} days</span>`;
+    else                  badge = `<span class="appt-days-badge future">In ${diffD} days</span>`;
+  } else {
+    badge = `<span class="appt-days-badge done">${Math.abs(diffD)}d ago</span>`;
+  }
+
+  return `<div class="appt-item ${isPast?'past':''}">
+    <div class="appt-icon-wrap ${isPast?'past-ic':'upcoming'}">${icon}</div>
+    <div class="appt-info">
+      <div class="appt-type-lbl">${a.type}</div>
+      <div class="appt-date-lbl">${dateStr}${timeStr}</div>
+      ${a.note ? `<div class="appt-note-lbl">${a.note}</div>` : ''}
+    </div>
+    ${badge}
+    <button class="btn-del-appt" onclick="deleteAppt(${a.id})" title="Remove">✕</button>
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════════
+   PARTNER SHARE LINK
+═══════════════════════════════════════════════ */
+function openShareModal() {
+  if (!can.partnerShare) { showNudgeModal('basic'); return; }
+  if (!state.dueDate)    { showNudgeModal('setup'); return; }
+
+  // Build share payload — only public-safe data
+  const payload = {
+    dueDate: state.dueDate.toISOString(),
+    name:    state.name,
+    baby:    state.baby,
+  };
+  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+  const url = `${location.origin}${location.pathname}#share=${encoded}`;
+
+  // Info row
+  const { week }  = calcWeek();
+  const dueStr    = state.dueDate.toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'});
+  document.getElementById('shareInfoRow').innerHTML = `
+    <div class="share-info-cell">
+      <div class="share-info-label">Current Week</div>
+      <div class="share-info-val">Week ${week > 40 ? '40+' : week}</div>
+    </div>
+    <div class="share-info-cell">
+      <div class="share-info-label">Due Date</div>
+      <div class="share-info-val">${dueStr}</div>
+    </div>`;
+
+  document.getElementById('shareLinkInput').value = url;
+  document.getElementById('copyLinkBtn').textContent = 'Copy Link';
+  document.getElementById('copyLinkBtn').classList.remove('copied');
+  document.getElementById('shareModal').classList.add('show');
+}
+
+function copyShareLink() {
+  const input = document.getElementById('shareLinkInput');
+  navigator.clipboard.writeText(input.value).then(() => {
+    const btn = document.getElementById('copyLinkBtn');
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy Link'; btn.classList.remove('copied'); }, 2500);
+  }).catch(() => {
+    input.select();
+    document.execCommand('copy');
+  });
+}
+
+function closeShareModal() {
+  document.getElementById('shareModal').classList.remove('show');
+}
+document.getElementById('shareModal').addEventListener('click', function(e) {
+  if (e.target === this) closeShareModal();
+});
+
+/* Partner view — detect #share= in URL on load */
+function detectPartnerView() {
+  const hash = location.hash;
+  if (!hash.startsWith('#share=')) return false;
+  try {
+    const decoded = JSON.parse(decodeURIComponent(escape(atob(hash.slice(7)))));
+    if (!decoded.dueDate) return false;
+    // Load as read-only state
+    state.dueDate = new Date(decoded.dueDate);
+    state.name    = decoded.name  || '';
+    state.baby    = decoded.baby  || '';
+    return true;
+  } catch (_) { return false; }
+}
+
+function showPartnerBanner() {
+  const banner = document.createElement('div');
+  banner.className = 'partner-banner';
+  banner.innerHTML = `
+    <span class="partner-banner-icon">👀</span>
+    <div class="partner-banner-text">
+      <strong>Partner View — Read Only</strong><br>
+      You're viewing ${state.name ? `<strong>${state.name}</strong>'s` : 'a'} pregnancy roadmap.
+      ${state.baby ? `Baby's nickname is <strong>${state.baby}</strong>.` : ''}
+      This is a live snapshot — updates when the link is opened.
+    </div>`;
+  // Insert at top of roadmap output screen
+  const screen = document.getElementById('roadmap-screen');
+  screen.insertBefore(banner, screen.firstChild);
+  // Hide edit controls
+  document.querySelectorAll('.hero-actions .btn-outline').forEach(b => b.style.display = 'none');
+}
+
+/* ═══════════════════════════════════════════════
+   PAGE NAVIGATION
+═══════════════════════════════════════════════ */
+function switchPage(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(`page-${pageId}`).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t => {
+    if (t.getAttribute('onclick') === `switchPage('${pageId}')`) t.classList.add('active');
+  });
+
+  if (pageId === 'wellness') {
+    if (state.dueDate) { const {week} = calcWeek(); setWellnessTrim(week<=13?1:week<=27?2:3); }
+    else renderWellness();
+  }
+  if (pageId === 'weekly') initWeeklyPage();
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ═══════════════════════════════════════════════
+   HELP TABS
+═══════════════════════════════════════════════ */
+function switchHelpTab(tab, btn) {
+  document.querySelectorAll('.help-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.help-tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`help-panel-${tab}`).classList.add('active');
+  btn.classList.add('active');
+}
+
+function toggleFaq(el) {
+  const isOpen = el.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(f => f.classList.remove('open'));
+  if (!isOpen) el.classList.add('open');
+}
+
+/* ═══════════════════════════════════════════════
+   ON LOAD
+═══════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', function() {
+  renderWellness();
+  // Partner view takes priority over saved state
+  if (detectPartnerView()) {
+    showRoadmap();
+    showPartnerBanner();
+  } else if (loadSavedState()) {
+    showRoadmap();
+  }
+});
+</script>
+</body>
+</html>
