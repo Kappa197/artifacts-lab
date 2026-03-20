@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>All Tools — The Artifacts Lab</title>
+<meta name="description" content="Browse all tools in The Artifacts Lab suite — finance, fitness, nutrition and life management tools designed for real adults.">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=JetBrains+Mono:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:      #0B0F1A;
+  --navy2:     #111827;
+  --navy3:     #1A2235;
+  --navy4:     #243048;
+  --border:    #2A3B55;
+  --border2:   #334466;
+  --amber:     #D4920A;
+  --amber2:    #F5A623;
+  --amber-dim: rgba(212,146,10,0.12);
+  --green:     #2ECC8A;
+  --green-dim: rgba(46,204,138,0.1);
+  --blue:      #4A90D9;
+  --blue-dim:  rgba(74,144,217,0.1);
+  --purple:    #9B72CF;
+  --rose:      #FB7185;
+  --rose-dim:  rgba(251,113,133,0.1);
+  --teal:      #2DD4BF;
+  --teal-dim:  rgba(45,212,191,0.1);
+  --text:      #E8EDF5;
+  --text2:     #9BAAC4;
+  --text3:     #5A6A8A;
+  --mono:      'JetBrains Mono', monospace;
+  --body:      'Outfit', sans-serif;
+  --serif:     'Playfair Display', serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--body);
+  background: var(--navy);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(212,146,10,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(212,146,10,0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none; z-index: 0;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 48px; height: 64px;
+  background: rgba(11,15,26,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(42,59,85,0.6);
+  transition: all 0.3s;
+}
+.nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.nav-logo-icon {
+  width: 32px; height: 32px; background: var(--amber-dim);
+  border: 1px solid var(--amber); border-radius: 8px;
+  display: flex; align-items: center; justify-content: center; font-size: 1rem;
+}
+.nav-logo-text { font-family: var(--serif); font-size: 1.1rem; font-weight: 700; color: var(--amber2); }
+.nav-links { display: flex; align-items: center; gap: 32px; list-style: none; }
+.nav-links a {
+  font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text3); text-decoration: none; transition: color 0.2s;
+}
+.nav-links a:hover, .nav-links a.active { color: var(--amber2); }
+.nav-cta {
+  font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 8px 20px; border-radius: 6px;
+  background: var(--amber-dim); border: 1px solid var(--amber);
+  color: var(--amber2); text-decoration: none; transition: all 0.2s; white-space: nowrap;
+}
+.nav-cta:hover { background: var(--amber); color: var(--navy); }
+
+/* ── PAGE ── */
+.page { position: relative; z-index: 1; max-width: 1140px; margin: 0 auto; padding: 100px 48px 80px; }
+
+/* ── HEADER ── */
+.page-header { margin-bottom: 56px; }
+.page-eyebrow {
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--amber); margin-bottom: 12px;
+}
+.page-title {
+  font-family: var(--serif); font-size: clamp(2.2rem, 4vw, 3.2rem);
+  font-weight: 700; line-height: 1.15; color: var(--text); margin-bottom: 14px;
+}
+.page-title em { font-style: italic; color: var(--amber2); }
+.page-sub { font-size: 1rem; color: var(--text2); font-weight: 300; line-height: 1.7; max-width: 540px; }
+
+/* filter tabs */
+.filter-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 28px; }
+.filter-tab {
+  font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 7px 16px; border-radius: 99px;
+  border: 1px solid var(--border2); color: var(--text3);
+  background: transparent; cursor: pointer; transition: all 0.2s;
+}
+.filter-tab:hover { border-color: var(--text3); color: var(--text); }
+.filter-tab.active { background: var(--amber-dim); border-color: var(--amber); color: var(--amber2); }
+
+/* ── CATEGORY ── */
+.cat-section { margin-bottom: 52px; }
+.cat-header {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 20px; padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.cat-icon { font-size: 1.1rem; }
+.cat-title { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text3); }
+.cat-count { font-family: var(--mono); font-size: 0.55rem; color: var(--text3); background: var(--navy3); border: 1px solid var(--border); border-radius: 99px; padding: 2px 8px; margin-left: auto; }
+
+/* ── TOOL CARDS ── */
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.tool-card {
+  background: var(--navy2); border: 1px solid var(--border);
+  border-radius: 16px; padding: 28px 24px;
+  position: relative; overflow: hidden; transition: all 0.3s;
+}
+.tool-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  opacity: 0; transition: opacity 0.3s;
+}
+.tool-card:hover { border-color: var(--border2); transform: translateY(-4px); box-shadow: 0 16px 48px rgba(0,0,0,0.4); }
+.tool-card:hover::before { opacity: 1; }
+
+.tc-expense::before   { background: linear-gradient(90deg, var(--blue), var(--amber)); }
+.tc-retire::before    { background: linear-gradient(90deg, var(--green), var(--blue)); }
+.tc-workout::before   { background: linear-gradient(90deg, var(--amber), #E8843A); }
+.tc-meal::before      { background: linear-gradient(90deg, var(--purple), var(--green)); }
+.tc-pregnancy::before { background: linear-gradient(90deg, var(--rose), var(--purple)); }
+.tc-sleep::before     { background: linear-gradient(90deg, var(--blue), var(--purple)); }
+.tc-body::before      { background: linear-gradient(90deg, var(--teal), var(--green)); }
+.tc-doctor::before    { background: linear-gradient(90deg, var(--green), var(--teal)); }
+
+.tool-card.coming-soon { opacity: 0.5; border-style: dashed; }
+.tool-card.coming-soon:hover { transform: none; box-shadow: none; border-color: var(--border); }
+
+.tc-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; }
+.tc-icon {
+  width: 48px; height: 48px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+}
+.tc-expense  .tc-icon { background: rgba(74,144,217,0.12); border: 1px solid rgba(74,144,217,0.25); }
+.tc-retire   .tc-icon { background: rgba(46,204,138,0.1);  border: 1px solid rgba(46,204,138,0.25); }
+.tc-workout  .tc-icon { background: var(--amber-dim);      border: 1px solid rgba(212,146,10,0.25); }
+.tc-meal     .tc-icon { background: rgba(155,114,207,0.12);border: 1px solid rgba(155,114,207,0.25); }
+.tc-pregnancy .tc-icon{ background: var(--rose-dim);       border: 1px solid rgba(251,113,133,0.25); }
+.tc-sleep    .tc-icon { background: var(--blue-dim);       border: 1px solid rgba(74,144,217,0.25); }
+.tc-body     .tc-icon { background: var(--teal-dim);       border: 1px solid rgba(45,212,191,0.25); }
+.tc-doctor   .tc-icon { background: rgba(46,204,138,0.1);  border: 1px solid rgba(46,204,138,0.25); }
+
+.tc-tier-wrap { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
+.tc-tier-tag {
+  font-family: var(--mono); font-size: 0.52rem; letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 3px 9px; border-radius: 4px;
+}
+.tag-free    { background: var(--green-dim); color: var(--green); border: 1px solid rgba(46,204,138,0.3); }
+.tag-basic   { background: var(--blue-dim);  color: var(--blue);  border: 1px solid rgba(74,144,217,0.3); }
+.tag-premium { background: var(--amber-dim); color: var(--amber2);border: 1px solid rgba(212,146,10,0.3); }
+.tag-soon    { background: var(--navy3);     color: var(--text3); border: 1px solid var(--border); }
+.tag-live    { background: var(--green-dim); color: var(--green); border: 1px solid rgba(46,204,138,0.3); font-size: 0.48rem; }
+
+.tc-name { font-family: var(--serif); font-size: 1.15rem; font-weight: 700; color: var(--text); margin-bottom: 8px; line-height: 1.2; }
+.tc-desc { font-size: 0.8rem; color: var(--text2); line-height: 1.7; margin-bottom: 18px; }
+
+.tc-features { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 20px; }
+.tc-feat {
+  font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.05em;
+  padding: 3px 8px; border-radius: 4px; background: var(--navy3);
+  border: 1px solid var(--border); color: var(--text3);
+}
+
+.tc-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn-try {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 9px 18px; border-radius: 7px;
+  text-decoration: none; background: var(--amber-dim);
+  border: 1px solid var(--amber); color: var(--amber2); transition: all 0.2s;
+}
+.btn-try:hover { background: var(--amber); color: var(--navy); }
+.btn-learn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 9px 18px; border-radius: 7px;
+  text-decoration: none; background: transparent;
+  border: 1px solid var(--border2); color: var(--text3); transition: all 0.2s;
+}
+.btn-learn:hover { border-color: var(--text3); color: var(--text); }
+.btn-soon {
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 9px 18px; border-radius: 7px;
+  background: var(--navy3); border: 1px solid var(--border);
+  color: var(--text3); cursor: default;
+}
+
+/* ── CTA STRIP ── */
+.cta-strip {
+  background: var(--navy2); border: 1px solid var(--border2);
+  border-radius: 16px; padding: 36px 40px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 24px; margin-top: 20px;
+  position: relative; overflow: hidden;
+}
+.cta-strip::before {
+  content: '';
+  position: absolute; top: -60px; right: -60px;
+  width: 240px; height: 240px;
+  background: radial-gradient(circle, rgba(212,146,10,0.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+.cta-text {}
+.cta-eyebrow { font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--amber); margin-bottom: 8px; }
+.cta-title { font-family: var(--serif); font-size: 1.5rem; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.cta-title em { font-style: italic; color: var(--amber2); }
+.cta-sub { font-size: 0.85rem; color: var(--text2); line-height: 1.6; }
+.cta-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 32px; background: var(--amber); color: var(--navy);
+  font-family: var(--body); font-size: 0.9rem; font-weight: 700;
+  border-radius: 10px; text-decoration: none; transition: all 0.2s;
+  box-shadow: 0 4px 20px rgba(212,146,10,0.3);
+}
+.btn-primary:hover { background: var(--amber2); transform: translateY(-2px); }
+.btn-ghost {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 24px; background: transparent; color: var(--text2);
+  font-family: var(--body); font-size: 0.9rem; font-weight: 500;
+  border-radius: 10px; text-decoration: none;
+  border: 1px solid var(--border2); transition: all 0.2s;
+}
+.btn-ghost:hover { border-color: var(--text3); color: var(--text); }
+
+/* ── FOOTER ── */
+footer {
+  background: var(--navy2); border-top: 1px solid var(--border);
+  padding: 32px 48px; display: flex; align-items: center;
+  justify-content: space-between; flex-wrap: wrap; gap: 16px;
+  position: relative; z-index: 1;
+}
+.footer-brand { font-family: var(--serif); font-size: 1rem; color: var(--amber2); }
+.footer-brand span { display: block; font-family: var(--mono); font-size: 0.55rem; color: var(--text3); letter-spacing: 0.1em; margin-top: 2px; }
+.footer-links { display: flex; gap: 24px; list-style: none; }
+.footer-links a { font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); text-decoration: none; transition: color 0.2s; }
+.footer-links a:hover { color: var(--amber2); }
+.footer-copy { font-family: var(--mono); font-size: 0.55rem; color: var(--text3); letter-spacing: 0.06em; }
+
+/* reveal animation */
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+
+@media (max-width: 960px) {
+  nav { padding: 0 24px; }
+  .nav-links { display: none; }
+  .page { padding: 88px 24px 60px; }
+  .tools-grid { grid-template-columns: repeat(2, 1fr); }
+  footer { padding: 24px; flex-direction: column; text-align: center; }
+  .footer-links { justify-content: center; }
+}
+@media (max-width: 600px) {
+  .tools-grid { grid-template-columns: 1fr; }
+  .cta-strip { padding: 28px 24px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">
+    <div class="nav-logo-icon">&#9879;&#65039;</div>
+    <div class="nav-logo-text">The Artifacts Lab</div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="tools.html" class="active">Tools</a></li>
+    <li><a href="index.html#pricing">Pricing</a></li>
+  </ul>
+  <a href="login.html" class="nav-cta">Sign In / Join</a>
+</nav>
+
+<div class="page">
+
+  <!-- Header -->
+  <div class="page-header reveal">
+    <div class="page-eyebrow">The Full Suite</div>
+    <h1 class="page-title">All <em>tools,</em><br>one place.</h1>
+    <p class="page-sub">Beautiful, private, offline-capable tools for managing your money, health, fitness and daily life. Start free — no account required for free tools.</p>
+    <div class="filter-tabs">
+      <button class="filter-tab active" onclick="filterTools('all', this)">All Tools</button>
+      <button class="filter-tab" onclick="filterTools('free', this)">Free</button>
+      <button class="filter-tab" onclick="filterTools('finance', this)">Finance</button>
+      <button class="filter-tab" onclick="filterTools('health', this)">Health &amp; Fitness</button>
+      <button class="filter-tab" onclick="filterTools('life', this)">Life &amp; Wellness</button>
+      <button class="filter-tab" onclick="filterTools('soon', this)">Coming Soon</button>
+    </div>
+  </div>
+
+  <!-- ══ FINANCE ══ -->
+  <div class="cat-section reveal reveal-delay-1" data-cat="finance">
+    <div class="cat-header">
+      <span class="cat-icon">&#128176;</span>
+      <span class="cat-title">Finance</span>
+      <span class="cat-count">2 tools live</span>
+    </div>
+    <div class="tools-grid">
+
+      <div class="tool-card tc-retire" data-tier="free" data-cat="finance">
+        <div class="tc-head">
+          <div class="tc-icon">&#128200;</div>
+          <div class="tc-tier-wrap">
+            <span class="tc-tier-tag tag-live">&#9679; Live</span>
+            <span class="tc-tier-tag tag-free">Free</span>
+          </div>
+        </div>
+        <div class="tc-name">Retirement Calculator</div>
+        <div class="tc-desc">Model your retirement with real sequence-of-returns risk, a withdrawal optimizer and stress tests across five life stages.</div>
+        <div class="tc-features">
+          <span class="tc-feat">5-period IRR</span>
+          <span class="tc-feat">Stress test</span>
+          <span class="tc-feat">Optimizer</span>
+          <span class="tc-feat">Tax-aware</span>
+          <span class="tc-feat">Year-by-year</span>
+        </div>
+        <div class="tc-actions">
+          <a href="retirement-calculator.html" class="btn-try">Try Free &#8594;</a>
+        </div>
+      </div>
+
+      <div class="tool-card tc-expense" data-tier="basic" data-cat="finance">
+        <div class="tc-head">
+          <div class="tc-icon">&#128176;</div>
+          <div class="tc-tier-wrap">
+            <span class="tc-tier-tag tag-live">&#9679; Live</span>
+            <span class="tc-tier-tag tag-basic">Basic</span>
+          </div>
+        </div>
+        <div class="tc-name">Expense Tracker</div>
+        <div class="tc-desc">Import bank statements, auto-categorise every transaction and track spending with beautiful charts. Dual currency support included.</div>
+        <div class="tc-features">
+          <span class="tc-feat">CSV import</span>
+          <span class="tc-feat">Auto-categorise</span>
+          <span class="tc-feat">Dual currency</span>
+          <span class="tc-feat">Household view</span>
+          <span class="tc-feat">PDF export</span>
+        </div>
+        <div class="tc-actions">
+          <a href="login.html" class="btn-try">Get Basic &#8594;</a>
+          <a href="index.html#pricing" class="btn-learn">Pricing</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ HEALTH & FITNESS ══ -->
+  <div class="cat-section reveal reveal-delay-2" data-cat="health">
+    <div class="cat-header">
+      <span class="cat-icon">&#127947;</span>
+      <span class="cat-title">Health &amp; Fitness</span>
+      <span class="cat-count">2 tools live</span>
+    </div>
+    <div class="tools-grid">
+
+      <div class="tool-card tc-workout" data-tier="basic" data-cat="health">
+        <div class="tc-head">
+          <div class="tc-icon">&#128170;</div>
+          <div class="tc-tier-wrap">
+            <span class="tc-tier-tag tag-live">&#9679; Live</span>
+            <span class="tc-tier-tag tag-basic">Basic</span>
+          </div>
+        </div>
+        <div class="tc-name">Workout Planner</div>
+        <div class="tc-desc">Generate a personalised training plan from 122 exercises. Tailored to your goals, experience, available sessions and equipment.</div>
+        <div class="tc-features">
+          <span class="tc-feat">122 exercises</span>
+          <span class="tc-feat">Goal-based</span>
+          <span class="tc-feat">Volume tracking</span>
+          <span class="tc-feat">Deload weeks</span>
+          <span class="tc-feat">Session logging</span>
+        </div>
+        <div class="tc-actions">
+          <a href="login.html" class="btn-try">Get Basic &#8594;</a>
+          <a href="index.html#pricing" class="btn-learn">Pricing</a>
+        </div>
+      </div>
+
+      <div class="tool-card tc-meal" data-tier="free" data-cat="health">
+        <div class="tc-head">
+          <div class="tc-icon">&#129367;</div>
+          <div class="tc-tier-wrap">
+            <span class="tc-tier-tag tag-live">&#9679; Live</span>
+            <span class="tc-tier-tag tag-free">Free</span>
+          </div>
+        </div>
+        <div class="tc-name">Meal Planner</div>
+        <div class="tc-desc">Generate a 1–6 week meal plan from 91 recipes matched to your calorie targets, dietary preferences and allergen exclusions.</div>
+        <div class="tc-features">
+          <span class="tc-feat">91 recipes</span>
+          <span class="tc-feat">Macro tracking</span>
+          <span class="tc-feat">Shopping list</span>
+          <span class="tc-feat">Portion scaling</span>
+          <span class="tc-feat">Allergen filters</span>
+        </div>
+        <div class="tc-actions">
+          <a href="meal-planner.html" class="btn-try">Try Free &#8594;</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ LIFE & WELLNESS ══ -->
+  <div class="cat-section reveal reveal-delay-3" data-cat="life">
+    <div class="cat-header">
+      <span class="cat-icon">&#127807;</span>
+      <span class="cat-title">Life &amp; Wellness</span>
+      <span class="cat-count">1 live · 3 coming soon</span>
+    </div>
+    <div class="tools-grid">
+
+      <div class="tool-card tc-pregnancy" data-tier="free" data-cat="life">
+        <div class="tc-head">
+          <div class="tc-icon">&#129328;</div>
+          <div class="tc-tier-wrap">
+            <span class="tc-tier-tag tag-live">&#9679; Live</span>
+            <span class="tc-tier-tag tag-free">Free</span>
+          </div>
+        </div>
+        <div class="tc-name">Pregnancy Roadmap</div>
+        <div class="tc-desc">Week-by-week pregnancy tracker with wellness guide, kick counter, contraction timer, appointment log and partner share link.</div>
+        <div class="tc-features">
+          <span class="tc-feat">Week tracker</span>
+          <span class="tc-feat">Kick counter</span>
+          <span class="tc-feat">Appointments</span>
+          <span class="tc-feat">Partner share</span>
+          <span class="tc-feat">Wellness guide</span>
+        </div>
+        <div class="tc-actions">
+          <a href="pregnancy-roadmap.html" class="btn-try">Try Free &#8594;</a>
+        </div>
+      </div>
+
+      <div class="tool-card tc-sleep coming-soon" data-tier="soon" data-cat="life">
+        <div class="tc-head">
+          <div class="tc-icon">&#128564;</div>
+          <div class="tc-tier-wrap">
+            <span class="tc-tier-tag tag-soon">Coming Soon</span>
+          </div>
+        </div>
+        <div class="tc-name">Sleep Tracker</div>
+        <div class="tc-desc">Log sleep quality, spot patterns and get evidence-based tips to improve your rest and recovery.</div>
+        <div class="tc-features">
+          <span class="tc-feat">Sleep logging</span>
+          <span class="tc-feat">Pattern detection</span>
+          <span class="tc-feat">Recovery tips</span>
+        </div>
+        <div class="tc-actions">
+          <span class="btn-soon">In Development</span>
+        </div>
+      </div>
+
+      <div class="tool-card tc-body coming-soon" data-tier="soon" data-cat="life">
+        <div class="tc-head">
+          <div class="tc-icon">&#128202;</div>
+          <div class="tc-tier-wrap">
+            <span class="tc-tier-tag tag-soon">Coming Soon</span>
+          </div>
+        </div>
+        <div class="tc-name">Body Metrics</div>
+        <div class="tc-desc">Track weight, body fat and measurements over time. Visualise trends and tie into your workout and nutrition goals.</div>
+        <div class="tc-features">
+          <span class="tc-feat">Weight tracking</span>
+          <span class="tc-feat">Body fat %</span>
+          <span class="tc-feat">TDEE calculator</span>
+        </div>
+        <div class="tc-actions">
+          <span class="btn-soon">In Development</span>
+        </div>
+      </div>
+
+      <div class="tool-card tc-doctor coming-soon" data-tier="soon" data-cat="life">
+        <div class="tc-head">
+          <div class="tc-icon">&#128657;</div>
+          <div class="tc-tier-wrap">
+            <span class="tc-tier-tag tag-soon">Coming Soon</span>
+          </div>
+        </div>
+        <div class="tc-name">Doctor Visit Prep</div>
+        <div class="tc-desc">Log symptoms, medications and questions. Generate a clean printable summary to bring to your next appointment.</div>
+        <div class="tc-features">
+          <span class="tc-feat">Symptom log</span>
+          <span class="tc-feat">Med tracker</span>
+          <span class="tc-feat">PDF summary</span>
+        </div>
+        <div class="tc-actions">
+          <span class="btn-soon">In Development</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CTA Strip -->
+  <div class="cta-strip reveal">
+    <div class="cta-text">
+      <div class="cta-eyebrow">Early Access</div>
+      <h2 class="cta-title">Start free.<br><em>Upgrade when ready.</em></h2>
+      <p class="cta-sub">Free tools need no account. Create a free account to unlock all tools and save your data across devices.</p>
+    </div>
+    <div class="cta-actions">
+      <a href="login.html" class="btn-primary">Create Free Account &#8594;</a>
+      <a href="index.html#pricing" class="btn-ghost">See Pricing</a>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-brand">
+    The Artifacts Lab
+    <span>theartifactslab.com &nbsp;&middot;&nbsp; Est. 2025</span>
+  </div>
+  <ul class="footer-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="tools.html">Tools</a></li>
+    <li><a href="index.html#pricing">Pricing</a></li>
+    <li><a href="#">Privacy</a></li>
+  </ul>
+  <div class="footer-copy">&copy; 2025 The Artifacts Lab. All rights reserved.</div>
+</footer>
+
+<script>
+// Scroll reveal
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// Filter tabs
+function filterTools(filter, btn) {
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+
+  const cards = document.querySelectorAll('.tool-card');
+  const cats  = document.querySelectorAll('.cat-section');
+
+  if (filter === 'all') {
+    cards.forEach(c => c.style.display = '');
+    cats.forEach(c => c.style.display = '');
+    return;
+  }
+
+  cats.forEach(cat => {
+    const catCards = cat.querySelectorAll('.tool-card');
+    let visible = 0;
+    catCards.forEach(card => {
+      const tier = card.dataset.tier;
+      const cat2 = card.dataset.cat;
+      let show = false;
+      if (filter === 'free')    show = tier === 'free';
+      if (filter === 'soon')    show = tier === 'soon';
+      if (filter === 'finance') show = cat2 === 'finance';
+      if (filter === 'health')  show = cat2 === 'health';
+      if (filter === 'life')    show = cat2 === 'life';
+      card.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    cat.style.display = visible > 0 ? '' : 'none';
+  });
+}
+
+// Sticky nav shadow
+window.addEventListener('scroll', () => {
+  document.querySelector('nav').style.boxShadow = window.scrollY > 20 ? '0 4px 32px rgba(0,0,0,0.4)' : 'none';
+});
+</script>
+</body>
+</html>

@@ -22,6 +22,10 @@
   --blue:      #4A90D9;
   --blue-dim:  rgba(74,144,217,0.1);
   --purple:    #9B72CF;
+  --rose:      #FB7185;
+  --rose-dim:  rgba(251,113,133,0.1);
+  --teal:      #2DD4BF;
+  --teal-dim:  rgba(45,212,191,0.1);
   --text:      #E8EDF5;
   --text2:     #9BAAC4;
   --text3:     #5A6A8A;
@@ -29,7 +33,7 @@
   --body:      'Outfit', sans-serif;
   --serif:     'Playfair Display', serif;
 }
-*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 body {
   font-family: var(--body);
@@ -57,10 +61,7 @@ header {
   justify-content: space-between;
   padding: 0 40px; height: 64px;
 }
-.h-logo {
-  display: flex; align-items: center; gap: 10px;
-  text-decoration: none;
-}
+.h-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
 .h-logo-icon {
   width: 30px; height: 30px;
   background: var(--amber-dim);
@@ -69,246 +70,246 @@ header {
   display: flex; align-items: center; justify-content: center;
   font-size: 0.9rem;
 }
-.h-logo-text {
-  font-family: var(--serif); font-size: 1rem;
-  font-weight: 700; color: var(--amber2);
-}
-.h-right {
-  display: flex; align-items: center; gap: 16px;
-}
-.h-email {
-  font-family: var(--mono); font-size: 0.62rem;
-  color: var(--text3); letter-spacing: 0.06em;
-}
+.h-logo-text { font-family: var(--serif); font-size: 1rem; font-weight: 700; color: var(--amber2); }
+.h-right { display: flex; align-items: center; gap: 16px; }
+.h-email { font-family: var(--mono); font-size: 0.62rem; color: var(--text3); letter-spacing: 0.06em; }
 .h-signout {
   font-family: var(--mono); font-size: 0.6rem;
   letter-spacing: 0.1em; text-transform: uppercase;
   padding: 7px 16px; border-radius: 6px;
-  background: transparent;
-  border: 1px solid var(--border2);
-  color: var(--text3); cursor: pointer;
-  transition: all 0.2s;
+  background: transparent; border: 1px solid var(--border2);
+  color: var(--text3); cursor: pointer; transition: all 0.2s;
 }
 .h-signout:hover { border-color: var(--text3); color: var(--text); }
 
 /* ── MAIN ── */
 main {
   position: relative; z-index: 1;
-  max-width: 1100px; margin: 0 auto;
+  max-width: 1140px; margin: 0 auto;
   padding: 40px 40px 80px;
 }
 
-/* ── WELCOME STRIP ── */
+/* ── WELCOME ── */
 .welcome {
   display: flex; align-items: center;
   justify-content: space-between; flex-wrap: wrap; gap: 16px;
-  margin-bottom: 36px;
-  padding-bottom: 28px;
+  margin-bottom: 36px; padding-bottom: 28px;
   border-bottom: 1px solid var(--border);
 }
-.welcome-text {}
-.welcome-eyebrow {
-  font-family: var(--mono); font-size: 0.58rem;
-  letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--text3); margin-bottom: 6px;
-}
-.welcome-title {
-  font-family: var(--serif); font-size: 1.8rem;
-  font-weight: 700; color: var(--text); line-height: 1.15;
-}
+.welcome-eyebrow { font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text3); margin-bottom: 6px; }
+.welcome-title { font-family: var(--serif); font-size: 1.8rem; font-weight: 700; color: var(--text); line-height: 1.15; }
 .welcome-title em { font-style: italic; color: var(--amber2); }
 
 /* tier badge */
-.tier-badge {
-  display: flex; align-items: center; gap: 10px;
-  padding: 12px 20px;
-  border-radius: 12px;
-  border: 1px solid;
-}
+.tier-badge { display: flex; align-items: center; gap: 10px; padding: 12px 20px; border-radius: 12px; border: 1px solid; }
 .tier-badge.free    { background: rgba(90,106,138,0.1); border-color: var(--border2); }
 .tier-badge.basic   { background: var(--blue-dim);      border-color: var(--blue); }
 .tier-badge.premium { background: var(--amber-dim);     border-color: var(--amber); }
-
 .tier-icon { font-size: 1.4rem; }
-.tier-info {}
-.tier-label {
-  font-family: var(--mono); font-size: 0.55rem;
-  letter-spacing: 0.14em; text-transform: uppercase;
-  margin-bottom: 2px;
-}
+.tier-label { font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 2px; }
 .tier-badge.free    .tier-label { color: var(--text3); }
 .tier-badge.basic   .tier-label { color: var(--blue); }
 .tier-badge.premium .tier-label { color: var(--amber2); }
-.tier-name {
-  font-family: var(--serif); font-size: 1rem;
-  font-weight: 700; color: var(--text);
-}
-.tier-expiry {
-  font-family: var(--mono); font-size: 0.58rem;
-  color: var(--text3); margin-top: 1px;
-}
+.tier-name { font-family: var(--serif); font-size: 1rem; font-weight: 700; color: var(--text); }
+.tier-expiry { font-family: var(--mono); font-size: 0.58rem; color: var(--text3); margin-top: 1px; }
 
 /* ── UPGRADE BANNER ── */
 .upgrade-banner {
-  background: var(--amber-dim);
-  border: 1px solid var(--amber);
-  border-radius: 12px;
-  padding: 16px 22px;
-  display: flex; align-items: center;
-  justify-content: space-between; flex-wrap: wrap; gap: 12px;
-  margin-bottom: 32px;
+  background: var(--amber-dim); border: 1px solid var(--amber);
+  border-radius: 12px; padding: 16px 22px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px; margin-bottom: 36px;
 }
 .upgrade-banner.hidden { display: none; }
-.ub-text {
-  font-size: 0.85rem; color: var(--text2); line-height: 1.5;
-}
+.ub-text { font-size: 0.85rem; color: var(--text2); line-height: 1.5; }
 .ub-text strong { color: var(--amber2); }
 .ub-btn {
-  font-family: var(--mono); font-size: 0.62rem;
-  letter-spacing: 0.1em; text-transform: uppercase;
-  padding: 9px 20px; border-radius: 7px;
-  background: var(--amber); color: var(--navy);
-  border: none; cursor: pointer; font-weight: 700;
-  transition: all 0.2s; white-space: nowrap;
-  text-decoration: none;
+  font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 9px 20px; border-radius: 7px;
+  background: var(--amber); color: var(--navy); border: none;
+  cursor: pointer; font-weight: 700; transition: all 0.2s;
+  white-space: nowrap; text-decoration: none;
 }
 .ub-btn:hover { background: var(--amber2); }
 
-/* ── SECTION TITLE ── */
-.section-label {
-  font-family: var(--mono); font-size: 0.6rem;
-  letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--text3); margin-bottom: 16px;
+/* ── CATEGORY SECTION ── */
+.cat-section { margin-bottom: 40px; }
+.cat-header {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 16px; padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.cat-icon { font-size: 1rem; }
+.cat-title {
+  font-family: var(--mono); font-size: 0.62rem;
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--text3);
+}
+.cat-count {
+  font-family: var(--mono); font-size: 0.55rem;
+  color: var(--text3); background: var(--navy3);
+  border: 1px solid var(--border); border-radius: 99px;
+  padding: 2px 8px; margin-left: auto;
 }
 
 /* ── TOOLS GRID ── */
 .tools-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px; margin-bottom: 48px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
 }
 
 .tool-card {
-  background: var(--navy2);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 24px;
-  position: relative;
-  overflow: hidden;
-  transition: all 0.25s;
+  background: var(--navy2); border: 1px solid var(--border);
+  border-radius: 14px; padding: 22px 20px;
+  position: relative; overflow: hidden; transition: all 0.25s;
 }
 .tool-card::before {
-  content: ''; position: absolute;
-  top: 0; left: 0; right: 0; height: 2px;
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
   opacity: 0; transition: opacity 0.25s;
 }
 .tool-card:not(.locked):hover {
-  border-color: var(--border2);
-  transform: translateY(-3px);
+  border-color: var(--border2); transform: translateY(-3px);
   box-shadow: 0 12px 40px rgba(0,0,0,0.35);
 }
 .tool-card:not(.locked):hover::before { opacity: 1; }
 
+/* card accent colours */
 .tc-expense::before  { background: linear-gradient(90deg, var(--blue), var(--amber)); }
 .tc-retire::before   { background: linear-gradient(90deg, var(--green), var(--blue)); }
 .tc-workout::before  { background: linear-gradient(90deg, var(--amber), #E8843A); }
 .tc-meal::before     { background: linear-gradient(90deg, var(--purple), var(--green)); }
+.tc-pregnancy::before{ background: linear-gradient(90deg, var(--rose), var(--purple)); }
+.tc-sleep::before    { background: linear-gradient(90deg, var(--blue), var(--purple)); }
+.tc-body::before     { background: linear-gradient(90deg, var(--teal), var(--green)); }
+.tc-doctor::before   { background: linear-gradient(90deg, var(--green), var(--teal)); }
 
-.tool-card.locked {
-  opacity: 0.5;
-  cursor: default;
-}
+.tool-card.locked { opacity: 0.5; cursor: default; }
 .lock-overlay {
   position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-  background: rgba(11,15,26,0.6);
-  border-radius: 14px;
-  font-size: 1.5rem;
-  display: none;
+  display: none; align-items: center; justify-content: center;
+  background: rgba(11,15,26,0.6); border-radius: 14px; font-size: 1.5rem;
 }
 .tool-card.locked .lock-overlay { display: flex; }
 
-.tc-head {
-  display: flex; align-items: flex-start;
-  justify-content: space-between; margin-bottom: 14px;
+/* coming soon card */
+.tool-card.coming-soon {
+  opacity: 0.45; cursor: default;
+  border-style: dashed;
 }
+.tool-card.coming-soon:hover { transform: none; box-shadow: none; }
+
+.tc-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
 .tc-icon {
-  width: 44px; height: 44px; border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.3rem;
+  width: 40px; height: 40px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
 }
-.tc-expense .tc-icon  { background: rgba(74,144,217,0.12); border: 1px solid rgba(74,144,217,0.25); }
-.tc-retire  .tc-icon  { background: rgba(46,204,138,0.1);  border: 1px solid rgba(46,204,138,0.25); }
-.tc-workout .tc-icon  { background: var(--amber-dim);      border: 1px solid rgba(212,146,10,0.25); }
-.tc-meal    .tc-icon  { background: rgba(155,114,207,0.12);border: 1px solid rgba(155,114,207,0.25); }
+.tc-expense  .tc-icon { background: rgba(74,144,217,0.12); border: 1px solid rgba(74,144,217,0.25); }
+.tc-retire   .tc-icon { background: rgba(46,204,138,0.1);  border: 1px solid rgba(46,204,138,0.25); }
+.tc-workout  .tc-icon { background: var(--amber-dim);      border: 1px solid rgba(212,146,10,0.25); }
+.tc-meal     .tc-icon { background: rgba(155,114,207,0.12);border: 1px solid rgba(155,114,207,0.25); }
+.tc-pregnancy.tc-icon { background: var(--rose-dim);       border: 1px solid rgba(251,113,133,0.25); }
+.tc-sleep    .tc-icon { background: var(--blue-dim);       border: 1px solid rgba(74,144,217,0.25); }
+.tc-body     .tc-icon { background: var(--teal-dim);       border: 1px solid rgba(45,212,191,0.25); }
+.tc-doctor   .tc-icon { background: rgba(46,204,138,0.1);  border: 1px solid rgba(46,204,138,0.25); }
+
+/* Fix pregnancy card icon wrapper */
+.tool-card.tc-pregnancy .tc-icon {
+  background: var(--rose-dim); border: 1px solid rgba(251,113,133,0.25);
+}
 
 .tc-tier-tag {
-  font-family: var(--mono); font-size: 0.5rem;
-  letter-spacing: 0.1em; text-transform: uppercase;
-  padding: 3px 8px; border-radius: 4px;
+  font-family: var(--mono); font-size: 0.5rem; letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 3px 8px; border-radius: 4px;
 }
 .tag-free    { background: rgba(90,106,138,0.15); color: var(--text3); border: 1px solid var(--border); }
 .tag-basic   { background: var(--blue-dim);       color: var(--blue);  border: 1px solid rgba(74,144,217,0.3); }
 .tag-premium { background: var(--amber-dim);      color: var(--amber2);border: 1px solid rgba(212,146,10,0.3); }
+.tag-soon    { background: var(--navy3);          color: var(--text3); border: 1px solid var(--border); }
 
-.tc-name {
-  font-family: var(--serif); font-size: 1.1rem;
-  font-weight: 700; color: var(--text);
-  margin-bottom: 6px; line-height: 1.2;
-}
-.tc-desc {
-  font-size: 0.78rem; color: var(--text2);
-  line-height: 1.65; margin-bottom: 18px;
-}
+.tc-name { font-family: var(--serif); font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 5px; line-height: 1.2; }
+.tc-desc { font-size: 0.75rem; color: var(--text2); line-height: 1.6; margin-bottom: 16px; }
+
 .tc-open-btn {
   display: inline-flex; align-items: center; gap: 6px;
-  font-family: var(--mono); font-size: 0.62rem;
-  letter-spacing: 0.1em; text-transform: uppercase;
-  padding: 9px 18px; border-radius: 7px;
-  text-decoration: none; border: none; cursor: pointer;
-  transition: all 0.2s;
-  background: var(--navy3);
-  border: 1px solid var(--border2);
-  color: var(--amber2);
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 8px 16px; border-radius: 7px;
+  text-decoration: none; border: none; cursor: pointer; transition: all 0.2s;
+  background: var(--navy3); border: 1px solid var(--border2); color: var(--amber2);
 }
-.tc-open-btn:hover {
-  background: var(--amber-dim);
-  border-color: var(--amber);
-}
+.tc-open-btn:hover { background: var(--amber-dim); border-color: var(--amber); }
 .tc-upgrade-btn {
   display: inline-flex; align-items: center; gap: 6px;
-  font-family: var(--mono); font-size: 0.62rem;
-  letter-spacing: 0.1em; text-transform: uppercase;
-  padding: 9px 18px; border-radius: 7px;
-  text-decoration: none; border: none; cursor: pointer;
-  transition: all 0.2s;
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text3);
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 8px 16px; border-radius: 7px;
+  text-decoration: none; border: 1px solid var(--border); color: var(--text3);
+  background: transparent; cursor: pointer; transition: all 0.2s;
 }
 .tc-upgrade-btn:hover { border-color: var(--amber); color: var(--amber2); }
+.tc-soon-label {
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text3);
+}
+
+/* ── UPGRADE MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center; padding: 24px;
+  opacity: 0; pointer-events: none; transition: opacity 0.25s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal-box {
+  background: var(--navy2); border: 1px solid var(--border2);
+  border-radius: 20px; padding: 40px 36px;
+  width: 100%; max-width: 520px;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+  transform: translateY(16px); transition: transform 0.25s; position: relative;
+}
+.modal-overlay.open .modal-box { transform: translateY(0); }
+.modal-close {
+  position: absolute; top: 16px; right: 16px;
+  background: var(--navy3); border: 1px solid var(--border);
+  color: var(--text3); width: 28px; height: 28px; border-radius: 50%;
+  cursor: pointer; font-size: 0.9rem;
+  display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+}
+.modal-close:hover { color: var(--text); border-color: var(--text3); }
+.modal-eyebrow { font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--amber); margin-bottom: 10px; }
+.modal-title { font-family: var(--serif); font-size: 1.6rem; font-weight: 700; color: var(--text); margin-bottom: 8px; line-height: 1.2; }
+.modal-title em { font-style: italic; color: var(--amber2); }
+.modal-sub { font-size: 0.82rem; color: var(--text2); line-height: 1.7; margin-bottom: 28px; }
+.plan-options { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+.plan-option {
+  border: 1px solid var(--border2); border-radius: 12px; padding: 16px 20px;
+  cursor: pointer; transition: all 0.2s; background: var(--navy3);
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.plan-option:hover { border-color: var(--amber); background: var(--amber-dim); }
+.plan-option.selected { border-color: var(--amber); background: var(--amber-dim); }
+.plan-option-name { font-weight: 700; font-size: 0.95rem; color: var(--text); margin-bottom: 3px; }
+.plan-option-desc { font-size: 0.75rem; color: var(--text2); line-height: 1.5; }
+.plan-option-price { font-family: var(--mono); font-size: 1.1rem; font-weight: 700; color: var(--amber2); white-space: nowrap; text-align: right; }
+.plan-option-price small { display: block; font-size: 0.58rem; color: var(--text3); font-weight: 400; }
+.checkout-btn {
+  width: 100%; padding: 15px; background: var(--amber); color: var(--navy);
+  border: none; border-radius: 10px; font-family: var(--body);
+  font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: all 0.2s;
+  box-shadow: 0 4px 16px rgba(212,146,10,0.3);
+}
+.checkout-btn:hover { background: var(--amber2); transform: translateY(-1px); }
+.modal-note { font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.06em; color: var(--text3); text-align: center; margin-top: 14px; text-transform: uppercase; }
+.test-mode-banner {
+  background: rgba(255,165,0,0.1); border: 1px solid rgba(255,165,0,0.3);
+  border-radius: 8px; padding: 8px 14px; font-family: var(--mono);
+  font-size: 0.6rem; color: orange; letter-spacing: 0.08em;
+  text-align: center; margin-bottom: 16px;
+}
 
 /* ── ACCOUNT SECTION ── */
-.account-grid {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
-}
-.account-card {
-  background: var(--navy2);
-  border: 1px solid var(--border);
-  border-radius: 14px; padding: 24px;
-}
-.ac-title {
-  font-family: var(--mono); font-size: 0.6rem;
-  letter-spacing: 0.12em; text-transform: uppercase;
-  color: var(--text3); margin-bottom: 16px;
-}
-.ac-row {
-  display: flex; justify-content: space-between;
-  align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid rgba(42,59,85,0.5);
-  font-size: 0.8rem;
-}
+.account-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 40px; }
+.account-card { background: var(--navy2); border: 1px solid var(--border); border-radius: 14px; padding: 24px; }
+.ac-title { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3); margin-bottom: 16px; }
+.ac-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(42,59,85,0.5); font-size: 0.8rem; }
 .ac-row:last-child { border-bottom: none; }
 .ac-key { color: var(--text3); }
 .ac-val { color: var(--text); font-family: var(--mono); font-size: 0.75rem; }
@@ -316,147 +317,34 @@ main {
 .ac-val.amber { color: var(--amber2); }
 .ac-val.blue  { color: var(--blue); }
 
-/* ── LOADING STATE ── */
-.loading {
-  display: flex; align-items: center; justify-content: center;
-  min-height: 60vh; flex-direction: column; gap: 16px;
-}
-.loading-spinner {
-  width: 36px; height: 36px;
-  border: 2px solid var(--border2);
-  border-top-color: var(--amber2);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.loading-text {
-  font-family: var(--mono); font-size: 0.65rem;
-  color: var(--text3); letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
+/* ── SECTION LABEL ── */
+.section-label { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text3); margin-bottom: 20px; }
 
-/* ── UPGRADE MODAL ── */
-.modal-overlay {
-  position: fixed; inset: 0; z-index: 200;
-  background: rgba(0,0,0,0.7);
-  backdrop-filter: blur(6px);
-  display: flex; align-items: center; justify-content: center;
-  padding: 24px;
-  opacity: 0; pointer-events: none;
-  transition: opacity 0.25s;
-}
-.modal-overlay.open { opacity: 1; pointer-events: all; }
-.modal-box {
-  background: var(--navy2);
-  border: 1px solid var(--border2);
-  border-radius: 20px;
-  padding: 40px 36px;
-  width: 100%; max-width: 520px;
-  box-shadow: 0 32px 80px rgba(0,0,0,0.5);
-  transform: translateY(16px);
-  transition: transform 0.25s;
-  position: relative;
-}
-.modal-overlay.open .modal-box { transform: translateY(0); }
-.modal-close {
-  position: absolute; top: 16px; right: 16px;
-  background: var(--navy3); border: 1px solid var(--border);
-  color: var(--text3); width: 28px; height: 28px;
-  border-radius: 50%; cursor: pointer; font-size: 0.9rem;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.15s;
-}
-.modal-close:hover { color: var(--text); border-color: var(--text3); }
-.modal-eyebrow {
-  font-family: var(--mono); font-size: 0.58rem;
-  letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--amber); margin-bottom: 10px;
-}
-.modal-title {
-  font-family: var(--serif); font-size: 1.6rem;
-  font-weight: 700; color: var(--text);
-  margin-bottom: 8px; line-height: 1.2;
-}
-.modal-title em { font-style: italic; color: var(--amber2); }
-.modal-sub {
-  font-size: 0.82rem; color: var(--text2);
-  line-height: 1.7; margin-bottom: 28px;
-}
-.plan-options {
-  display: flex; flex-direction: column; gap: 12px;
-  margin-bottom: 24px;
-}
-.plan-option {
-  border: 1px solid var(--border2);
-  border-radius: 12px; padding: 16px 20px;
-  cursor: pointer; transition: all 0.2s;
-  background: var(--navy3);
-  display: flex; align-items: center;
-  justify-content: space-between; gap: 12px;
-}
-.plan-option:hover { border-color: var(--amber); background: var(--amber-dim); }
-.plan-option.selected { border-color: var(--amber); background: var(--amber-dim); }
-.plan-option-left {}
-.plan-option-name {
-  font-weight: 700; font-size: 0.95rem;
-  color: var(--text); margin-bottom: 3px;
-}
-.plan-option-desc {
-  font-size: 0.75rem; color: var(--text2); line-height: 1.5;
-}
-.plan-option-price {
-  font-family: var(--mono); font-size: 1.1rem;
-  font-weight: 700; color: var(--amber2);
-  white-space: nowrap; text-align: right;
-}
-.plan-option-price small {
-  display: block; font-size: 0.58rem;
-  color: var(--text3); font-weight: 400;
-}
-.checkout-btn {
-  width: 100%; padding: 15px;
-  background: var(--amber); color: var(--navy);
-  border: none; border-radius: 10px;
-  font-family: var(--body); font-size: 0.95rem;
-  font-weight: 700; cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 4px 16px rgba(212,146,10,0.3);
-}
-.checkout-btn:hover {
-  background: var(--amber2); transform: translateY(-1px);
-}
-.checkout-btn:disabled {
-  opacity: 0.6; cursor: not-allowed; transform: none;
-}
-.modal-note {
-  font-family: var(--mono); font-size: 0.58rem;
-  letter-spacing: 0.06em; color: var(--text3);
-  text-align: center; margin-top: 14px;
-  text-transform: uppercase;
-}
-.test-mode-banner {
-  background: rgba(255,165,0,0.1);
-  border: 1px solid rgba(255,165,0,0.3);
-  border-radius: 8px; padding: 8px 14px;
-  font-family: var(--mono); font-size: 0.6rem;
-  color: orange; letter-spacing: 0.08em;
-  text-align: center; margin-bottom: 16px;
-}
-@media (max-width: 768px) {
+/* ── LOADING ── */
+.loading { display: flex; align-items: center; justify-content: center; min-height: 60vh; flex-direction: column; gap: 16px; }
+.loading-spinner { width: 36px; height: 36px; border: 2px solid var(--border2); border-top-color: var(--amber2); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-family: var(--mono); font-size: 0.65rem; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
   header { padding: 0 20px; }
   .h-email { display: none; }
   main { padding: 28px 20px 60px; }
-  .tools-grid { grid-template-columns: 1fr; }
+  .tools-grid { grid-template-columns: repeat(2, 1fr); }
   .account-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 540px) {
+  .tools-grid { grid-template-columns: 1fr; }
+  .welcome { flex-direction: column; align-items: flex-start; }
 }
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
 <header>
   <a href="index.html" class="h-logo">
-    <div class="h-logo-icon">⚗️</div>
+    <div class="h-logo-icon">&#9879;&#65039;</div>
     <div class="h-logo-text">The Artifacts Lab</div>
   </a>
   <div class="h-right">
@@ -465,7 +353,6 @@ main {
   </div>
 </header>
 
-<!-- LOADING -->
 <main id="loadingState">
   <div class="loading">
     <div class="loading-spinner"></div>
@@ -473,7 +360,6 @@ main {
   </div>
 </main>
 
-<!-- DASHBOARD (hidden until auth confirmed) -->
 <main id="dashState" style="display:none;">
 
   <!-- Welcome -->
@@ -483,8 +369,8 @@ main {
       <h1 class="welcome-title">Welcome back,<br><em id="firstName">—</em></h1>
     </div>
     <div class="tier-badge free" id="tierBadge">
-      <div class="tier-icon" id="tierIcon">🆓</div>
-      <div class="tier-info">
+      <div class="tier-icon" id="tierIcon">&#129250;</div>
+      <div>
         <div class="tier-label" id="tierLabel">Current Plan</div>
         <div class="tier-name" id="tierName">Free</div>
         <div class="tier-expiry" id="tierExpiry"></div>
@@ -492,105 +378,152 @@ main {
     </div>
   </div>
 
-  <!-- Upgrade banner (shown for free/basic) -->
+  <!-- Upgrade banner -->
   <div class="upgrade-banner" id="upgradeBanner">
     <div class="ub-text">
-      <strong id="upgradeTitle">Unlock the full suite</strong> — 
-      <span id="upgradeDesc">Upgrade to Basic for $8/year and access all 4 tools with core features.</span>
+      <strong id="upgradeTitle">Unlock the full suite</strong> —
+      <span id="upgradeDesc">Upgrade to Basic for $8/year and access all tools with core features.</span>
     </div>
-    <a href="index.html#pricing" class="ub-btn" id="upgradeBtn">Upgrade Now →</a>
+    <button class="ub-btn" id="upgradeBtn" onclick="openModal()">Upgrade Now &#8594;</button>
   </div>
 
-  <!-- Tools -->
-  <div class="section-label">Your Tools</div>
-  <div class="tools-grid">
-
-    <!-- Retirement Calculator -->
-    <div class="tool-card tc-retire" id="cardRetire">
-      <div class="lock-overlay">🔒</div>
-      <div class="tc-head">
-        <div class="tc-icon">📈</div>
-        <span class="tc-tier-tag tag-free">Free</span>
-      </div>
-      <div class="tc-name">Retirement Calculator</div>
-      <div class="tc-desc">Model your retirement across five life stages. Portfolio survival, withdrawal optimizer, and stress tests.</div>
-      <a href="retirement-calculator.html" class="tc-open-btn">Open Tool →</a>
+  <!-- ══ CATEGORY 1: FINANCE ══ -->
+  <div class="cat-section">
+    <div class="cat-header">
+      <span class="cat-icon">&#128176;</span>
+      <span class="cat-title">Finance</span>
+      <span class="cat-count">2 tools</span>
     </div>
+    <div class="tools-grid">
 
-    <!-- Meal Planner -->
-    <div class="tool-card tc-meal" id="cardMeal">
-      <div class="lock-overlay">🔒</div>
-      <div class="tc-head">
-        <div class="tc-icon">🥗</div>
-        <span class="tc-tier-tag tag-free">Free</span>
+      <div class="tool-card tc-retire" id="cardRetire">
+        <div class="lock-overlay">&#128274;</div>
+        <div class="tc-head">
+          <div class="tc-icon">&#128200;</div>
+          <span class="tc-tier-tag tag-free">Free</span>
+        </div>
+        <div class="tc-name">Retirement Calculator</div>
+        <div class="tc-desc">Model your retirement across five life stages. Portfolio survival, withdrawal optimizer, and sequence-of-returns stress tests.</div>
+        <a href="retirement-calculator.html" class="tc-open-btn">Open Tool &#8594;</a>
       </div>
-      <div class="tc-name">Meal Planner</div>
-      <div class="tc-desc">Generate a personalised 1–6 week meal plan from 91 recipes matched to your calorie targets and dietary preferences.</div>
-      <a href="meal-planner.html" class="tc-open-btn">Open Tool →</a>
-    </div>
 
-    <!-- Expense Tracker -->
-    <div class="tool-card tc-expense" id="cardExpense">
-      <div class="lock-overlay">🔒</div>
-      <div class="tc-head">
-        <div class="tc-icon">💰</div>
-        <span class="tc-tier-tag tag-basic" id="tagExpense">Basic</span>
+      <div class="tool-card tc-expense" id="cardExpense">
+        <div class="lock-overlay">&#128274;</div>
+        <div class="tc-head">
+          <div class="tc-icon">&#128176;</div>
+          <span class="tc-tier-tag tag-basic" id="tagExpense">Basic</span>
+        </div>
+        <div class="tc-name">Expense Tracker</div>
+        <div class="tc-desc">Import bank statements, auto-categorise transactions and track spending with beautiful charts and dual currency support.</div>
+        <a href="expense-tracker.html" class="tc-open-btn" id="btnExpense">Open Tool &#8594;</a>
       </div>
-      <div class="tc-name">Expense Tracker</div>
-      <div class="tc-desc">Import your bank statements, auto-categorise transactions and track spending with beautiful charts.</div>
-      <a href="expense-tracker.html" class="tc-open-btn" id="btnExpense">Open Tool →</a>
-    </div>
 
-    <!-- Workout Planner -->
-    <div class="tool-card tc-workout" id="cardWorkout">
-      <div class="lock-overlay">🔒</div>
-      <div class="tc-head">
-        <div class="tc-icon">💪</div>
-        <span class="tc-tier-tag tag-basic" id="tagWorkout">Basic</span>
-      </div>
-      <div class="tc-name">Workout Planner</div>
-      <div class="tc-desc">Generate a personalised training plan from 122 exercises. Tailored to your goals, experience and schedule.</div>
-      <a href="workout-planner.html" class="tc-open-btn" id="btnWorkout">Open Tool →</a>
     </div>
-
   </div>
 
-  <!-- Account Info -->
+  <!-- ══ CATEGORY 2: HEALTH & FITNESS ══ -->
+  <div class="cat-section">
+    <div class="cat-header">
+      <span class="cat-icon">&#127947;</span>
+      <span class="cat-title">Health &amp; Fitness</span>
+      <span class="cat-count">2 tools</span>
+    </div>
+    <div class="tools-grid">
+
+      <div class="tool-card tc-workout" id="cardWorkout">
+        <div class="lock-overlay">&#128274;</div>
+        <div class="tc-head">
+          <div class="tc-icon">&#128170;</div>
+          <span class="tc-tier-tag tag-basic" id="tagWorkout">Basic</span>
+        </div>
+        <div class="tc-name">Workout Planner</div>
+        <div class="tc-desc">Generate a personalised training plan from 122 exercises. Tailored to your goals, experience and available sessions.</div>
+        <a href="workout-planner.html" class="tc-open-btn" id="btnWorkout">Open Tool &#8594;</a>
+      </div>
+
+      <div class="tool-card tc-meal" id="cardMeal">
+        <div class="lock-overlay">&#128274;</div>
+        <div class="tc-head">
+          <div class="tc-icon">&#129367;</div>
+          <span class="tc-tier-tag tag-free">Free</span>
+        </div>
+        <div class="tc-name">Meal Planner</div>
+        <div class="tc-desc">Generate a 1–6 week meal plan from 91 recipes matched to your calorie targets, dietary preferences and allergen exclusions.</div>
+        <a href="meal-planner.html" class="tc-open-btn">Open Tool &#8594;</a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ CATEGORY 3: LIFE & WELLNESS ══ -->
+  <div class="cat-section">
+    <div class="cat-header">
+      <span class="cat-icon">&#127807;</span>
+      <span class="cat-title">Life &amp; Wellness</span>
+      <span class="cat-count">1 tool · 3 coming soon</span>
+    </div>
+    <div class="tools-grid">
+
+      <div class="tool-card tc-pregnancy" id="cardPregnancy">
+        <div class="lock-overlay">&#128274;</div>
+        <div class="tc-head">
+          <div class="tc-icon">&#129328;</div>
+          <span class="tc-tier-tag tag-free">Free</span>
+        </div>
+        <div class="tc-name">Pregnancy Roadmap</div>
+        <div class="tc-desc">Week-by-week pregnancy tracker with wellness guide, kick counter, contraction timer, appointment log and partner share link.</div>
+        <a href="pregnancy-roadmap.html" class="tc-open-btn">Open Tool &#8594;</a>
+      </div>
+
+      <div class="tool-card tc-sleep coming-soon">
+        <div class="tc-head">
+          <div class="tc-icon">&#128564;</div>
+          <span class="tc-tier-tag tag-soon">Soon</span>
+        </div>
+        <div class="tc-name">Sleep Tracker</div>
+        <div class="tc-desc">Log sleep quality, spot patterns and get evidence-based tips to improve your rest and recovery.</div>
+        <span class="tc-soon-label">In development</span>
+      </div>
+
+      <div class="tool-card tc-body coming-soon">
+        <div class="tc-head">
+          <div class="tc-icon">&#128202;</div>
+          <span class="tc-tier-tag tag-soon">Soon</span>
+        </div>
+        <div class="tc-name">Body Metrics</div>
+        <div class="tc-desc">Track weight, body fat and measurements over time. Visualise trends and tie into your workout and nutrition goals.</div>
+        <span class="tc-soon-label">In development</span>
+      </div>
+
+      <div class="tool-card tc-doctor coming-soon">
+        <div class="tc-head">
+          <div class="tc-icon">&#128657;</div>
+          <span class="tc-tier-tag tag-soon">Soon</span>
+        </div>
+        <div class="tc-name">Doctor Visit Prep</div>
+        <div class="tc-desc">Log symptoms, medications and questions. Generate a clean printable summary to bring to your next appointment.</div>
+        <span class="tc-soon-label">In development</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ ACCOUNT ══ -->
   <div class="section-label">Account</div>
   <div class="account-grid">
     <div class="account-card">
       <div class="ac-title">Account Details</div>
-      <div class="ac-row">
-        <span class="ac-key">Email</span>
-        <span class="ac-val" id="acEmail">—</span>
-      </div>
-      <div class="ac-row">
-        <span class="ac-key">Member since</span>
-        <span class="ac-val" id="acSince">—</span>
-      </div>
-      <div class="ac-row">
-        <span class="ac-key">Current plan</span>
-        <span class="ac-val amber" id="acPlan">Free</span>
-      </div>
+      <div class="ac-row"><span class="ac-key">Email</span><span class="ac-val" id="acEmail">—</span></div>
+      <div class="ac-row"><span class="ac-key">Member since</span><span class="ac-val" id="acSince">—</span></div>
+      <div class="ac-row"><span class="ac-key">Current plan</span><span class="ac-val amber" id="acPlan">Free</span></div>
     </div>
     <div class="account-card">
       <div class="ac-title">Plan Includes</div>
-      <div class="ac-row">
-        <span class="ac-key">Retirement Calculator</span>
-        <span class="ac-val green" id="featRetire">✓ Included</span>
-      </div>
-      <div class="ac-row">
-        <span class="ac-key">Meal Planner</span>
-        <span class="ac-val green" id="featMeal">✓ Included</span>
-      </div>
-      <div class="ac-row">
-        <span class="ac-key">Expense Tracker</span>
-        <span class="ac-val" id="featExpense">— Basic+</span>
-      </div>
-      <div class="ac-row">
-        <span class="ac-key">Workout Planner</span>
-        <span class="ac-val" id="featWorkout">— Basic+</span>
-      </div>
+      <div class="ac-row"><span class="ac-key">Retirement Calculator</span><span class="ac-val green">&#10003; Included</span></div>
+      <div class="ac-row"><span class="ac-key">Meal Planner</span><span class="ac-val green">&#10003; Included</span></div>
+      <div class="ac-row"><span class="ac-key">Pregnancy Roadmap</span><span class="ac-val green">&#10003; Included</span></div>
+      <div class="ac-row"><span class="ac-key">Expense Tracker</span><span class="ac-val" id="featExpense">— Basic+</span></div>
+      <div class="ac-row"><span class="ac-key">Workout Planner</span><span class="ac-val" id="featWorkout">— Basic+</span></div>
     </div>
   </div>
 
@@ -599,44 +532,35 @@ main {
 <!-- UPGRADE MODAL -->
 <div class="modal-overlay" id="upgradeModal">
   <div class="modal-box">
-    <button class="modal-close" onclick="closeModal()">✕</button>
+    <button class="modal-close" onclick="closeModal()">&#10005;</button>
     <div class="modal-eyebrow">Upgrade Your Plan</div>
     <h2 class="modal-title">Unlock the full<br><em>Artifacts Lab.</em></h2>
-    <p class="modal-sub" id="modalSub">Choose the plan that works for you. Cancel or keep forever — your choice.</p>
-
-    <div class="test-mode-banner">⚠ Test mode — use card 4242 4242 4242 4242, any future date, any CVC</div>
-
-    <div class="plan-options" id="planOptions">
-
+    <p class="modal-sub">Choose the plan that works for you. Cancel or keep forever — your choice.</p>
+    <div class="test-mode-banner">&#9888; Test mode — use card 4242 4242 4242 4242, any future date, any CVC</div>
+    <div class="plan-options">
       <div class="plan-option" id="optBasic" onclick="selectPlan('basic')">
-        <div class="plan-option-left">
+        <div>
           <div class="plan-option-name">Basic Plan</div>
-          <div class="plan-option-desc">All 4 tools · CSV import · 3-month workout plans · 6-month history</div>
+          <div class="plan-option-desc">All tools · CSV import · 3-month workout plans · 6-month history</div>
         </div>
         <div class="plan-option-price">$8<small>/ year</small></div>
       </div>
-
       <div class="plan-option selected" id="optPremiumAnnual" onclick="selectPlan('premium_annual')">
-        <div class="plan-option-left">
-          <div class="plan-option-name">Premium Annual ⭐</div>
+        <div>
+          <div class="plan-option-name">Premium Annual &#11088;</div>
           <div class="plan-option-desc">Everything in Basic + stress test, household view, PDF export, 6-month plans</div>
         </div>
         <div class="plan-option-price">$29<small>/ year</small></div>
       </div>
-
       <div class="plan-option" id="optPremiumLifetime" onclick="selectPlan('premium_lifetime')">
-        <div class="plan-option-left">
-          <div class="plan-option-name">Premium Lifetime 🔑</div>
+        <div>
+          <div class="plan-option-name">Premium Lifetime &#128273;</div>
           <div class="plan-option-desc">Everything in Premium · pay once · all future tools included</div>
         </div>
         <div class="plan-option-price">$49<small>one-time</small></div>
       </div>
-
     </div>
-
-    <button class="checkout-btn" id="checkoutBtn" onclick="startCheckout()">
-      Continue to Payment →
-    </button>
+    <button class="checkout-btn" onclick="startCheckout()">Continue to Payment &#8594;</button>
     <div class="modal-note">Secured by Stripe · Cancel anytime · No hidden fees</div>
   </div>
 </div>
@@ -646,15 +570,14 @@ const SUPABASE_URL  = 'https://fvgajfiksxmwioxnesry.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2Z2FqZmlrc3htd2lveG5lc3J5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NDU4OTEsImV4cCI6MjA4OTIyMTg5MX0.KwqAzx1oAGeh0F3q1LfeQPXYjtdOjaOrzS_c4eUGKJY';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-// Stripe Payment Links
 const PAYMENT_LINKS = {
   basic:            'https://buy.stripe.com/test_eVq6oHb3e0QQ71f6ZL77O02',
   premium_annual:   'https://buy.stripe.com/test_28EbJ1dbm7fefxL4RD77O01',
   premium_lifetime: 'https://buy.stripe.com/test_5kQbJ1dbmbvuetH1Fr77O00',
 };
 
-let selectedPlan = 'premium_annual';
-let currentUserEmail = '';
+let selectedPlan       = 'premium_annual';
+let currentUserEmail   = '';
 
 async function init() {
   const { data: { session } } = await db.auth.getSession();
@@ -679,19 +602,21 @@ async function init() {
   document.getElementById('hEmail').textContent    = email;
   document.getElementById('firstName').textContent = name;
   document.getElementById('acEmail').textContent   = email;
-  document.getElementById('acSince').textContent   = new Date(profile?.created_at || user.created_at).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
+  document.getElementById('acSince').textContent   = new Date(profile?.created_at || user.created_at)
+    .toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
 
   const badge = document.getElementById('tierBadge');
-  const icons = { free: '🆓', basic: '🔵', premium: '⭐' };
+  const icons = { free: '&#129250;', basic: '&#128309;', premium: '&#11088;' };
   const names = { free: 'Free Plan', basic: 'Basic Plan', premium: 'Premium Plan' };
   badge.className = `tier-badge ${tier}`;
-  document.getElementById('tierIcon').textContent = icons[tier];
+  document.getElementById('tierIcon').innerHTML = icons[tier];
   document.getElementById('tierName').textContent = names[tier];
   document.getElementById('acPlan').textContent   = names[tier];
 
   if (profile?.tier_expiry) {
     document.getElementById('tierExpiry').textContent =
-      'Renews ' + new Date(profile.tier_expiry).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+      'Renews ' + new Date(profile.tier_expiry)
+        .toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
   }
 
   // Upgrade banner
@@ -701,32 +626,34 @@ async function init() {
   } else if (tier === 'basic') {
     document.getElementById('upgradeTitle').textContent = 'Upgrade to Premium';
     document.getElementById('upgradeDesc').textContent  = 'Unlock advanced retirement modelling, household view, PDF export and 6-month workout plans.';
-    document.getElementById('upgradeBtn').textContent   = 'Upgrade to Premium →';
-    document.getElementById('upgradeBtn').onclick       = (e) => { e.preventDefault(); openModal(tier); };
-    // Hide basic option in modal for basic users
-    document.getElementById('optBasic').style.display = 'none';
+    document.getElementById('upgradeBtn').textContent   = 'Upgrade to Premium &#8594;';
+    document.getElementById('optBasic').style.display   = 'none';
     selectedPlan = 'premium_annual';
-  } else {
-    // Free user — show full modal
-    document.getElementById('upgradeBtn').onclick = (e) => { e.preventDefault(); openModal(tier); };
   }
 
   // Tool gating
   const hasBasic = tier === 'basic' || tier === 'premium';
+
   if (!hasBasic) {
     document.getElementById('cardExpense').classList.add('locked');
-    document.getElementById('btnExpense').outerHTML = `<button class="tc-upgrade-btn" onclick="openModal('free')">🔒 Upgrade to unlock</button>`;
+    document.getElementById('btnExpense').outerHTML =
+      `<button class="tc-upgrade-btn" onclick="openModal()">&#128274; Upgrade to unlock</button>`;
     document.getElementById('cardWorkout').classList.add('locked');
-    document.getElementById('btnWorkout').outerHTML = `<button class="tc-upgrade-btn" onclick="openModal('free')">🔒 Upgrade to unlock</button>`;
+    document.getElementById('btnWorkout').outerHTML =
+      `<button class="tc-upgrade-btn" onclick="openModal()">&#128274; Upgrade to unlock</button>`;
   }
 
-  // Account features
-  document.getElementById('featExpense').outerHTML = `<span id="featExpense">${hasBasic ? '<span class="ac-val green">✓ Included</span>' : '<span class="ac-val">— Basic+</span>'}</span>`;
-  document.getElementById('featWorkout').outerHTML = `<span id="featWorkout">${hasBasic ? '<span class="ac-val green">✓ Included</span>' : '<span class="ac-val">— Basic+</span>'}</span>`;
+  // Account features panel
+  const yes = `<span class="ac-val green">&#10003; Included</span>`;
+  const no  = `<span class="ac-val">— Basic+</span>`;
+  document.getElementById('featExpense').outerHTML =
+    `<span id="featExpense">${hasBasic ? yes : no}</span>`;
+  document.getElementById('featWorkout').outerHTML =
+    `<span id="featWorkout">${hasBasic ? yes : no}</span>`;
 }
 
-// ── MODAL ────────────────────────────────────
-function openModal(currentTier) {
+// ── MODAL ──
+function openModal() {
   document.getElementById('upgradeModal').classList.add('open');
 }
 function closeModal() {
@@ -739,22 +666,23 @@ document.getElementById('upgradeModal').addEventListener('click', function(e) {
 function selectPlan(plan) {
   selectedPlan = plan;
   document.querySelectorAll('.plan-option').forEach(el => el.classList.remove('selected'));
-  document.getElementById('opt' + plan.split('_').map((w,i) => i===0 ? w.charAt(0).toUpperCase()+w.slice(1) : w.charAt(0).toUpperCase()+w.slice(1)).join('')).classList.add('selected');
+  const map = { basic: 'optBasic', premium_annual: 'optPremiumAnnual', premium_lifetime: 'optPremiumLifetime' };
+  document.getElementById(map[plan])?.classList.add('selected');
 }
 
-// ── STRIPE CHECKOUT ──────────────────────────
+// ── STRIPE ──
 function startCheckout() {
   const link = PAYMENT_LINKS[selectedPlan];
   if (link) window.open(link, '_blank');
 }
 
-// ── SUCCESS TOAST ────────────────────────────
+// ── SUCCESS TOAST ──
 const params = new URLSearchParams(window.location.search);
 if (params.get('upgrade') === 'success') {
   setTimeout(() => {
     const toast = document.createElement('div');
     toast.style.cssText = `position:fixed;bottom:24px;right:24px;background:var(--green-dim);border:1px solid var(--green);border-radius:10px;padding:14px 20px;font-family:var(--mono);font-size:0.72rem;color:var(--green);z-index:999;box-shadow:0 8px 32px rgba(0,0,0,0.3);`;
-    toast.textContent = '✓ Payment successful! Your plan will update shortly.';
+    toast.textContent = '&#10003; Payment successful! Your plan will update shortly.';
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 5000);
   }, 500);
@@ -767,6 +695,5 @@ async function signOut() {
 
 init();
 </script>
-
 </body>
 </html>

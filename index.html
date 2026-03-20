@@ -7,7 +7,6 @@
 <meta name="description" content="Beautiful, private, offline-capable tools for managing your money, your time, your health and almost anything you can plan in your daily life and for your future. No subscriptions. No complexity. Just tools that work.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=JetBrains+Mono:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 /* ═══════════════════════════════════════ TOKENS */
 :root {
@@ -775,6 +774,7 @@ footer {
   </a>
   <ul class="nav-links">
     <li><a href="#tools">Tools</a></li>
+    <li><a href="tools.html">All Tools</a></li>
     <li><a href="#why">Why us</a></li>
     <li><a href="#pricing">Pricing</a></li>
   </ul>
@@ -1045,71 +1045,23 @@ const observer = new IntersectionObserver((entries) => {
 
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-// ── Supabase ─────────────────────────────────
-const SUPABASE_URL  = 'https://fvgajfiksxmwioxnesry.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2Z2FqZmlrc3htd2lveG5lc3J5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NDU4OTEsImV4cCI6MjA4OTIyMTg5MX0.KwqAzx1oAGeh0F3q1LfeQPXYjtdOjaOrzS_c4eUGKJY';
-const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-
-async function sendWelcomeEmail(email) {
-  try {
-    await fetch('/api/send-welcome', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-    });
-  } catch(e) {
-    console.log('Welcome email error:', e);
-  }
-}
-
 // ── Email form ───────────────────────────────
-async function handleSubmit(e) {
+function handleSubmit(e) {
   e.preventDefault();
-  const email = document.getElementById('emailInput').value.trim().toLowerCase();
+  const email = document.getElementById('emailInput').value;
   const note  = document.getElementById('emailNote');
   const btn   = e.target.querySelector('.email-submit');
 
-  btn.textContent = 'Joining…';
+  // Visual feedback
+  btn.textContent = '✓ You\'re on the list!';
+  btn.style.background = 'var(--green)';
+  btn.style.color = '#0a1f14';
   btn.disabled = true;
+  note.textContent = `We'll be in touch at ${email} — welcome to the Lab!`;
+  note.style.color = 'var(--green)';
 
-  try {
-    const { error } = await db
-      .from('early_access')
-      .insert({ email });
-
-    if (error) {
-      if (error.code === '23505') {
-        // Already signed up — still redirect nicely
-        btn.textContent = '✓ Already registered!';
-        btn.style.background = 'var(--amber)';
-        btn.style.color = 'var(--navy)';
-        note.textContent = `${email} is already on the list — redirecting…`;
-        note.style.color = 'var(--amber2)';
-        setTimeout(() => {
-          window.location.href = `thankyou.html?email=${encodeURIComponent(email)}`;
-        }, 1200);
-      } else {
-        throw error;
-      }
-    } else {
-      // New signup — send welcome email then redirect
-      sendWelcomeEmail(email); // fire and forget
-      btn.textContent = '✓ You\'re in!';
-      btn.style.background = 'var(--green)';
-      btn.style.color = '#0a1f14';
-      note.textContent = `Welcome! Redirecting…`;
-      note.style.color = 'var(--green)';
-      setTimeout(() => {
-        window.location.href = `thankyou.html?email=${encodeURIComponent(email)}`;
-      }, 800);
-    }
-  } catch (err) {
-    btn.textContent = 'Try again';
-    btn.disabled = false;
-    note.textContent = 'Something went wrong — please try again.';
-    note.style.color = 'var(--red, #E05252)';
-    console.error('Signup error:', err);
-  }
+  // TODO: wire to Supabase / Resend when platform is live
+  console.log('Early access signup:', email);
 }
 
 // ── Sticky nav shadow on scroll ──────────────
