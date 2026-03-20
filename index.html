@@ -117,6 +117,86 @@ nav {
   color: var(--navy);
 }
 
+/* ── HAMBURGER BUTTON ── */
+.nav-hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 40px; height: 40px;
+  background: var(--amber-dim);
+  border: 1px solid var(--amber);
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  z-index: 201;
+}
+.nav-hamburger:hover {
+  background: rgba(212,146,10,0.22);
+  box-shadow: 0 0 16px rgba(212,146,10,0.25);
+}
+.nav-hamburger span {
+  display: block;
+  width: 18px; height: 2px;
+  background: var(--amber2);
+  border-radius: 2px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+}
+.nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* ── MOBILE MENU DROPDOWN ── */
+.nav-mobile-menu {
+  display: none;
+  position: fixed;
+  top: 64px; left: 0; right: 0;
+  background: rgba(11,15,26,0.97);
+  backdrop-filter: blur(24px);
+  border-bottom: 2px solid var(--amber);
+  padding: 8px 0 16px;
+  z-index: 200;
+  transform: translateY(-8px);
+  opacity: 0;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+}
+.nav-mobile-menu.open { transform: translateY(0); opacity: 1; }
+.nav-mobile-menu ul { list-style: none; padding: 8px 0; }
+.nav-mobile-menu ul li { border-bottom: 1px solid rgba(42,59,85,0.4); }
+.nav-mobile-menu ul li:last-child { border-bottom: none; }
+.nav-mobile-menu ul li a {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 28px;
+  font-family: var(--mono); font-size: 0.7rem;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text2); text-decoration: none; transition: all 0.2s;
+}
+.nav-mobile-menu ul li a:hover {
+  color: var(--amber2); background: var(--amber-dim); padding-left: 34px;
+}
+.nav-mobile-menu ul li a .menu-arrow { color: var(--text3); font-size: 0.7rem; transition: all 0.2s; }
+.nav-mobile-menu ul li a:hover .menu-arrow { color: var(--amber2); }
+.nav-mobile-cta { margin: 12px 28px 4px; }
+.nav-mobile-cta a {
+  display: block; text-align: center; padding: 13px;
+  background: var(--amber); color: var(--navy);
+  font-family: var(--mono); font-size: 0.7rem; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  text-decoration: none; border-radius: 8px; transition: all 0.2s;
+  box-shadow: 0 4px 16px rgba(212,146,10,0.3);
+}
+.nav-mobile-cta a:hover { background: var(--amber2); box-shadow: 0 6px 20px rgba(212,146,10,0.4); }
+.nav-backdrop {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.4); z-index: 199; backdrop-filter: blur(2px);
+}
+.nav-backdrop.open { display: block; }
+
 /* ═══════════════════════════════════════ HERO */
 .hero {
   position: relative;
@@ -748,6 +828,8 @@ footer {
 @media (max-width: 900px) {
   nav { padding: 0 24px; }
   .nav-links { display: none; }
+  .nav-hamburger { display: flex; }
+  .nav-mobile-menu { display: block; }
   .tools-grid { grid-template-columns: 1fr; }
   .why-grid { grid-template-columns: 1fr; }
   .why-item { border-right: none; border-bottom: 1px solid var(--border); }
@@ -767,6 +849,7 @@ footer {
 <body>
 
 <!-- ═══════════════════════════════ NAV -->
+<div class="nav-backdrop" id="navBackdrop" onclick="closeMenu()"></div>
 <nav>
   <a href="#" class="nav-logo">
     <div class="nav-logo-icon">⚗️</div>
@@ -778,8 +861,24 @@ footer {
     <li><a href="#why">Why us</a></li>
     <li><a href="#pricing">Pricing</a></li>
   </ul>
-  <a href="#early-access" class="nav-cta">Get Early Access</a>
+  <a href="login.html" class="nav-cta">Sign In / Join</a>
+  <button class="nav-hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
+
+<!-- Mobile dropdown menu -->
+<div class="nav-mobile-menu" id="mobileMenu">
+  <ul>
+    <li><a href="#tools" onclick="closeMenu()">Tools <span class="menu-arrow">→</span></a></li>
+    <li><a href="tools.html" onclick="closeMenu()">All Tools <span class="menu-arrow">→</span></a></li>
+    <li><a href="#why" onclick="closeMenu()">Why Us <span class="menu-arrow">→</span></a></li>
+    <li><a href="#pricing" onclick="closeMenu()">Pricing <span class="menu-arrow">→</span></a></li>
+  </ul>
+  <div class="nav-mobile-cta">
+    <a href="login.html" onclick="closeMenu()">Sign In / Join →</a>
+  </div>
+</div>
 
 <!-- ═══════════════════════════════ HERO -->
 <section class="hero">
@@ -1070,7 +1169,29 @@ window.addEventListener('scroll', () => {
   nav.style.boxShadow = window.scrollY > 20
     ? '0 4px 32px rgba(0,0,0,0.4)'
     : 'none';
+  if (document.getElementById('mobileMenu').classList.contains('open')) closeMenu();
 });
+
+// ── Hamburger menu ────────────────────────────
+function toggleMenu() {
+  const btn      = document.getElementById('hamburger');
+  const menu     = document.getElementById('mobileMenu');
+  const backdrop = document.getElementById('navBackdrop');
+  if (menu.classList.contains('open')) {
+    closeMenu();
+  } else {
+    btn.classList.add('open');
+    menu.classList.add('open');
+    backdrop.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+}
+function closeMenu() {
+  document.getElementById('hamburger').classList.remove('open');
+  document.getElementById('mobileMenu').classList.remove('open');
+  document.getElementById('navBackdrop').classList.remove('open');
+  document.body.style.overflow = '';
+}
 </script>
 </body>
 </html>
