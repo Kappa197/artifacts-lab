@@ -605,8 +605,6 @@ async function init() {
   const { data: profile } = await profilePromise;
   const tier = profile?.tier ?? 'free';
 
-  const tier = profile?.tier ?? 'free';
-
   document.getElementById('loadingState').style.display = 'none';
   document.getElementById('dashState').style.display = '';
 
