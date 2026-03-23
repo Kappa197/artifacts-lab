@@ -845,6 +845,8 @@ var S = {
   favourites: JSON.parse(localStorage.getItem('mp_favourites')||'[]'),
 };
 
+var dayViewActive = false; // view toggle state — global scope
+
 // ─── HELPERS ─────────────────────────────────────────
 function saveFavourites(){ localStorage.setItem('mp_favourites', JSON.stringify(S.favourites)); }
 
@@ -1139,7 +1141,10 @@ function openSwap(wi,di,slot){
     item.innerHTML="<span class='swap-em'>"+r.em+"</span><div><div class='swap-item-name'>"+r.name+"</div><div class='swap-item-meta'>~"+mk+" kcal · "+mp+"g prot</div></div>";
     item.addEventListener("click",function(){
       S.plan[S.swapWeek][S.swapDay][S.swapSlot]=r;
-      closeSwap(); renderWeek(S.swapWeek); renderNutrition(S.swapWeek);
+      closeSwap();
+      renderWeek(S.swapWeek);
+      if(dayViewActive) buildDaySelector(S.swapWeek);
+      renderNutrition(S.swapWeek);
       toast("Recipe swapped!");
     });
     list.appendChild(item);
@@ -1644,7 +1649,6 @@ function init(){
 
 // ─── MOBILE DAY VIEW ─────────────────────────────
 var S_mobileDay = 0;
-var dayViewActive = false;
 
 function setViewMode(dayMode){
   dayViewActive = dayMode;
