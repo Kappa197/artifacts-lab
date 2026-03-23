@@ -399,7 +399,7 @@ async function resetPassword() {
   if (!email) { showMsg('err', 'Please enter your email address.'); return; }
   btn.textContent = 'Sending…'; btn.disabled = true;
   const { error } = await db.auth.resetPasswordForEmail(email, {
-    redirectTo: 'https://theartifactslab.com/dashboard.html'
+    redirectTo: 'https://www.theartifactslab.com/reset-password.html'
   });
   if (error) {
     showMsg('err', error.message);
