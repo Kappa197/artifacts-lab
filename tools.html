@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>All Tools — The Artifacts Lab</title>
-<meta name="description" content="Browse all tools in The Artifacts Lab suite — finance, fitness, nutrition and life management tools designed for real adults.">
+<meta name="description" content="Browse all tools in The Artifacts Lab suite — Personal finance, fitness, nutrition and life management tools designed for real adults.">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=JetBrains+Mono:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -309,23 +309,23 @@ footer {
     <div class="filter-tabs">
       <button class="filter-tab active" onclick="filterTools('all', this)">All Tools</button>
       <button class="filter-tab" onclick="filterTools('free', this)">Free</button>
-      <button class="filter-tab" onclick="filterTools('finance', this)">Finance</button>
+      <button class="filter-tab" onclick="filterTools('Personal finance', this)"> Personal finance</button>
       <button class="filter-tab" onclick="filterTools('health', this)">Health &amp; Fitness</button>
       <button class="filter-tab" onclick="filterTools('life', this)">Life &amp; Wellness</button>
       <button class="filter-tab" onclick="filterTools('soon', this)">Coming Soon</button>
     </div>
   </div>
 
-  <!-- ══ FINANCE ══ -->
-  <div class="cat-section reveal reveal-delay-1" data-cat="finance">
+  <!-- ══ PERSONAL FINANCE ══ -->
+  <div class="cat-section reveal reveal-delay-1" data-cat="Personal finance">
     <div class="cat-header">
       <span class="cat-icon">&#128176;</span>
-      <span class="cat-title">Finance</span>
+      <span class="cat-title">Personal finance</span>
       <span class="cat-count">2 tools live</span>
     </div>
     <div class="tools-grid">
 
-      <div class="tool-card tc-retire" data-tier="free" data-cat="finance">
+      <div class="tool-card tc-retire" data-tier="free" data-cat="Personal finance">
         <div class="tc-head">
           <div class="tc-icon">&#128200;</div>
           <div class="tc-tier-wrap">
@@ -347,7 +347,7 @@ footer {
         </div>
       </div>
 
-      <div class="tool-card tc-expense" data-tier="basic" data-cat="finance">
+      <div class="tool-card tc-expense" data-tier="basic" data-cat="Personal finance">
         <div class="tc-head">
           <div class="tc-icon">&#128176;</div>
           <div class="tc-tier-wrap">
@@ -580,7 +580,7 @@ function filterTools(filter, btn) {
       let show = false;
       if (filter === 'free')    show = tier === 'free';
       if (filter === 'soon')    show = tier === 'soon';
-      if (filter === 'finance') show = cat2 === 'finance';
+      if (filter === 'Personal finance') show = cat2 === 'Personal finance';
       if (filter === 'health')  show = cat2 === 'health';
       if (filter === 'life')    show = cat2 === 'life';
       card.style.display = show ? '' : 'none';
