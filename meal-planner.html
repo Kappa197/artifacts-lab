@@ -1321,8 +1321,8 @@ function closeHelp(){ document.getElementById("helpOv").classList.remove("open")
 function init(){
   // Show tier badge in header
   var tierLabels={free:"Free Plan",basic:"Basic Plan",premium:"Premium Plan"};
-  document.getElementById("tierBadge").textContent=tierLabels[TIER];
-  document.getElementById("tierBadge").className="tier-pill tier-"+TIER;
+  var tierBadge = document.getElementById("tierBadge") || document.getElementById("toolTierBadge");
+  if(tierBadge){ tierBadge.textContent=tierLabels[TIER]; }
 
   // Diet cards
   document.querySelectorAll(".diet-card").forEach(function(c){
