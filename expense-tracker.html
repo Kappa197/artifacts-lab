@@ -3,42 +3,61 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Finance Tracker</title>
+<title>Finance Tracker — The Artifacts Lab</title>
+<link rel="preconnect" href="https://fvgajfiksxmwioxnesry.supabase.co">
+<link rel="dns-prefetch" href="https://fvgajfiksxmwioxnesry.supabase.co">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=JetBrains+Mono:wght@300;400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=JetBrains+Mono:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --navy:   #0B0F1A;
-  --navy2:  #111827;
-  --navy3:  #1A2235;
-  --navy4:  #243048;
-  --border: #2A3B55;
-  --border2:#334466;
-  --amber:  #D4920A;
-  --amber2: #F5A623;
-  --amber-dim: rgba(212,146,10,0.15);
-  --green:  #2ECC8A;
-  --green-dim: rgba(46,204,138,0.12);
-  --red:    #E05252;
-  --red-dim:rgba(224,82,82,0.12);
-  --blue:   #4A90D9;
-  --text:   #E8EDF5;
-  --text2:  #9BAAC4;
-  --text3:  #5A6A8A;
-  --mono:   'JetBrains Mono', monospace;
-  --body:   'Outfit', sans-serif;
-  --serif:  'Playfair Display', serif;
+  --navy:      #0B0F1A;
+  --navy2:     #111827;
+  --navy3:     #1A2235;
+  --navy4:     #243048;
+  --border:    #2A3B55;
+  --border2:   #334466;
+  --amber:     #D4920A;
+  --amber2:    #F5A623;
+  --amber-dim: rgba(212,146,10,0.12);
+  --green:     #2ECC8A;
+  --green-dim: rgba(46,204,138,0.1);
+  --blue:      #4A90D9;
+  --blue-dim:  rgba(74,144,217,0.1);
+  --purple:    #9B72CF;
+  --rose:      #FB7185;
+  --rose-dim:  rgba(251,113,133,0.1);
+  --teal:      #2DD4BF;
+  --teal-dim:  rgba(45,212,191,0.1);
+  --red:       #E05252;
+  --red-dim:   rgba(224,82,82,0.12);
+  --text:      #E8EDF5;
+  --text2:     #9BAAC4;
+  --text3:     #5A6A8A;
+  --mono:      'JetBrains Mono', monospace;
+  --body:      'Outfit', sans-serif;
+  --serif:     'Playfair Display', serif;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:var(--body);background:var(--navy);color:var(--text);min-height:100vh;}
+body{font-family:var(--body);background:var(--navy);color:var(--text);min-height:100vh;position:relative;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(212,146,10,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(212,146,10,0.025) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0;}
 
-/* HEADER */
-.app-header{background:var(--navy2);border-bottom:1px solid var(--border);padding:0 28px;display:flex;align-items:center;gap:24px;height:60px;position:sticky;top:0;z-index:100;}
-.logo{font-family:var(--serif);font-size:1.2rem;color:var(--amber2);}
-.logo span{color:var(--text3);font-size:0.68rem;display:block;font-family:var(--mono);letter-spacing:0.08em;margin-top:-3px;}
-.tabs{display:flex;gap:2px;margin-left:auto;}
+/* PLATFORM NAV */
+.tool-header{position:sticky;top:0;z-index:100;background:rgba(11,15,26,0.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:60px;gap:16px;}
+.tool-nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;cursor:pointer;}
+.tool-nav-icon{width:28px;height:28px;background:var(--amber-dim);border:1px solid var(--amber);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:0.85rem;}
+.tool-nav-brand{font-family:var(--serif);font-size:0.95rem;font-weight:700;color:var(--amber2);}
+.tool-nav-sep{color:var(--border2);font-size:1rem;}
+.tool-nav-title{font-family:var(--mono);font-size:0.58rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);}
+.tool-nav-right{display:flex;align-items:center;gap:12px;}
+.tool-tier-badge{font-family:var(--mono);font-size:0.55rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:4px 12px;border-radius:99px;border:1px solid var(--border2);color:var(--text3);background:transparent;transition:all 0.2s;}
+.tool-tier-badge.basic{color:var(--blue);border-color:var(--blue);background:var(--blue-dim);}
+.tool-tier-badge.premium{color:var(--amber2);border-color:var(--amber);background:var(--amber-dim);}
+.tool-nav-back{font-family:var(--mono);font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;padding:7px 14px;border-radius:6px;background:var(--navy3);border:1px solid var(--border2);color:var(--text3);text-decoration:none;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+.tool-nav-back:hover{border-color:var(--amber);color:var(--amber2);}
+/* Tool tab nav (kept for Settings/Import/Dashboard/Annual) */
+.tabs{display:flex;gap:2px;}
 .tab-btn{padding:7px 18px;border:none;background:none;color:var(--text3);font-family:var(--mono);font-size:0.68rem;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;border-radius:6px;transition:all 0.15s;}
 .tab-btn:hover{color:var(--text);background:var(--navy3);}
 .tab-btn.active{color:var(--amber2);background:var(--amber-dim);}
@@ -175,7 +194,7 @@ select option{background:var(--navy3);}
 /* PRINT / PDF EXPORT */
 @media print {
   body{background:#fff !important;color:#000 !important;}
-  .app-header,.tabs,.tab-panel:not(.active),.tab-btn,
+  .tool-header,.tabs,.tab-panel:not(.active),.tab-btn,
   #backupReminder,.upgrade-nudge,button,select,input,
   #trendCard,#drillCard,.dg3 .card:nth-child(3),
   .section-head p{display:none !important;}
@@ -188,7 +207,7 @@ select option{background:var(--navy3);}
 #printHeader{display:none;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #ddd;}
 
 @media(max-width:900px){.kpi-grid{grid-template-columns:1fr 1fr;}.dg2,.dg3{grid-template-columns:1fr;}.grid4{grid-template-columns:1fr 1fr;}}
-@media(max-width:600px){.tab-panel{padding:14px;}.kpi-grid{grid-template-columns:1fr;}.grid2,.grid3{grid-template-columns:1fr;}}
+@media(max-width:600px){.tool-header{padding:0 16px;}.tool-nav-brand{display:none;}.tool-nav-sep{display:none;}.tab-panel{padding:14px;}.kpi-grid{grid-template-columns:1fr;}.grid2,.grid3{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
@@ -201,14 +220,23 @@ select option{background:var(--navy3);}
 </div>
 <style>@keyframes spin{to{transform:rotate(360deg);}}</style>
 
-<header class="app-header">
-  <div class="logo">Finance Tracker<span>Personal Balance Sheet</span></div>
-  <nav class="tabs">
+<header class="tool-header" id="toolHeader">
+  <a href="javascript:void(0)" class="tool-nav-logo" id="logoLink">
+    <div class="tool-nav-icon">⚗️</div>
+    <div class="tool-nav-brand">The Artifacts Lab</div>
+    <div class="tool-nav-sep">|</div>
+    <div class="tool-nav-title">Finance Tracker</div>
+  </a>
+  <nav class="tabs" style="margin:0 auto;">
     <button class="tab-btn active" onclick="showTab('settings',this)">⚙ Settings</button>
     <button class="tab-btn" onclick="showTab('import',this)">↑ Import</button>
     <button class="tab-btn" onclick="showTab('dashboard',this)">◈ Dashboard</button>
     <button id="annualTabBtn" class="tab-btn" onclick="showTab('annual',this)">◑ Annual</button>
   </nav>
+  <div class="tool-nav-right">
+    <div class="tool-tier-badge" id="toolTierBadge">Free</div>
+    <a href="javascript:void(0)" class="tool-nav-back" id="backBtn">← Home</a>
+  </div>
 </header>
 
 <!-- ══════ TAB: SETTINGS ══════ -->
@@ -767,12 +795,32 @@ async function initTier() {
         resolvedTier = profile.tier;
       }
     }
+
+    // CHANGE 4 — Logo navigation (reuse auth state from getUser above)
+    const logoLink = document.getElementById('logoLink');
+    const backBtn  = document.getElementById('backBtn');
+    if (logoLink && backBtn) {
+      const dest = user ? 'dashboard.html' : 'index.html';
+      logoLink.setAttribute('href', dest);
+      backBtn.setAttribute('href', dest);
+      backBtn.textContent = user ? '← Dashboard' : '← Home';
+    }
+
   } catch (e) {
     // Network error or Supabase unavailable — fall back to free gracefully
     console.warn('Tier fetch failed, defaulting to free:', e);
   }
 
   buildCan(resolvedTier);
+
+  // CHANGE 3 — Tier badge
+  const badge = document.getElementById('toolTierBadge');
+  if (badge) {
+    const labels = { free: 'Free', basic: 'Basic', premium: 'Premium' };
+    badge.textContent = labels[TIER] || 'Free';
+    badge.className   = 'tool-tier-badge ' + TIER;
+  }
+
   if (overlay) overlay.style.display = 'none';
   init();
 }

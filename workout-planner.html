@@ -3,31 +3,71 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Workout Planner</title>
+<title>Workout Planner — The Artifacts Lab</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="preconnect" href="https://fvgajfiksxmwioxnesry.supabase.co">
+<link rel="dns-prefetch" href="https://fvgajfiksxmwioxnesry.supabase.co">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=JetBrains+Mono:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#f1f5f9;--surface:#fff;--primary:#1a56db;--primary-d:#1343b6;--primary-l:#e8efff;
-  --ok:#059669;--ok-l:#ecfdf5;--warn:#d97706;--warn-l:#fffbeb;
-  --red:#dc2626;--red-l:#fef2f2;--text:#0f172a;--muted:#64748b;--border:#e2e8f0;
-  --r:14px;--sh:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.05);
-  --sh-md:0 4px 16px rgba(0,0,0,.09);
-  --fd:'Barlow Condensed',sans-serif;--fb:'DM Sans',sans-serif
+  --navy:      #0B0F1A;
+  --navy2:     #111827;
+  --navy3:     #1A2235;
+  --navy4:     #243048;
+  --border:    #2A3B55;
+  --border2:   #334466;
+  --amber:     #D4920A;
+  --amber2:    #F5A623;
+  --amber-dim: rgba(212,146,10,0.12);
+  --green:     #2ECC8A;
+  --green-dim: rgba(46,204,138,0.1);
+  --blue:      #4A90D9;
+  --blue-dim:  rgba(74,144,217,0.1);
+  --purple:    #9B72CF;
+  --rose:      #FB7185;
+  --rose-dim:  rgba(251,113,133,0.1);
+  --teal:      #2DD4BF;
+  --teal-dim:  rgba(45,212,191,0.1);
+  --text:      #E8EDF5;
+  --text2:     #9BAAC4;
+  --text3:     #5A6A8A;
+  --muted:     #9BAAC4;
+  --mono:      'JetBrains Mono', monospace;
+  --body:      'Outfit', sans-serif;
+  --serif:     'Playfair Display', serif;
+  /* Legacy aliases kept for tool-specific components */
+  --bg:        #0B0F1A;
+  --surface:   #111827;
+  --primary:   #D4920A;
+  --primary-d: #b87d08;
+  --primary-l: rgba(212,146,10,0.12);
+  --ok:        #2ECC8A;
+  --ok-l:      rgba(46,204,138,0.1);
+  --warn:      #F5A623;
+  --warn-l:    rgba(245,166,35,0.12);
+  --red:       #FB7185;
+  --red-l:     rgba(251,113,133,0.1);
+  --r:         14px;
+  --sh:        0 1px 3px rgba(0,0,0,.3),0 1px 2px rgba(0,0,0,.2);
+  --sh-md:     0 4px 16px rgba(0,0,0,.4);
+  --fd:        'JetBrains Mono', monospace;
+  --fb:        'Outfit', sans-serif;
+  --jb:        'JetBrains Mono', monospace;
+  --card:      #111827;
 }
-body{font-family:var(--fb);background:var(--bg);color:var(--text);min-height:100vh;font-size:16px;line-height:1.5}
+body{font-family:var(--body);background:var(--navy);color:var(--text);min-height:100vh;font-size:16px;line-height:1.5;position:relative}
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(212,146,10,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(212,146,10,0.025) 1px, transparent 1px);
+  background-size:60px 60px;
+  pointer-events:none;z-index:0;
+}
 
-/* HEADER */
-header{background:var(--text);color:#fff;padding:.75rem 1.2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.2)}
-.logo{display:flex;align-items:center;gap:.55rem;text-decoration:none}
-.logo-text{font-family:var(--fd);font-size:1.35rem;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:#fff}
-.logo-text span{color:#60a5fa}
-nav{display:flex;gap:.3rem;flex-wrap:wrap}
-nav button{background:transparent;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.7);padding:.33rem .75rem;border-radius:6px;cursor:pointer;font-family:var(--fb);font-size:.77rem;font-weight:500;transition:all .15s;white-space:nowrap}
-nav button:hover{background:rgba(255,255,255,.1);color:#fff}
-nav button.active{background:var(--primary);border-color:var(--primary);color:#fff}
+/* TOOL INNER NAV (tabs below platform header) */
 
 /* LAYOUT */
 .container{max-width:860px;margin:0 auto;padding:1.5rem 1rem 4rem}
@@ -45,7 +85,7 @@ nav button.active{background:var(--primary);border-color:var(--primary);color:#f
 /* WELCOME */
 .welcome-hero{text-align:center;padding:2.5rem 1rem 2rem;max-width:520px;margin:0 auto}
 .hero-svg{margin-bottom:1.2rem;display:flex;justify-content:center}
-.hero-title{font-family:var(--fd);font-size:2.8rem;font-weight:900;letter-spacing:.01em;text-transform:uppercase;line-height:1.05;margin-bottom:.7rem}
+.hero-title{font-family:var(--serif);font-size:2.8rem;font-weight:900;letter-spacing:.01em;text-transform:uppercase;line-height:1.05;margin-bottom:.7rem}
 .hero-sub{color:var(--muted);font-size:.95rem;max-width:400px;margin:.5rem auto 1.8rem;line-height:1.7}
 .hero-pills{display:flex;flex-wrap:wrap;gap:.45rem;justify-content:center;margin-bottom:2rem}
 .hero-pill{background:var(--primary-l);color:var(--primary);font-size:.76rem;font-weight:600;padding:.28rem .85rem;border-radius:999px}
@@ -69,6 +109,10 @@ label.fl .hint{font-size:.75rem;color:var(--muted);font-weight:400;text-transfor
 input[type=range]{-webkit-appearance:none;appearance:none;flex:1;height:5px;border-radius:3px;background:var(--border);outline:none;cursor:pointer}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--primary);cursor:pointer;border:3px solid #fff;box-shadow:0 2px 6px rgba(26,86,219,.35)}
 input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--primary);cursor:pointer;border:3px solid #fff}
+/* Locked-zone overlay on days slider */
+.slider-lock-overlay{position:relative;flex:1;display:flex;align-items:center}
+.slider-lock-overlay input[type=range]{width:100%}
+.slider-lock-zone{position:absolute;top:50%;transform:translateY(-50%);height:5px;border-radius:0 3px 3px 0;background:repeating-linear-gradient(90deg,rgba(90,106,138,.4) 0px,rgba(90,106,138,.4) 4px,transparent 4px,transparent 8px);pointer-events:none}
 .slider-hint{font-size:.78rem;color:var(--muted);margin-top:.5rem;padding-left:.2rem;min-height:1.2em}
 
 /* CHIPS */
@@ -203,6 +247,8 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 .cues-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-l)}
 .swap-btn{background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;font-size:.68rem;padding:.15rem .4rem;color:var(--muted);transition:all .12s;white-space:nowrap;line-height:1.4;margin-left:.3rem;vertical-align:middle}
 .swap-btn:hover{border-color:#10b981;color:#10b981;background:#ecfdf5}
+.swap-btn.swap-locked,.mendo-swap-btn.swap-locked{opacity:.35;cursor:pointer;filter:grayscale(.6)}
+.swap-btn.swap-locked:hover,.mendo-swap-btn.swap-locked:hover{border-color:var(--border);color:var(--muted);background:none}
 .swap-modal-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:.3rem;max-height:55vh;overflow-y:auto}
 .swap-item{display:flex;flex-direction:column;gap:.1rem;padding:.55rem .7rem;border-radius:6px;border:1px solid var(--border);cursor:pointer;transition:all .12s;background:#fafafa}
 .swap-item:hover{border-color:#10b981;background:#ecfdf5}
@@ -397,8 +443,6 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
   .hero-title{font-size:2.1rem}
   .stats-grid{grid-template-columns:repeat(2,1fr)}
   .plan-header h2{font-size:1.3rem}
-  nav button{padding:.3rem .55rem;font-size:.72rem}
-  .logo-text{font-size:1.1rem}
   .ex-row{grid-template-columns:1fr}
   .ex-params{text-align:left;margin-top:.3rem}
   .phase-int{display:none}
@@ -488,8 +532,33 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
   border-top:1px solid var(--border);padding-top:.6rem;
 }
 
+/* ── PLATFORM NAV ─────────────────────────────────────────────── */
+.tool-header{position:sticky;top:0;z-index:100;background:rgba(11,15,26,0.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:60px;gap:16px}
+.tool-nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;cursor:pointer}
+.tool-nav-icon{width:28px;height:28px;background:var(--amber-dim);border:1px solid var(--amber);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.85rem}
+.tool-nav-brand{font-family:var(--serif);font-size:.95rem;font-weight:700;color:var(--amber2)}
+.tool-nav-sep{color:var(--border2);font-size:1rem}
+.tool-nav-title{font-family:var(--mono);font-size:.58rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--text3)}
+.tool-nav-right{display:flex;align-items:center;gap:12px}
+.tool-tier-badge{font-family:var(--mono);font-size:.55rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:4px 12px;border-radius:99px;border:1px solid var(--border2);color:var(--text3);background:transparent;transition:all .2s}
+.tool-tier-badge.basic{color:var(--blue);border-color:var(--blue);background:var(--blue-dim)}
+.tool-tier-badge.premium{color:var(--amber2);border-color:var(--amber);background:var(--amber-dim)}
+.tool-nav-back{font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;padding:7px 14px;border-radius:6px;background:var(--navy3);border:1px solid var(--border2);color:var(--text3);text-decoration:none;cursor:pointer;transition:all .2s;white-space:nowrap}
+.tool-nav-back:hover{border-color:var(--amber);color:var(--amber2)}
+/* Tool inner tabs (below platform header) */
+.tool-inner-nav{background:var(--navy2);border-bottom:1px solid var(--border);padding:0 28px;display:flex;gap:.3rem;flex-wrap:wrap}
+.tool-inner-nav button{background:transparent;border:none;border-bottom:2px solid transparent;color:var(--text2);padding:.55rem .75rem;cursor:pointer;font-family:var(--body);font-size:.77rem;font-weight:500;transition:all .15s;white-space:nowrap;margin-bottom:-1px}
+.tool-inner-nav button:hover{color:var(--text)}
+.tool-inner-nav button.active{color:var(--amber2);border-bottom-color:var(--amber)}
+@media(max-width:600px){
+  .tool-header{padding:0 16px}
+  .tool-nav-brand{display:none}
+  .tool-nav-sep{display:none}
+  .tool-inner-nav{padding:0 12px}
+}
+
 @media print{
-  header,.print-bar,.week-nav,.step-nav,.btn,nav{display:none!important}
+  .tool-header,.tool-inner-nav,.print-bar,.week-nav,.step-nav,.btn{display:none!important}
   .container{max-width:100%;padding:0}
   body{background:#fff;font-size:10px}
   .day-card{break-inside:avoid;margin-bottom:.4rem}
@@ -534,19 +603,27 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
   </defs>
 </svg>
 
-<header>
-  <div class="logo">
-    <svg width="52" height="26"><use href="#barbell-icon"/></svg>
-    <span class="logo-text">Workout<span>Planner</span></span>
+<header class="tool-header" id="toolHeader">
+  <a href="index.html" class="tool-nav-logo" id="logoLink">
+    <div class="tool-nav-icon">⚗️</div>
+    <div class="tool-nav-brand">The Artifacts Lab</div>
+    <div class="tool-nav-sep">|</div>
+    <div class="tool-nav-title">Workout Planner</div>
+  </a>
+  <div class="tool-nav-right">
+    <div class="tool-tier-badge" id="toolTierBadge">Free</div>
+    <a href="index.html" class="tool-nav-back" id="backBtn">← Home</a>
   </div>
-  <nav>
-    <button id="nav-wizard" onclick="showView('wizard')" class="active">Setup</button>
-    <button id="nav-plan"   onclick="showView('plan')">My Plan</button>
-    <button id="nav-tracker" onclick="showView('tracker')">Tracker</button>
-    <button id="nav-manual" onclick="showView('manual')">Manual</button>
-    <button id="nav-faq"    onclick="showView('faq')">FAQ</button>
-  </nav>
 </header>
+
+<!-- Tool inner navigation tabs -->
+<nav class="tool-inner-nav">
+  <button id="nav-wizard"  onclick="showView('wizard')"  class="active">Setup</button>
+  <button id="nav-plan"    onclick="showView('plan')">My Plan</button>
+  <button id="nav-tracker" onclick="showView('tracker')">Tracker</button>
+  <button id="nav-manual"  onclick="showView('manual')">Manual</button>
+  <button id="nav-faq"     onclick="showView('faq')">FAQ</button>
+</nav>
 
 <div class="container">
 
@@ -581,8 +658,10 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
         <label class="fl">Days per week <span class="hint">— be realistic, consistency beats ambition</span></label>
         <div class="slider-wrap">
           <div><div class="slider-val" id="wpw-val">3</div><div class="slider-unit">days/wk</div></div>
-          <input type="range" min="2" max="6" value="3" id="sl-wpw"
-            oninput="S.wpw=+this.value;document.getElementById('wpw-val').textContent=this.value;updateSplitHint();updateDayFocusGrid()">
+          <div class="slider-lock-overlay" id="wpw-overlay">
+            <input type="range" min="2" max="6" value="3" id="sl-wpw" oninput="onWpwInput(this)">
+            <div class="slider-lock-zone" id="wpw-lock-zone" style="display:none"></div>
+          </div>
         </div>
         <div class="slider-hint" id="split-hint"></div>
       </div>
@@ -1017,15 +1096,18 @@ function buildCan(tier) {
 
 async function initTier() {
   let tier = 'free'; // safe default — never crashes even if Supabase is unreachable
+  let session = null;
 
   try {
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-    // 1. Get the logged-in user
-    const { data: { user }, error: authErr } = await sb.auth.getUser();
+    // 1. Get session (single call — reused for both tier and nav)
+    const { data: sessionData } = await sb.auth.getSession();
+    session = sessionData?.session ?? null;
+    const user = session?.user ?? null;
 
-    if (user && !authErr) {
-      // 2. Fetch their tier from profiles table
+    if (user) {
+      // 2. Fetch tier from profiles table
       const { data: profile, error: profileErr } = await sb
         .from('profiles')
         .select('tier')
@@ -1042,6 +1124,25 @@ async function initTier() {
   }
 
   buildCan(tier);
+
+  // Change 3 — Update nav tier badge with real tier
+  const badge = document.getElementById('toolTierBadge');
+  if (badge) {
+    const labels = { free: 'Free', basic: 'Basic', premium: 'Premium' };
+    badge.textContent = labels[TIER] || 'Free';
+    badge.className   = 'tool-tier-badge ' + TIER;
+  }
+
+  // Change 4 — Logo and back button navigate based on auth state
+  const logoLink = document.getElementById('logoLink');
+  const backBtn  = document.getElementById('backBtn');
+  if (logoLink && backBtn) {
+    const dest = session ? 'dashboard.html' : 'index.html';
+    logoLink.setAttribute('href', dest);
+    backBtn.setAttribute('href', dest);
+    backBtn.textContent = session ? '← Dashboard' : '← Home';
+  }
+
   initUI();
 }
 
@@ -2854,7 +2955,7 @@ function renderPlan(){
                 <div class="mendo-ex-meta"><span>${roundsPerEx} rounds × ${pd.reps} reps</span><span>${ex.note||''}</span></div>
               </div>
             </div>
-            ${can.exerciseSwap?`<button class="mendo-swap-btn" onclick="openMendoSwap('${day.sessId}',${ei},${di})">⇄ Swap</button>`:""}
+            ${can.exerciseSwap?`<button class="mendo-swap-btn" onclick="openMendoSwap('${day.sessId}',${ei},${di})">⇄ Swap</button>`:`<button class="mendo-swap-btn swap-locked" onclick="showNudgeModal('basic')">⇄ Swap</button>`}
           </div>`;
         });
       } else if(day.sessId === 'B2'){
@@ -2871,7 +2972,7 @@ function renderPlan(){
                 <div class="mendo-ex-meta"><span>${minuteExamples.slice(0,3).join(', ')}${minuteExamples.length>3?'…':''}</span><span>${pd.reps} reps @ ${pd.pct}</span><span>${ex.note||''}</span></div>
               </div>
             </div>
-            ${can.exerciseSwap?`<button class="mendo-swap-btn" onclick="openMendoSwap('${day.sessId}',${ei},${di})">⇄ Swap</button>`:""}
+            ${can.exerciseSwap?`<button class="mendo-swap-btn" onclick="openMendoSwap('${day.sessId}',${ei},${di})">⇄ Swap</button>`:`<button class="mendo-swap-btn swap-locked" onclick="showNudgeModal('basic')">⇄ Swap</button>`}
           </div>`;
         });
       } else {
@@ -2882,7 +2983,7 @@ function renderPlan(){
             <div class="mendo-ex-name">${ex.name||'Exercise'}</div>
             <div class="mendo-ex-meta"><span>${ex.note||''}</span></div>
           </div>
-          ${can.exerciseSwap?`<button class="mendo-swap-btn" onclick="openMendoSwap('${day.sessId}',0,${di})">⇄ Swap</button>`:""}
+          ${can.exerciseSwap?`<button class="mendo-swap-btn" onclick="openMendoSwap('${day.sessId}',0,${di})">⇄ Swap</button>`:`<button class="mendo-swap-btn swap-locked" onclick="showNudgeModal('basic')">⇄ Swap</button>`}
         </div>`;
       }
 
@@ -2951,7 +3052,7 @@ function renderPlan(){
           const _ssIdx = ssExIdx++;
           html+=`<div class="ex-row">
             <div>
-              <div class="ex-name">${ssLabel}${ex.name}<span class="ex-cat ${catCls}">${catLbl}</span><button class="cues-btn" onclick="showCuesModal('${ex.id}')" title="Execution checklist">📋 Form</button>${can.exerciseSwap?`<button class="swap-btn" onclick="showSwapModal(${di},${_ssIdx},'${ex.id}')" title="Swap this exercise">⇄ Swap</button>`:''}</div>
+              <div class="ex-name">${ssLabel}${ex.name}<span class="ex-cat ${catCls}">${catLbl}</span><button class="cues-btn" onclick="showCuesModal('${ex.id}')" title="Execution checklist">📋 Form</button><button class="swap-btn${can.exerciseSwap?'':' swap-locked'}" onclick="${can.exerciseSwap?`showSwapModal(${di},${_ssIdx},'${ex.id}')`:`showNudgeModal('basic')`}" title="${can.exerciseSwap?'Swap this exercise':'Upgrade to swap exercises'}">⇄ Swap</button></div>
               <div class="ex-muscles">${muscles}</div>
               ${ex.note?`<div class="ex-note">💡 ${ex.note}</div>`:''}
             </div>
@@ -2981,7 +3082,7 @@ function renderPlan(){
         const badge=getLoadBadge(day.focus||S.focus,S.secondaryFocus,week.phase,isBW,week.weekNum,S.weeks);
         html+=`<div class="ex-row">
           <div>
-            <div class="ex-name"><span class="ex-num">${ei+1}</span>${ex.name}<span class="ex-cat ${catCls}">${catLbl}</span><button class="cues-btn" onclick="showCuesModal('${ex.id}')" title="Execution checklist">📋 Form</button>${can.exerciseSwap?`<button class="swap-btn" onclick="showSwapModal(${di},${ei},'${ex.id}')" title="Swap this exercise">⇄ Swap</button>`:''}</div>
+            <div class="ex-name"><span class="ex-num">${ei+1}</span>${ex.name}<span class="ex-cat ${catCls}">${catLbl}</span><button class="cues-btn" onclick="showCuesModal('${ex.id}')" title="Execution checklist">📋 Form</button><button class="swap-btn${can.exerciseSwap?'':' swap-locked'}" onclick="${can.exerciseSwap?`showSwapModal(${di},${ei},'${ex.id}')`:`showNudgeModal('basic')`}" title="${can.exerciseSwap?'Swap this exercise':'Upgrade to swap exercises'}">⇄ Swap</button></div>
             <div class="ex-muscles">${muscles}</div>
             ${ex.note?`<div class="ex-note">💡 ${ex.note}</div>`:''}
           </div>
@@ -3095,10 +3196,46 @@ function renderVolumeTable(matrix, weeks){
 // =====================================================================
 // BUILD & SHOW
 // =====================================================================
+// =====================================================================
+// DAYS SLIDER — snap-back + lock-zone overlay
+// =====================================================================
+function onWpwInput(el){
+  const maxDays = can.sixSessionMax ? 6 : can.fiveSessionMax ? 5 : 3;
+  const val = +el.value;
+  if(val > maxDays){
+    // Snap back to limit
+    el.value = maxDays;
+    S.wpw = maxDays;
+    document.getElementById('wpw-val').textContent = maxDays;
+    // Show upgrade nudge modal
+    const targetTier = can.fiveSessionMax ? 'premium' : 'basic';
+    showNudgeModal(targetTier);
+  } else {
+    S.wpw = val;
+    document.getElementById('wpw-val').textContent = val;
+  }
+  updateSplitHint();
+  updateDayFocusGrid();
+}
+
+// Position the hatched overlay that visually marks the locked zone
+function updateWpwLockZone(maxDays){
+  const zone = document.getElementById('wpw-lock-zone');
+  const sl   = document.getElementById('sl-wpw');
+  if(!zone || !sl) return;
+  if(maxDays >= 6){ zone.style.display = 'none'; return; }
+  // Slider range: 2–6 = 4 steps. Locked zone starts after maxDays.
+  // Position as % of track width
+  const totalSteps = 6 - 2; // 4
+  const lockedFrom = (maxDays - 2) / totalSteps; // 0–1
+  zone.style.display = 'block';
+  zone.style.left  = (lockedFrom * 100) + '%';
+  zone.style.width = ((1 - lockedFrom) * 100) + '%';
+}
+
 function buildAndShow(){
   // Tier enforcement — hard caps in case HTML was manipulated
   const maxDays = can.sixSessionMax ? 6 : can.fiveSessionMax ? 5 : 3;
-  if(S.wpw > maxDays) S.wpw = maxDays;
   if(!can.longerPlans && S.weeks !== 4) S.weeks = 4;
   if(!can.priority) S.priority = [];
   if(!can.supersets) S.superset = false;
@@ -3487,7 +3624,7 @@ function togglePriority(el){
 function showView(name){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById(`view-${name}`).classList.add('active');
-  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tool-inner-nav button').forEach(b=>b.classList.remove('active'));
   document.getElementById(`nav-${name}`).classList.add('active');
   if(name==='tracker') initTracker();
   window.scrollTo({top:0,behavior:'smooth'});
@@ -3523,13 +3660,16 @@ window.addEventListener('load', initTier);
 // =====================================================================
 function initTierGating(){
 
-  // ── Days slider cap ──────────────────────────────────────────────
+  // ── Days slider — always max=6, locked zone shown for capped tiers ──
   const maxDays = can.sixSessionMax ? 6 : can.fiveSessionMax ? 5 : 3;
   const slWpw = document.getElementById('sl-wpw');
   if(slWpw){
-    slWpw.max = maxDays;
+    // Keep max=6 so the full range is always visible
+    // Snap to limit if currently over it
     if(S.wpw > maxDays){ S.wpw = maxDays; slWpw.value = maxDays; document.getElementById('wpw-val').textContent = maxDays; }
     updateSplitHint();
+    // Position the locked-zone hatching overlay
+    updateWpwLockZone(maxDays);
   }
   // Inline nudge under days slider
   if(!can.fiveSessionMax || !can.sixSessionMax){
@@ -3631,15 +3771,7 @@ function initTierGating(){
       navTrk.onclick = (e)=>{ e.preventDefault(); showNudgeModal('premium'); };
     }
   }
-
-  // ── Tier badge in header ──────────────────────────────────────────
-  const logoText = document.querySelector('.logo-text');
-  if(logoText && TIER !== 'premium' && !logoText.querySelector('.tier-header-badge')){
-    const badge = document.createElement('span');
-    badge.className = 'tier-header-badge';
-    badge.textContent = TIER === 'free' ? 'FREE' : 'BASIC';
-    logoText.appendChild(badge);
-  }
+  // Note: tier badge is now handled by initTier() via #toolTierBadge in the platform nav
 }
 
 // Inline nudge modal — small overlay, not an alert

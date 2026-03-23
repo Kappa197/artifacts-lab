@@ -4,17 +4,126 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Retirement Runway Calculator</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="preconnect" href="https://fvgajfiksxmwioxnesry.supabase.co">
+<link rel="dns-prefetch" href="https://fvgajfiksxmwioxnesry.supabase.co">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=JetBrains+Mono:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
 <style>
+  :root {
+    --navy:      #0B0F1A;
+    --navy2:     #111827;
+    --navy3:     #1A2235;
+    --navy4:     #243048;
+    --border:    #2A3B55;
+    --border2:   #334466;
+    --amber:     #D4920A;
+    --amber2:    #F5A623;
+    --amber-dim: rgba(212,146,10,0.12);
+    --green:     #2ECC8A;
+    --green-dim: rgba(46,204,138,0.1);
+    --blue:      #4A90D9;
+    --blue-dim:  rgba(74,144,217,0.1);
+    --purple:    #9B72CF;
+    --rose:      #FB7185;
+    --rose-dim:  rgba(251,113,133,0.1);
+    --teal:      #2DD4BF;
+    --teal-dim:  rgba(45,212,191,0.1);
+    --text:      #E8EDF5;
+    --text2:     #9BAAC4;
+    --text3:     #5A6A8A;
+    --mono:      'JetBrains Mono', monospace;
+    --body:      'Outfit', sans-serif;
+    --serif:     'Playfair Display', serif;
+  }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     min-height: 100vh;
-    background: linear-gradient(135deg, #080b13 0%, #0f1625 50%, #0a1020 100%);
-    font-family: Georgia, serif;
-    color: #e2e8f0;
-    padding: 40px 24px;
+    background: var(--navy);
+    font-family: var(--body);
+    color: var(--text);
+    padding: 0 0 40px;
     font-size: 14px;
+    position: relative;
   }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(212,146,10,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(212,146,10,0.025) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none; z-index: 0;
+  }
+  /* Tool content sits above grid overlay */
+  body > * { position: relative; z-index: 1; }
+  /* ── Platform nav ── */
+  .tool-header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(11,15,26,0.92);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center;
+    justify-content: space-between;
+    padding: 0 28px; height: 60px;
+    gap: 16px; margin-bottom: 32px;
+  }
+  .tool-nav-logo {
+    display: flex; align-items: center; gap: 10px;
+    text-decoration: none; flex-shrink: 0; cursor: pointer;
+  }
+  .tool-nav-icon {
+    width: 28px; height: 28px;
+    background: var(--amber-dim);
+    border: 1px solid var(--amber);
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem;
+  }
+  .tool-nav-brand {
+    font-family: var(--serif);
+    font-size: 0.95rem; font-weight: 700;
+    color: var(--amber2);
+  }
+  .tool-nav-sep { color: var(--border2); font-size: 1rem; }
+  .tool-nav-title {
+    font-family: var(--mono);
+    font-size: 0.58rem; font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--text3);
+  }
+  .tool-nav-right { display: flex; align-items: center; gap: 12px; }
+  .tool-tier-badge {
+    font-family: var(--mono);
+    font-size: 0.55rem; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 4px 12px; border-radius: 99px;
+    border: 1px solid var(--border2);
+    color: var(--text3); background: transparent;
+    transition: all 0.2s;
+  }
+  .tool-tier-badge.basic   { color: var(--blue);   border-color: var(--blue);  background: var(--blue-dim); }
+  .tool-tier-badge.premium { color: var(--amber2); border-color: var(--amber); background: var(--amber-dim); }
+  .tool-nav-back {
+    font-family: var(--mono);
+    font-size: 0.6rem; letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 7px 14px; border-radius: 6px;
+    background: var(--navy3);
+    border: 1px solid var(--border2);
+    color: var(--text3);
+    text-decoration: none; cursor: pointer;
+    transition: all 0.2s; white-space: nowrap;
+  }
+  .tool-nav-back:hover { border-color: var(--amber); color: var(--amber2); }
+  @media (max-width: 600px) {
+    .tool-header { padding: 0 16px; }
+    .tool-nav-brand { display: none; }
+    .tool-nav-sep   { display: none; }
+  }
+  /* ── Tool content wrapper ── */
+  .tool-content { padding: 0 24px; max-width: 1400px; margin: 0 auto; }
   input[type=number] {
     background: #0a0e1a; border: 1px solid #1e2535; border-radius: 6px;
     color: #e2e8f0; padding: 8px 12px; font-size: 13px;
@@ -114,12 +223,20 @@
 </head>
 <body>
 
-<!-- Header -->
-<div style="text-align:center;margin-bottom:40px">
-  <p style="font-family:'Courier New',monospace;font-size:11px;letter-spacing:0.25em;color:#c9a84c;margin-bottom:10px;text-transform:uppercase">Financial Independence Planner</p>
-  <h1 style="font-family:Georgia,serif;font-size:clamp(28px,5vw,50px);font-weight:300;color:#fff;line-height:1.1">Retirement Runway</h1>
-  <p style="color:#64748b;font-family:'Courier New',monospace;font-size:12px;margin-top:10px">Model your financial independence — adjust assumptions and see the impact</p>
-</div>
+<header class="tool-header" id="toolHeader">
+  <a href="javascript:void(0)" class="tool-nav-logo" id="logoLink">
+    <div class="tool-nav-icon">&#9879;&#65039;</div>
+    <div class="tool-nav-brand">The Artifacts Lab</div>
+    <div class="tool-nav-sep">|</div>
+    <div class="tool-nav-title">Retirement Calculator</div>
+  </a>
+  <div class="tool-nav-right">
+    <div class="tool-tier-badge" id="toolTierBadge">Free</div>
+    <a href="javascript:void(0)" class="tool-nav-back" id="backBtn">&#8592; Dashboard</a>
+  </div>
+</header>
+
+<div class="tool-content">
 
 <!-- Tab bar -->
 <div class="tab-bar">
@@ -830,12 +947,11 @@ function buildCan(tier) {
 }
 
 async function initTier() {
-  // Show a subtle loading state on the header while fetching
-  const header = document.querySelector('h1');
-  if (header) header.style.opacity = '0.5';
-
   try {
-    const { data: { user } } = await _sb.auth.getUser();
+    // Get session first (single call — reused for both tier and nav)
+    const { data: { session } } = await _sb.auth.getSession();
+    const user = session?.user ?? null;
+
     if (user) {
       const { data: profile } = await _sb
         .from('profiles')
@@ -844,14 +960,31 @@ async function initTier() {
         .single();
       buildCan(profile?.tier ?? 'free');
     } else {
-      buildCan('free');  // not logged in → free tier
+      buildCan('free');
     }
   } catch (e) {
     console.warn('Supabase tier fetch failed, defaulting to free:', e.message);
     buildCan('free');
   }
 
-  if (header) header.style.opacity = '';
+  // Change 3 — update tier badge in nav
+  const badge = document.getElementById('toolTierBadge');
+  if (badge) {
+    const labels = { free: 'Free', basic: 'Basic', premium: 'Premium' };
+    badge.textContent = labels[TIER] || 'Free';
+    badge.className   = 'tool-tier-badge ' + TIER;
+  }
+
+  // Change 4 — logo & back button navigation
+  const logoLink = document.getElementById('logoLink');
+  const backBtn  = document.getElementById('backBtn');
+  if (logoLink && backBtn) {
+    const { data: { session: sess } } = await _sb.auth.getSession();
+    const dest = sess ? 'dashboard.html' : 'index.html';
+    logoLink.setAttribute('href', dest);
+    backBtn.setAttribute('href', dest);
+    backBtn.textContent = sess ? '← Dashboard' : '← Home';
+  }
 
   // Boot the app now that tier is known
   buildPeriodInputs();
@@ -3342,5 +3475,6 @@ function initUI() {
 // initUI() and recalc(). Everything is driven from there.
 window.addEventListener('load', initTier);
 </script>
+</div><!-- end .tool-content -->
 </body>
 </html>

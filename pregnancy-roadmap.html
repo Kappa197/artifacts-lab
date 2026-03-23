@@ -4,75 +4,158 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pregnancy Roadmap — The Artifacts Lab</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fvgajfiksxmwioxnesry.supabase.co" />
+  <link rel="dns-prefetch" href="https://fvgajfiksxmwioxnesry.supabase.co" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=JetBrains+Mono:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
   <style>
-    /* ═══ TOKENS ═══ */
+    /* ═══ PLATFORM TOKENS ═══ */
     :root {
-      --navy:        #09101f;
-      --navy-card:   #111827;
-      --navy-mid:    #1a2438;
-      --navy-light:  #243049;
-      --amber:       #f5a623;
-      --amber-lt:    #fcd166;
-      --amber-dim:   rgba(245,166,35,.14);
-      --rose:        #fb7185;
-      --rose-dim:    rgba(251,113,133,.13);
-      --teal:        #2dd4bf;
-      --teal-dim:    rgba(45,212,191,.13);
+      --navy:      #0B0F1A;
+      --navy2:     #111827;
+      --navy3:     #1A2235;
+      --navy4:     #243048;
+      --border:    #2A3B55;
+      --border2:   #334466;
+      --amber:     #D4920A;
+      --amber2:    #F5A623;
+      --amber-dim: rgba(212,146,10,0.12);
+      --green:     #2ECC8A;
+      --green-dim: rgba(46,204,138,0.1);
+      --blue:      #4A90D9;
+      --blue-dim:  rgba(74,144,217,0.1);
+      --purple:    #9B72CF;
+      --rose:      #FB7185;
+      --rose-dim:  rgba(251,113,133,0.1);
+      --teal:      #2DD4BF;
+      --teal-dim:  rgba(45,212,191,0.1);
+      --text:      #E8EDF5;
+      --text2:     #9BAAC4;
+      --text3:     #5A6A8A;
+      --mono:      'JetBrains Mono', monospace;
+      --body:      'Outfit', sans-serif;
+      --serif:     'Playfair Display', serif;
+      /* Tool-specific extras (not in platform palette) */
       --violet:      #a78bfa;
       --violet-dim:  rgba(167,139,250,.13);
-      --green:       #4ade80;
-      --green-dim:   rgba(74,222,128,.13);
       --orange:      #fb923c;
       --sky:         #38bdf8;
       --sky-dim:     rgba(56,189,248,.13);
-      --text:        #f0f4fc;
-      --text-muted:  #7a8caa;
-      --border:      rgba(245,166,35,.18);
+      /* Aliases for legacy tool CSS */
+      --navy-card:   var(--navy2);
+      --navy-mid:    var(--navy3);
+      --navy-light:  var(--navy4);
+      --amber-lt:    #fcd166;
       --border-soft: rgba(240,244,252,.08);
       --shadow:      0 4px 24px rgba(0,0,0,.45);
-      --font-d: 'Playfair Display',serif;
-      --font-b: 'Outfit',sans-serif;
-      --font-m: 'JetBrains Mono',monospace;
+      --text-muted:  var(--text2);
+      --font-d: var(--serif);
+      --font-b: var(--body);
+      --font-m: var(--mono);
       --r-sm: 8px; --r-md: 14px; --r-lg: 20px; --r-xl: 28px;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
-    body { background: var(--navy); color: var(--text); font-family: var(--font-b); font-size: 16px; line-height: 1.6; min-height: 100vh; }
-
-    /* ═══ NAV ═══ */
-    .top-nav {
-      position: sticky; top: 0; z-index: 100;
-      background: rgba(9,16,31,.93); backdrop-filter: blur(14px);
-      border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 20px; height: 58px; gap: 12px;
+    body {
+      background: var(--navy); color: var(--text);
+      font-family: var(--body); font-size: 16px;
+      line-height: 1.6; min-height: 100vh;
+      position: relative;
     }
-    .nav-brand { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-    .nav-logo  { font-family: var(--font-m); font-size: 11px; font-weight: 700; color: var(--amber); letter-spacing: .08em; text-transform: uppercase; }
-    .nav-sep   { color: var(--border); font-size: 18px; }
-    .nav-title { font-family: var(--font-d); font-size: 17px; color: var(--text); }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(212,146,10,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(212,146,10,0.025) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none; z-index: 0;
+    }
+    body > * { position: relative; z-index: 1; }
+
+    /* ═══ PLATFORM NAV ═══ */
+    .tool-header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(11,15,26,0.92);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 0 28px; height: 60px;
+      gap: 16px;
+    }
+    .tool-nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; flex-shrink: 0; cursor: pointer;
+    }
+    .tool-nav-icon {
+      width: 28px; height: 28px;
+      background: var(--amber-dim);
+      border: 1px solid var(--amber);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem;
+    }
+    .tool-nav-brand {
+      font-family: var(--serif);
+      font-size: 0.95rem; font-weight: 700;
+      color: var(--amber2);
+    }
+    .tool-nav-sep { color: var(--border2); font-size: 1rem; }
+    .tool-nav-title {
+      font-family: var(--mono);
+      font-size: 0.58rem; font-weight: 600;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--text3);
+    }
+    .tool-nav-right { display: flex; align-items: center; gap: 12px; }
+    .tool-tier-badge {
+      font-family: var(--mono);
+      font-size: 0.55rem; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      padding: 4px 12px; border-radius: 99px;
+      border: 1px solid var(--border2);
+      color: var(--text3); background: transparent;
+      transition: all 0.2s;
+    }
+    .tool-tier-badge.basic   { color: var(--blue);   border-color: var(--blue);  background: var(--blue-dim); }
+    .tool-tier-badge.premium { color: var(--amber2); border-color: var(--amber); background: var(--amber-dim); }
+    .tool-nav-back {
+      font-family: var(--mono);
+      font-size: 0.6rem; letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 7px 14px; border-radius: 6px;
+      background: var(--navy3);
+      border: 1px solid var(--border2);
+      color: var(--text3);
+      text-decoration: none; cursor: pointer;
+      transition: all 0.2s; white-space: nowrap;
+    }
+    .tool-nav-back:hover { border-color: var(--amber); color: var(--amber2); }
+
+    /* Tool page tabs (sit inside tool-header) */
     .nav-tabs  { display: flex; gap: 3px; }
     .nav-tab {
       background: none; border: none; cursor: pointer;
-      font-family: var(--font-b); font-size: 13px; font-weight: 500;
-      color: var(--text-muted); padding: 6px 13px; border-radius: 20px;
+      font-family: var(--body); font-size: 13px; font-weight: 500;
+      color: var(--text2); padding: 6px 13px; border-radius: 20px;
       transition: all .2s; white-space: nowrap;
     }
-    .nav-tab:hover  { color: var(--text); background: var(--border); }
-    .nav-tab.active { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(245,166,35,.3); }
-    .nav-tier {
-      font-family: var(--font-m); font-size: 10px; font-weight: 700;
-      letter-spacing: .08em; text-transform: uppercase;
-      padding: 3px 10px; border-radius: 20px;
-      border: 1px solid var(--border); color: var(--text-muted); flex-shrink: 0;
+    .nav-tab:hover  { color: var(--text); background: rgba(212,146,10,.1); }
+    .nav-tab.active { background: var(--amber-dim); color: var(--amber2); border: 1px solid rgba(212,146,10,.3); }
+
+    @media (max-width: 600px) {
+      .tool-header { padding: 0 16px; }
+      .tool-nav-brand { display: none; }
+      .tool-nav-sep   { display: none; }
     }
-    .nav-tier.basic   { color: var(--teal);  border-color: var(--teal); }
-    .nav-tier.premium { color: var(--amber); border-color: var(--amber); }
+    @media (max-width: 400px) {
+      .nav-tabs { gap: 1px; }
+      .nav-tab  { font-size: 11px; padding: 5px 7px; }
+    }
 
     /* ═══ PAGES ═══ */
     .page { display: none; }
@@ -664,10 +747,6 @@
 
     /* ═══ RESPONSIVE ═══ */
     @media (max-width: 720px) {
-      .top-nav { padding: 0 14px; }
-      .nav-logo, .nav-sep { display: none; }
-      .nav-title { font-size: 14px; }
-      .nav-tab { font-size: 12px; padding: 5px 9px; }
       .roadmap-hero { grid-template-columns: 1fr; padding: 24px 22px; }
       .progress-ring-wrap { order: -1; } .progress-ring-wrap svg { width: 110px; height: 110px; }
       .trimester-grid, .countdown-row { grid-template-columns: 1fr; }
@@ -686,11 +765,6 @@
       .faq-q { padding: 16px 18px; }
       .faq-a { padding: 0 18px 16px; }
     }
-    @media (max-width: 400px) {
-      .nav-tabs { gap: 1px; }
-      .nav-tab  { font-size: 11px; padding: 5px 7px; }
-    }
-
     /* ═══ UTILITY ═══ */
     .hidden { display: none !important; }
     @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
@@ -703,21 +777,25 @@
 </head>
 <body>
 
-<!-- ══════ NAV ══════ -->
-<nav class="top-nav">
-  <div class="nav-brand">
-    <span class="nav-logo">The Artifacts Lab</span>
-    <span class="nav-sep">·</span>
-    <span class="nav-title">Pregnancy Roadmap</span>
-  </div>
+<!-- ══════ PLATFORM NAV ══════ -->
+<header class="tool-header" id="toolHeader">
+  <a href="javascript:void(0)" class="tool-nav-logo" id="logoLink">
+    <div class="tool-nav-icon">⚗️</div>
+    <div class="tool-nav-brand">The Artifacts Lab</div>
+    <div class="tool-nav-sep">|</div>
+    <div class="tool-nav-title">Pregnancy Roadmap</div>
+  </a>
   <div class="nav-tabs">
-    <button class="nav-tab active"  onclick="switchPage('roadmap')">Roadmap</button>
-    <button class="nav-tab"         onclick="switchPage('wellness')">Wellness</button>
-    <button class="nav-tab"         onclick="switchPage('weekly')">Weekly</button>
-    <button class="nav-tab"         onclick="switchPage('help')">Help</button>
+    <button class="nav-tab active" onclick="switchPage('roadmap')">Roadmap</button>
+    <button class="nav-tab"        onclick="switchPage('wellness')">Wellness</button>
+    <button class="nav-tab"        onclick="switchPage('weekly')">Weekly</button>
+    <button class="nav-tab"        onclick="switchPage('help')">Help</button>
   </div>
-  <span class="nav-tier" id="tierBadge">Free</span>
-</nav>
+  <div class="tool-nav-right">
+    <div class="tool-tier-badge" id="toolTierBadge">Free</div>
+    <a href="javascript:void(0)" class="tool-nav-back" id="backBtn">← Home</a>
+  </div>
+</header>
 
 <!-- ══════════════════════════════════════════════
      ROADMAP PAGE
@@ -1314,22 +1392,38 @@ function buildCan(t) {
 
 async function initTier() {
   try {
-    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    const { data: { user } } = await sb.auth.getUser();
-    if (user) {
-      const { data } = await sb.from('profiles').select('tier').eq('id', user.id).single();
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // Single getSession call — reused for both tier and nav logic
+    const { data: { session } } = await db.auth.getSession();
+
+    if (session?.user) {
+      const { data } = await db.from('profiles').select('tier').eq('id', session.user.id).single();
       TIER = data?.tier || 'free';
     }
-  } catch (_) {}
-  can = buildCan(TIER);
-  updateTierBadge();
-  if (!document.getElementById('roadmap-screen').classList.contains('hidden')) renderTimeline();
-}
 
-function updateTierBadge() {
-  const b = document.getElementById('tierBadge');
-  b.textContent = TIER.charAt(0).toUpperCase() + TIER.slice(1);
-  b.className   = 'nav-tier ' + TIER;
+    // Change 3 — update nav tier badge
+    const badge = document.getElementById('toolTierBadge');
+    if (badge) {
+      const labels = { free: 'Free', basic: 'Basic', premium: 'Premium' };
+      badge.textContent = labels[TIER] || 'Free';
+      badge.className   = 'tool-tier-badge ' + TIER;
+    }
+
+    // Change 4 — logo + back button navigate based on auth state
+    const logoLink = document.getElementById('logoLink');
+    const backBtn  = document.getElementById('backBtn');
+    if (logoLink && backBtn) {
+      const dest = session ? 'dashboard.html' : 'index.html';
+      logoLink.setAttribute('href', dest);
+      backBtn.setAttribute('href', dest);
+      backBtn.textContent = session ? '← Dashboard' : '← Home';
+    }
+
+  } catch (_) {}
+
+  can = buildCan(TIER);
+  if (!document.getElementById('roadmap-screen').classList.contains('hidden')) renderTimeline();
 }
 
 window.addEventListener('load', initTier);
