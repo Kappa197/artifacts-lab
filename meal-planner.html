@@ -133,6 +133,8 @@ input[type=range]::-moz-range-track{height:4px;background:var(--navy4);border-ra
 .plan-hsub{font-size:11px;opacity:.7;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hdr-btns{display:flex;gap:6px;flex-shrink:0}
 .hdr-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .2s}
+.shop-btn-styled{background:var(--green-dim);border-color:var(--green);color:var(--green);font-weight:700}
+.shop-btn-styled:hover{background:var(--green);color:#fff}
 .hdr-btn:hover{background:rgba(255,255,255,.25)}
 .portion-bar{background:var(--navy2);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:12px}
 .portion-label{font-size:13px;font-weight:600;color:var(--text)}
@@ -371,18 +373,17 @@ input[type=range]::-moz-range-track{height:4px;background:var(--navy4);border-ra
 .plan-hsub{font-size:11px;color:var(--text3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
 
-/* ── MOBILE DAY LAYOUT ───────────────────────── */
-.micro-bar-rda{font-size:9px;color:var(--text3);width:64px;text-align:right;flex-shrink:0}
+/* ── MOBILE & DAY VIEW ───────────────────────── */
+.micro-bar-rda{font-size:9px;color:var(--text3);width:58px;text-align:right;flex-shrink:0}
 .micro-bar-fill.mid{background:var(--amber)}
 .nutr-micro-note{font-size:10px;color:var(--text3);margin-bottom:10px;line-height:1.5}
-/* Day selector (mobile only) */
+/* Day selector */
 .day-selector{display:none;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:8px 12px;gap:6px;background:var(--navy2);border-bottom:1px solid var(--border)}
-.day-selector-btn{flex-shrink:0;padding:6px 12px;border-radius:20px;border:1.5px solid var(--border);background:transparent;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.08em;color:var(--text2);cursor:pointer;transition:all .2s;white-space:nowrap}
+.day-selector-btn{flex-shrink:0;padding:6px 14px;border-radius:20px;border:1.5px solid var(--border);background:transparent;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.08em;color:var(--text2);cursor:pointer;transition:all .2s;white-space:nowrap}
 .day-selector-btn.active{border-color:var(--amber);background:var(--amber-dim);color:var(--amber2)}
 /* Mobile meal stack */
 .mobile-day-view{display:none;flex-direction:column;gap:10px;padding:12px 14px}
-.mobile-meal-card{background:var(--navy2);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:box-shadow .2s}
-.mobile-meal-card:active{opacity:.85}
+.mobile-meal-card{background:var(--navy2);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:box-shadow .2s}
 .mmc-slot-bar{height:3px;width:100%}
 .mmc-slot-bar.breakfast{background:#C4622D}
 .mmc-slot-bar.snack1,.mmc-slot-bar.snack2{background:#5A7A4A}
@@ -391,25 +392,24 @@ input[type=range]::-moz-range-track{height:4px;background:var(--navy4);border-ra
 .mmc-body{padding:12px 14px}
 .mmc-slot-label{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
 .mmc-content{display:flex;align-items:center;gap:12px}
-.mmc-emoji{font-size:24px;flex-shrink:0}
-.mmc-info{flex:1;min-width:0}
-.mmc-name{font-size:13px;font-weight:600;color:var(--text);line-height:1.35;margin-bottom:3px}
+.mmc-emoji{font-size:26px;flex-shrink:0;cursor:pointer}
+.mmc-info{flex:1;min-width:0;cursor:pointer}
+.mmc-name{font-size:14px;font-weight:600;color:var(--text);line-height:1.35;margin-bottom:3px}
 .mmc-meta{font-size:11px;color:var(--text2)}
-.mmc-actions{display:flex;flex-direction:column;gap:6px;flex-shrink:0}
-.mmc-action-btn{width:34px;height:34px;border-radius:8px;border:1px solid var(--border);background:var(--navy3);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
-.mmc-action-btn:active{transform:scale(.9)}
+.mmc-actions{display:flex;gap:6px;flex-shrink:0}
+.mmc-action-btn{width:36px;height:36px;border-radius:8px;border:1px solid var(--border);background:var(--navy3);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.mmc-action-btn:active{transform:scale(.88)}
 .mmc-action-btn.heart.fav{border-color:var(--rose);background:var(--rose-dim)}
-.mmc-action-btn.swap-action{border-color:var(--border2)}
 .mobile-day-total{text-align:center;padding:8px;font-size:11px;color:var(--text3);border-top:1px solid var(--border);margin-top:4px}
 .mobile-day-total strong{color:var(--amber);font-family:var(--serif)}
-/* View mode — toggled by JS, not media query */
-/* Default: week view shown, day view hidden */
-.day-selector{ display:none; }
-.mobile-day-view{ display:none; }
-/* When day-view mode is active */
-body.day-view .week-grid{ display:none; }
-body.day-view .day-selector{ display:flex; }
-body.day-view .mobile-day-view{ display:flex; }
+/* View toggle button in subheader */
+.view-toggle-btn{padding:7px 14px;border-radius:8px;background:var(--amber-dim);border:1.5px solid var(--amber);color:var(--amber2);font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;cursor:pointer;transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:5px}
+.view-toggle-btn:hover{background:var(--amber);color:#fff}
+.view-toggle-btn.active{background:var(--amber);border-color:var(--amber2);color:#fff}
+/* Day view mode (body class) */
+body.day-view .week-grid{display:none}
+body.day-view .day-selector{display:flex}
+body.day-view .mobile-day-view{display:flex}
 
 </style>
 </head>
@@ -551,7 +551,7 @@ body.day-view .mobile-day-view{ display:flex; }
 <div id="planPage" class="page">
   <div class="plan-subheader">
     <div class="plan-hinfo"><div class="plan-htitle">Meal Plan</div><div class="plan-hsub" id="planSub"></div></div>
-    <div class="hdr-btns"><button class="hdr-btn" id="viewToggleBtn" title="Switch view">⊞ Week</button><button class="hdr-btn" id="shopBtn">🛒 List</button><button class="hdr-btn" id="printBtn">🖨️</button></div>
+    <div class="hdr-btns"><button class="view-toggle-btn" id="viewToggleBtn">☰ Day</button><button class="hdr-btn shop-btn-styled" id="shopBtn">🛒 Shopping List</button><button class="hdr-btn" id="printBtn">🖨️</button></div>
   </div>
   <div class="portion-bar">
     <span class="portion-label">Serves</span>
@@ -685,7 +685,9 @@ const R=[
 // ─── SUPABASE ────────────────────────────────────────
 const SUPABASE_URL  = 'https://fvgajfiksxmwioxnesry.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2Z2FqZmlrc3htd2lveG5lc3J5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NDU4OTEsImV4cCI6MjA4OTIyMTg5MX0.KwqAzx1oAGeh0F3q1LfeQPXYjtdOjaOrzS_c4eUGKJY';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+// Safe init — falls back to free tier if Supabase CDN fails to load
+var sb = null;
+try { sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON); } catch(e){ console.warn('Supabase SDK not loaded, running in offline/free mode'); }
 
 // ─── TIER ────────────────────────────────────────────
 // Resolved at runtime from Supabase. Falls back to 'free'.
@@ -724,18 +726,20 @@ async function initTier(){
   document.getElementById('appLoader').style.display = 'flex';
 
   try {
-    const { data: { user }, error: authErr } = await sb.auth.getUser();
-    if(authErr || !user){
-      // Not logged in — free tier
-      buildCan('free');
-    } else {
-      const { data: profile, error: profileErr } = await sb
-        .from('profiles')
-        .select('tier')
-        .eq('id', user.id)
-        .single();
-      var tier = (profile && !profileErr) ? (profile.tier || 'free') : 'free';
-      buildCan(tier);
+    if(!sb){ buildCan('free'); }
+    else {
+      const { data: { user }, error: authErr } = await sb.auth.getUser();
+      if(authErr || !user){
+        buildCan('free');
+      } else {
+        const { data: profile, error: profileErr } = await sb
+          .from('profiles')
+          .select('tier')
+          .eq('id', user.id)
+          .single();
+        var tier = (profile && !profileErr) ? (profile.tier || 'free') : 'free';
+        buildCan(tier);
+      }
     }
   } catch(e){
     console.warn('Supabase unreachable — defaulting to free tier', e);
@@ -921,9 +925,11 @@ function generate(){
     slots[slot]=p;
   });
 
-  for(var sl of en){
-    if(!slots[sl]||!slots[sl].length){toast("No recipes for "+SLOT_LABELS[sl]+". Try adjusting filters.");return;}
-  }
+  var noSlot=false;
+  en.forEach(function(sl){
+    if(!noSlot&&(!slots[sl]||!slots[sl].length)){toast("No recipes for "+SLOT_LABELS[sl]+". Try adjusting filters.");noSlot=true;}
+  });
+  if(noSlot) return;
 
   var used={};
   var plan=[];
@@ -1026,8 +1032,6 @@ function renderWeek(wi){
   });
   wrap.appendChild(trow);
   cont.appendChild(wrap);
-  // Also render day view if active
-  if(dayViewActive) buildDaySelector(wi);
 }
 
 function makeMealCard(r,wi,di,slot){
@@ -1065,139 +1069,13 @@ function makeMealCard(r,wi,di,slot){
   return card;
 }
 
-// ─── MOBILE DAY VIEW ─────────────────────────────
-var S_mobileDay = 0; // which day is selected on mobile
-
-function renderMobileDay(wi, di){
-  S_mobileDay = di;
-  var en=Object.keys(S.slots).filter(function(k){return S.slots[k];});
-  var day=S.plan[wi][di];
-
-  // Update day selector active state
-  document.querySelectorAll(".day-selector-btn").forEach(function(b,i){
-    b.classList.toggle("active", i===di);
-  });
-
-  var view=document.getElementById("mobileDayView");
-  view.innerHTML="";
-
-  en.forEach(function(slot){
-    var r=day[slot];
-    var mk=Math.round((r.kcal[0]+r.kcal[1])/2*S.portions);
-    var mp=Math.round((r.prot[0]+r.prot[1])/2*S.portions);
-    var isFav=S.favourites.includes(r.id);
-
-    var card=document.createElement("div");
-    card.className="mobile-meal-card";
-
-    var bar=document.createElement("div");
-    bar.className="mmc-slot-bar "+slot;
-    card.appendChild(bar);
-
-    var body=document.createElement("div");
-    body.className="mmc-body";
-
-    var lbl=document.createElement("div");
-    lbl.className="mmc-slot-label";
-    lbl.textContent=SLOT_ICONS[slot]+" "+SLOT_LABELS[slot];
-    body.appendChild(lbl);
-
-    var content=document.createElement("div");
-    content.className="mmc-content";
-
-    var emojiEl=document.createElement("div");
-    emojiEl.className="mmc-emoji";
-    emojiEl.textContent=r.em;
-    content.appendChild(emojiEl);
-
-    var info=document.createElement("div");
-    info.className="mmc-info";
-    info.innerHTML="<div class='mmc-name'>"+r.name+"</div><div class='mmc-meta'>~"+mk+" kcal · "+mp+"g prot</div>";
-    // Tap name/emoji to open recipe
-    info.addEventListener("click",function(){openModal(r);});
-    emojiEl.addEventListener("click",function(){openModal(r);});
-    content.appendChild(info);
-
-    // Action buttons — always visible on mobile
-    var actions=document.createElement("div");
-    actions.className="mmc-actions";
-
-    var heartBtn=document.createElement("button");
-    heartBtn.className="mmc-action-btn heart"+(isFav?" fav":"");
-    heartBtn.textContent=isFav?"❤️":"🤍";
-    heartBtn.title=can.savedFavourites?"Toggle favourite":"Premium feature";
-    heartBtn.addEventListener("click",function(e){
-      e.stopPropagation();
-      if(!can.savedFavourites){nudge("Save favourites — available on Premium");return;}
-      var idx=S.favourites.indexOf(r.id);
-      if(idx>=0) S.favourites.splice(idx,1); else S.favourites.push(r.id);
-      saveFavourites();
-      var isFavNow=S.favourites.includes(r.id);
-      heartBtn.textContent=isFavNow?"❤️":"🤍";
-      heartBtn.classList.toggle("fav",isFavNow);
-    });
-    actions.appendChild(heartBtn);
-
-    var swapBtn=document.createElement("button");
-    swapBtn.className="mmc-action-btn swap-action";
-    swapBtn.textContent="🔄";
-    swapBtn.title="Swap recipe";
-    (function(capturedSlot, capturedDi){
-      swapBtn.addEventListener("click",function(e){
-        e.stopPropagation();
-        if(!can.recipeSwap){nudge("Recipe swap — available on Basic plan");return;}
-        openSwap(wi, capturedDi, capturedSlot);
-      });
-    })(slot, di);
-    actions.appendChild(swapBtn);
-
-    content.appendChild(actions);
-    body.appendChild(content);
-    card.appendChild(body);
-    view.appendChild(card);
-  });
-
-  // Day total
-  var slots2=en;
-  var lo=slots2.reduce(function(s,sl){return s+day[sl].kcal[0];},0);
-  var hi=slots2.reduce(function(s,sl){return s+day[sl].kcal[1];},0);
-  var tot=document.createElement("div");
-  tot.className="mobile-day-total";
-  tot.innerHTML="Est. daily total: <strong>"+Math.round((lo+hi)/2*S.portions)+" kcal</strong>";
-  view.appendChild(tot);
-}
-
-function buildDaySelector(wi){
-  var sel=document.getElementById("daySelector");
-  sel.innerHTML="";
-  DAYS.forEach(function(day,di){
-    var btn=document.createElement("button");
-    btn.className="day-selector-btn"+(di===0?" active":"");
-    btn.textContent=day;
-    btn.addEventListener("click",function(){
-      renderMobileDay(wi, di);
-    });
-    sel.appendChild(btn);
-  });
-  renderMobileDay(wi, 0);
-}
-
 // ─── NUTRITION SUMMARY ───────────────────────────────
-// RDA contribution per meal tagged with each micronutrient (% of daily RDA)
-// Based on updated nutritional science (2020+ DRI/EFSA references)
 var MICRO_RDA={
-  omega3:  {rda:"1.3g",   pct:35, note:"ALA+EPA+DHA combined"},
-  iron:    {rda:"14mg",   pct:22, note:"mixed plant+animal sources"},
-  calcium: {rda:"1000mg", pct:28, note:"per dairy/fortified serving"},
-  magnesium:{rda:"350mg", pct:18, note:"cumulative from grains/veg"},
-  vitC:    {rda:"80mg",   pct:50, note:"single fruit/veg portion"},
-  vitD:    {rda:"20mcg",  pct:22, note:"limited food sources"},
-  folate:  {rda:"400mcg", pct:30, note:"leafy greens/legumes"},
-  b12:     {rda:"2.4mcg", pct:45, note:"animal products concentrated"},
-  potassium:{rda:"3500mg",pct:18, note:"needs multiple daily sources"},
-  fiber:   {rda:"30g",    pct:16, note:"cumulative across meals"},
+  omega3:{rda:"1.3g",pct:35},iron:{rda:"14mg",pct:22},calcium:{rda:"1000mg",pct:28},
+  magnesium:{rda:"350mg",pct:18},vitC:{rda:"80mg",pct:50},vitD:{rda:"20mcg",pct:22},
+  folate:{rda:"400mcg",pct:30},b12:{rda:"2.4mcg",pct:45},
+  potassium:{rda:"3500mg",pct:18},fiber:{rda:"30g",pct:16},
 };
-
 function renderNutrition(wi){
   if(!can.nutritionSummary) return;
   var en=Object.keys(S.slots).filter(function(k){return S.slots[k];});
@@ -1210,24 +1088,21 @@ function renderNutrition(wi){
       totK+=(r.kcal[0]+r.kcal[1])/2; totP+=(r.prot[0]+r.prot[1])/2;
       totC+=(r.carbs[0]+r.carbs[1])/2; totF+=(r.fat[0]+r.fat[1])/2;
       r.mc.forEach(function(m){
-        if(mSum[m]!==undefined && MICRO_RDA[m]){
-          mSum[m]+=MICRO_RDA[m].pct;
-        }
+        if(mSum[m]!==undefined&&MICRO_RDA[m]) mSum[m]+=MICRO_RDA[m].pct;
       });
     });
   });
   var aK=Math.round(totK/7*S.portions),aP=Math.round(totP/7*S.portions);
   var aC=Math.round(totC/7),aF=Math.round(totF/7);
-  // Average daily RDA % = weekly sum / 7 days, capped at 100
   var microRows=MICROS.map(function(m){
     var rdaInfo=MICRO_RDA[m.id]||{rda:"",pct:25};
-    var dailyAvgPct=Math.min(100,Math.round(mSum[m.id]/7));
-    var color=dailyAvgPct>=80?"hi":dailyAvgPct>=50?"mid":"";
+    var pct=Math.min(100,Math.round(mSum[m.id]/7));
+    var col=pct>=80?"hi":pct>=50?"mid":"";
     return "<div class='micro-bar-row'>"+
       "<span class='micro-bar-lbl'>"+m.l+"</span>"+
-      "<div class='micro-bar-track'><div class='micro-bar-fill "+color+"' style='width:"+dailyAvgPct+"%'></div></div>"+
-      "<span class='micro-bar-pct'>"+dailyAvgPct+"%</span>"+
-      "<span class='micro-bar-rda'>RDA "+rdaInfo.rda+"</span>"+
+      "<div class='micro-bar-track'><div class='micro-bar-fill "+col+"' style='width:"+pct+"%'></div></div>"+
+      "<span class='micro-bar-pct'>"+pct+"%</span>"+
+      "<span class='micro-bar-rda'>"+rdaInfo.rda+"</span>"+
     "</div>";
   }).join("");
   document.getElementById("nutrContent").innerHTML=
@@ -1237,8 +1112,8 @@ function renderNutrition(wi){
       "<div class='nutr-box'><div class='nutr-val'>"+aC+"g</div><div class='nutr-lbl'>Avg carbs</div></div>"+
       "<div class='nutr-box'><div class='nutr-val'>"+aF+"g</div><div class='nutr-lbl'>Avg fat</div></div>"+
     "</div>"+
-    "<div class='nutr-micro-title'>Estimated % of daily RDA met by this meal plan</div>"+
-    "<div class='nutr-micro-note'>Based on typical nutrient density of tagged ingredients. Colour: 🟡 &lt;50% · 🟠 50–79% · 🟢 80%+</div>"+
+    "<div class='nutr-micro-title'>Est. % of daily RDA met by this plan</div>"+
+    "<div class='nutr-micro-note'>🟡 &lt;50% · 🟠 50–79% · 🟢 80%+</div>"+
     "<div class='micro-bars'>"+microRows+"</div>";
 }
 
@@ -1733,21 +1608,9 @@ function init(){
   document.getElementById("printBtn").addEventListener("click",function(){window.print();});
 
   // Shopping list
-  // View toggle button
-  var viewToggleBtn = document.getElementById("viewToggleBtn");
-  var dayViewActive = false;
-  function setViewMode(dayMode){
-    dayViewActive = dayMode;
-    document.body.classList.toggle("day-view", dayMode);
-    viewToggleBtn.innerHTML = dayMode ? "⊞ Week" : "☰ Day";
-    viewToggleBtn.title = dayMode ? "Switch to weekly grid" : "Switch to daily view";
-    // Re-render whichever view just became active
-    if(S.plan){
-      if(dayMode){ buildDaySelector(S.week); }
-      else { renderWeek(S.week); }
-    }
-  }
-  viewToggleBtn.addEventListener("click", function(){ setViewMode(!dayViewActive); });
+  // View toggle
+  var vtb = document.getElementById("viewToggleBtn");
+  if(vtb){ vtb.addEventListener("click", function(){ setViewMode(!dayViewActive); }); }
 
   var shopBtn=document.getElementById("shopBtn");
   if(!can.shoppingList){
@@ -1777,6 +1640,117 @@ function init(){
   if(!can.multiWeekPlan){
     document.querySelector(".tool-nav-title").textContent="Meal Planner — Free";
   }
+}
+
+// ─── MOBILE DAY VIEW ─────────────────────────────
+var S_mobileDay = 0;
+var dayViewActive = false;
+
+function setViewMode(dayMode){
+  dayViewActive = dayMode;
+  document.body.classList.toggle("day-view", dayMode);
+  var btn = document.getElementById("viewToggleBtn");
+  if(btn){
+    btn.innerHTML = dayMode ? "⊞ Week" : "☰ Day";
+    btn.classList.toggle("active", dayMode);
+  }
+  if(S.plan){
+    if(dayMode){ buildDaySelector(S.week); }
+    else { renderWeek(S.week); }
+  }
+}
+
+function renderMobileDay(wi, di){
+  S_mobileDay = di;
+  var en = Object.keys(S.slots).filter(function(k){return S.slots[k];});
+  var day = S.plan[wi][di];
+  document.querySelectorAll(".day-selector-btn").forEach(function(b,i){
+    b.classList.toggle("active", i===di);
+  });
+  var view = document.getElementById("mobileDayView");
+  view.innerHTML = "";
+  en.forEach(function(slot){
+    var r = day[slot];
+    var mk = Math.round((r.kcal[0]+r.kcal[1])/2*S.portions);
+    var mp = Math.round((r.prot[0]+r.prot[1])/2*S.portions);
+    var isFav = S.favourites.includes(r.id);
+    var card = document.createElement("div");
+    card.className = "mobile-meal-card";
+    var bar = document.createElement("div");
+    bar.className = "mmc-slot-bar " + slot;
+    card.appendChild(bar);
+    var body = document.createElement("div");
+    body.className = "mmc-body";
+    var lbl = document.createElement("div");
+    lbl.className = "mmc-slot-label";
+    lbl.textContent = SLOT_ICONS[slot] + " " + SLOT_LABELS[slot];
+    body.appendChild(lbl);
+    var content = document.createElement("div");
+    content.className = "mmc-content";
+    var emojiEl = document.createElement("div");
+    emojiEl.className = "mmc-emoji";
+    emojiEl.textContent = r.em;
+    emojiEl.addEventListener("click", function(){openModal(r);});
+    content.appendChild(emojiEl);
+    var info = document.createElement("div");
+    info.className = "mmc-info";
+    info.innerHTML = "<div class='mmc-name'>" + r.name + "</div><div class='mmc-meta'>~" + mk + " kcal · " + mp + "g prot</div>";
+    info.addEventListener("click", function(){openModal(r);});
+    content.appendChild(info);
+    var actions = document.createElement("div");
+    actions.className = "mmc-actions";
+    var heartBtn = document.createElement("button");
+    heartBtn.className = "mmc-action-btn heart" + (isFav?" fav":"");
+    heartBtn.textContent = isFav ? "❤️" : "🤍";
+    heartBtn.title = can.savedFavourites ? "Toggle favourite" : "Premium feature";
+    heartBtn.addEventListener("click", function(e){
+      e.stopPropagation();
+      if(!can.savedFavourites){nudge("Save favourites — available on Premium");return;}
+      var idx = S.favourites.indexOf(r.id);
+      if(idx>=0) S.favourites.splice(idx,1); else S.favourites.push(r.id);
+      saveFavourites();
+      heartBtn.textContent = S.favourites.includes(r.id) ? "❤️" : "🤍";
+      heartBtn.classList.toggle("fav", S.favourites.includes(r.id));
+    });
+    actions.appendChild(heartBtn);
+    var swapBtn2 = document.createElement("button");
+    swapBtn2.className = "mmc-action-btn";
+    swapBtn2.textContent = "🔄";
+    swapBtn2.title = "Swap recipe";
+    (function(capturedSlot, capturedDi){
+      swapBtn2.addEventListener("click", function(e){
+        e.stopPropagation();
+        if(!can.recipeSwap){nudge("Recipe swap — available on Basic plan");return;}
+        openSwap(wi, capturedDi, capturedSlot);
+      });
+    })(slot, di);
+    actions.appendChild(swapBtn2);
+    content.appendChild(actions);
+    body.appendChild(content);
+    card.appendChild(body);
+    view.appendChild(card);
+  });
+  var lo = en.reduce(function(s,sl){return s+day[sl].kcal[0];},0);
+  var hi = en.reduce(function(s,sl){return s+day[sl].kcal[1];},0);
+  var tot = document.createElement("div");
+  tot.className = "mobile-day-total";
+  tot.innerHTML = "Est. daily total: <strong>" + Math.round((lo+hi)/2*S.portions) + " kcal</strong>";
+  view.appendChild(tot);
+}
+
+function buildDaySelector(wi){
+  var sel = document.getElementById("daySelector");
+  sel.innerHTML = "";
+  DAYS.forEach(function(day, di){
+    var btn = document.createElement("button");
+    btn.className = "day-selector-btn" + (di===0?" active":"");
+    btn.textContent = day;
+    (function(capturedDi){
+      btn.addEventListener("click", function(){ renderMobileDay(wi, capturedDi); });
+    })(di);
+    sel.appendChild(btn);
+  });
+  renderMobileDay(wi, S_mobileDay < 7 ? S_mobileDay : 0);
 }
 
 window.addEventListener('load', initTier);
