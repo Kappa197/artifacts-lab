@@ -3,8 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>All Tools — The Artifacts Lab</title>
-<meta name="description" content="Browse all tools in The Artifacts Lab suite — Personal finance, fitness, nutrition and life management tools designed for real adults.">
+<title>Personal Finance, Fitness &amp; Wellness Tools — The Artifacts Lab</title>
+<meta name="description" content="Expense tracker, retirement calculator, workout planner and meal planner — private, offline-capable tools for managing money, health and fitness. No subscriptions.">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://theartifactslab.com/tools.html">
+<meta property="og:title" content="Personal Finance, Fitness &amp; Wellness Tools — The Artifacts Lab">
+<meta property="og:description" content="Expense tracker, retirement calculator, workout planner and meal planner — private, offline-capable tools for managing money, health and fitness. No subscriptions.">
+<meta property="og:image" content="https://theartifactslab.com/og-image.png">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Personal Finance, Fitness &amp; Wellness Tools — The Artifacts Lab">
+<meta name="twitter:description" content="Private tools for money, health and fitness. No subscriptions. Free to start.">
+<meta name="twitter:image" content="https://theartifactslab.com/og-image.png">
+
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=JetBrains+Mono:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -82,6 +96,64 @@ nav {
   color: var(--amber2); text-decoration: none; transition: all 0.2s; white-space: nowrap;
 }
 .nav-cta:hover { background: var(--amber); color: var(--navy); }
+
+/* ── HAMBURGER BUTTON ── */
+.nav-hamburger {
+  display: none; flex-direction: column;
+  justify-content: center; align-items: center; gap: 5px;
+  width: 40px; height: 40px;
+  background: var(--amber-dim); border: 1px solid var(--amber);
+  border-radius: 8px; cursor: pointer; padding: 0;
+  transition: all 0.2s; flex-shrink: 0; z-index: 201;
+}
+.nav-hamburger:hover { background: rgba(212,146,10,0.22); box-shadow: 0 0 16px rgba(212,146,10,0.25); }
+.nav-hamburger span {
+  display: block; width: 18px; height: 2px;
+  background: var(--amber2); border-radius: 2px;
+  transition: all 0.3s cubic-bezier(0.4,0,0.2,1); transform-origin: center;
+}
+.nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* ── MOBILE MENU ── */
+.nav-mobile-menu {
+  display: none; position: fixed;
+  top: 64px; left: 0; right: 0;
+  background: rgba(11,15,26,0.97); backdrop-filter: blur(24px);
+  border-bottom: 2px solid var(--amber); padding: 8px 0 16px;
+  z-index: 200; transform: translateY(-8px); opacity: 0;
+  transition: transform 0.25s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+}
+.nav-mobile-menu.open { transform: translateY(0); opacity: 1; }
+.nav-mobile-menu ul { list-style: none; padding: 8px 0; }
+.nav-mobile-menu ul li { border-bottom: 1px solid rgba(42,59,85,0.4); }
+.nav-mobile-menu ul li:last-child { border-bottom: none; }
+.nav-mobile-menu ul li a {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 28px; font-family: var(--mono); font-size: 0.7rem;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text2); text-decoration: none; transition: all 0.2s;
+}
+.nav-mobile-menu ul li a:hover { color: var(--amber2); background: var(--amber-dim); padding-left: 34px; }
+.nav-mobile-menu ul li a .menu-arrow { color: var(--text3); font-size: 0.7rem; transition: all 0.2s; }
+.nav-mobile-menu ul li a:hover .menu-arrow { color: var(--amber2); }
+.nav-mobile-cta { margin: 12px 28px 4px; }
+.nav-mobile-cta a {
+  display: block; text-align: center; padding: 13px;
+  background: var(--amber); color: var(--navy);
+  font-family: var(--mono); font-size: 0.7rem; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  text-decoration: none; border-radius: 8px; transition: all 0.2s;
+  box-shadow: 0 4px 16px rgba(212,146,10,0.3);
+}
+.nav-mobile-cta a:hover { background: var(--amber2); }
+.nav-backdrop {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.4); z-index: 199; backdrop-filter: blur(2px);
+}
+.nav-backdrop.open { display: block; }
 
 /* ── PAGE ── */
 .page { position: relative; z-index: 1; max-width: 1140px; margin: 0 auto; padding: 100px 48px 80px; }
@@ -273,6 +345,8 @@ footer {
 @media (max-width: 960px) {
   nav { padding: 0 24px; }
   .nav-links { display: none; }
+  .nav-hamburger { display: flex; }
+  .nav-mobile-menu { display: block; }
   .page { padding: 88px 24px 60px; }
   .tools-grid { grid-template-columns: repeat(2, 1fr); }
   footer { padding: 24px; flex-direction: column; text-align: center; }
@@ -286,6 +360,7 @@ footer {
 </head>
 <body>
 
+<div class="nav-backdrop" id="navBackdrop" onclick="closeMenu()"></div>
 <nav>
   <a href="index.html" class="nav-logo">
     <div class="nav-logo-icon">&#9879;&#65039;</div>
@@ -295,9 +370,26 @@ footer {
     <li><a href="index.html">Home</a></li>
     <li><a href="tools.html" class="active">Tools</a></li>
     <li><a href="index.html#pricing">Pricing</a></li>
+    <li><a href="#">Blog</a></li>
   </ul>
   <a href="login.html" class="nav-cta">Sign In / Join</a>
+  <button class="nav-hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
+
+<!-- Mobile dropdown menu -->
+<div class="nav-mobile-menu" id="mobileMenu">
+  <ul>
+    <li><a href="index.html" onclick="closeMenu()">Home <span class="menu-arrow">→</span></a></li>
+    <li><a href="tools.html" onclick="closeMenu()">Tools <span class="menu-arrow">→</span></a></li>
+    <li><a href="index.html#pricing" onclick="closeMenu()">Pricing <span class="menu-arrow">→</span></a></li>
+    <li><a href="#" onclick="closeMenu()">Blog <span class="menu-arrow">→</span></a></li>
+  </ul>
+  <div class="nav-mobile-cta">
+    <a href="login.html" onclick="closeMenu()">Sign In / Join →</a>
+  </div>
+</div>
 
 <div class="page">
 
@@ -309,9 +401,10 @@ footer {
     <div class="filter-tabs">
       <button class="filter-tab active" onclick="filterTools('all', this)">All Tools</button>
       <button class="filter-tab" onclick="filterTools('free', this)">Free</button>
-      <button class="filter-tab" onclick="filterTools('Personal finance', this)"> Personal finance</button>
+      <button class="filter-tab" onclick="filterTools('finance', this)">Finance</button>
       <button class="filter-tab" onclick="filterTools('health', this)">Health &amp; Fitness</button>
       <button class="filter-tab" onclick="filterTools('life', this)">Life &amp; Wellness</button>
+      <button class="filter-tab" onclick="filterTools('family', this)">Family</button>
       <button class="filter-tab" onclick="filterTools('soon', this)">Coming Soon</button>
     </div>
   </div>
@@ -435,31 +528,9 @@ footer {
     <div class="cat-header">
       <span class="cat-icon">&#127807;</span>
       <span class="cat-title">Life &amp; Wellness</span>
-      <span class="cat-count">1 live · 3 coming soon</span>
+      <span class="cat-count">3 coming soon</span>
     </div>
     <div class="tools-grid">
-
-      <div class="tool-card tc-pregnancy" data-tier="free" data-cat="life">
-        <div class="tc-head">
-          <div class="tc-icon">&#129328;</div>
-          <div class="tc-tier-wrap">
-            <span class="tc-tier-tag tag-live">&#9679; Live</span>
-            <span class="tc-tier-tag tag-free">Free</span>
-          </div>
-        </div>
-        <div class="tc-name">Pregnancy Roadmap</div>
-        <div class="tc-desc">Week-by-week pregnancy tracker with wellness guide, kick counter, contraction timer, appointment log and partner share link.</div>
-        <div class="tc-features">
-          <span class="tc-feat">Week tracker</span>
-          <span class="tc-feat">Kick counter</span>
-          <span class="tc-feat">Appointments</span>
-          <span class="tc-feat">Partner share</span>
-          <span class="tc-feat">Wellness guide</span>
-        </div>
-        <div class="tc-actions">
-          <a href="pregnancy-roadmap.html" class="btn-try">Try Free &#8594;</a>
-        </div>
-      </div>
 
       <div class="tool-card tc-sleep coming-soon" data-tier="soon" data-cat="life">
         <div class="tc-head">
@@ -521,12 +592,46 @@ footer {
     </div>
   </div>
 
+  <!-- ══ FAMILY ══ -->
+  <div class="cat-section reveal reveal-delay-3" data-cat="family">
+    <div class="cat-header">
+      <span class="cat-icon">&#128106;</span>
+      <span class="cat-title">Family</span>
+      <span class="cat-count">1 live</span>
+    </div>
+    <div class="tools-grid">
+
+      <div class="tool-card tc-pregnancy" data-tier="free" data-cat="family">
+        <div class="tc-head">
+          <div class="tc-icon">&#129328;</div>
+          <div class="tc-tier-wrap">
+            <span class="tc-tier-tag tag-live">&#9679; Live</span>
+            <span class="tc-tier-tag tag-free">Free</span>
+          </div>
+        </div>
+        <div class="tc-name">Pregnancy Roadmap</div>
+        <div class="tc-desc">Week-by-week pregnancy tracker with wellness guide, kick counter, contraction timer, appointment log and partner share link.</div>
+        <div class="tc-features">
+          <span class="tc-feat">Week tracker</span>
+          <span class="tc-feat">Kick counter</span>
+          <span class="tc-feat">Appointments</span>
+          <span class="tc-feat">Partner share</span>
+          <span class="tc-feat">Wellness guide</span>
+        </div>
+        <div class="tc-actions">
+          <a href="pregnancy-roadmap.html" class="btn-try">Try Free &#8594;</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   <!-- CTA Strip -->
   <div class="cta-strip reveal">
     <div class="cta-text">
       <div class="cta-eyebrow">Early Access</div>
       <h2 class="cta-title">Start free.<br><em>Upgrade when ready.</em></h2>
-      <p class="cta-sub">Free tools need no account. Create a free account to unlock all tools and save your data across devices.</p>
+      <p class="cta-sub">The free tools work instantly — no account needed. Create a free account to save your progress, access all tools, and sync across your devices.</p>
     </div>
     <div class="cta-actions">
       <a href="login.html" class="btn-primary">Create Free Account &#8594;</a>
@@ -545,9 +650,10 @@ footer {
     <li><a href="index.html">Home</a></li>
     <li><a href="tools.html">Tools</a></li>
     <li><a href="index.html#pricing">Pricing</a></li>
+    <li><a href="#">Blog</a></li>
     <li><a href="#">Privacy</a></li>
   </ul>
-  <div class="footer-copy">&copy; 2025 The Artifacts Lab. All rights reserved.</div>
+  <div class="footer-copy">&copy; 2026 The Artifacts Lab. All rights reserved.</div>
 </footer>
 
 <script>
@@ -562,11 +668,10 @@ function filterTools(filter, btn) {
   document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
 
-  const cards = document.querySelectorAll('.tool-card');
-  const cats  = document.querySelectorAll('.cat-section');
+  const cats = document.querySelectorAll('.cat-section');
 
   if (filter === 'all') {
-    cards.forEach(c => c.style.display = '');
+    document.querySelectorAll('.tool-card').forEach(c => c.style.display = '');
     cats.forEach(c => c.style.display = '');
     return;
   }
@@ -580,9 +685,10 @@ function filterTools(filter, btn) {
       let show = false;
       if (filter === 'free')    show = tier === 'free';
       if (filter === 'soon')    show = tier === 'soon';
-      if (filter === 'Personal finance') show = cat2 === 'Personal finance';
+      if (filter === 'finance') show = cat2 === 'finance';
       if (filter === 'health')  show = cat2 === 'health';
       if (filter === 'life')    show = cat2 === 'life';
+      if (filter === 'family')  show = cat2 === 'family';
       card.style.display = show ? '' : 'none';
       if (show) visible++;
     });
@@ -590,9 +696,31 @@ function filterTools(filter, btn) {
   });
 }
 
+// Hamburger menu
+function toggleMenu() {
+  const btn      = document.getElementById('hamburger');
+  const menu     = document.getElementById('mobileMenu');
+  const backdrop = document.getElementById('navBackdrop');
+  if (menu.classList.contains('open')) {
+    closeMenu();
+  } else {
+    btn.classList.add('open');
+    menu.classList.add('open');
+    backdrop.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+}
+function closeMenu() {
+  document.getElementById('hamburger').classList.remove('open');
+  document.getElementById('mobileMenu').classList.remove('open');
+  document.getElementById('navBackdrop').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
 // Sticky nav shadow
 window.addEventListener('scroll', () => {
   document.querySelector('nav').style.boxShadow = window.scrollY > 20 ? '0 4px 32px rgba(0,0,0,0.4)' : 'none';
+  if (document.getElementById('mobileMenu').classList.contains('open')) closeMenu();
 });
 </script>
 </body>

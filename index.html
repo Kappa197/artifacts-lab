@@ -4,9 +4,26 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Artifacts Lab — Smart tools for real life</title>
-<meta name="description" content="Beautiful, private, offline-capable tools for managing your money, your time, your health, your fitness, your wellbeing and your routing for anything you can plan in your daily life (and for your future). No subscriptions. No complexity. Just tools that work.">
+<meta name="description" content="Simple, private tools for managing your money, health, fitness and daily life. No subscriptions. Your data never leaves your device. Free to start.">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://theartifactslab.com/">
+<meta property="og:title" content="The Artifacts Lab — Smart tools for real life">
+<meta property="og:description" content="Simple, private tools for managing your money, health, fitness and daily life. No subscriptions. Free to start.">
+<meta property="og:image" content="https://theartifactslab.com/og-image.png">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The Artifacts Lab — Smart tools for real life">
+<meta name="twitter:description" content="Simple, private tools for your money, health and fitness. No subscriptions.">
+<meta name="twitter:image" content="https://theartifactslab.com/og-image.png">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=JetBrains+Mono:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fvgajfiksxmwioxnesry.supabase.co">
+<link rel="dns-prefetch" href="https://fvgajfiksxmwioxnesry.supabase.co">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
 <style>
 /* ═══════════════════════════════════════ TOKENS */
 :root {
@@ -860,6 +877,7 @@ footer {
     <li><a href="tools.html">All Tools</a></li>
     <li><a href="#why">Why us</a></li>
     <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#">Blog</a></li>
   </ul>
   <a href="login.html" class="nav-cta">Sign In / Join</a>
   <button class="nav-hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
@@ -874,6 +892,7 @@ footer {
     <li><a href="tools.html" onclick="closeMenu()">All Tools <span class="menu-arrow">→</span></a></li>
     <li><a href="#why" onclick="closeMenu()">Why Us <span class="menu-arrow">→</span></a></li>
     <li><a href="#pricing" onclick="closeMenu()">Pricing <span class="menu-arrow">→</span></a></li>
+    <li><a href="#" onclick="closeMenu()">Blog <span class="menu-arrow">→</span></a></li>
   </ul>
   <div class="nav-mobile-cta">
     <a href="login.html" onclick="closeMenu()">Sign In / Join →</a>
@@ -882,7 +901,7 @@ footer {
 
 <!-- ═══════════════════════════════ HERO -->
 <section class="hero">
-  <div class="hero-eyebrow">Launching 2025 · Early Access Open</div>
+  <div class="hero-eyebrow">Simple tools for complex little problems of our daily life</div>
 
   <h1 class="hero-title">
     <em>Smart tools</em>
@@ -890,7 +909,7 @@ footer {
   </h1>
 
   <p class="hero-sub">
-    Beautiful, private, offline-capable tools to manage your health, wealth, and everything in between. The ultimate personal toolkit to plan your daily life (and for a better future). No spreadsheets. No apps. No nonsense.
+    Expense tracking, retirement planning, meal planning and workout tools — beautifully designed, completely private, free to start.
   </p>
 
   <div class="hero-actions">
@@ -1009,8 +1028,8 @@ footer {
       </div>
       <div class="why-item reveal reveal-delay-2">
         <div class="why-num">02</div>
-        <div class="why-title">Designed for YOU</div>
-        <div class="why-desc">Built for people like you! We all need a little help in our daily life. The artifacts lab helps you with finances, health, nutrition and every day little troubles...</div>
+        <div class="why-title">Built for real adults, not tech experts</div>
+        <div class="why-desc">No jargon, no steep learning curves, no assumptions about your technical knowledge. Every tool is designed to be picked up in minutes by anyone — whether you're tracking your first budget or stress-testing a retirement plan.</div>
       </div>
       <div class="why-item reveal reveal-delay-3">
         <div class="why-num">03</div>
@@ -1071,7 +1090,7 @@ footer {
           <li><div class="pf-check pf-no">—</div>Household / 2nd profile</li>
           <li><div class="pf-check pf-no">—</div>Advanced retirement modelling</li>
         </ul>
-        <a href="#early-access" class="price-btn price-btn-basic">Get Basic</a>
+        <a href="login.html" class="price-btn price-btn-basic">Get Basic</a>
       </div>
 
       <!-- PREMIUM -->
@@ -1093,7 +1112,7 @@ footer {
           <li><div class="pf-check pf-yes">✓</div>Yearly financial summary</li>
           <li><div class="pf-check pf-lock">★</div>Priority access to new tools</li>
         </ul>
-        <a href="#early-access" class="price-btn price-btn-premium">Get Premium</a>
+        <a href="login.html" class="price-btn price-btn-premium">Get Premium</a>
       </div>
 
     </div>
@@ -1124,11 +1143,13 @@ footer {
   </div>
   <ul class="footer-links">
     <li><a href="#tools">Tools</a></li>
+    <li><a href="tools.html">All Tools</a></li>
     <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#">Blog</a></li>
     <li><a href="#">Privacy</a></li>
     <li><a href="#">Contact</a></li>
   </ul>
-  <div class="footer-copy">© 2025 The Artifacts Lab. All rights reserved.</div>
+  <div class="footer-copy">© 2026 The Artifacts Lab. All rights reserved.</div>
 </footer>
 
 <script>
@@ -1144,23 +1165,63 @@ const observer = new IntersectionObserver((entries) => {
 
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
+// ── Supabase ─────────────────────────────────
+const SUPABASE_URL  = 'https://fvgajfiksxmwioxnesry.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2Z2FqZmlrc3htd2lveG5lc3J5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NDU4OTEsImV4cCI6MjA4OTIyMTg5MX0.KwqAzx1oAGeh0F3q1LfeQPXYjtdOjaOrzS_c4eUGKJY';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+async function sendWelcomeEmail(email) {
+  try {
+    await fetch('/api/send-welcome', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+  } catch(e) { console.log('Welcome email error:', e); }
+}
+
 // ── Email form ───────────────────────────────
-function handleSubmit(e) {
+async function handleSubmit(e) {
   e.preventDefault();
-  const email = document.getElementById('emailInput').value;
+  const email = document.getElementById('emailInput').value.trim().toLowerCase();
   const note  = document.getElementById('emailNote');
   const btn   = e.target.querySelector('.email-submit');
 
-  // Visual feedback
-  btn.textContent = '✓ You\'re on the list!';
-  btn.style.background = 'var(--green)';
-  btn.style.color = '#0a1f14';
+  btn.textContent = 'Joining…';
   btn.disabled = true;
-  note.textContent = `We'll be in touch at ${email} — welcome to the Lab!`;
-  note.style.color = 'var(--green)';
 
-  // TODO: wire to Supabase / Resend when platform is live
-  console.log('Early access signup:', email);
+  try {
+    const { error } = await db.from('early_access').insert({ email });
+
+    if (error) {
+      if (error.code === '23505') {
+        btn.textContent = '✓ Already registered!';
+        btn.style.background = 'var(--amber)';
+        btn.style.color = 'var(--navy)';
+        note.textContent = `${email} is already on the list — we'll be in touch!`;
+        note.style.color = 'var(--amber2)';
+        setTimeout(() => {
+          window.location.href = `thankyou.html?email=${encodeURIComponent(email)}`;
+        }, 1200);
+      } else { throw error; }
+    } else {
+      sendWelcomeEmail(email);
+      btn.textContent = '✓ You\'re in!';
+      btn.style.background = 'var(--green)';
+      btn.style.color = '#0a1f14';
+      note.textContent = 'Redirecting…';
+      note.style.color = 'var(--green)';
+      setTimeout(() => {
+        window.location.href = `thankyou.html?email=${encodeURIComponent(email)}`;
+      }, 800);
+    }
+  } catch (err) {
+    btn.textContent = 'Try again';
+    btn.disabled = false;
+    note.textContent = 'Something went wrong — please try again.';
+    note.style.color = '#E05252';
+    console.error('Signup error:', err);
+  }
 }
 
 // ── Sticky nav shadow on scroll ──────────────
