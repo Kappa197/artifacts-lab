@@ -1,14 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-NVPSBWT293"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-NVPSBWT293');
-</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The meal planning system I use when I genuinely can't be bothered | The Artifacts Lab</title>
@@ -442,7 +434,7 @@ footer {
 
     <h2>How the meal planner actually works in practice</h2>
 
-    <p>The Meal Planner at [[<a href="/meal-planner.html">theartifactslab.com/meal-planner</a>]](https://<a href="/meal-planner.html">theartifactslab.com/meal-planner</a>) is built around this logic. You open it, work through nine steps, and it generates a complete weekly grid. No account, no login, no subscription required to see what it can do.</p>
+    <p>The Meal Planner at <a href="https://<a href="/meal-planner.html">theartifactslab.com/meal-planner</a>"><a href="/meal-planner.html">theartifactslab.com/meal-planner</a></a> is built around this logic. You open it, work through nine steps, and it generates a complete weekly grid. No account, no login, no subscription required to see what it can do.</p>
 
     <p>The setup takes about three minutes. You pick your diet type &mdash; vegan, vegetarian, pescatarian, or omnivore &mdash; which immediately filters the recipe database. Then you choose how many weeks you want planned, which meal slots you actually eat (not everyone eats five times a day, and the tool doesn't assume you do), your calorie target, and optionally a daily protein goal. There's also an exclusion list: type in anything you can't eat or don't like, and those ingredients get scrubbed from every recipe suggestion. It handles aliases intelligently &mdash; type "nuts" and it removes almonds, walnuts, peanut butter, and cashews in one go.</p>
 
@@ -458,7 +450,7 @@ footer {
 
     <p>The decision to make this a meal planner with macro tracking and no account required was deliberate. I wanted something that would work for a first-time visitor who just wants a useful week of meals, without forcing them to create yet another account for a tool they're not sure about yet. You can try the full free version right now and decide whether it's worth upgrading later. If you find yourself reaching for it every Sunday, that's a reasonable signal.</p>
 
-    <p>The tool is at [[<a href="/meal-planner.html">theartifactslab.com/meal-planner</a>]](https://<a href="/meal-planner.html">theartifactslab.com/meal-planner</a>). It works on any browser, on any device, with no installation. Give it one Sunday and see how the week goes.</p>
+    <p>The tool is at <a href="https://<a href="/meal-planner.html">theartifactslab.com/meal-planner</a>"><a href="/meal-planner.html">theartifactslab.com/meal-planner</a></a>. It works on any browser, on any device, with no installation. Give it one Sunday and see how the week goes.</p>
 
     <p>If you've tried it and found something that didn't work for your setup &mdash; a cuisine you couldn't find, a dietary combination that produced odd results, or a feature you genuinely missed &mdash; I'd love to hear it. Drop a comment below or reach out directly. The tool is still evolving and real feedback from real kitchens is worth more than any amount of internal testing.</p>
 
@@ -534,7 +526,7 @@ footer {
 <footer>
   <div class="footer-brand">
     The Artifacts Lab
-    <span>theartifactslab.com &nbsp;&middot;&nbsp; Est. 2025</span>
+    <span>theartifactslab.com &nbsp;&middot;&nbsp; Est. 2026</span>
   </div>
   <ul class="footer-links">
     <li><a href="/index.html">Home</a></li>
@@ -601,7 +593,7 @@ async function handleSubmit(e) {
     } else if (error) { throw error; }
     else {
       sendWelcomeEmail(email);
-      btn.textContent = '✓ You\'re in!'; btn.style.background = 'var(--green)'; btn.style.color = '#0a1f14';
+      btn.textContent = '✓ You're in!'; btn.style.background = 'var(--green)'; btn.style.color = '#0a1f14';
       note.textContent = 'Redirecting…'; note.style.color = 'var(--green)';
       setTimeout(() => { window.location.href = `/thankyou.html?email=${encodeURIComponent(email)}`; }, 800);
     }
