@@ -1,16 +1,14 @@
 <!DOCTYPE html>
 <html lang="en"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
 <head>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-NVPSBWT293"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-NVPSBWT293');
-</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#D4920A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Artifacts Lab">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
 <title>Dashboard — The Artifacts Lab</title>
 <link rel="preconnect" href="https://fvgajfiksxmwioxnesry.supabase.co">
 <link rel="dns-prefetch" href="https://fvgajfiksxmwioxnesry.supabase.co">
@@ -348,6 +346,44 @@ main {
   .tools-grid { grid-template-columns: 1fr; }
   .welcome { flex-direction: column; align-items: flex-start; }
 }
+
+/* ── PWA Install Card (dashboard) ── */
+.pwa-install-card {
+  background: var(--navy2); border: 1px solid var(--amber);
+  border-radius: 14px; padding: 20px 22px;
+  display: flex; align-items: center; gap: 16px;
+  margin-top: 16px; flex-wrap: wrap;
+}
+.pwa-card-icon {
+  width: 44px; height: 44px; background: var(--amber-dim);
+  border: 1px solid var(--amber); border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; flex-shrink: 0;
+}
+.pwa-card-text { flex: 1; }
+.pwa-card-title {
+  font-family: var(--serif); font-size: 0.95rem; font-weight: 700;
+  color: var(--text); margin-bottom: 3px;
+}
+.pwa-card-sub {
+  font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.06em;
+  color: var(--text3); text-transform: uppercase;
+}
+.pwa-card-actions { display: flex; gap: 8px; }
+.pwa-card-install {
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 9px 18px; border-radius: 7px;
+  background: var(--amber); color: var(--navy); border: none;
+  font-weight: 700; cursor: pointer; transition: all 0.2s;
+}
+.pwa-card-install:hover { background: var(--amber2); }
+.pwa-card-dismiss {
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 9px 12px; border-radius: 7px;
+  background: transparent; color: var(--text3);
+  border: 1px solid var(--border2); cursor: pointer; transition: all 0.2s;
+}
+.pwa-card-dismiss:hover { color: var(--text); border-color: var(--text3); }
 </style>
 </head>
 <body>
@@ -535,7 +571,20 @@ main {
       <div class="ac-row"><span class="ac-key">Expense Tracker</span><span class="ac-val" id="featExpense">— Basic+</span></div>
       <div class="ac-row"><span class="ac-key">Workout Planner</span><span class="ac-val" id="featWorkout">— Basic+</span></div>
     </div>
-  </div>
+  
+      <!-- PWA Install Card -->
+      <div class="pwa-install-card" id="pwa-install-card" style="display:none;">
+        <div class="pwa-card-icon">&#9879;&#65039;</div>
+        <div class="pwa-card-text">
+          <div class="pwa-card-title">Install The Artifacts Lab</div>
+          <div class="pwa-card-sub">Add to home screen &middot; Works offline &middot; No App Store</div>
+        </div>
+        <div class="pwa-card-actions">
+          <button class="pwa-card-install" onclick="installApp()">Install &#8594;</button>
+          <button class="pwa-card-dismiss" onclick="hideInstallCard()">&#10005;</button>
+        </div>
+      </div>
+</div>
 
 </main>
 
@@ -713,6 +762,41 @@ async function signOut() {
 }
 
 init();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .catch(err => console.log('SW registration failed:', err));
+  });
+}
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  if (!localStorage.getItem('pwa-dismissed')) showInstallCard();
+});
+window.addEventListener('appinstalled', () => {
+  deferredPrompt = null;
+  hideInstallCard();
+});
+function showInstallCard() {
+  const card = document.getElementById('pwa-install-card');
+  if (card) card.style.display = 'flex';
+}
+function hideInstallCard() {
+  const card = document.getElementById('pwa-install-card');
+  if (card) card.style.display = 'none';
+  localStorage.setItem('pwa-dismissed', '1');
+}
+async function installApp() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  hideInstallCard();
+}
 </script>
 </body>
 </html>

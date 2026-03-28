@@ -11,6 +11,12 @@
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#D4920A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Artifacts Lab">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
 <title>The Artifacts Lab — Smart tools for real life</title>
 <meta name="description" content="Simple, private tools for managing your money, health, fitness and daily life. No subscriptions. Your data never leaves your device. Free to start.">
 
@@ -869,6 +875,52 @@ footer {
   .hero { padding: 100px 20px 70px; }
   .tool-card { padding: 24px; }
 }
+
+/* ── PWA Install Banner ── */
+#pwa-banner {
+  position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%);
+  z-index: 999; width: calc(100% - 32px); max-width: 520px;
+  background: var(--navy2); border: 1px solid var(--amber);
+  border-radius: 14px; padding: 16px 18px;
+  display: flex; align-items: center; gap: 14px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+  transition: bottom 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+#pwa-banner.show { bottom: 24px; }
+.pwa-banner-icon {
+  font-size: 1.8rem; flex-shrink: 0;
+  width: 44px; height: 44px; background: var(--amber-dim);
+  border: 1px solid var(--amber); border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+}
+.pwa-banner-text { flex: 1; }
+.pwa-banner-title {
+  font-family: var(--serif); font-size: 0.9rem; font-weight: 700;
+  color: var(--text); margin-bottom: 2px;
+}
+.pwa-banner-sub {
+  font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.06em;
+  color: var(--text3); text-transform: uppercase;
+}
+.pwa-banner-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.pwa-install-btn {
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 8px 14px; border-radius: 7px;
+  background: var(--amber); color: var(--navy); border: none;
+  font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap;
+}
+.pwa-install-btn:hover { background: var(--amber2); }
+.pwa-dismiss-btn {
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 8px 12px; border-radius: 7px;
+  background: transparent; color: var(--text3);
+  border: 1px solid var(--border2); cursor: pointer; transition: all 0.2s;
+}
+.pwa-dismiss-btn:hover { color: var(--text); border-color: var(--text3); }
+@media (max-width: 480px) {
+  #pwa-banner { flex-wrap: wrap; }
+  .pwa-banner-actions { width: 100%; justify-content: flex-end; }
+}
 </style>
 </head>
 <body>
@@ -1147,7 +1199,7 @@ footer {
 <footer>
   <div class="footer-brand">
     The Artifacts Lab
-    <span>theartifactslab.com · Est. 2026</span>
+    <span>theartifactslab.com · Est. 2025</span>
   </div>
   <ul class="footer-links">
     <li><a href="#tools">Tools</a></li>
@@ -1260,6 +1312,68 @@ function closeMenu() {
   document.getElementById('mobileMenu').classList.remove('open');
   document.getElementById('navBackdrop').classList.remove('open');
   document.body.style.overflow = '';
+}
+</script>
+
+<!-- PWA Install Banner -->
+<div id="pwa-banner">
+  <div class="pwa-banner-icon">&#9879;&#65039;</div>
+  <div class="pwa-banner-text">
+    <div class="pwa-banner-title">Install The Artifacts Lab</div>
+    <div class="pwa-banner-sub">Works offline &middot; No App Store needed</div>
+  </div>
+  <div class="pwa-banner-actions">
+    <button class="pwa-install-btn" onclick="installApp()">Install &#8594;</button>
+    <button class="pwa-dismiss-btn" onclick="hideInstallBanner()">&#10005;</button>
+  </div>
+</div>
+<script>
+// ── Register Service Worker ───────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .catch(err => console.log('SW registration failed:', err));
+  });
+}
+
+// ── PWA Install Prompt ────────────────────────
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Show install banner after 3 seconds
+  setTimeout(showInstallBanner, 3000);
+});
+
+window.addEventListener('appinstalled', () => {
+  deferredPrompt = null;
+  hideInstallBanner();
+});
+
+function showInstallBanner() {
+  if (!deferredPrompt) return;
+  const banner = document.getElementById('pwa-banner');
+  if (banner) banner.classList.add('show');
+}
+
+function hideInstallBanner() {
+  const banner = document.getElementById('pwa-banner');
+  if (banner) banner.classList.remove('show');
+  localStorage.setItem('pwa-dismissed', '1');
+}
+
+async function installApp() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  hideInstallBanner();
+}
+
+// Don't show again if already dismissed
+if (localStorage.getItem('pwa-dismissed')) {
+  window.removeEventListener('beforeinstallprompt', showInstallBanner);
 }
 </script>
 </body>
