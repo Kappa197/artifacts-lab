@@ -52,21 +52,23 @@ body{font-family:var(--body);background:var(--navy);color:var(--text);min-height
 body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(212,146,10,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(212,146,10,0.025) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0;}
 
 /* PLATFORM NAV */
-.tool-header{position:sticky;top:0;z-index:100;background:rgba(11,15,26,0.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:60px;gap:16px;}
-.tool-nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;cursor:pointer;}
-.tool-nav-icon{width:28px;height:28px;background:var(--amber-dim);border:1px solid var(--amber);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:0.85rem;}
-.tool-nav-brand{font-family:var(--serif);font-size:0.95rem;font-weight:700;color:var(--amber2);}
-.tool-nav-sep{color:var(--border2);font-size:1rem;}
-.tool-nav-title{font-family:var(--mono);font-size:0.58rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);}
-.tool-nav-right{display:flex;align-items:center;gap:12px;}
-.tool-tier-badge{font-family:var(--mono);font-size:0.55rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:4px 12px;border-radius:99px;border:1px solid var(--border2);color:var(--text3);background:transparent;transition:all 0.2s;}
+.tool-header{position:sticky;top:0;z-index:100;background:rgba(11,15,26,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;align-items:center;padding:0 20px;gap:0;}
+.tool-header-row1{display:flex;align-items:center;justify-content:space-between;width:100%;height:52px;gap:10px;}
+.tool-nav-logo{display:flex;align-items:center;gap:8px;text-decoration:none;flex-shrink:0;cursor:pointer;}
+.tool-nav-icon{width:26px;height:26px;background:var(--amber-dim);border:1px solid var(--amber);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:0.8rem;}
+.tool-nav-brand{font-family:var(--serif);font-size:0.9rem;font-weight:700;color:var(--amber2);}
+.tool-nav-sep{color:var(--border2);font-size:0.9rem;}
+.tool-nav-title{font-family:var(--mono);font-size:0.55rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);}
+.tool-nav-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.tool-tier-badge{font-family:var(--mono);font-size:0.55rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:4px 10px;border-radius:99px;border:1px solid var(--border2);color:var(--text3);background:transparent;transition:all 0.2s;white-space:nowrap;}
 .tool-tier-badge.basic{color:var(--blue);border-color:var(--blue);background:var(--blue-dim);}
 .tool-tier-badge.premium{color:var(--amber2);border-color:var(--amber);background:var(--amber-dim);}
-.tool-nav-back{font-family:var(--mono);font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;padding:7px 14px;border-radius:6px;background:var(--navy3);border:1px solid var(--border2);color:var(--text3);text-decoration:none;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+.tool-nav-back{font-family:var(--mono);font-size:0.58rem;letter-spacing:0.08em;text-transform:uppercase;padding:6px 12px;border-radius:6px;background:var(--navy3);border:1px solid var(--border2);color:var(--text3);text-decoration:none;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
 .tool-nav-back:hover{border-color:var(--amber);color:var(--amber2);}
-/* Tool tab nav (kept for Settings/Import/Dashboard/Annual) */
+.tool-header-tabs{display:flex;gap:2px;width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:0 0 6px 0;border-top:1px solid var(--border);}
+.tool-header-tabs::-webkit-scrollbar{display:none;}
 .tabs{display:flex;gap:2px;}
-.tab-btn{padding:7px 18px;border:none;background:none;color:var(--text3);font-family:var(--mono);font-size:0.68rem;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;border-radius:6px;transition:all 0.15s;}
+.tab-btn{padding:8px 14px;border:none;background:none;color:var(--text3);font-family:var(--mono);font-size:0.65rem;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;border-radius:6px;transition:all 0.15s;white-space:nowrap;}
 .tab-btn:hover{color:var(--text);background:var(--navy3);}
 .tab-btn.active{color:var(--amber2);background:var(--amber-dim);}
 
@@ -202,7 +204,7 @@ select option{background:var(--navy3);}
 /* PRINT / PDF EXPORT */
 @media print {
   body{background:#fff !important;color:#000 !important;}
-  .tool-header,.tabs,.tab-panel:not(.active),.tab-btn,
+  .tool-header,.tool-header-tabs,.tab-panel:not(.active),.tab-btn,
   #backupReminder,.upgrade-nudge,button,select,input,
   #trendCard,#drillCard,.dg3 .card:nth-child(3),
   .section-head p{display:none !important;}
@@ -214,8 +216,9 @@ select option{background:var(--navy3);}
 }
 #printHeader{display:none;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #ddd;}
 
+html,body{overflow-x:hidden;max-width:100%;}
 @media(max-width:900px){.kpi-grid{grid-template-columns:1fr 1fr;}.dg2,.dg3{grid-template-columns:1fr;}.grid4{grid-template-columns:1fr 1fr;}}
-@media(max-width:600px){.tool-header{padding:0 16px;}.tool-nav-brand{display:none;}.tool-nav-sep{display:none;}.tab-panel{padding:14px;}.kpi-grid{grid-template-columns:1fr;}.grid2,.grid3{grid-template-columns:1fr;}}
+@media(max-width:600px){.tool-header{padding:0 14px;}.tool-nav-brand{display:none;}.tool-nav-sep{display:none;}.tool-nav-back{font-size:0.55rem;padding:5px 10px;}.tab-panel{padding:14px;}.kpi-grid{grid-template-columns:1fr;}.grid2,.grid3{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
@@ -229,21 +232,25 @@ select option{background:var(--navy3);}
 <style>@keyframes spin{to{transform:rotate(360deg);}}</style>
 
 <header class="tool-header" id="toolHeader">
-  <a href="javascript:void(0)" class="tool-nav-logo" id="logoLink">
-    <div class="tool-nav-icon">⚗️</div>
-    <div class="tool-nav-brand">The Artifacts Lab</div>
-    <div class="tool-nav-sep">|</div>
-    <div class="tool-nav-title">Finance Tracker</div>
-  </a>
-  <nav class="tabs" style="margin:0 auto;">
+  <!-- Row 1: logo + right controls -->
+  <div class="tool-header-row1">
+    <a href="javascript:void(0)" class="tool-nav-logo" id="logoLink">
+      <div class="tool-nav-icon">⚗️</div>
+      <div class="tool-nav-brand">The Artifacts Lab</div>
+      <div class="tool-nav-sep">|</div>
+      <div class="tool-nav-title">Finance Tracker</div>
+    </a>
+    <div class="tool-nav-right">
+      <div class="tool-tier-badge" id="toolTierBadge">Free</div>
+      <a href="javascript:void(0)" class="tool-nav-back" id="backBtn">← Home</a>
+    </div>
+  </div>
+  <!-- Row 2: tabs (scrollable on mobile) -->
+  <div class="tool-header-tabs">
     <button class="tab-btn active" onclick="showTab('settings',this)">⚙ Settings</button>
     <button class="tab-btn" onclick="showTab('import',this)">↑ Import</button>
     <button class="tab-btn" onclick="showTab('dashboard',this)">◈ Dashboard</button>
     <button id="annualTabBtn" class="tab-btn" onclick="showTab('annual',this)">◑ Annual</button>
-  </nav>
-  <div class="tool-nav-right">
-    <div class="tool-tier-badge" id="toolTierBadge">Free</div>
-    <a href="javascript:void(0)" class="tool-nav-back" id="backBtn">← Home</a>
   </div>
 </header>
 
@@ -372,7 +379,7 @@ select option{background:var(--navy3);}
 
 <!-- ══════ TAB: IMPORT ══════ -->
 <div id="tab-import" class="tab-panel">
-  <div class="section-head"><h2>Import Transactions</h2><p>Upload the CSV file generated by your AI assistant. Need help getting there? Open the <strong style="color:var(--green);cursor:pointer;" onclick="showTab('settings',document.querySelector('.tab-btn:nth-child(1)'));setTimeout(openGuide,100)">Get Started Guide</strong> in Settings.</p></div>
+  <div class="section-head"><h2>Import Transactions</h2><p>Upload the CSV file generated by your AI assistant. Need help getting there? Open the <strong style="color:var(--green);cursor:pointer;" onclick="showTab('settings',document.querySelector('.tab-btn'));setTimeout(openGuide,100)">Get Started Guide</strong> in Settings.</p></div>
 
   <!-- Profile selector -->
   <div class="card" style="margin-bottom:18px;">
@@ -735,7 +742,7 @@ select option{background:var(--navy3);}
           </div>
 
           <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
-            <button onclick="closeGuide();showTab('import',document.querySelector('.tab-btn:nth-child(2)'))" style="background:none;border:1px solid var(--border2);border-radius:6px;color:var(--amber2);font-family:var(--mono);font-size:0.7rem;padding:5px 12px;cursor:pointer;" onmouseover="this.style.borderColor='var(--amber2)'" onmouseout="this.style.borderColor='var(--border2)'">→ Go to Import</button>
+            <button onclick="closeGuide();showTab('import',document.querySelectorAll('.tab-btn')[1])" style="background:none;border:1px solid var(--border2);border-radius:6px;color:var(--amber2);font-family:var(--mono);font-size:0.7rem;padding:5px 12px;cursor:pointer;" onmouseover="this.style.borderColor='var(--amber2)'" onmouseout="this.style.borderColor='var(--border2)'">→ Go to Import</button>
           </div>
         </div>
       </div>

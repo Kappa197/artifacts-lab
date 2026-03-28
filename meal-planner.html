@@ -994,6 +994,7 @@ function showPlan(){
         document.querySelectorAll(".week-tab").forEach(function(x){x.classList.remove("active");});
         t.classList.add("active"); S.week=wi;
         renderWeek(wi); renderNutrition(wi);
+        if(dayViewActive) buildDaySelector(wi);
       });
       tabs.appendChild(t);
     })(w);
@@ -1667,7 +1668,7 @@ function setViewMode(dayMode){
     btn.classList.toggle("active", dayMode);
   }
   if(S.plan){
-    if(dayMode){ buildDaySelector(S.week); }
+    if(dayMode){ S_mobileDay=0; buildDaySelector(S.week); }
     else { renderWeek(S.week); }
   }
 }
@@ -1762,7 +1763,7 @@ function buildDaySelector(wi){
     })(di);
     sel.appendChild(btn);
   });
-  renderMobileDay(wi, S_mobileDay < 7 ? S_mobileDay : 0);
+  renderMobileDay(wi, 0);
 }
 
 window.addEventListener('load', initTier);
