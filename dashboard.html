@@ -771,25 +771,41 @@ if ('serviceWorker' in navigator) {
       .catch(err => console.log('SW registration failed:', err));
   });
 }
+
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches
+  || window.navigator.standalone;
+
 let deferredPrompt = null;
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  if (!localStorage.getItem('pwa-dismissed')) showInstallCard();
-});
-window.addEventListener('appinstalled', () => {
-  deferredPrompt = null;
-  hideInstallCard();
-});
-function showInstallCard() {
+
+function initInstallCard() {
+  if (isInStandaloneMode) return; // already installed - hide card
+  if (localStorage.getItem('pwa-dismissed')) return;
+
   const card = document.getElementById('pwa-install-card');
-  if (card) card.style.display = 'flex';
+  if (!card) return;
+
+  if (isIOS) {
+    // iOS: show with manual instructions
+    card.querySelector('.pwa-card-title').textContent = 'Install The Artifacts Lab';
+    card.querySelector('.pwa-card-sub').textContent = 'Tap Share → Add to Home Screen in Safari';
+    card.querySelector('.pwa-card-install').textContent = 'How? →';
+    card.querySelector('.pwa-card-install').onclick = showIOSInstructions;
+    card.style.display = 'flex';
+  }
+  // Android/desktop handled by beforeinstallprompt below
 }
+
+function showIOSInstructions() {
+  alert('To install on iPhone/iPad:\n\n1. Tap the Share button (box with arrow) at the bottom of Safari\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add" — done!');
+}
+
 function hideInstallCard() {
   const card = document.getElementById('pwa-install-card');
   if (card) card.style.display = 'none';
   localStorage.setItem('pwa-dismissed', '1');
 }
+
 async function installApp() {
   if (!deferredPrompt) return;
   deferredPrompt.prompt();
@@ -797,6 +813,23 @@ async function installApp() {
   deferredPrompt = null;
   hideInstallCard();
 }
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  if (!localStorage.getItem('pwa-dismissed') && !isInStandaloneMode) {
+    const card = document.getElementById('pwa-install-card');
+    if (card) card.style.display = 'flex';
+  }
+});
+
+window.addEventListener('appinstalled', () => {
+  deferredPrompt = null;
+  hideInstallCard();
+});
+
+// Run after page loads
+window.addEventListener('load', initInstallCard);
 </script>
 </body>
 </html>
