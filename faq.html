@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAQ — The Artifacts Lab</title>
+<meta name="description" content="Frequently asked questions about The Artifacts Lab — pricing, privacy, offline use, installing as an app, and more.">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#D4920A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Artifacts Lab">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://theartifactslab.com/faq">
+<meta property="og:title" content="FAQ — The Artifacts Lab">
+<meta property="og:description" content="Frequently asked questions about pricing, privacy, offline use and installing as an app.">
+<meta property="og:image" content="https://theartifactslab.com/og-image.png">
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-NVPSBWT293"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-NVPSBWT293');
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=JetBrains+Mono:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:      #0B0F1A;
+  --navy2:     #111827;
+  --navy3:     #1A2235;
+  --navy4:     #243048;
+  --border:    #2A3B55;
+  --border2:   #334466;
+  --amber:     #D4920A;
+  --amber2:    #F5A623;
+  --amber-dim: rgba(212,146,10,0.12);
+  --green:     #2ECC8A;
+  --text:      #E8EDF5;
+  --text2:     #9BAAC4;
+  --text3:     #5A6A8A;
+  --mono:      'JetBrains Mono', monospace;
+  --body:      'Outfit', sans-serif;
+  --serif:     'Playfair Display', serif;
+}
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--body); background: var(--navy); color: var(--text);
+  min-height: 100vh; overflow-x: hidden; line-height: 1.6;
+}
+body::before {
+  content: ''; position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(212,146,10,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(212,146,10,0.03) 1px, transparent 1px);
+  background-size: 60px 60px; pointer-events: none; z-index: 0;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 48px; height: 64px;
+  background: rgba(11,15,26,0.9); backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(42,59,85,0.6);
+}
+.nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.nav-logo-icon {
+  width: 32px; height: 32px; background: var(--amber-dim);
+  border: 1px solid var(--amber); border-radius: 8px;
+  display: flex; align-items: center; justify-content: center; font-size: 1rem;
+}
+.nav-logo-text { font-family: var(--serif); font-size: 1.1rem; font-weight: 700; color: var(--amber2); }
+.nav-links { display: flex; align-items: center; gap: 32px; list-style: none; }
+.nav-links a {
+  font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text3); text-decoration: none; transition: color 0.2s;
+}
+.nav-links a:hover, .nav-links a.active { color: var(--amber2); }
+.nav-cta {
+  font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 8px 20px; border-radius: 6px;
+  background: var(--amber-dim); border: 1px solid var(--amber);
+  color: var(--amber2); text-decoration: none; transition: all 0.2s; white-space: nowrap;
+}
+.nav-cta:hover { background: var(--amber); color: var(--navy); }
+.nav-hamburger {
+  display: none; flex-direction: column; justify-content: center;
+  align-items: center; gap: 5px; width: 40px; height: 40px;
+  background: var(--amber-dim); border: 1px solid var(--amber);
+  border-radius: 8px; cursor: pointer; padding: 0; z-index: 201;
+}
+.nav-hamburger span {
+  display: block; width: 18px; height: 2px; background: var(--amber2);
+  border-radius: 2px; transition: all 0.3s cubic-bezier(0.4,0,0.2,1); transform-origin: center;
+}
+.nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+.nav-mobile-menu {
+  display: none; position: fixed; top: 64px; left: 0; right: 0;
+  background: rgba(11,15,26,0.97); backdrop-filter: blur(24px);
+  border-bottom: 2px solid var(--amber); padding: 8px 0 16px; z-index: 200;
+  transform: translateY(-8px); opacity: 0;
+  transition: transform 0.25s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease;
+}
+.nav-mobile-menu.open { transform: translateY(0); opacity: 1; }
+.nav-mobile-menu ul { list-style: none; padding: 8px 0; }
+.nav-mobile-menu ul li { border-bottom: 1px solid rgba(42,59,85,0.4); }
+.nav-mobile-menu ul li:last-child { border-bottom: none; }
+.nav-mobile-menu ul li a {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 28px; font-family: var(--mono); font-size: 0.7rem;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text2); text-decoration: none; transition: all 0.2s;
+}
+.nav-mobile-menu ul li a:hover { color: var(--amber2); background: var(--amber-dim); }
+.nav-mobile-menu ul li a .menu-arrow { color: var(--text3); }
+.nav-mobile-cta { margin: 12px 28px 4px; }
+.nav-mobile-cta a {
+  display: block; text-align: center; padding: 13px; background: var(--amber); color: var(--navy);
+  font-family: var(--mono); font-size: 0.7rem; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; border-radius: 8px;
+}
+.nav-backdrop {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.4); z-index: 199;
+}
+.nav-backdrop.open { display: block; }
+
+/* ── PAGE ── */
+.page {
+  position: relative; z-index: 1;
+  max-width: 760px; margin: 0 auto;
+  padding: 100px 24px 80px;
+}
+
+/* ── HEADER ── */
+.page-eyebrow {
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--amber); margin-bottom: 14px;
+}
+.page-title {
+  font-family: var(--serif); font-size: clamp(2.2rem, 5vw, 3.4rem);
+  font-weight: 700; line-height: 1.1; color: var(--text); margin-bottom: 14px;
+}
+.page-title em { font-style: italic; color: var(--amber2); }
+.page-sub {
+  font-size: 1rem; color: var(--text2); line-height: 1.7; margin-bottom: 56px;
+}
+
+/* ── FAQ CATEGORIES ── */
+.faq-category { margin-bottom: 52px; }
+.faq-cat-label {
+  font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--amber); margin-bottom: 20px;
+  padding-bottom: 10px; border-bottom: 1px solid var(--border);
+}
+
+/* ── FAQ ITEMS — no JS, pure CSS details/summary ── */
+.faq-item {
+  border-bottom: 1px solid var(--border);
+}
+.faq-item:last-child { border-bottom: none; }
+details { width: 100%; }
+details summary {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 0; gap: 16px; cursor: pointer;
+  font-family: var(--body); font-size: 0.95rem; font-weight: 600;
+  color: var(--text); transition: color 0.2s;
+  list-style: none; -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation; user-select: none;
+}
+details summary::-webkit-details-marker { display: none; }
+details summary:hover { color: var(--amber2); }
+details[open] summary { color: var(--amber2); }
+.summary-icon {
+  font-size: 1.2rem; font-weight: 300; color: var(--amber);
+  flex-shrink: 0; transition: transform 0.25s; line-height: 1;
+  width: 24px; text-align: center;
+}
+details[open] .summary-icon { transform: rotate(45deg); }
+.faq-answer {
+  font-size: 0.88rem; color: var(--text2); line-height: 1.8;
+  padding-bottom: 20px;
+}
+.faq-answer a { color: var(--amber2); text-decoration: underline; text-underline-offset: 3px; }
+.faq-answer p { margin-bottom: 12px; }
+.faq-answer p:last-child { margin-bottom: 0; }
+
+/* ── INSTALL STEPS ── */
+.install-steps { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+.install-platform {
+  background: var(--navy2); border: 1px solid var(--border2);
+  border-radius: 10px; padding: 16px 18px;
+}
+.install-platform-label {
+  font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--amber); margin-bottom: 12px; font-weight: 700;
+}
+.install-step {
+  display: flex; gap: 12px; align-items: flex-start; margin-bottom: 8px;
+}
+.install-step:last-child { margin-bottom: 0; }
+.install-step-num {
+  width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+  background: var(--amber-dim); border: 1px solid var(--amber);
+  color: var(--amber2); font-family: var(--mono); font-size: 0.58rem;
+  font-weight: 700; display: flex; align-items: center; justify-content: center;
+}
+.install-step-text {
+  font-size: 0.85rem; color: var(--text2); line-height: 1.6; padding-top: 2px;
+}
+.install-step-text strong { color: var(--text); }
+
+/* ── CTA ── */
+.faq-cta {
+  background: var(--navy2); border: 1px solid var(--border2);
+  border-radius: 14px; padding: 28px; text-align: center; margin-top: 52px;
+}
+.faq-cta-title {
+  font-family: var(--serif); font-size: 1.3rem; font-weight: 700;
+  color: var(--text); margin-bottom: 8px;
+}
+.faq-cta-sub { font-size: 0.85rem; color: var(--text2); margin-bottom: 20px; }
+.faq-cta-btn {
+  display: inline-block; padding: 12px 28px; background: var(--amber);
+  color: var(--navy); font-family: var(--body); font-size: 0.9rem; font-weight: 700;
+  border-radius: 10px; text-decoration: none; transition: all 0.2s;
+  box-shadow: 0 4px 16px rgba(212,146,10,0.3);
+}
+.faq-cta-btn:hover { background: var(--amber2); }
+
+/* ── FOOTER ── */
+footer {
+  background: var(--navy2); border-top: 1px solid var(--border);
+  padding: 40px 48px; display: flex; align-items: center;
+  justify-content: space-between; flex-wrap: wrap; gap: 16px;
+  position: relative; z-index: 1;
+}
+.footer-brand { font-family: var(--serif); font-size: 1rem; color: var(--amber2); }
+.footer-brand span { display: block; font-family: var(--mono); font-size: 0.55rem; color: var(--text3); letter-spacing: 0.1em; margin-top: 2px; }
+.footer-links { display: flex; gap: 24px; list-style: none; flex-wrap: wrap; }
+.footer-links a { font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); text-decoration: none; transition: color 0.2s; }
+.footer-links a:hover { color: var(--amber2); }
+.footer-copy { font-family: var(--mono); font-size: 0.55rem; color: var(--text3); letter-spacing: 0.06em; }
+
+@media (max-width: 900px) {
+  nav { padding: 0 24px; }
+  .nav-links { display: none; }
+  .nav-hamburger { display: flex; }
+  .nav-mobile-menu { display: block; }
+  footer { padding: 28px 24px; flex-direction: column; text-align: center; }
+  .footer-links { justify-content: center; }
+}
+</style>
+</head>
+<body>
+
+<div class="nav-backdrop" id="navBackdrop" onclick="closeMenu()"></div>
+<nav id="mainNav">
+  <a href="/index.html" class="nav-logo">
+    <div class="nav-logo-icon">&#9879;&#65039;</div>
+    <div class="nav-logo-text">The Artifacts Lab</div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="/index.html">Home</a></li>
+    <li><a href="/tools.html">Tools</a></li>
+    <li><a href="/index.html#pricing">Pricing</a></li>
+    <li><a href="/faq" class="active">FAQ</a></li>
+    <li><a href="/blog">Blog</a></li>
+  </ul>
+  <a href="/login.html" class="nav-cta">Sign In / Join</a>
+  <button class="nav-hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+<div class="nav-mobile-menu" id="mobileMenu">
+  <ul>
+    <li><a href="/index.html" onclick="closeMenu()">Home <span class="menu-arrow">→</span></a></li>
+    <li><a href="/tools.html" onclick="closeMenu()">Tools <span class="menu-arrow">→</span></a></li>
+    <li><a href="/index.html#pricing" onclick="closeMenu()">Pricing <span class="menu-arrow">→</span></a></li>
+    <li><a href="/faq" onclick="closeMenu()">FAQ <span class="menu-arrow">→</span></a></li>
+    <li><a href="/blog" onclick="closeMenu()">Blog <span class="menu-arrow">→</span></a></li>
+  </ul>
+  <div class="nav-mobile-cta">
+    <a href="/login.html" onclick="closeMenu()">Sign In / Join →</a>
+  </div>
+</div>
+
+<div class="page">
+
+  <div class="page-eyebrow">Help &amp; Support</div>
+  <h1 class="page-title">Frequently asked<br><em>questions.</em></h1>
+  <p class="page-sub">Everything you need to know about The Artifacts Lab. Can't find your answer? <a href="mailto:hello@theartifactslab.com" style="color:var(--amber2)">Send us a message.</a></p>
+
+  <!-- ── GENERAL ── -->
+  <div class="faq-category">
+    <div class="faq-cat-label">General</div>
+
+    <div class="faq-item">
+      <details>
+        <summary>Is it really free? <span class="summary-icon">+</span></summary>
+        <div class="faq-answer">
+          Yes — the Retirement Calculator and Meal Planner are free forever with no account required. Basic unlocks all tools for $8/year. Premium adds advanced features for $29/year or $49 lifetime. The free tier is genuinely useful, not a crippled demo.
+        </div>
+      </details>
+    </div>
+
+    <div class="faq-item">
+      <details>
+        <summary>Do I need to create an account? <span class="summary-icon">+</span></summary>
+        <div class="faq-answer">
+          Not for the free tools — just open them and start immediately. An account is only needed if you want to save your data across devices or access paid features.
+        </div>
+      </details>
+    </div>
+
+    <div class="faq-item">
+      <details>
+        <summary>What's the difference between Basic and Premium? <span class="summary-icon">+</span></summary>
+        <div class="faq-answer">
+          <p>Basic ($8/year) gives you all tools with core features — CSV import, 3-month workout plans, shopping lists and more.</p>
+          <p>Premium ($29/year or $49 lifetime) adds advanced retirement stress testing, 6-month workout plans, household view and PDF export.</p>
+          <a href="/index.html#pricing">See the full comparison →</a>
+        </div>
+      </details>
+    </div>
+
+    <div class="faq-item">
+      <details>
+        <summary>Can I cancel my subscription? <span class="summary-icon">+</span></summary>
+        <div class="faq-answer">
+          Yes, anytime. Your access continues until the end of the billing period. The Lifetime plan is a one-time payment with no renewal ever.
+        </div>
+      </details>
+    </div>
+
+    <div class="faq-item">
+      <details>
+        <summary>What payment methods are accepted? <span class="summary-icon">+</span></summary>
+        <div class="faq-answer">
+          All major credit and debit cards via Stripe — Visa, Mastercard, Amex and more. Stripe handles all payments securely; we never see your card details.
+        </div>
+      </details>
+    </div>
+
+  </div>
+
+  <!-- ── PRIVACY & DATA ── -->
+  <div class="faq-category">
+    <div class="faq-cat-label">Privacy &amp; Data</div>
+
+    <div class="faq-item">
+      <details>
+        <summary>Where is my data stored? <span class="summary-icon">+</span></summary>
+        <div class="faq-answer">
+          All tool data — expenses, meal plans, workout logs — is stored locally on your device in your browser. It never leaves your device. We have no access to it.
+        </div>
+      </details>
+    </div>
+
+    <div class="faq-item">
+      <details>
+        <summary>Is my financial data safe? <span class="summary-icon">+</span></summary>
+        <div class="faq-answer">
+          Yes. Every tool runs entirely in your browser. Your financial data never touches our servers. We don't sell data, we don't show ads, and there are no third-party trackers inside the tools.
+        </div>
+      </details>
+    </div>
+
+    <div class="faq-item">
+      <details>
+        <summary>Does it work offline? <span class="summary-icon">+</span></summary>
+        <div class="faq-answer">
+          Yes — after your first visit all tools work without an internet connection. Your data is stored locally so nothing is lost if you go offline.
+        </div>
+      </details>
+    </div>
+
+  </div>
+
+  <!-- ── INSTALL AS APP ── -->
+  <div class="faq-category">
+    <div class="faq-cat-label">Installing as an App</div>
+
+    <div class="faq-item">
+      <details>
+        <summary>Can I install it as an app on my phone? <span class="summary-icon">+</span></summary>
+        <div class="faq-answer">
+          Yes — no App Store needed. See the step-by-step instructions below for your device.
+        </div>
+      </details>
+    </div>
+
+    <div class="install-steps">
+
+      <div class="install-platform">
+        <div class="install-platform-label">&#128241; Android — Chrome or Edge</div>
+        <div class="install-step"><div class="install-step-num">1</div><div class="install-step-text">Open <strong>theartifactslab.com</strong> in Chrome or Edge on your Android phone</div></div>
+        <div class="install-step"><div class="install-step-num">2</div><div class="install-step-text">Tap the <strong>three-dot menu (⋮)</strong> in the top right corner</div></div>
+        <div class="install-step"><div class="install-step-num">3</div><div class="install-step-text">Tap <strong>"Add to Home screen"</strong> or <strong>"Install app"</strong></div></div>
+        <div class="install-step"><div class="install-step-num">4</div><div class="install-step-text">Tap <strong>"Install"</strong> — the app icon appears on your home screen</div></div>
+      </div>
+
+      <div class="install-platform">
+        <div class="install-platform-label">&#127822; iPhone / iPad — Safari</div>
+        <div class="install-step"><div class="install-step-num">1</div><div class="install-step-text">Open <strong>theartifactslab.com</strong> in <strong>Safari</strong> (must be Safari, not Chrome)</div></div>
+        <div class="install-step"><div class="install-step-num">2</div><div class="install-step-text">Tap the <strong>Share button &#8679;</strong> at the bottom of the screen</div></div>
+        <div class="install-step"><div class="install-step-num">3</div><div class="install-step-text">Scroll down and tap <strong>"Add to Home Screen"</strong></div></div>
+        <div class="install-step"><div class="install-step-num">4</div><div class="install-step-text">Tap <strong>"Add"</strong> — the app icon appears on your home screen</div></div>
+      </div>
+
+      <div class="install-platform">
+        <div class="install-platform-label">&#128187; Desktop — Chrome</div>
+        <div class="install-step"><div class="install-step-num">1</div><div class="install-step-text">Open <strong>theartifactslab.com</strong> in Chrome on your computer</div></div>
+        <div class="install-step"><div class="install-step-num">2</div><div class="install-step-text">Click the <strong>three-dot menu (⋮)</strong> in the top right corner</div></div>
+        <div class="install-step"><div class="install-step-num">3</div><div class="install-step-text">Go to <strong>"Cast, save and share"</strong> → click <strong>"Install page as app"</strong></div></div>
+        <div class="install-step"><div class="install-step-num">4</div><div class="install-step-text">Click <strong>"Install"</strong> to confirm</div></div>
+      </div>
+
+      <div class="install-platform">
+        <div class="install-platform-label">&#128187; Desktop — Microsoft Edge</div>
+        <div class="install-step"><div class="install-step-num">1</div><div class="install-step-text">Open <strong>theartifactslab.com</strong> in Microsoft Edge</div></div>
+        <div class="install-step"><div class="install-step-num">2</div><div class="install-step-text">Click the <strong>three-dot menu (…)</strong> in the top right corner</div></div>
+        <div class="install-step"><div class="install-step-num">3</div><div class="install-step-text">Go to <strong>"Apps"</strong> → click <strong>"Install this site as an app"</strong></div></div>
+        <div class="install-step"><div class="install-step-num">4</div><div class="install-step-text">Click <strong>"Install"</strong> to confirm</div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="faq-cta">
+    <div class="faq-cta-title">Ready to get started?</div>
+    <div class="faq-cta-sub">Free tools, no account required. Upgrade when you're ready.</div>
+    <a href="/tools.html" class="faq-cta-btn">See all tools →</a>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-brand">
+    The Artifacts Lab
+    <span>theartifactslab.com &nbsp;&middot;&nbsp; Est. 2026</span>
+  </div>
+  <ul class="footer-links">
+    <li><a href="/index.html">Home</a></li>
+    <li><a href="/tools.html">Tools</a></li>
+    <li><a href="/index.html#pricing">Pricing</a></li>
+    <li><a href="/faq">FAQ</a></li>
+    <li><a href="/blog">Blog</a></li>
+  </ul>
+  <div class="footer-copy">&copy; 2026 The Artifacts Lab. All rights reserved.</div>
+</footer>
+
+<script>
+function toggleMenu() {
+  const btn = document.getElementById('hamburger');
+  const menu = document.getElementById('mobileMenu');
+  const backdrop = document.getElementById('navBackdrop');
+  if (menu.classList.contains('open')) { closeMenu(); }
+  else { btn.classList.add('open'); menu.classList.add('open'); backdrop.classList.add('open'); document.body.style.overflow = 'hidden'; }
+}
+function closeMenu() {
+  document.getElementById('hamburger').classList.remove('open');
+  document.getElementById('mobileMenu').classList.remove('open');
+  document.getElementById('navBackdrop').classList.remove('open');
+  document.body.style.overflow = '';
+}
+window.addEventListener('scroll', () => {
+  document.getElementById('mainNav').style.boxShadow = window.scrollY > 20 ? '0 4px 32px rgba(0,0,0,0.4)' : 'none';
+  if (document.getElementById('mobileMenu').classList.contains('open')) closeMenu();
+});
+</script>
+</body>
+</html>
