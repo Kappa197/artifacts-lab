@@ -878,6 +878,7 @@ footer {
 
 /* ── Why install button ── */
 .why-install-btn {
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
   margin-top: 16px;
   font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.1em;
   text-transform: uppercase; padding: 10px 20px; border-radius: 7px;
@@ -889,11 +890,11 @@ footer {
 
 /* ── Install Modal ── */
 .install-modal-backdrop {
-  display: none; position: fixed; inset: 0;
+  display: none; position: fixed; inset: 0; pointer-events: none;
   background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
   z-index: 1000; align-items: center; justify-content: center; padding: 24px;
 }
-.install-modal-backdrop.open { display: flex; }
+.install-modal-backdrop.open { display: flex; pointer-events: auto; }
 .install-modal {
   background: var(--navy2); border: 1px solid var(--amber);
   border-radius: 18px; padding: 32px 28px; max-width: 480px; width: 100%;
@@ -960,6 +961,8 @@ footer {
   padding: 20px 0; gap: 16px; text-align: left;
   font-family: var(--body); font-size: 0.95rem; font-weight: 600;
   color: var(--text); transition: color 0.2s;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+  user-select: none; -webkit-user-select: none;
 }
 .faq-question:hover { color: var(--amber2); }
 .faq-question.open  { color: var(--amber2); }
@@ -971,9 +974,11 @@ footer {
 .faq-question.open .faq-icon { transform: rotate(45deg); }
 .faq-answer {
   max-height: 0; overflow: hidden;
-  transition: max-height 0.35s ease, padding 0.35s ease;
+  transition: max-height 0.4s ease, padding 0.4s ease;
   font-size: 0.88rem; color: var(--text2); line-height: 1.8; padding-bottom: 0;
+  pointer-events: none;
 }
+.faq-answer.open { pointer-events: auto; }
 .faq-answer.open { max-height: 400px; padding-bottom: 20px; }
 .faq-answer a { color: var(--amber2); text-decoration: underline; text-underline-offset: 3px; }
 
