@@ -1353,42 +1353,42 @@ footer {
     <div class="faq-grid reveal">
 
       <div class="faq-item">
-        <button class="faq-question" onclick="toggleFaq(this)">Is it really free?<span class="faq-icon">+</span></button>
+        <button class="faq-question" onclick="toggleFaq(this, event)">Is it really free?<span class="faq-icon">+</span></button>
         <div class="faq-answer">Yes — the Retirement Calculator and Meal Planner are free forever, no account required. Basic unlocks all tools for $8/year. Premium adds advanced features for $29/year or $49 lifetime.</div>
       </div>
 
       <div class="faq-item">
-        <button class="faq-question" onclick="toggleFaq(this)">Do I need to create an account?<span class="faq-icon">+</span></button>
+        <button class="faq-question" onclick="toggleFaq(this, event)">Do I need to create an account?<span class="faq-icon">+</span></button>
         <div class="faq-answer">Not for the free tools — just open them and start immediately. An account is only needed to save your data across devices or to access paid features.</div>
       </div>
 
       <div class="faq-item">
-        <button class="faq-question" onclick="toggleFaq(this)">Where is my data stored? Is it private?<span class="faq-icon">+</span></button>
+        <button class="faq-question" onclick="toggleFaq(this, event)">Where is my data stored? Is it private?<span class="faq-icon">+</span></button>
         <div class="faq-answer">All tool data is stored locally on your device. It never leaves your browser. We have no access to it, we don't sell it, and there are no ads — ever.</div>
       </div>
 
       <div class="faq-item">
-        <button class="faq-question" onclick="toggleFaq(this)">Can I install it as an app on my phone?<span class="faq-icon">+</span></button>
+        <button class="faq-question" onclick="toggleFaq(this, event)">Can I install it as an app on my phone?<span class="faq-icon">+</span></button>
         <div class="faq-answer">Yes — no App Store needed. Tap the "How to install" button in the section above for step-by-step instructions for your device.</div>
       </div>
 
       <div class="faq-item">
-        <button class="faq-question" onclick="toggleFaq(this)">Does it work offline?<span class="faq-icon">+</span></button>
+        <button class="faq-question" onclick="toggleFaq(this, event)">Does it work offline?<span class="faq-icon">+</span></button>
         <div class="faq-answer">Yes — after your first visit all tools work without an internet connection. Your data is stored locally so nothing is lost if you go offline.</div>
       </div>
 
       <div class="faq-item">
-        <button class="faq-question" onclick="toggleFaq(this)">What's the difference between Basic and Premium?<span class="faq-icon">+</span></button>
+        <button class="faq-question" onclick="toggleFaq(this, event)">What's the difference between Basic and Premium?<span class="faq-icon">+</span></button>
         <div class="faq-answer">Basic ($8/year) gives you all tools with core features. Premium ($29/year or $49 lifetime) adds advanced retirement stress testing, 6-month workout plans, household view and PDF export. See the <a href="#pricing">full comparison above</a>.</div>
       </div>
 
       <div class="faq-item">
-        <button class="faq-question" onclick="toggleFaq(this)">Can I cancel my subscription?<span class="faq-icon">+</span></button>
+        <button class="faq-question" onclick="toggleFaq(this, event)">Can I cancel my subscription?<span class="faq-icon">+</span></button>
         <div class="faq-answer">Yes, anytime. Your access continues until the end of the billing period. The Lifetime plan is a one-time payment with no renewal ever.</div>
       </div>
 
       <div class="faq-item">
-        <button class="faq-question" onclick="toggleFaq(this)">What payment methods are accepted?<span class="faq-icon">+</span></button>
+        <button class="faq-question" onclick="toggleFaq(this, event)">What payment methods are accepted?<span class="faq-icon">+</span></button>
         <div class="faq-answer">All major credit and debit cards via Stripe — Visa, Mastercard, Amex and more. Stripe handles all payments securely; we never see your card details.</div>
       </div>
 
@@ -1566,7 +1566,7 @@ function showInstallTab(platform) {
 }
 
 // ── FAQ accordion ─────────────────────────────────
-function toggleFaq(btn) {
+function toggleFaq(btn, event) {
   event.preventDefault();
   event.stopPropagation();
   const answer = btn.nextElementSibling;
