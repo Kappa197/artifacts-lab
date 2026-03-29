@@ -384,6 +384,17 @@ main {
   border: 1px solid var(--border2); cursor: pointer; transition: all 0.2s;
 }
 .pwa-card-dismiss:hover { color: var(--text); border-color: var(--text3); }
+
+/* ── PWA Install Button (header) ── */
+.h-install-btn {
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 7px 14px; border-radius: 6px;
+  background: var(--amber-dim); border: 1px solid var(--amber);
+  color: var(--amber2); cursor: pointer; transition: all 0.2s;
+  white-space: nowrap; display: flex; align-items: center; gap: 6px;
+}
+.h-install-btn:hover { background: var(--amber); color: var(--navy); }
+@media (max-width: 540px) { .h-install-btn span.h-install-label { display: none; } }
 </style>
 </head>
 <body>
@@ -395,6 +406,7 @@ main {
   </a>
   <div class="h-right">
     <span class="h-email" id="hEmail">—</span>
+    <button class="h-install-btn" onclick="installApp()">&#128242; <span class="h-install-label">Add to Home Screen</span></button>
     <button class="h-signout" onclick="signOut()">Sign Out</button>
   </div>
 </header>
@@ -573,15 +585,15 @@ main {
     </div>
   
       <!-- PWA Install Card -->
-      <div class="pwa-install-card" id="pwa-install-card" style="display:none;">
-        <div class="pwa-card-icon">&#9879;&#65039;</div>
+      <!-- PWA Install Card — always visible unless already installed -->
+      <div class="pwa-install-card" id="pwa-install-card">
+        <div class="pwa-card-icon">&#128242;</div>
         <div class="pwa-card-text">
-          <div class="pwa-card-title">Install The Artifacts Lab</div>
-          <div class="pwa-card-sub">Add to home screen &middot; Works offline &middot; No App Store</div>
+          <div class="pwa-card-title">Use as an app</div>
+          <div class="pwa-card-sub">Works offline &middot; Home screen icon &middot; No App Store needed</div>
         </div>
         <div class="pwa-card-actions">
           <button class="pwa-card-install" onclick="installApp()">Install &#8594;</button>
-          <button class="pwa-card-dismiss" onclick="hideInstallCard()">&#10005;</button>
         </div>
       </div>
 </div>
@@ -778,43 +790,37 @@ const isStandalone = window.matchMedia('(display-mode: standalone)').matches
   || window.navigator.standalone === true;
 let deferredPrompt = null;
 
-// Capture Android/Desktop native prompt
+// Hide card if already running as installed app
+if (isStandalone) {
+  document.addEventListener('DOMContentLoaded', () => {
+    const card = document.getElementById('pwa-install-card');
+    if (card) card.style.display = 'none';
+  });
+}
+
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
 });
 
-window.addEventListener('appinstalled', hideInstallCard);
+window.addEventListener('appinstalled', () => {
+  const card = document.getElementById('pwa-install-card');
+  if (card) card.style.display = 'none';
+});
 
 async function installApp() {
   if (deferredPrompt) {
-    // Android / Desktop — native prompt
     deferredPrompt.prompt();
     await deferredPrompt.userChoice;
     deferredPrompt = null;
-    hideInstallCard();
+    const card = document.getElementById('pwa-install-card');
+    if (card) card.style.display = 'none';
   } else if (isIOS) {
-    // iOS Safari — manual instructions
-    alert('To install on iPhone or iPad:\n\n1. Tap the Share button ⬆ at the bottom of Safari\n2. Scroll and tap "Add to Home Screen"\n3. Tap "Add"\n\nDone — the app will appear on your home screen!');
+    alert('To install on iPhone or iPad:\n\n1. Open this page in Safari (not Chrome)\n2. Tap the Share button \u2B06 at the bottom\n3. Scroll down and tap "Add to Home Screen"\n4. Tap "Add"\n\nThe app will appear on your home screen!');
   } else {
-    // Fallback for other browsers
-    alert('To install: open this page in Chrome or Safari and use the browser menu to "Add to Home Screen".');
+    alert('To install:\n\n- Chrome: tap the menu (\u22EE) and select "Add to Home Screen" or "Install app"\n- Safari: tap Share \u2B06 then "Add to Home Screen"');
   }
 }
-
-function hideInstallCard() {
-  const card = document.getElementById('pwa-install-card');
-  if (card) card.style.display = 'none';
-  localStorage.setItem('pwa-dismissed', '1');
-}
-
-// Show card on load unless already installed or dismissed
-window.addEventListener('load', () => {
-  if (isStandalone) return;
-  if (localStorage.getItem('pwa-dismissed')) return;
-  const card = document.getElementById('pwa-install-card');
-  if (card) card.style.display = 'flex';
-});
 </script>
 </body>
 </html>

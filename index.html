@@ -922,6 +922,49 @@ footer {
   #pwa-banner { flex-wrap: wrap; }
   .pwa-banner-actions { width: 100%; justify-content: flex-end; }
 }
+
+/* ── Why install button ── */
+.why-install-btn {
+  margin-top: 14px;
+  font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 9px 18px; border-radius: 7px;
+  background: var(--amber-dim); border: 1px solid var(--amber);
+  color: var(--amber2); cursor: pointer; transition: all 0.2s;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.why-install-btn:hover { background: var(--amber); color: var(--navy); }
+
+/* ── FAQ Section ── */
+.faq-section { background: var(--navy2); border-top: 1px solid var(--border); }
+.faq-grid { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 0; }
+.faq-item {
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+.faq-item:last-child { border-bottom: none; }
+.faq-question {
+  width: 100%; background: none; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 0; gap: 16px; text-align: left;
+  font-family: var(--body); font-size: 0.95rem; font-weight: 600;
+  color: var(--text); transition: color 0.2s;
+}
+.faq-question:hover { color: var(--amber2); }
+.faq-question.open { color: var(--amber2); }
+.faq-icon {
+  font-family: var(--mono); font-size: 1.2rem; font-weight: 300;
+  color: var(--amber); flex-shrink: 0; transition: transform 0.25s;
+  width: 24px; text-align: center;
+}
+.faq-question.open .faq-icon { transform: rotate(45deg); }
+.faq-answer {
+  max-height: 0; overflow: hidden;
+  transition: max-height 0.35s ease, padding 0.35s ease;
+  font-size: 0.88rem; color: var(--text2); line-height: 1.8;
+  padding: 0;
+}
+.faq-answer.open { max-height: 300px; padding-bottom: 20px; }
+.faq-answer a { color: var(--amber2); text-decoration: underline; text-underline-offset: 3px; }
 </style>
 </head>
 <body>
@@ -953,6 +996,7 @@ footer {
     <li><a href="tools.html" onclick="closeMenu()">All Tools <span class="menu-arrow">→</span></a></li>
     <li><a href="#why" onclick="closeMenu()">Why Us <span class="menu-arrow">→</span></a></li>
     <li><a href="#pricing" onclick="closeMenu()">Pricing <span class="menu-arrow">→</span></a></li>
+    <li><a href="#faq" onclick="closeMenu()">FAQ <span class="menu-arrow">→</span></a></li>
     <li><a href="/blog" onclick="closeMenu()">Blog <span class="menu-arrow">→</span></a></li>
   </ul>
   <div class="nav-mobile-cta">
@@ -1097,6 +1141,12 @@ footer {
         <div class="why-title">Works everywhere, instantly</div>
         <div class="why-desc">Laptop, phone, tablet — the tools adapt to any screen. After first load they work completely offline. No app to install, no account to create for the free tools.</div>
       </div>
+      <div class="why-item reveal reveal-delay-4">
+        <div class="why-num">04</div>
+        <div class="why-title">Installs like an app — no App Store needed</div>
+        <div class="why-desc">Add The Artifacts Lab to your home screen directly from your browser. Works on iPhone, Android, and desktop. Tap the install button below or use your browser's "Add to Home Screen" option.</div>
+        <button class="why-install-btn" onclick="installApp()">&#128242; Add to Home Screen</button>
+      </div>
     </div>
   </div>
 </section>
@@ -1181,6 +1231,99 @@ footer {
 </section>
 
 <!-- ═══════════════════════════════ EMAIL CAPTURE -->
+
+<!-- ═══════════════════════════════ FAQ -->
+<section class="section faq-section" id="faq">
+  <div class="section-inner">
+    <div class="section-eyebrow">Got questions?</div>
+    <h2 class="section-title">Frequently asked<br><em>questions.</em></h2>
+
+    <div class="faq-grid reveal">
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Is it really free?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          Yes — the Retirement Calculator and Meal Planner are free forever with no account required. Basic unlocks all tools for $8/year. Premium adds advanced features for $29/year or $49 lifetime.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Do I need to create an account?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          Not for the free tools — open them and start immediately. An account is only required if you want to save your data across devices or access the paid features.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Where is my data stored? Is it private?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          All your tool data — expenses, meal plans, workout logs — is stored locally on your device. It never leaves your browser. We have no access to it, we don't sell it, and there are no ads.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Can I install it as an app on my phone?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          Yes! No App Store needed. On iPhone or iPad: open in Safari, tap the Share button ⬆, then tap "Add to Home Screen". On Android: open in Chrome, tap the menu, then "Add to Home Screen". It will appear as an app icon and work offline.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Does it work offline?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          Yes — after your first visit, all tools work without an internet connection. Your data is stored locally so nothing is lost if you go offline.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          What's the difference between Basic and Premium?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          Basic ($8/year) gives you all tools with core features — CSV import, 3-month workout plans, shopping lists. Premium ($29/year or $49 lifetime) adds advanced retirement stress testing, 6-month workout plans, household view and PDF export. See the <a href="#pricing">full comparison above</a>.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Can I cancel my subscription?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          Yes, anytime. Your access continues until the end of the billing period. The Lifetime plan is a one-time payment with no renewal.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          What payment methods are accepted?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          All major credit and debit cards via Stripe — Visa, Mastercard, Amex and more. Stripe handles all payments securely; we never see your card details.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
 <section class="section email-section" id="early-access">
   <div class="section-inner">
     <div class="email-card reveal">
@@ -1214,6 +1357,21 @@ footer {
 </footer>
 
 <script>
+
+// ── FAQ accordion ─────────────────────────────
+function toggleFaq(btn) {
+  const answer = btn.nextElementSibling;
+  const isOpen = answer.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.faq-answer').forEach(a => a.classList.remove('open'));
+  document.querySelectorAll('.faq-question').forEach(b => b.classList.remove('open'));
+  // Open clicked if it was closed
+  if (!isOpen) {
+    answer.classList.add('open');
+    btn.classList.add('open');
+  }
+}
+
 // ── Scroll reveal ────────────────────────────
 const observer = new IntersectionObserver((entries) => {
   entries.forEach(e => {
@@ -1338,6 +1496,28 @@ if ('serviceWorker' in navigator) {
 }
 
 // ── PWA Install ───────────────────────────────
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent.toLowerCase());
+const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+  || window.navigator.standalone === true;
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+});
+
+async function installApp() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+  } else if (isIOS) {
+    alert('To install on iPhone or iPad:\n\n1. Open in Safari (not Chrome)\n2. Tap the Share button \u2B06 at the bottom\n3. Tap "Add to Home Screen"\n4. Tap "Add"\n\nDone!');
+  } else {
+    alert('To install:\n\n- Chrome: tap the menu and select "Add to Home Screen" or "Install app"\n- Safari: tap Share \u2B06 then "Add to Home Screen"');
+  }
+}
+// __REMOVE__
 const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent.toLowerCase());
 const isStandalone = window.matchMedia('(display-mode: standalone)').matches
   || window.navigator.standalone === true;
