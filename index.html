@@ -548,6 +548,15 @@ nav {
   position: relative;
 }
 .why-item:last-child { border-right: none; }
+.why-install-btn {
+  margin-top: 16px;
+  font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 10px 20px; border-radius: 7px;
+  background: var(--amber-dim); border: 1px solid var(--amber);
+  color: var(--amber2); cursor: pointer; transition: all 0.2s;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.why-install-btn:hover { background: var(--amber); color: var(--navy); }
 .why-item::before {
   content: '';
   position: absolute; top: 0; left: 32px; right: 32px; height: 1px;
@@ -876,30 +885,10 @@ footer {
   .tool-card { padding: 24px; }
 }
 
-
-@media (max-width: 480px) {
-  #pwa-banner { flex-wrap: wrap; }
-  .pwa-banner-actions { width: 100%; justify-content: flex-end; }
-}
-
-/* ── Why install button ── */
-.why-install-btn {
-  margin-top: 14px;
-  font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.1em;
-  text-transform: uppercase; padding: 9px 18px; border-radius: 7px;
-  background: var(--amber-dim); border: 1px solid var(--amber);
-  color: var(--amber2); cursor: pointer; transition: all 0.2s;
-  display: inline-flex; align-items: center; gap: 6px;
-}
-.why-install-btn:hover { background: var(--amber); color: var(--navy); }
-
 /* ── FAQ Section ── */
 .faq-section { background: var(--navy2); border-top: 1px solid var(--border); }
-.faq-grid { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 0; }
-.faq-item {
-  border-bottom: 1px solid var(--border);
-  overflow: hidden;
-}
+.faq-grid { max-width: 720px; margin: 0 auto; }
+.faq-item { border-bottom: 1px solid var(--border); }
 .faq-item:last-child { border-bottom: none; }
 .faq-question {
   width: 100%; background: none; border: none; cursor: pointer;
@@ -909,21 +898,20 @@ footer {
   color: var(--text); transition: color 0.2s;
 }
 .faq-question:hover { color: var(--amber2); }
-.faq-question.open { color: var(--amber2); }
+.faq-question.open  { color: var(--amber2); }
 .faq-icon {
-  font-family: var(--mono); font-size: 1.2rem; font-weight: 300;
-  color: var(--amber); flex-shrink: 0; transition: transform 0.25s;
-  width: 24px; text-align: center;
+  font-size: 1.4rem; font-weight: 300; color: var(--amber);
+  flex-shrink: 0; transition: transform 0.25s; line-height: 1;
 }
 .faq-question.open .faq-icon { transform: rotate(45deg); }
 .faq-answer {
   max-height: 0; overflow: hidden;
   transition: max-height 0.35s ease, padding 0.35s ease;
-  font-size: 0.88rem; color: var(--text2); line-height: 1.8;
-  padding: 0;
+  font-size: 0.88rem; color: var(--text2); line-height: 1.8; padding-bottom: 0;
 }
-.faq-answer.open { max-height: 300px; padding-bottom: 20px; }
+.faq-answer.open { max-height: 400px; padding-bottom: 20px; }
 .faq-answer a { color: var(--amber2); text-decoration: underline; text-underline-offset: 3px; }
+
 </style>
 </head>
 <body>
@@ -1104,7 +1092,7 @@ footer {
       <div class="why-item reveal reveal-delay-4">
         <div class="why-num">04</div>
         <div class="why-title">Installs like an app — no App Store needed</div>
-        <div class="why-desc">Add The Artifacts Lab to your home screen directly from your browser. Works on iPhone, Android, and desktop. Tap the install button below or use your browser's "Add to Home Screen" option.</div>
+        <div class="why-desc">Add The Artifacts Lab to your home screen directly from your browser. Works on iPhone, Android, and desktop. No download, no App Store, no account required.</div>
         <button class="why-install-btn" onclick="installApp()">&#128242; Add to Home Screen</button>
       </div>
     </div>
@@ -1191,13 +1179,13 @@ footer {
 </section>
 
 <!-- ═══════════════════════════════ EMAIL CAPTURE -->
-
 <!-- ═══════════════════════════════ FAQ -->
 <section class="section faq-section" id="faq">
   <div class="section-inner">
-    <div class="section-eyebrow">Got questions?</div>
-    <h2 class="section-title">Frequently asked<br><em>questions.</em></h2>
-
+    <div class="reveal" style="text-align:center; max-width:560px; margin:0 auto 48px;">
+      <div class="section-eyebrow">Got questions?</div>
+      <h2 class="section-title">Frequently asked<br><em>questions.</em></h2>
+    </div>
     <div class="faq-grid reveal">
 
       <div class="faq-item">
@@ -1216,7 +1204,7 @@ footer {
           <span class="faq-icon">+</span>
         </button>
         <div class="faq-answer">
-          Not for the free tools — open them and start immediately. An account is only required if you want to save your data across devices or access the paid features.
+          Not for the free tools — just open them and start immediately. An account is only needed to save your data across devices or to access paid features.
         </div>
       </div>
 
@@ -1226,7 +1214,7 @@ footer {
           <span class="faq-icon">+</span>
         </button>
         <div class="faq-answer">
-          All your tool data — expenses, meal plans, workout logs — is stored locally on your device. It never leaves your browser. We have no access to it, we don't sell it, and there are no ads.
+          All tool data is stored locally on your device. It never leaves your browser. We have no access to it, we don't sell it, and there are no ads.
         </div>
       </div>
 
@@ -1236,7 +1224,7 @@ footer {
           <span class="faq-icon">+</span>
         </button>
         <div class="faq-answer">
-          Yes! No App Store needed. On iPhone or iPad: open in Safari, tap the Share button ⬆, then tap "Add to Home Screen". On Android: open in Chrome, tap the menu, then "Add to Home Screen". It will appear as an app icon and work offline.
+          Yes — no App Store needed. On iPhone: open in Safari, tap the Share button &#8679;, then tap "Add to Home Screen". On Android: open in Chrome, tap the menu, then "Add to Home Screen". It works offline once installed.
         </div>
       </div>
 
@@ -1246,7 +1234,7 @@ footer {
           <span class="faq-icon">+</span>
         </button>
         <div class="faq-answer">
-          Yes — after your first visit, all tools work without an internet connection. Your data is stored locally so nothing is lost if you go offline.
+          Yes — after your first visit all tools work without an internet connection. Your data is stored locally so nothing is lost if you go offline.
         </div>
       </div>
 
@@ -1256,7 +1244,7 @@ footer {
           <span class="faq-icon">+</span>
         </button>
         <div class="faq-answer">
-          Basic ($8/year) gives you all tools with core features — CSV import, 3-month workout plans, shopping lists. Premium ($29/year or $49 lifetime) adds advanced retirement stress testing, 6-month workout plans, household view and PDF export. See the <a href="#pricing">full comparison above</a>.
+          Basic ($8/year) gives you all tools with core features. Premium ($29/year or $49 lifetime) adds advanced retirement stress testing, 6-month workout plans, household view and PDF export. See the <a href="#pricing">full comparison above</a>.
         </div>
       </div>
 
@@ -1266,7 +1254,7 @@ footer {
           <span class="faq-icon">+</span>
         </button>
         <div class="faq-answer">
-          Yes, anytime. Your access continues until the end of the billing period. The Lifetime plan is a one-time payment with no renewal.
+          Yes, anytime. Your access continues until the end of the billing period. The Lifetime plan is a one-time payment with no renewal ever.
         </div>
       </div>
 
@@ -1303,7 +1291,7 @@ footer {
 <footer>
   <div class="footer-brand">
     The Artifacts Lab
-    <span>theartifactslab.com · Est. 2025</span>
+    <span>theartifactslab.com · Est. 2026</span>
   </div>
   <ul class="footer-links">
     <li><a href="#tools">Tools</a></li>
@@ -1318,22 +1306,6 @@ footer {
 </footer>
 
 <script>
-
-// ── FAQ accordion ─────────────────────────────
-function toggleFaq(btn) {
-  if (event) { event.preventDefault(); event.stopPropagation(); }
-  const answer = btn.nextElementSibling;
-  const isOpen = answer.classList.contains('open');
-  // Close all
-  document.querySelectorAll('.faq-answer').forEach(a => a.classList.remove('open'));
-  document.querySelectorAll('.faq-question').forEach(b => b.classList.remove('open'));
-  // Open clicked if it was closed
-  if (!isOpen) {
-    answer.classList.add('open');
-    btn.classList.add('open');
-  }
-}
-
 // ── Scroll reveal ────────────────────────────
 const observer = new IntersectionObserver((entries) => {
   entries.forEach(e => {
@@ -1436,17 +1408,29 @@ function closeMenu() {
 }
 </script>
 
-
 <script>
-// ── Register Service Worker ───────────────────
+// ── Service Worker ────────────────────────────────
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .catch(err => console.log('SW registration failed:', err));
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
   });
 }
 
-// ── PWA Install ───────────────────────────────
+// ── FAQ accordion ─────────────────────────────────
+function toggleFaq(btn) {
+  event.preventDefault();
+  event.stopPropagation();
+  const answer = btn.nextElementSibling;
+  const isOpen = answer.classList.contains('open');
+  document.querySelectorAll('.faq-answer').forEach(a => a.classList.remove('open'));
+  document.querySelectorAll('.faq-question').forEach(b => b.classList.remove('open'));
+  if (!isOpen) {
+    answer.classList.add('open');
+    btn.classList.add('open');
+  }
+}
+
+// ── PWA Install ───────────────────────────────────
 const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent.toLowerCase());
 const isStandalone = window.matchMedia('(display-mode: standalone)').matches
   || window.navigator.standalone === true;
@@ -1457,18 +1441,29 @@ window.addEventListener('beforeinstallprompt', (e) => {
   deferredPrompt = e;
 });
 
+window.addEventListener('appinstalled', () => { deferredPrompt = null; });
+
 async function installApp() {
   if (deferredPrompt) {
     deferredPrompt.prompt();
     await deferredPrompt.userChoice;
     deferredPrompt = null;
   } else if (isIOS) {
-    alert('To install on iPhone or iPad:\n\n1. Open in Safari (not Chrome)\n2. Tap the Share button \u2B06 at the bottom\n3. Tap "Add to Home Screen"\n4. Tap "Add"\n\nDone!');
+    alert('To install on iPhone or iPad:
+
+1. Open this page in Safari
+2. Tap the Share button ⬆ at the bottom
+3. Tap "Add to Home Screen"
+4. Tap "Add"
+
+Done — the app icon will appear on your home screen!');
   } else {
-    alert('To install:\n\n- Chrome: tap the menu and select "Add to Home Screen" or "Install app"\n- Safari: tap Share \u2B06 then "Add to Home Screen"');
+    alert('To install:
+
+Chrome: tap the menu (⋮) and select "Add to Home Screen" or "Install app"
+Safari: tap Share ⬆ then "Add to Home Screen"');
   }
 }
-
 </script>
 </body>
 </html>
