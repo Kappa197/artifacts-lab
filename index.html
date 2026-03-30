@@ -88,7 +88,7 @@ body::before {
 
 /* ═══════════════════════════════════════ NAV */
 nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  position: sticky; top: 0; left: 0; right: 0; z-index: 100;
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 48px;
   height: 64px;
@@ -236,7 +236,7 @@ nav {
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   text-align: center;
-  padding: 120px 24px 80px;
+  padding: 60px 24px 80px;
   overflow: hidden;
   z-index: 1;
 }
@@ -956,10 +956,10 @@ footer {
     <div class="nav-logo-text">The Artifacts Lab</div>
   </a>
   <ul class="nav-links">
-    <li><a href="tools.html">Tools</a></li>
+    <li><a href="#tools">Tools</a></li>
     <li><a href="tools.html">All Tools</a></li>
-    <li><a href="tools.html">Why Us</a></li>
-    <li><a href="login.html">Pricing</a></li>
+    <li><a href="#why">Why us</a></li>
+    <li><a href="#pricing">Pricing</a></li>
     <li><a href="#faq">FAQ</a></li>
     <li><a href="/blog">Blog</a></li>
   </ul>
@@ -972,10 +972,10 @@ footer {
 <!-- Mobile dropdown menu -->
 <div class="nav-mobile-menu" id="mobileMenu">
   <ul>
-    <li><a href="tools.html" onclick="closeMenu()">Tools <span class="menu-arrow">→</span></a></li>
+    <li><a href="#tools" onclick="closeMenu()">Tools <span class="menu-arrow">→</span></a></li>
     <li><a href="tools.html" onclick="closeMenu()">All Tools <span class="menu-arrow">→</span></a></li>
-    <li><a href="tools.html" onclick="closeMenu()">Why Us <span class="menu-arrow">→</span></a></li>
-    <li><a href="login.html" onclick="closeMenu()">Pricing <span class="menu-arrow">→</span></a></li>
+    <li><a href="#why" onclick="closeMenu()">Why Us <span class="menu-arrow">→</span></a></li>
+    <li><a href="#pricing" onclick="closeMenu()">Pricing <span class="menu-arrow">→</span></a></li>
     <li><a href="#faq" onclick="closeMenu()">FAQ <span class="menu-arrow">→</span></a></li>
     <li><a href="/blog" onclick="closeMenu()">Blog <span class="menu-arrow">→</span></a></li>
   </ul>
@@ -1033,10 +1033,10 @@ footer {
   </p>
 
   <div class="hero-actions">
-    <a href="login.html" class="btn-primary">
+    <a href="#early-access" class="btn-primary">
       ✦ Get Free Access
     </a>
-    <a href="tools.html" class="btn-ghost">
+    <a href="#tools" class="btn-ghost">
       See the tools →
     </a>
   </div>
@@ -1193,7 +1193,7 @@ footer {
           <li><div class="pf-check pf-no">—</div>Multi-week meal plans</li>
           <li><div class="pf-check pf-no">—</div>Shopping list generator</li>
         </ul>
-        <a href="login.html" class="price-btn price-btn-free">Start for free</a>
+        <a href="#early-access" class="price-btn price-btn-free">Start for free</a>
       </div>
 
       <!-- BASIC -->
@@ -1282,7 +1282,7 @@ footer {
 
       <div class="faq-item">
         <button class="faq-question" onclick="toggleFaq(this)">What's the difference between Basic and Premium?<span class="faq-icon">+</span></button>
-        <div class="faq-answer">Basic ($8/year) gives you all tools with core features. Premium ($29/year or $49 lifetime) adds advanced retirement stress testing, 6-month workout plans, household view and PDF export. See the <a href="login.html">full comparison above</a>.</div>
+        <div class="faq-answer">Basic ($8/year) gives you all tools with core features. Premium ($29/year or $49 lifetime) adds advanced retirement stress testing, 6-month workout plans, household view and PDF export. See the <a href="#pricing">full comparison above</a>.</div>
       </div>
 
       <div class="faq-item">
@@ -1321,9 +1321,9 @@ footer {
     <span>theartifactslab.com · Est. 2026</span>
   </div>
   <ul class="footer-links">
-    <li><a href="tools.html">Tools</a></li>
+    <li><a href="#tools">Tools</a></li>
     <li><a href="tools.html">All Tools</a></li>
-    <li><a href="login.html">Pricing</a></li>
+    <li><a href="#pricing">Pricing</a></li>
     <li><a href="#faq">FAQ</a></li>
     <li><a href="/blog">Blog</a></li>
     <li><a href="#">Privacy</a></li>
