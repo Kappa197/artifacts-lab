@@ -1,86 +1,70 @@
 // The Artifacts Lab — Service Worker
-// Version: 1.0.0
+// Version: 1.2.0
 
-const CACHE_NAME = 'artifacts-lab-v1';
+const CACHE_NAME = 'artifacts-lab-v3';
 
-// Core pages to cache immediately on install
+// Only cache static assets — NOT HTML pages
+// HTML pages are always fetched fresh from the network
 const PRECACHE_URLS = [
-  '/',
-  '/index.html',
-  '/dashboard.html',
-  '/login.html',
-  '/tools.html',
-  '/offline.html',
   '/manifest.json',
-  '/retirement-calculator.html',
-  '/meal-planner.html',
-  '/expense-tracker.html',
-  '/workout-planner.html',
-  '/pregnancy-roadmap.html',
+  '/offline.html',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png',
 ];
 
 // ── INSTALL ──────────────────────────────────
-// Cache core pages when the service worker is installed
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(PRECACHE_URLS);
-    }).then(() => self.skipWaiting())
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(PRECACHE_URLS))
+      .then(() => self.skipWaiting())
   );
 });
 
 // ── ACTIVATE ─────────────────────────────────
-// Remove old caches when a new service worker takes over
+// Delete ALL old caches on activate
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames
           .filter(name => name !== CACHE_NAME)
-          .map(name => caches.delete(name))
+          .map(name => {
+            console.log('[SW] Deleting old cache:', name);
+            return caches.delete(name);
+          })
       );
     }).then(() => self.clients.claim())
   );
 });
 
 // ── FETCH ─────────────────────────────────────
-// Network-first strategy for HTML pages (always fresh content)
-// Cache-first strategy for static assets (fonts, scripts)
 self.addEventListener('fetch', event => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip non-GET requests and external APIs
+  // Skip non-GET and external requests
   if (request.method !== 'GET') return;
   if (url.origin !== location.origin) return;
 
-  // Skip Supabase and Stripe API calls — always need network
+  // Skip all API calls
+  if (url.pathname.startsWith('/api/')) return;
   if (url.hostname.includes('supabase.co')) return;
   if (url.hostname.includes('stripe.com')) return;
-  if (url.hostname.includes('resend.com')) return;
+  if (url.hostname.includes('googleapis.com')) return;
+  if (url.hostname.includes('googletagmanager.com')) return;
+  if (url.hostname.includes('jsdelivr.net')) return;
 
-  // Network-first for HTML pages — users always get fresh content
+  // HTML pages — ALWAYS network first, never serve from cache
   if (request.headers.get('Accept')?.includes('text/html')) {
     event.respondWith(
       fetch(request)
-        .then(response => {
-          // Cache successful responses
-          if (response.ok) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
-          }
-          return response;
-        })
-        .catch(() => {
-          // Offline — try cache first, then show offline page
-          return caches.match(request)
-            .then(cached => cached || caches.match('/offline.html'));
-        })
+        .catch(() => caches.match('/offline.html'))
     );
     return;
   }
 
-  // Cache-first for everything else (fonts, CSS, JS, images)
+  // Static assets (icons, images) — cache first
   event.respondWith(
     caches.match(request).then(cached => {
       if (cached) return cached;
