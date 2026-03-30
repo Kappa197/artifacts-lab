@@ -3653,15 +3653,6 @@ document.addEventListener('keydown', e=>{
   if(e.key==='Escape'){ closeCuesModal(); closeSwapModal(); }
 });
 // initTier() fetches Supabase tier, builds can, then calls initUI()
-// ── bfcache guard ─────────────────────────────
-// Prevents Android back button from serving a stale
-// cached page that re-triggers initTier() incorrectly
-window.addEventListener('pageshow', (e) => {
-  if (e.persisted) {
-    // Page restored from bfcache — force a clean reload
-    window.location.reload();
-  }
-});
 window.addEventListener('load', initTier);
 
 // =====================================================================

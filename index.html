@@ -194,17 +194,10 @@ nav {
   z-index: 200;
   transform: translateY(-8px);
   opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: transform 0.25s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease, visibility 0.25s;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
   box-shadow: 0 16px 48px rgba(0,0,0,0.5);
 }
-.nav-mobile-menu.open {
-  transform: translateY(0);
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-}
+.nav-mobile-menu.open { transform: translateY(0); opacity: 1; }
 .nav-mobile-menu ul { list-style: none; padding: 8px 0; }
 .nav-mobile-menu ul li { border-bottom: 1px solid rgba(42,59,85,0.4); }
 .nav-mobile-menu ul li:last-child { border-bottom: none; }
@@ -883,7 +876,7 @@ footer {
   nav { padding: 0 24px; }
   .nav-links { display: none; }
   .nav-hamburger { display: flex; }
-  .nav-mobile-menu { display: none; }
+  .nav-mobile-menu { display: block; }
   .tools-grid { grid-template-columns: 1fr; }
   .why-grid { grid-template-columns: 1fr; }
   .why-item { border-right: none; border-bottom: 1px solid var(--border); }
@@ -971,13 +964,36 @@ footer {
     </div>
 
     <!-- Android -->
+      </div>
+      </div>
+      </div>
+      </div>
+    </div>
+
+    <!-- iPhone / iPad -->
+      </div>
+      </div>
+      </div>
+      </div>
+    </div>
+
+    <!-- Desktop Chrome -->
+      </div>
+      </div>
+      </div>
+      </div>
+    </div>
+
+    <!-- Desktop Edge -->
+      </div>
+      </div>
+      </div>
+      </div>
+    </div>
+
+  </div>
 </div>
-<!-- iPhone / iPad -->
-</div>
-<!-- Desktop Chrome -->
-</div>
-<!-- Desktop Edge -->
-</div>
+
 <!-- ═══════════════════════════════ HERO -->
 <section class="hero">
   <div class="hero-eyebrow">Simple tools for complex little problems of our daily life</div>
@@ -1327,6 +1343,7 @@ function toggleMenu() {
   if (menu.classList.contains('open')) {
     closeMenu();
   } else {
+    menu.style.display = 'block';
     btn.classList.add('open');
     menu.classList.add('open');
     backdrop.classList.add('open');
@@ -1334,10 +1351,12 @@ function toggleMenu() {
   }
 }
 function closeMenu() {
+  const menu = document.getElementById('mobileMenu');
   document.getElementById('hamburger').classList.remove('open');
-  document.getElementById('mobileMenu').classList.remove('open');
+  menu.classList.remove('open');
   document.getElementById('navBackdrop').classList.remove('open');
   document.body.style.overflow = '';
+  setTimeout(() => { menu.style.display = 'none'; }, 260);
 }
 </script>
 
