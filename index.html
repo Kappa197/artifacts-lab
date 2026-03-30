@@ -65,7 +65,7 @@
 }
 
 *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: auto; }
 
 body {
   font-family: var(--body);
@@ -552,6 +552,16 @@ nav {
   position: relative;
 }
 .why-item:last-child { border-right: none; }
+.why-faq-link {
+  display: inline-flex; align-items: center; gap: 8px;
+  margin-top: 16px; font-family: var(--mono); font-size: 0.62rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 10px 20px; border-radius: 7px;
+  background: var(--amber-dim); border: 1px solid var(--amber);
+  color: var(--amber2); text-decoration: none; transition: all 0.2s;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.why-faq-link:hover { background: var(--amber); color: var(--navy); }
 .why-item::before {
   content: '';
   position: absolute; top: 0; left: 32px; right: 32px; height: 1px;
@@ -881,78 +891,30 @@ footer {
   .tool-card { padding: 24px; }
 }
 
-/* ── Why install button ── */
-.why-install-btn {
-  margin-top: 16px;
-  font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.1em;
-  text-transform: uppercase; padding: 10px 20px; border-radius: 7px;
-  background: var(--amber-dim); border: 1px solid var(--amber);
-  color: var(--amber2); cursor: pointer; transition: all 0.2s;
-  display: inline-flex; align-items: center; gap: 8px;
-}
-.why-install-btn:hover { background: var(--amber); color: var(--navy); }
+
 
 /* ── Install Modal ── */
-.install-modal-backdrop {
-  display: none; position: fixed; inset: 0; pointer-events: none;
-  background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
-  z-index: 1000; align-items: center; justify-content: center; padding: 24px;
-}
-.install-modal-backdrop.open { display: flex; pointer-events: auto; }
-.install-modal {
-  background: var(--navy2); border: 1px solid var(--amber);
-  border-radius: 18px; padding: 32px 28px; max-width: 480px; width: 100%;
-  position: relative; box-shadow: 0 24px 80px rgba(0,0,0,0.6);
-  animation: modalIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
-}
-@keyframes modalIn {
-  from { opacity: 0; transform: scale(0.92) translateY(12px); }
+
+
+
+
   to   { opacity: 1; transform: scale(1) translateY(0); }
 }
-.install-modal-close {
-  position: absolute; top: 16px; right: 16px;
-  background: var(--navy3); border: 1px solid var(--border2);
-  color: var(--text3); width: 32px; height: 32px; border-radius: 8px;
-  cursor: pointer; font-size: 1rem; display: flex;
-  align-items: center; justify-content: center; transition: all 0.2s;
-}
-.install-modal-close:hover { color: var(--text); border-color: var(--text3); }
-.install-modal-icon { font-size: 2rem; margin-bottom: 12px; }
-.install-modal-title {
-  font-family: var(--serif); font-size: 1.4rem; font-weight: 700;
-  color: var(--text); margin-bottom: 6px; line-height: 1.2;
-}
-.install-modal-sub {
-  font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.1em;
-  text-transform: uppercase; color: var(--amber); margin-bottom: 24px;
-}
-.install-tabs {
-  display: flex; gap: 6px; margin-bottom: 24px; flex-wrap: wrap;
-}
-.install-tab {
-  font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.08em;
-  text-transform: uppercase; padding: 6px 14px; border-radius: 99px;
-  border: 1px solid var(--border2); color: var(--text3);
-  background: transparent; cursor: pointer; transition: all 0.2s;
-}
-.install-tab.active { background: var(--amber-dim); border-color: var(--amber); color: var(--amber2); }
-.install-steps { display: none; }
-.install-steps.active { display: block; }
-.install-step {
-  display: flex; gap: 14px; align-items: flex-start;
-  margin-bottom: 16px;
-}
-.install-step:last-child { margin-bottom: 0; }
-.install-step-num {
-  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
-  background: var(--amber-dim); border: 1px solid var(--amber);
-  color: var(--amber2); font-family: var(--mono); font-size: 0.65rem;
-  font-weight: 700; display: flex; align-items: center; justify-content: center;
-}
-.install-step-text {
-  font-size: 0.88rem; color: var(--text2); line-height: 1.6; padding-top: 4px;
-}
-.install-step-text strong { color: var(--text); }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* ── FAQ Section ── */
 .faq-section { background: var(--navy2); border-top: 1px solid var(--border); }
@@ -1023,90 +985,34 @@ footer {
 </div>
 
 
-    <div class="install-tabs">
-      <button class="install-tab active" onclick="showInstallTab('android')">Android</button>
-      <button class="install-tab" onclick="showInstallTab('iphone')">iPhone / iPad</button>
-      <button class="install-tab" onclick="showInstallTab('chrome')">Desktop Chrome</button>
-      <button class="install-tab" onclick="showInstallTab('edge')">Desktop Edge</button>
+
     </div>
 
     <!-- Android -->
-    <div class="install-steps active" id="install-android">
-      <div class="install-step">
-        <div class="install-step-num">1</div>
-        <div class="install-step-text">Open <strong>theartifactslab.com</strong> in <strong>Chrome</strong> on your Android phone</div>
       </div>
-      <div class="install-step">
-        <div class="install-step-num">2</div>
-        <div class="install-step-text">Tap the <strong>three-dot menu (⋮)</strong> in the top right corner</div>
       </div>
-      <div class="install-step">
-        <div class="install-step-num">3</div>
-        <div class="install-step-text">Tap <strong>"Add to Home screen"</strong> or <strong>"Install app"</strong></div>
       </div>
-      <div class="install-step">
-        <div class="install-step-num">4</div>
-        <div class="install-step-text">Tap <strong>"Install"</strong> to confirm — the app icon will appear on your home screen</div>
       </div>
     </div>
 
     <!-- iPhone / iPad -->
-    <div class="install-steps" id="install-iphone">
-      <div class="install-step">
-        <div class="install-step-num">1</div>
-        <div class="install-step-text">Open <strong>theartifactslab.com</strong> in <strong>Safari</strong> (must be Safari, not Chrome)</div>
       </div>
-      <div class="install-step">
-        <div class="install-step-num">2</div>
-        <div class="install-step-text">Tap the <strong>Share button &#8679;</strong> at the bottom of the screen</div>
       </div>
-      <div class="install-step">
-        <div class="install-step-num">3</div>
-        <div class="install-step-text">Scroll down and tap <strong>"Add to Home Screen"</strong></div>
       </div>
-      <div class="install-step">
-        <div class="install-step-num">4</div>
-        <div class="install-step-text">Tap <strong>"Add"</strong> — the app icon will appear on your home screen</div>
       </div>
     </div>
 
     <!-- Desktop Chrome -->
-    <div class="install-steps" id="install-chrome">
-      <div class="install-step">
-        <div class="install-step-num">1</div>
-        <div class="install-step-text">Open <strong>theartifactslab.com</strong> in <strong>Chrome</strong> on your computer</div>
       </div>
-      <div class="install-step">
-        <div class="install-step-num">2</div>
-        <div class="install-step-text">Click the <strong>three-dot menu (⋮)</strong> in the top right corner</div>
       </div>
-      <div class="install-step">
-        <div class="install-step-num">3</div>
-        <div class="install-step-text">Go to <strong>"Cast, save and share"</strong> then click <strong>"Install page as app"</strong></div>
       </div>
-      <div class="install-step">
-        <div class="install-step-num">4</div>
-        <div class="install-step-text">Click <strong>"Install"</strong> to confirm — it will open as a standalone app</div>
       </div>
     </div>
 
     <!-- Desktop Edge -->
-    <div class="install-steps" id="install-edge">
-      <div class="install-step">
-        <div class="install-step-num">1</div>
-        <div class="install-step-text">Open <strong>theartifactslab.com</strong> in <strong>Microsoft Edge</strong> on your computer</div>
       </div>
-      <div class="install-step">
-        <div class="install-step-num">2</div>
-        <div class="install-step-text">Click the <strong>three-dot menu (…)</strong> in the top right corner</div>
       </div>
-      <div class="install-step">
-        <div class="install-step-num">3</div>
-        <div class="install-step-text">Go to <strong>"Apps"</strong> then click <strong>"Install this site as an app"</strong></div>
       </div>
-      <div class="install-step">
-        <div class="install-step-num">4</div>
-        <div class="install-step-text">Click <strong>"Install"</strong> to confirm — it will open as a standalone app</div>
       </div>
     </div>
 
@@ -1254,7 +1160,7 @@ footer {
         <div class="why-num">04</div>
         <div class="why-title">Installs like an app — no App Store needed</div>
         <div class="why-desc">Add The Artifacts Lab to your home screen on any device. Works on iPhone, Android, Chrome and Edge. Tap below for step-by-step instructions.</div>
-        <button class="why-install-btn" onclick="openInstallModal()">&#128242; How to install</button>
+        <a href="/faq" class="why-faq-link">&#128242; How to install &rarr;</a>
       </div>
     </div>
   </div>
@@ -1537,30 +1443,8 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// ── Install Modal ─────────────────────────────────
-function openInstallModal() {
-  document.getElementById('installModalBackdrop').classList.add('open');
-  document.body.style.overflow = 'hidden';
-  // Auto-detect platform and select tab
-  const ua = navigator.userAgent.toLowerCase();
-  if (/iphone|ipad|ipod/.test(ua)) showInstallTab('iphone');
-  else if (/android/.test(ua)) showInstallTab('android');
-  else if (/edg\//.test(ua)) showInstallTab('edge');
-  else showInstallTab('chrome');
-}
 
-function closeInstallModal(e) {
-  if (e && e.target !== document.getElementById('installModalBackdrop')) return;
-  document.getElementById('installModalBackdrop').classList.remove('open');
-  document.body.style.overflow = '';
-}
 
-function showInstallTab(platform) {
-  document.querySelectorAll('.install-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.install-steps').forEach(s => s.classList.remove('active'));
-  document.getElementById('install-' + platform).classList.add('active');
-  event.target.classList.add('active');
-}
 
 // ── FAQ accordion ─────────────────────────────────
 function toggleFaq(btn) {
@@ -1576,13 +1460,5 @@ function toggleFaq(btn) {
   }
 }
 </script>
-<!-- ═══ INSTALL MODAL ═══ -->
-<div class="install-modal-backdrop" id="installModalBackdrop" onclick="closeInstallModal(event)">
-  <div class="install-modal">
-    <button class="install-modal-close" onclick="closeInstallModal()">&#10005;</button>
-    <div class="install-modal-icon">&#128242;</div>
-    <div class="install-modal-title">Install The Artifacts Lab</div>
-    <div class="install-modal-sub">Choose your device below</div>
-
 </body>
 </html>
