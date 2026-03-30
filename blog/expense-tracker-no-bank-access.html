@@ -44,7 +44,7 @@
   --serif:     'Playfair Display', serif;
 }
 *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: auto; }
+html { scroll-behavior: smooth; }
 body {
   font-family: var(--body); background: var(--navy); color: var(--text);
   min-height: 100vh; overflow-x: hidden; line-height: 1.6;
@@ -233,7 +233,6 @@ nav {
 .tool-cta-name { font-family: var(--serif); font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 3px; }
 .tool-cta-desc { font-size: 0.78rem; color: var(--text2); }
 .tool-cta-btn {
-  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
   font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.1em;
   text-transform: uppercase; padding: 11px 22px; border-radius: 8px;
   background: var(--amber); color: var(--navy); border: none;
