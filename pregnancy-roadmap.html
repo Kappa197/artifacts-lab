@@ -1,14 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-NVPSBWT293"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-NVPSBWT293');
-</script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pregnancy Roadmap — The Artifacts Lab</title>
@@ -155,37 +147,14 @@
     .nav-tab:hover  { color: var(--text); background: rgba(212,146,10,.1); }
     .nav-tab.active { background: var(--amber-dim); color: var(--amber2); border: 1px solid rgba(212,146,10,.3); }
 
-    /* ── Desktop nav: single row (unchanged) ── */
-
-    /* ── Mobile nav: two rows ── */
     @media (max-width: 600px) {
-      .tool-header {
-        flex-wrap: wrap;
-        height: auto;
-        padding: 10px 16px 0;
-        gap: 8px;
-      }
+      .tool-header { padding: 0 16px; }
       .tool-nav-brand { display: none; }
       .tool-nav-sep   { display: none; }
-      .tool-nav-right { gap: 8px; }
-      .tool-nav-back  { padding: 6px 10px; font-size: 0.55rem; }
-
-      /* Push tabs to second row, full width */
-      .nav-tabs {
-        order: 3;
-        width: 100%;
-        justify-content: space-around;
-        border-top: 1px solid var(--border);
-        padding: 4px 0 6px;
-        gap: 2px;
-      }
-      .nav-tab {
-        flex: 1;
-        text-align: center;
-        padding: 7px 4px;
-        font-size: 12px;
-        border-radius: 8px;
-      }
+    }
+    @media (max-width: 400px) {
+      .nav-tabs { gap: 1px; }
+      .nav-tab  { font-size: 11px; padding: 5px 7px; }
     }
 
     /* ═══ PAGES ═══ */
@@ -1457,6 +1426,15 @@ async function initTier() {
   if (!document.getElementById('roadmap-screen').classList.contains('hidden')) renderTimeline();
 }
 
+// ── bfcache guard ─────────────────────────────
+// Prevents Android back button from serving a stale
+// cached page that re-triggers initTier() incorrectly
+window.addEventListener('pageshow', (e) => {
+  if (e.persisted) {
+    // Page restored from bfcache — force a clean reload
+    window.location.reload();
+  }
+});
 window.addEventListener('load', initTier);
 
 /* ═══════════════════════════════════════════════

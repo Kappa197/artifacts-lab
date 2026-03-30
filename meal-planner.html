@@ -1,14 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-NVPSBWT293"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-NVPSBWT293');
-</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fvgajfiksxmwioxnesry.supabase.co">
@@ -994,7 +986,6 @@ function showPlan(){
         document.querySelectorAll(".week-tab").forEach(function(x){x.classList.remove("active");});
         t.classList.add("active"); S.week=wi;
         renderWeek(wi); renderNutrition(wi);
-        if(dayViewActive) buildDaySelector(wi);
       });
       tabs.appendChild(t);
     })(w);
@@ -1668,7 +1659,7 @@ function setViewMode(dayMode){
     btn.classList.toggle("active", dayMode);
   }
   if(S.plan){
-    if(dayMode){ S_mobileDay=0; buildDaySelector(S.week); }
+    if(dayMode){ buildDaySelector(S.week); }
     else { renderWeek(S.week); }
   }
 }
@@ -1763,9 +1754,18 @@ function buildDaySelector(wi){
     })(di);
     sel.appendChild(btn);
   });
-  renderMobileDay(wi, 0);
+  renderMobileDay(wi, S_mobileDay < 7 ? S_mobileDay : 0);
 }
 
+// ── bfcache guard ─────────────────────────────
+// Prevents Android back button from serving a stale
+// cached page that re-triggers initTier() incorrectly
+window.addEventListener('pageshow', (e) => {
+  if (e.persisted) {
+    // Page restored from bfcache — force a clean reload
+    window.location.reload();
+  }
+});
 window.addEventListener('load', initTier);
 
 </script>
