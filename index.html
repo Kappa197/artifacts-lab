@@ -194,10 +194,17 @@ nav {
   z-index: 200;
   transform: translateY(-8px);
   opacity: 0;
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
+  visibility: hidden;
+  pointer-events: none;
+  transition: transform 0.25s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease, visibility 0.25s;
   box-shadow: 0 16px 48px rgba(0,0,0,0.5);
 }
-.nav-mobile-menu.open { transform: translateY(0); opacity: 1; }
+.nav-mobile-menu.open {
+  transform: translateY(0);
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
 .nav-mobile-menu ul { list-style: none; padding: 8px 0; }
 .nav-mobile-menu ul li { border-bottom: 1px solid rgba(42,59,85,0.4); }
 .nav-mobile-menu ul li:last-child { border-bottom: none; }
@@ -876,7 +883,7 @@ footer {
   nav { padding: 0 24px; }
   .nav-links { display: none; }
   .nav-hamburger { display: flex; }
-  .nav-mobile-menu { display: block; }
+  .nav-mobile-menu { display: none; }
   .tools-grid { grid-template-columns: 1fr; }
   .why-grid { grid-template-columns: 1fr; }
   .why-item { border-right: none; border-bottom: 1px solid var(--border); }
@@ -919,15 +926,6 @@ footer {
 
 
 
-
-/* ══ TEMPORARY DEBUG CSS — REMOVE AFTER TESTING ══ */
-* {
-  outline: 1px solid rgba(255, 0, 0, 0.2) !important;
-}
-nav, .nav-mobile-menu, .nav-backdrop, .nav-hamburger {
-  background: rgba(0, 0, 255, 0.15) !important;
-}
-/* ══ END DEBUG CSS ══ */
 </style>
 </head>
 <body>
@@ -973,36 +971,13 @@ nav, .nav-mobile-menu, .nav-backdrop, .nav-hamburger {
     </div>
 
     <!-- Android -->
-      </div>
-      </div>
-      </div>
-      </div>
-    </div>
-
-    <!-- iPhone / iPad -->
-      </div>
-      </div>
-      </div>
-      </div>
-    </div>
-
-    <!-- Desktop Chrome -->
-      </div>
-      </div>
-      </div>
-      </div>
-    </div>
-
-    <!-- Desktop Edge -->
-      </div>
-      </div>
-      </div>
-      </div>
-    </div>
-
-  </div>
 </div>
-
+<!-- iPhone / iPad -->
+</div>
+<!-- Desktop Chrome -->
+</div>
+<!-- Desktop Edge -->
+</div>
 <!-- ═══════════════════════════════ HERO -->
 <section class="hero">
   <div class="hero-eyebrow">Simple tools for complex little problems of our daily life</div>
