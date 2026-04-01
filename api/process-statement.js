@@ -1,11 +1,11 @@
 // api/process-statement.js
 // Vercel Edge Function — AI Statement Import + Receipt Scanning
+// Uses streaming to stay within Vercel Hobby free plan limits
 
 export const config = { runtime: 'edge' };
 
 const SUPABASE_URL = 'https://fvgajfiksxmwioxnesry.supabase.co';
 
-// Safe base64 encoding for Edge runtime (avoids stack overflow on large files)
 function toBase64(buffer) {
   let binary = '';
   const bytes = new Uint8Array(buffer);
@@ -15,19 +15,20 @@ function toBase64(buffer) {
   return btoa(binary);
 }
 
+const CORS = {
+  'Access-Control-Allow-Origin':  '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
 function jsonResponse(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    },
+    headers: { 'Content-Type': 'application/json', ...CORS },
   });
 }
 
-function statementPrompt(categories, currency) {
+function statementPrompt(currency) {
   return `Convert this bank statement into a JSON array. Each object must have exactly these keys:
 {"date":"copy exactly as shown","description":"copy exactly, do not translate","debit":<number or null>,"credit":<number or null>}
 
@@ -35,7 +36,7 @@ RULES:
 1. Include EVERY transaction. Do not skip any row.
 2. debit: amount when money LEFT the account (purchase, fee, transfer out). null if incoming.
 3. credit: amount when money ARRIVED (salary, refund, transfer in). null if outgoing.
-4. Amounts: plain numbers, period as decimal separator. Example: 1250.50. No currency symbols.
+4. Amounts: plain numbers, period as decimal. Example: 1250.50. No currency symbols.
 5. Currency is ${currency}. Do not convert amounts.
 6. OUTPUT ONLY the raw JSON array. No explanation, no markdown. First character must be [
 
@@ -46,12 +47,7 @@ function receiptPrompt(currency) {
   return `Extract key details from this receipt image.
 
 OUTPUT FORMAT — a single JSON object:
-{
-  "date": "YYYY-MM-DD if readable, otherwise null",
-  "merchant": "store or merchant name",
-  "amount": <total amount as a number>,
-  "description": "merchant name and brief context"
-}
+{"date":"YYYY-MM-DD if readable, otherwise null","merchant":"store name","amount":<total as number>,"description":"merchant and brief context"}
 
 RULES:
 1. amount: the TOTAL charged. Plain number, period as decimal.
@@ -59,8 +55,35 @@ RULES:
 3. OUTPUT ONLY the raw JSON object. No markdown. Start with {`;
 }
 
+async function verifyAuth(req) {
+  const SUPABASE_ANON = process.env.SUPABASE_ANON_KEY;
+  const auth = req.headers.get('Authorization') || '';
+  if (!auth.startsWith('Bearer ')) return false;
+  if (!SUPABASE_ANON) { console.warn('SUPABASE_ANON_KEY not set — skipping auth'); return true; }
+  const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+    headers: { 'Authorization': auth, 'apikey': SUPABASE_ANON },
+  });
+  return res.ok;
+}
+
+function extractJSON(text, mode) {
+  if (!text) throw new Error('Empty response from AI');
+  text = text.replace(/^```json\s*/im, '').replace(/^```\s*/im, '').replace(/\s*```$/im, '').trim();
+  try { return JSON.parse(text); } catch {}
+  if (mode !== 'receipt') {
+    const s = text.indexOf('['), e = text.lastIndexOf(']');
+    if (s !== -1 && e > s) { try { return JSON.parse(text.slice(s, e + 1)); } catch {} }
+  }
+  const os = text.indexOf('{'), oe = text.lastIndexOf('}');
+  if (os !== -1 && oe > os) { try { return JSON.parse(text.slice(os, oe + 1)); } catch {} }
+  try {
+    return JSON.parse(text.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').replace(/,\s*([}\]])/g, '$1'));
+  } catch {}
+  throw new Error('Response was not valid JSON');
+}
+
 export default async function handler(req) {
-  // Outer safety net — ensures we always return JSON even on unexpected crashes
+  // Outer safety net — always returns JSON even on unexpected crash
   try {
     return await processRequest(req);
   } catch (e) {
@@ -70,66 +93,22 @@ export default async function handler(req) {
 }
 
 async function processRequest(req) {
-  // CORS preflight
-  if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      },
-    });
-  }
+  if (req.method === 'OPTIONS') return new Response(null, { headers: CORS });
+  if (req.method !== 'POST')    return jsonResponse({ error: 'Method not allowed' }, 405);
 
-  if (req.method !== 'POST') {
-    return jsonResponse({ error: 'Method not allowed' }, 405);
-  }
-
-  // Read env vars inside the request handler (more reliable in Edge runtime)
-  const SUPABASE_ANON = process.env.SUPABASE_ANON_KEY;
   const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
+  if (!ANTHROPIC_KEY) return jsonResponse({ error: 'Server configuration error: missing API key.' }, 500);
 
-  if (!ANTHROPIC_KEY) {
-    console.error('[process-statement] ANTHROPIC_API_KEY is not set');
-    return jsonResponse({ error: 'Server configuration error: missing API key.' }, 500);
-  }
+  const authed = await verifyAuth(req);
+  if (!authed) return jsonResponse({ error: 'Unauthorized. Please log in and try again.' }, 401);
 
-  // Verify auth
-  const authHeader = req.headers.get('Authorization') || '';
-  if (!authHeader.startsWith('Bearer ')) {
-    return jsonResponse({ error: 'Missing or invalid Authorization header.' }, 401);
-  }
-
-  const token = authHeader.slice(7);
-
-  if (SUPABASE_ANON) {
-    const userRes = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'apikey': SUPABASE_ANON,
-      },
-    });
-    if (!userRes.ok) {
-      return jsonResponse({ error: 'Unauthorized. Please log in and try again.' }, 401);
-    }
-  } else {
-    console.warn('[process-statement] SUPABASE_ANON_KEY not set — skipping auth check');
-  }
-
-  // Parse form data
   let formData;
-  try {
-    formData = await req.formData();
-  } catch (e) {
-    return jsonResponse({ error: 'Could not parse request body: ' + e.message }, 400);
-  }
+  try { formData = await req.formData(); }
+  catch (e) { return jsonResponse({ error: 'Could not parse request: ' + e.message }, 400); }
 
-  const mode       = formData.get('mode') || 'statement';
-  const currency   = formData.get('currency') || 'THB';
-  const file       = formData.get('file');
-  const catsRaw    = formData.get('categories');
-  const categories = catsRaw ? JSON.parse(catsRaw) : [];
-
+  const mode     = formData.get('mode') || 'statement';
+  const currency = formData.get('currency') || 'THB';
+  const file     = formData.get('file');
   if (!file) return jsonResponse({ error: 'No file provided.' }, 400);
 
   // Build Claude message content
@@ -138,31 +117,19 @@ async function processRequest(req) {
 
   if (fileType === 'application/pdf') {
     const bytes = await file.arrayBuffer();
-    content.push({
-      type: 'document',
-      source: { type: 'base64', media_type: 'application/pdf', data: toBase64(bytes) },
-    });
+    content.push({ type:'document', source:{ type:'base64', media_type:'application/pdf', data:toBase64(bytes) } });
   } else if (fileType.startsWith('image/')) {
-    const validType = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(fileType)
-      ? fileType : 'image/jpeg';
+    const validType = ['image/jpeg','image/png','image/gif','image/webp'].includes(fileType) ? fileType : 'image/jpeg';
     const bytes = await file.arrayBuffer();
-    content.push({
-      type: 'image',
-      source: { type: 'base64', media_type: validType, data: toBase64(bytes) },
-    });
+    content.push({ type:'image', source:{ type:'base64', media_type:validType, data:toBase64(bytes) } });
   } else {
-    // CSV or text
     const text = await file.text();
     if (!text.trim()) return jsonResponse({ error: 'The file appears to be empty.' }, 400);
-    content.push({ type: 'text', text: `Bank statement (${file.name}):\n\n${text}` });
+    content.push({ type:'text', text:`Bank statement (${file.name}):\n\n${text}` });
   }
+  content.push({ type:'text', text: mode === 'receipt' ? receiptPrompt(currency) : statementPrompt(currency) });
 
-  content.push({
-    type: 'text',
-    text: mode === 'receipt' ? receiptPrompt(currency) : statementPrompt(categories, currency),
-  });
-
-  // Call Claude API
+  // Call Claude API with streaming enabled
   const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -173,67 +140,67 @@ async function processRequest(req) {
     body: JSON.stringify({
       model:      'claude-haiku-4-5-20251001',
       max_tokens: 8096,
-      messages:   [{ role: 'user', content }],
+      stream:     true,   // ← streaming keeps Vercel connection alive
+      messages:   [{ role:'user', content }],
     }),
   });
 
   if (!claudeRes.ok) {
     const errText = await claudeRes.text();
-    console.error('[process-statement] Claude API error', claudeRes.status, errText.slice(0, 200));
+    console.error('[process-statement] Claude error', claudeRes.status, errText.slice(0, 200));
     return jsonResponse({
       error: `AI service error (${claudeRes.status}). ${claudeRes.status === 401 ? 'Check your API key.' : 'Please try again.'}`,
     }, 502);
   }
 
-  const claudeData = await claudeRes.json();
-  const rawText    = claudeData.content?.[0]?.text || '';
+  // Stream Claude's SSE response through, collecting the full text
+  // Then return a single JSON response once complete
+  const stream = new ReadableStream({
+    async start(controller) {
+      const reader  = claudeRes.body.getReader();
+      const decoder = new TextDecoder();
+      let fullText  = '';
+      let buffer    = '';
 
-  // Parse JSON from Claude's response — robust extraction handles extra text + Thai chars
-  try {
-    const data = extractJSON(rawText, mode);
-    return jsonResponse({ ok: true, data, mode });
-  } catch (e) {
-    console.error('[process-statement] JSON parse error:', e.message);
-    console.error('[process-statement] Raw (first 400):', rawText.slice(0, 400));
-    return jsonResponse({
-      error: 'Could not parse AI response. Details: ' + e.message,
-    }, 500);
-  }
-}
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
 
-// Robustly extract JSON from Claude's response even if it adds surrounding text
-function extractJSON(text, mode) {
-  if (!text) throw new Error('Empty response from AI');
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop(); // keep incomplete last line
 
-  // 1. Strip markdown code fences
-  text = text.replace(/^```json\s*/im, '').replace(/^```\s*/im, '').replace(/\s*```$/im, '').trim();
+          for (const line of lines) {
+            if (!line.startsWith('data: ')) continue;
+            const payload = line.slice(6).trim();
+            if (payload === '[DONE]') continue;
+            try {
+              const evt = JSON.parse(payload);
+              if (evt.type === 'content_block_delta' && evt.delta?.type === 'text_delta') {
+                fullText += evt.delta.text;
+              }
+            } catch {}
+          }
+        }
 
-  // 2. Try direct parse first
-  try { return JSON.parse(text); } catch {}
+        // Parse the complete response and return as JSON
+        const data   = extractJSON(fullText, mode);
+        const result = JSON.stringify({ ok:true, data, mode });
+        controller.enqueue(new TextEncoder().encode(result));
+        controller.close();
 
-  // 3. For statement mode: find the outermost JSON array
-  if (mode !== 'receipt') {
-    const start = text.indexOf('[');
-    const end   = text.lastIndexOf(']');
-    if (start !== -1 && end > start) {
-      try { return JSON.parse(text.slice(start, end + 1)); } catch {}
-    }
-  }
+      } catch (e) {
+        console.error('[process-statement] Stream processing error:', e.message);
+        console.error('[process-statement] Raw (first 300):', fullText.slice(0, 300));
+        const errResult = JSON.stringify({ error: 'Could not parse AI response: ' + e.message });
+        controller.enqueue(new TextEncoder().encode(errResult));
+        controller.close();
+      }
+    },
+  });
 
-  // 4. For receipt mode (or fallback): find the outermost JSON object
-  const oStart = text.indexOf('{');
-  const oEnd   = text.lastIndexOf('}');
-  if (oStart !== -1 && oEnd > oStart) {
-    try { return JSON.parse(text.slice(oStart, oEnd + 1)); } catch {}
-  }
-
-  // 5. Last resort: try to fix common JSON issues (Thai/special chars in strings)
-  try {
-    const fixed = text
-      .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '') // remove control chars
-      .replace(/,\s*([}\]])/g, '$1');                                  // trailing commas
-    return JSON.parse(fixed);
-  } catch {}
-
-  throw new Error('Response was not valid JSON — Claude may have added explanation text');
+  return new Response(stream, {
+    headers: { 'Content-Type': 'application/json', ...CORS },
+  });
 }
