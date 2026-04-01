@@ -28,42 +28,16 @@ function jsonResponse(data, status = 200) {
 }
 
 function statementPrompt(categories, currency) {
-  const expLines = categories
-    .filter(c => c.type !== 'income')
-    .map(c => `  - ${c.name}  | bucket: ${c.bucket}`)
-    .join('\n');
-  const incLines = categories
-    .filter(c => c.type === 'income')
-    .map(c => `  - ${c.name}`)
-    .join('\n');
-
-  return `You are a financial data assistant. Convert the attached bank statement into a JSON array.
-
-OUTPUT FORMAT — a JSON array, each object with exactly these keys:
-{
-  "date": "copy the date exactly as it appears in the source",
-  "description": "copy the transaction description exactly, do not translate",
-  "debit": <number or null>,
-  "credit": <number or null>,
-  "category": "exact category name from the list below"
-}
+  return `Convert this bank statement into a JSON array. Each object must have exactly these keys:
+{"date":"copy exactly as shown","description":"copy exactly, do not translate","debit":<number or null>,"credit":<number or null>}
 
 RULES:
 1. Include EVERY transaction. Do not skip any row.
-2. debit: amount when money LEFT the account. null if incoming.
-3. credit: amount when money ARRIVED. null if outgoing.
-4. Amounts: plain numbers only. Period as decimal. Example: 1250.50
-5. Currency is ${currency}. Do not convert.
-6. category: ONLY names from the lists below. Write ONLY the category name — no bucket label.
-7. For credit transactions use INCOME CATEGORIES.
-8. If unsure, write: Uncategorized
-9. OUTPUT ONLY the raw JSON array. No explanation, no markdown. Start with [
-
-EXPENSE CATEGORIES:
-${expLines}
-
-INCOME CATEGORIES:
-${incLines}
+2. debit: amount when money LEFT the account (purchase, fee, transfer out). null if incoming.
+3. credit: amount when money ARRIVED (salary, refund, transfer in). null if outgoing.
+4. Amounts: plain numbers, period as decimal separator. Example: 1250.50. No currency symbols.
+5. Currency is ${currency}. Do not convert amounts.
+6. OUTPUT ONLY the raw JSON array. No explanation, no markdown. First character must be [
 
 Your entire response must be the JSON array only, starting with [ and ending with ]`;
 }
