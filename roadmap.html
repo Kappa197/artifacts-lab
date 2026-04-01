@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-NVPSBWT293"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-NVPSBWT293');
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roadmap — What's Coming Next · The Artifacts Lab</title>
+<meta name="description" content="See what tools are coming to The Artifacts Lab, vote for what you want built next, and request a feature. No account required.">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://theartifactslab.com/roadmap">
+<meta property="og:title" content="Roadmap — The Artifacts Lab">
+<meta property="og:description" content="See what's coming, vote for what you want next, and request a feature.">
+<meta property="og:image" content="https://theartifactslab.com/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Roadmap — The Artifacts Lab">
+<meta name="twitter:description" content="See what's coming, vote for what you want next, and request a feature.">
+<meta name="twitter:image" content="https://theartifactslab.com/og-image.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400&family=JetBrains+Mono:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fvgajfiksxmwioxnesry.supabase.co">
+<link rel="dns-prefetch" href="https://fvgajfiksxmwioxnesry.supabase.co">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+
+<style>
+:root {
+  --navy:#0B0F1A; --navy2:#111827; --navy3:#1A2235; --navy4:#243048; --navy5:#2E3D58;
+  --border:#2A3B55; --border2:#334466;
+  --amber:#D4920A; --amber2:#F5A623; --amber3:#FFD17A;
+  --amber-dim:rgba(212,146,10,0.12); --amber-glow:rgba(212,146,10,0.25); --amber-soft:rgba(212,146,10,0.06);
+  --green:#2ECC8A; --green-dim:rgba(46,204,138,0.1);
+  --blue:#4A90D9; --blue-dim:rgba(74,144,217,0.1);
+  --purple:#9B72CF; --purple-dim:rgba(155,114,207,0.1);
+  --teal:#2DD4BF; --teal-dim:rgba(45,212,191,0.1);
+  --rose:#FB7185; --rose-dim:rgba(251,113,133,0.1);
+  --text:#E8EDF5; --text2:#9BAAC4; --text3:#5A6A8A;
+  --mono:'JetBrains Mono',monospace; --body:'Outfit',sans-serif; --serif:'Playfair Display',serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:auto;}
+body{font-family:var(--body);background:var(--navy);color:var(--text);overflow-x:hidden;line-height:1.6;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(212,146,10,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(212,146,10,0.03) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0;}
+
+/* ── NAV ── */
+nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:64px;background:rgba(11,15,26,0.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(42,59,85,0.6);transition:all 0.3s;}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-logo-icon{width:32px;height:32px;background:var(--amber-dim);border:1px solid var(--amber);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;}
+.nav-logo-text{font-family:var(--serif);font-size:1.1rem;font-weight:700;color:var(--amber2);}
+.nav-links{display:flex;align-items:center;gap:32px;list-style:none;}
+.nav-links a{font-family:var(--mono);font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);text-decoration:none;transition:color 0.2s;}
+.nav-links a:hover,.nav-links a.active{color:var(--amber2);}
+.nav-cta{font-family:var(--mono);font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;padding:8px 20px;border-radius:6px;background:var(--amber-dim);border:1px solid var(--amber);color:var(--amber2);text-decoration:none;transition:all 0.2s;white-space:nowrap;}
+.nav-cta:hover{background:var(--amber);color:var(--navy);}
+.nav-hamburger{display:none;flex-direction:column;justify-content:center;align-items:center;gap:5px;width:40px;height:40px;background:var(--amber-dim);border:1px solid var(--amber);border-radius:8px;cursor:pointer;padding:0;transition:all 0.2s;flex-shrink:0;z-index:201;}
+.nav-hamburger span{display:block;width:18px;height:2px;background:var(--amber2);border-radius:2px;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);transform-origin:center;}
+.nav-hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
+.nav-hamburger.open span:nth-child(2){opacity:0;transform:scaleX(0);}
+.nav-hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+.nav-mobile-menu{display:block;position:fixed;top:64px;left:0;right:0;background:rgba(11,15,26,0.97);backdrop-filter:blur(24px);border-bottom:2px solid var(--amber);padding:8px 0 16px;z-index:200;transform:translateY(-8px);opacity:0;visibility:hidden;pointer-events:none;transition:transform 0.25s cubic-bezier(0.4,0,0.2,1),opacity 0.25s ease,visibility 0.25s;box-shadow:0 16px 48px rgba(0,0,0,0.5);}
+.nav-mobile-menu.open{transform:translateY(0);opacity:1;visibility:visible;pointer-events:auto;}
+.nav-mobile-menu ul{list-style:none;padding:8px 0;}
+.nav-mobile-menu ul li{border-bottom:1px solid rgba(42,59,85,0.4);}
+.nav-mobile-menu ul li:last-child{border-bottom:none;}
+.nav-mobile-menu ul li a{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;font-family:var(--mono);font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text2);text-decoration:none;transition:all 0.2s;}
+.nav-mobile-menu ul li a:hover{color:var(--amber2);background:var(--amber-dim);padding-left:34px;}
+.nav-mobile-menu ul li a .menu-arrow{color:var(--text3);font-size:0.7rem;}
+.nav-mobile-cta{margin:12px 28px 4px;}
+.nav-mobile-cta a{display:block;text-align:center;padding:13px;background:var(--amber);color:var(--navy);font-family:var(--mono);font-size:0.7rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;text-decoration:none;border-radius:8px;transition:all 0.2s;}
+.nav-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:199;backdrop-filter:blur(2px);pointer-events:none;}
+.nav-backdrop.open{display:block;pointer-events:auto;}
+
+/* ── PAGE ── */
+.page{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:100px 48px 80px;}
+
+/* ── PAGE HEADER ── */
+.page-header{margin-bottom:64px;text-align:center;}
+.page-eyebrow{font-family:var(--mono);font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--amber);margin-bottom:14px;}
+.page-title{font-family:var(--serif);font-size:clamp(2.4rem,5vw,3.6rem);font-weight:700;line-height:1.1;color:var(--text);margin-bottom:16px;}
+.page-title em{font-style:italic;color:var(--amber2);}
+.page-sub{font-size:1rem;color:var(--text2);font-weight:300;line-height:1.75;max-width:540px;margin:0 auto;}
+
+/* ── SECTION TITLES ── */
+.section{margin-bottom:72px;}
+.section-header{margin-bottom:28px;}
+.section-eyebrow{font-family:var(--mono);font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--amber);margin-bottom:8px;}
+.section-title{font-family:var(--serif);font-size:1.7rem;font-weight:700;color:var(--text);line-height:1.2;}
+.section-sub{font-size:0.88rem;color:var(--text2);margin-top:6px;line-height:1.65;}
+
+/* ── LIVE TOOLS ── */
+.live-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
+.live-card{background:var(--navy2);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;position:relative;overflow:hidden;}
+.live-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.lc-expense::before{background:linear-gradient(90deg,var(--blue),var(--amber));}
+.lc-retire::before{background:linear-gradient(90deg,var(--green),var(--blue));}
+.lc-workout::before{background:linear-gradient(90deg,var(--amber),#E8843A);}
+.lc-meal::before{background:linear-gradient(90deg,var(--purple),var(--green));}
+.lc-pregnancy::before{background:linear-gradient(90deg,var(--rose),var(--purple));}
+.live-icon{font-size:1.6rem;margin-bottom:8px;}
+.live-name{font-family:var(--serif);font-size:0.85rem;font-weight:700;color:var(--text);margin-bottom:6px;line-height:1.3;}
+.live-badge{font-family:var(--mono);font-size:0.48rem;letter-spacing:0.1em;text-transform:uppercase;padding:2px 8px;border-radius:3px;background:var(--green-dim);color:var(--green);border:1px solid rgba(46,204,138,0.3);}
+
+/* ── ROADMAP ITEMS ── */
+.roadmap-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.roadmap-card{background:var(--navy2);border:1px solid var(--border);border-radius:14px;padding:24px;position:relative;overflow:hidden;transition:border-color 0.2s;}
+.roadmap-card:hover{border-color:var(--border2);}
+.roadmap-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;opacity:0.6;}
+.rc-sleep::before{background:linear-gradient(90deg,var(--blue),var(--purple));}
+.rc-doctor::before{background:linear-gradient(90deg,var(--green),var(--teal));}
+.rc-travel::before{background:linear-gradient(90deg,var(--teal),var(--blue));}
+.rc-todo::before{background:linear-gradient(90deg,var(--amber),var(--amber2));}
+.rc-pet::before{background:linear-gradient(90deg,var(--green),var(--teal));}
+.rc-passwords::before{background:linear-gradient(90deg,var(--purple),var(--amber));}
+.rc-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;}
+.rc-icon{font-size:1.6rem;}
+.rc-status{font-family:var(--mono);font-size:0.48rem;letter-spacing:0.1em;text-transform:uppercase;padding:3px 9px;border-radius:4px;}
+.status-next{background:var(--amber-dim);color:var(--amber2);border:1px solid rgba(212,146,10,0.3);}
+.status-planned{background:var(--navy3);color:var(--text3);border:1px solid var(--border);}
+.status-exploring{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(74,144,217,0.2);}
+.rc-name{font-family:var(--serif);font-size:1.05rem;font-weight:700;color:var(--text);margin-bottom:6px;line-height:1.3;}
+.rc-desc{font-size:0.78rem;color:var(--text2);line-height:1.65;margin-bottom:14px;}
+.rc-vote-count{font-family:var(--mono);font-size:0.6rem;color:var(--text3);letter-spacing:0.05em;}
+.rc-vote-count span{color:var(--amber2);font-weight:600;}
+
+/* ── VOTE SECTION ── */
+.vote-section{background:var(--navy2);border:1px solid var(--border2);border-radius:16px;padding:36px 40px;position:relative;overflow:hidden;}
+.vote-section::before{content:'';position:absolute;top:-80px;right:-80px;width:300px;height:300px;background:radial-gradient(circle,rgba(212,146,10,0.06) 0%,transparent 70%);pointer-events:none;}
+.vote-title{font-family:var(--serif);font-size:1.4rem;font-weight:700;color:var(--text);margin-bottom:6px;}
+.vote-sub{font-size:0.85rem;color:var(--text2);margin-bottom:24px;line-height:1.65;}
+.vote-options{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;}
+.vote-option{background:var(--navy3);border:2px solid var(--border);border-radius:10px;padding:16px 14px;cursor:pointer;transition:all 0.2s;text-align:center;position:relative;}
+.vote-option:hover{border-color:var(--amber);background:var(--amber-dim);}
+.vote-option.selected{border-color:var(--amber2);background:var(--amber-dim);box-shadow:0 0 0 1px var(--amber-dim);}
+.vote-option-icon{font-size:1.4rem;margin-bottom:6px;}
+.vote-option-name{font-family:var(--serif);font-size:0.85rem;font-weight:700;color:var(--text);line-height:1.3;}
+.vote-option-desc{font-size:0.72rem;color:var(--text3);margin-top:3px;line-height:1.5;}
+.vote-check{position:absolute;top:8px;right:8px;width:18px;height:18px;background:var(--amber);border-radius:50%;display:none;align-items:center;justify-content:center;font-size:0.55rem;color:var(--navy);font-weight:700;}
+.vote-option.selected .vote-check{display:flex;}
+.vote-email-row{display:flex;gap:10px;flex-wrap:wrap;}
+.vote-input{flex:1;min-width:220px;padding:12px 16px;background:var(--navy);border:1px solid var(--border2);border-radius:8px;font-family:var(--body);font-size:0.88rem;color:var(--text);outline:none;transition:border-color 0.2s;}
+.vote-input::placeholder{color:var(--text3);}
+.vote-input:focus{border-color:var(--amber);}
+.vote-btn{padding:12px 28px;background:var(--amber);color:var(--navy);border:none;border-radius:8px;font-family:var(--body);font-size:0.9rem;font-weight:700;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+.vote-btn:hover{background:var(--amber2);transform:translateY(-1px);}
+.vote-btn:disabled{background:var(--border);color:var(--text3);cursor:not-allowed;transform:none;}
+.vote-note{font-family:var(--mono);font-size:0.55rem;letter-spacing:0.06em;color:var(--text3);margin-top:12px;text-transform:uppercase;}
+.vote-notify{background:var(--navy3);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-top:16px;}
+.vote-notify-label{font-size:0.78rem;color:var(--text2);line-height:1.6;margin-bottom:10px;}
+.vote-notify-label span{color:var(--text3);font-size:0.72rem;}
+.vote-notify-row{display:flex;gap:10px;flex-wrap:wrap;}
+.vote-notify-input{flex:1;min-width:200px;padding:10px 14px;background:var(--navy);border:1px solid var(--border2);border-radius:7px;font-family:var(--body);font-size:0.85rem;color:var(--text);outline:none;transition:border-color 0.2s;}
+.vote-notify-input::placeholder{color:var(--text3);}
+.vote-notify-input:focus{border-color:var(--amber);}
+.vote-notify-btn{padding:10px 20px;background:transparent;color:var(--amber2);border:1px solid var(--amber);border-radius:7px;font-family:var(--body);font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+.vote-notify-btn:hover{background:var(--amber-dim);}
+.vote-notify-btn:disabled{opacity:0.5;cursor:not-allowed;}
+.vote-notify-note{font-family:var(--mono);font-size:0.52rem;color:var(--text3);letter-spacing:0.06em;margin-top:8px;text-transform:uppercase;}
+.vote-success{display:none;padding:16px;background:var(--green-dim);border:1px solid rgba(46,204,138,0.3);border-radius:8px;font-size:0.88rem;color:var(--green);text-align:center;margin-top:16px;}
+
+/* ── FEATURE REQUEST ── */
+.request-card{background:var(--navy2);border:1px solid var(--border2);border-radius:16px;padding:36px 40px;position:relative;overflow:hidden;}
+.request-card::before{content:'';position:absolute;top:-80px;left:-80px;width:300px;height:300px;background:radial-gradient(circle,rgba(74,144,217,0.05) 0%,transparent 70%);pointer-events:none;}
+.request-title{font-family:var(--serif);font-size:1.4rem;font-weight:700;color:var(--text);margin-bottom:6px;}
+.request-sub{font-size:0.85rem;color:var(--text2);margin-bottom:24px;line-height:1.65;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.form-field{display:flex;flex-direction:column;gap:6px;}
+.form-label{font-family:var(--mono);font-size:0.58rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);}
+.form-input{padding:12px 16px;background:var(--navy);border:1px solid var(--border2);border-radius:8px;font-family:var(--body);font-size:0.88rem;color:var(--text);outline:none;transition:border-color 0.2s;}
+.form-input::placeholder{color:var(--text3);}
+.form-input:focus{border-color:var(--amber);}
+.form-textarea{padding:14px 16px;background:var(--navy);border:1px solid var(--border2);border-radius:8px;font-family:var(--body);font-size:0.88rem;color:var(--text);outline:none;transition:border-color 0.2s;resize:vertical;min-height:100px;width:100%;margin-bottom:12px;line-height:1.6;}
+.form-textarea::placeholder{color:var(--text3);}
+.form-textarea:focus{border-color:var(--amber);}
+.form-select{padding:12px 16px;background:var(--navy);border:1px solid var(--border2);border-radius:8px;font-family:var(--body);font-size:0.88rem;color:var(--text);outline:none;transition:border-color 0.2s;cursor:pointer;appearance:none;-webkit-appearance:none;}
+.form-select:focus{border-color:var(--amber);}
+.request-btn{padding:13px 32px;background:var(--amber);color:var(--navy);border:none;border-radius:8px;font-family:var(--body);font-size:0.9rem;font-weight:700;cursor:pointer;transition:all 0.2s;}
+.request-btn:hover{background:var(--amber2);transform:translateY(-1px);}
+.request-btn:disabled{background:var(--border);color:var(--text3);cursor:not-allowed;transform:none;}
+.request-success{display:none;padding:16px;background:var(--green-dim);border:1px solid rgba(46,204,138,0.3);border-radius:8px;font-size:0.88rem;color:var(--green);text-align:center;margin-top:16px;}
+.char-hint{font-family:var(--mono);font-size:0.55rem;color:var(--text3);text-align:right;margin-top:4px;}
+
+/* ── REVEAL ── */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity 0.65s ease,transform 0.65s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+.reveal-delay-1{transition-delay:0.1s;}
+.reveal-delay-2{transition-delay:0.2s;}
+.reveal-delay-3{transition-delay:0.3s;}
+
+/* ── FOOTER ── */
+footer{background:var(--navy2);border-top:1px solid var(--border);padding:40px 48px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;position:relative;z-index:1;}
+.footer-brand{font-family:var(--serif);font-size:1rem;color:var(--amber2);}
+.footer-brand span{display:block;font-family:var(--mono);font-size:0.55rem;color:var(--text3);letter-spacing:0.1em;margin-top:2px;font-weight:400;}
+.footer-links{display:flex;gap:24px;list-style:none;}
+.footer-links a{font-family:var(--mono);font-size:0.58rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);text-decoration:none;transition:color 0.2s;}
+.footer-links a:hover{color:var(--amber2);}
+.footer-copy{font-family:var(--mono);font-size:0.55rem;color:var(--text3);letter-spacing:0.06em;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  nav{padding:0 24px;}
+  .nav-links{display:none;}
+  .nav-hamburger{display:flex;}
+  .nav-mobile-menu{display:block;}
+  .page{padding:88px 24px 60px;}
+  .live-grid{grid-template-columns:repeat(3,1fr);}
+  .roadmap-grid{grid-template-columns:1fr 1fr;}
+  .vote-options{grid-template-columns:1fr 1fr;}
+  .form-row{grid-template-columns:1fr;}
+  .vote-section,.request-card{padding:28px 24px;}
+  footer{padding:28px 24px;flex-direction:column;text-align:center;}
+  .footer-links{justify-content:center;}
+}
+@media(max-width:600px){
+  .live-grid{grid-template-columns:repeat(2,1fr);}
+  .roadmap-grid{grid-template-columns:1fr;}
+  .vote-options{grid-template-columns:1fr;}
+  .vote-notify-row{flex-direction:column;}
+}
+</style>
+</head>
+<body>
+
+<div class="nav-backdrop" id="navBackdrop" onclick="closeMenu()"></div>
+<nav>
+  <a href="/index.html" class="nav-logo">
+    <div class="nav-logo-icon">⚗️</div>
+    <div class="nav-logo-text">The Artifacts Lab</div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="tools.html">Tools</a></li>
+    <li><a href="tools.html">All Tools</a></li>
+    <li><a href="index.html">Why Us</a></li>
+    <li><a href="login.html">Pricing</a></li>
+    <li><a href="roadmap.html" class="active">Roadmap</a></li>
+    <li><a href="/faq">FAQ</a></li>
+    <li><a href="/blog">Blog</a></li>
+  </ul>
+  <a href="/login.html" class="nav-cta">Sign In / Join</a>
+  <button class="nav-hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="nav-mobile-menu" id="mobileMenu">
+<ul>
+    <li><a href="tools.html" onclick="closeMenu()">Tools <span class="menu-arrow">→</span></a></li>
+    <li><a href="tools.html" onclick="closeMenu()">All Tools <span class="menu-arrow">→</span></a></li>
+    <li><a href="index.html" onclick="closeMenu()">Why Us <span class="menu-arrow">→</span></a></li>
+    <li><a href="login.html" onclick="closeMenu()">Pricing <span class="menu-arrow">→</span></a></li>
+    <li><a href="roadmap.html" onclick="closeMenu()">Roadmap <span class="menu-arrow">→</span></a></li>
+    <li><a href="/faq" onclick="closeMenu()">FAQ <span class="menu-arrow">→</span></a></li>
+    <li><a href="/blog" onclick="closeMenu()">Blog <span class="menu-arrow">→</span></a></li>
+  </ul>
+  <div class="nav-mobile-cta">
+    <a href="/login.html" onclick="closeMenu()">Sign In / Join →</a>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header reveal">
+    <div class="page-eyebrow">The Artifacts Lab · Roadmap</div>
+    <h1 class="page-title">What we're building <em>next.</em></h1>
+    <p class="page-sub">The Lab is growing. Here's what's live, what's coming, and — most importantly — what you want us to build. Your votes shape the priority order.</p>
+  </div>
+
+  <!-- LIVE TOOLS -->
+  <div class="section reveal reveal-delay-1">
+    <div class="section-header">
+      <div class="section-eyebrow">Currently live</div>
+      <div class="section-title">5 tools, available today</div>
+    </div>
+    <div class="live-grid">
+      <div class="live-card lc-expense">
+        <div class="live-icon">💰</div>
+        <div class="live-name">Expense Tracker</div>
+        <div class="live-badge">● Live</div>
+      </div>
+      <div class="live-card lc-retire">
+        <div class="live-icon">📈</div>
+        <div class="live-name">Retirement Calculator</div>
+        <div class="live-badge">● Live</div>
+      </div>
+      <div class="live-card lc-workout">
+        <div class="live-icon">💪</div>
+        <div class="live-name">Workout Planner</div>
+        <div class="live-badge">● Live</div>
+      </div>
+      <div class="live-card lc-meal">
+        <div class="live-icon">🥗</div>
+        <div class="live-name">Meal Planner</div>
+        <div class="live-badge">● Live</div>
+      </div>
+      <div class="live-card lc-pregnancy">
+        <div class="live-icon">🤰</div>
+        <div class="live-name">Pregnancy Roadmap</div>
+        <div class="live-badge">● Live</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMING SOON -->
+  <div class="section reveal reveal-delay-2">
+    <div class="section-header">
+      <div class="section-eyebrow">Coming next</div>
+      <div class="section-title">6 tools in the pipeline</div>
+      <div class="section-sub">Status reflects current build priority — shaped by your votes below.</div>
+    </div>
+    <div class="roadmap-grid" id="roadmapGrid">
+
+
+      <div class="roadmap-card rc-todo">
+        <div class="rc-head">
+          <div class="rc-icon">📝</div>
+          <span class="rc-status status-next">Next up</span>
+        </div>
+        <div class="rc-name">To-Do & Notes Tracker</div>
+        <div class="rc-desc">Capture tasks, notes and reminders in one private place. Organised by project or day, with a clean interface that gets out of your way. No cloud sync, no subscription — just your list.</div>
+        <div class="rc-vote-count">Votes: <span id="votes-todo">—</span></div>
+      </div>
+
+      <div class="roadmap-card rc-sleep">
+        <div class="rc-head">
+          <div class="rc-icon">🧠</div>
+          <span class="rc-status status-next">Next up</span>
+        </div>
+        <div class="rc-name">Sleep & Brain Fog Tracker</div>
+        <div class="rc-desc">Log sleep hours, quality and morning clarity. Spot the patterns that wreck your focus — late screens, stress, diet — and build a clearer picture of what actually helps you recover.</div>
+        <div class="rc-vote-count">Votes: <span id="votes-sleep">—</span></div>
+      </div>
+
+      <div class="roadmap-card rc-pet">
+        <div class="rc-head">
+          <div class="rc-icon">🐾</div>
+          <span class="rc-status status-planned">Planned</span>
+        </div>
+        <div class="rc-name">Did I Feed the Pet?</div>
+        <div class="rc-desc">Track feeding times, vet appointments, medications, activity and general wellbeing for your pet. Shared access for households. Never argue about who fed the cat again.</div>
+        <div class="rc-vote-count">Votes: <span id="votes-pet">—</span></div>
+      </div>
+
+      <div class="roadmap-card rc-travel">
+        <div class="rc-head">
+          <div class="rc-icon">✈️</div>
+          <span class="rc-status status-planned">Planned</span>
+        </div>
+        <div class="rc-name">Travel Planner</div>
+        <div class="rc-desc">Plan trips from scratch — itinerary, budget by category, activities and bookings in one place. Multi-currency, offline-ready. Works as well for a weekend city break as a three-month trip.</div>
+        <div class="rc-vote-count">Votes: <span id="votes-travel">—</span></div>
+      </div>
+
+      <div class="roadmap-card rc-doctor">
+        <div class="rc-head">
+          <div class="rc-icon">🩺</div>
+          <span class="rc-status status-exploring">Exploring</span>
+        </div>
+        <div class="rc-name">Doctor Visit & Medication Tracker</div>
+        <div class="rc-desc">Log symptoms, questions and appointment notes before and after each visit. Track medications, dosages and schedules. Generate a clean printable summary your doctor will actually appreciate.</div>
+        <div class="rc-vote-count">Votes: <span id="votes-doctor">—</span></div>
+      </div>
+
+      <div class="roadmap-card rc-passwords">
+        <div class="rc-head">
+          <div class="rc-icon">🔐</div>
+          <span class="rc-status status-exploring">Exploring</span>
+        </div>
+        <div class="rc-name">Password Collector</div>
+        <div class="rc-desc">Store passwords, PINs and credentials locally on your device — fully offline, never uploaded anywhere. Encrypted in your browser, readable only by you. No cloud, no risk, no monthly fee.</div>
+        <div class="rc-vote-count">Votes: <span id="votes-passwords">—</span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- VOTE -->
+  <div class="section reveal reveal-delay-3" id="vote">
+    <div class="vote-section">
+      <div class="section-eyebrow" style="margin-bottom:8px;">Your vote counts</div>
+      <div class="vote-title">Which tool do you want next?</div>
+      <div class="vote-sub">Pick the one that would genuinely improve your daily life. We build in order of demand.</div>
+
+            <div class="vote-options" id="voteOptions">
+        <div class="vote-option" onclick="selectVote('todo', event)">
+          <div class="vote-check">✓</div>
+          <div class="vote-option-icon">📝</div>
+          <div class="vote-option-name">To-Do &amp; Notes</div>
+          <div class="vote-option-desc">Tasks, notes and reminders in one place</div>
+        </div>
+        <div class="vote-option" onclick="selectVote('sleep', event)">
+          <div class="vote-check">✓</div>
+          <div class="vote-option-icon">🧠</div>
+          <div class="vote-option-name">Sleep &amp; Brain Fog</div>
+          <div class="vote-option-desc">Track sleep quality and mental clarity</div>
+        </div>
+        <div class="vote-option" onclick="selectVote('pet', event)">
+          <div class="vote-check">✓</div>
+          <div class="vote-option-icon">🐾</div>
+          <div class="vote-option-name">Pet Life Manager</div>
+          <div class="vote-option-desc">Food, vet, meds and wellbeing tracker</div>
+        </div>
+        <div class="vote-option" onclick="selectVote('travel', event)">
+          <div class="vote-check">✓</div>
+          <div class="vote-option-icon">✈️</div>
+          <div class="vote-option-name">Travel Planner</div>
+          <div class="vote-option-desc">Budget, schedule and activities</div>
+        </div>
+        <div class="vote-option" onclick="selectVote('doctor', event)">
+          <div class="vote-check">✓</div>
+          <div class="vote-option-icon">🩺</div>
+          <div class="vote-option-name">Doctor &amp; Medications</div>
+          <div class="vote-option-desc">Visits, symptoms and prescriptions</div>
+        </div>
+        <div class="vote-option" onclick="selectVote('passwords', event)">
+          <div class="vote-check">✓</div>
+          <div class="vote-option-icon">🔐</div>
+          <div class="vote-option-name">Password Collector</div>
+          <div class="vote-option-desc">Safe, offline, only yours</div>
+        </div>
+      </div>
+
+
+      <div style="text-align:center;margin-bottom:4px;">
+        <button class="vote-btn" id="voteBtn" onclick="submitVote()">Cast my vote →</button>
+      </div>
+      <div class="vote-note">One vote per person · No account required</div>
+
+      <div class="vote-notify" id="voteNotifyBox" style="display:none;">
+        <div class="vote-notify-label">Want to know when it's ready? Drop your email and we'll ping you on launch day. <span>No account required · No spam, ever.</span></div>
+        <div class="vote-notify-row">
+          <input type="email" class="vote-notify-input" id="voteEmail" placeholder="your@email.com">
+          <button class="vote-notify-btn" id="voteNotifyBtn" onclick="submitNotify()">Notify me →</button>
+        </div>
+        <div class="vote-notify-note" id="voteNotifyNote">Optional · You can skip this</div>
+      </div>
+      <div class="vote-success" id="voteSuccess">
+        ✓ Vote recorded — thank you. Your input shapes what we build next.
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURE REQUEST -->
+  <div class="section reveal" id="request">
+    <div class="request-card">
+      <div class="section-eyebrow" style="margin-bottom:8px;">Got an idea?</div>
+      <div class="request-title">Request a feature</div>
+      <div class="request-sub">Something missing from an existing tool? An entirely new tool you wish existed? Tell us. Every request is read by Claudio personally.</div>
+
+      <div class="form-row">
+        <div class="form-field">
+          <label class="form-label" for="reqEmail">Your email</label>
+          <input type="email" class="form-input" id="reqEmail" placeholder="your@email.com">
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="reqTool">Which tool is this about?</label>
+          <select class="form-input form-select" id="reqTool">
+            <option value="">Select a tool (or leave blank)</option>
+            <option value="expense-tracker">Expense Tracker</option>
+            <option value="retirement-calculator">Retirement Calculator</option>
+            <option value="workout-planner">Workout Planner</option>
+            <option value="meal-planner">Meal Planner</option>
+            <option value="pregnancy-roadmap">Pregnancy Roadmap</option>
+            <option value="new-tool">New tool idea</option>
+            <option value="general">General / other</option>
+          </select>
+        </div>
+      </div>
+
+      <textarea class="form-textarea" id="reqText" placeholder="Describe the feature or tool you'd like to see. The more specific, the better — 'I wish I could export my meal plan as a PDF' is more useful than 'more export options'." maxlength="1000" oninput="updateCharCount(this)"></textarea>
+      <div class="char-hint" id="charHint">0 / 1000</div>
+
+      <button class="request-btn" id="requestBtn" onclick="submitRequest()">Send request →</button>
+      <div class="request-success" id="requestSuccess">
+        ✓ Got it — thank you. Claudio will read this personally.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-brand">
+    The Artifacts Lab
+    <span>theartifactslab.com &nbsp;·&nbsp; Est. 2026</span>
+  </div>
+  <ul class="footer-links">
+    <li><a href="/index.html">Home</a></li>
+    <li><a href="/tools.html">Tools</a></li>
+    <li><a href="/blog">Blog</a></li>
+    <li><a href="/roadmap.html">Roadmap</a></li>
+    <li><a href="#">Privacy</a></li>
+  </ul>
+  <div class="footer-copy">© 2026 The Artifacts Lab. All rights reserved.</div>
+</footer>
+
+<script>
+// ── Supabase ──────────────────────────────────────────────────────────────
+const SUPABASE_URL  = 'https://fvgajfiksxmwioxnesry.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2Z2FqZmlrc3htd2lveG5lc3J5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NDU4OTEsImV4cCI6MjA4OTIyMTg5MX0.KwqAzx1oAGeh0F3q1LfeQPXYjtdOjaOrzS_c4eUGKJY';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+// ── Scroll reveal ─────────────────────────────────────────────────────────
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }});
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ── Nav ───────────────────────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  document.querySelector('nav').style.boxShadow = window.scrollY > 20 ? '0 4px 32px rgba(0,0,0,0.4)' : 'none';
+  if (document.getElementById('mobileMenu').classList.contains('open')) closeMenu();
+});
+function toggleMenu() {
+  const btn = document.getElementById('hamburger');
+  const menu = document.getElementById('mobileMenu');
+  const backdrop = document.getElementById('navBackdrop');
+  if (menu.classList.contains('open')) { closeMenu(); }
+  else { btn.classList.add('open'); menu.classList.add('open'); backdrop.classList.add('open'); document.body.style.overflow = 'hidden'; }
+}
+function closeMenu() {
+  document.getElementById('hamburger').classList.remove('open');
+  document.getElementById('mobileMenu').classList.remove('open');
+  document.getElementById('navBackdrop').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ── Load vote counts ──────────────────────────────────────────────────────
+async function loadVoteCounts() {
+  try {
+    const { data, error } = await db.from('roadmap_votes').select('tool');
+    if (error || !data) return;
+    const counts = {};
+    data.forEach(row => { counts[row.tool] = (counts[row.tool] || 0) + 1; });
+    ['todo','sleep','pet','travel','doctor','passwords'].forEach(tool => {
+      const el = document.getElementById('votes-' + tool);
+      if (el) el.textContent = counts[tool] || '0';
+    });
+  } catch(e) { /* silent fail — vote counts are decorative */ }
+}
+loadVoteCounts();
+
+// ── Vote ──────────────────────────────────────────────────────────────────
+let selectedTool = null;
+
+function selectVote(tool, event) {
+  selectedTool = tool;
+  document.querySelectorAll('.vote-option').forEach(el => el.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+}
+
+async function submitVote() {
+  if (!selectedTool) {
+    alert('Please select a tool first.');
+    return;
+  }
+  const btn = document.getElementById('voteBtn');
+  btn.disabled = true;
+  btn.textContent = 'Recording...';
+  try {
+    const { error } = await db.from('roadmap_votes').insert({ tool: selectedTool, email: null });
+    if (error && error.code !== '23505') throw error;
+    // Lock the options
+    document.getElementById('voteOptions').style.opacity = '0.5';
+    document.getElementById('voteOptions').style.pointerEvents = 'none';
+    btn.style.display = 'none';
+    document.querySelector('.vote-note').style.display = 'none';
+    // Show success + optional notify box
+    document.getElementById('voteSuccess').style.display = 'block';
+    document.getElementById('voteNotifyBox').style.display = 'block';
+    loadVoteCounts();
+  } catch(err) {
+    btn.disabled = false;
+    btn.textContent = 'Cast my vote →';
+  }
+}
+
+async function submitNotify() {
+  const email = document.getElementById('voteEmail').value.trim().toLowerCase();
+  if (!email || !email.includes('@')) {
+    document.getElementById('voteEmail').focus();
+    return;
+  }
+  const btn = document.getElementById('voteNotifyBtn');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+  try {
+    // Update the most recent vote for this session with the email
+    await db.from('roadmap_votes').insert({ tool: selectedTool, email });
+    document.getElementById('voteNotifyNote').textContent = '✓ We\'ll email you when it launches.';
+    document.getElementById('voteNotifyNote').style.color = 'var(--green)';
+    document.getElementById('voteEmail').style.display = 'none';
+    btn.style.display = 'none';
+  } catch(err) {
+    // Even on duplicate, treat as success silently
+    document.getElementById('voteNotifyNote').textContent = '✓ You\'re on the list.';
+    document.getElementById('voteNotifyNote').style.color = 'var(--green)';
+    document.getElementById('voteEmail').style.display = 'none';
+    btn.style.display = 'none';
+  }
+}
+
+// ── Feature Request ───────────────────────────────────────────────────────
+function updateCharCount(el) {
+  document.getElementById('charHint').textContent = el.value.length + ' / 1000';
+}
+
+async function submitRequest() {
+  const email   = document.getElementById('reqEmail').value.trim().toLowerCase();
+  const tool    = document.getElementById('reqTool').value;
+  const message = document.getElementById('reqText').value.trim();
+
+  if (!email || !email.includes('@')) { document.getElementById('reqEmail').focus(); return; }
+  if (message.length < 10) { document.getElementById('reqText').focus(); return; }
+
+  const btn = document.getElementById('requestBtn');
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+
+  try {
+    const { error } = await db.from('feature_requests').insert({ email, tool: tool || null, message });
+    if (error) throw error;
+    document.getElementById('requestSuccess').style.display = 'block';
+    document.getElementById('reqEmail').value = '';
+    document.getElementById('reqTool').value = '';
+    document.getElementById('reqText').value = '';
+    document.getElementById('charHint').textContent = '0 / 1000';
+    btn.style.display = 'none';
+  } catch(err) {
+    btn.disabled = false;
+    btn.textContent = 'Try again';
+  }
+}
+</script>
+</body>
+</html>
