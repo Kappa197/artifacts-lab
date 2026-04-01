@@ -2727,9 +2727,18 @@ async function processWithAI() {
     if (name.endsWith('.pdf')) {
       // Extract text from PDF client-side — avoids timeout on Edge Function
       if (loadingMsg) loadingMsg.textContent = 'Extracting text from PDF…';
-      const text = await extractPDFText(_aiFile);
-      if (!text.trim()) throw new Error('Could not extract text from this PDF. The file may be scanned/image-only.');
-      fileToSend = new File([text], _aiFile.name.replace(/\.pdf$/i, '.txt'), { type: 'text/plain' });
+      const rawText = await extractPDFText(_aiFile);
+      if (!rawText.trim()) throw new Error('Could not extract text from this PDF. The file may be scanned/image-only.');
+      // Pre-filter: keep only lines that look like transaction rows (contain a date or numbers)
+      // This strips repeated page headers/footers and cuts token count ~40%
+      const filtered = rawText.split('\n').filter(line => {
+        const t = line.trim();
+        if (!t || t.length < 6) return false;
+        // Keep lines containing a date pattern or a number with decimals
+        return /\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}/.test(t) || /\d{1,3}[,\d]*\.\d{2}/.test(t);
+      }).join('\n');
+      const textToSend = filtered.trim() || rawText; // fallback to full text if filter too aggressive
+      fileToSend = new File([textToSend], _aiFile.name.replace(/\.pdf$/i, '.txt'), { type: 'text/plain' });
       if (loadingMsg) loadingMsg.textContent = 'Claude is analysing your transactions…';
     } else if (name.match(/\.(xlsx|xls)$/i)) {
       // Convert Excel → CSV client-side
@@ -2750,19 +2759,24 @@ async function processWithAI() {
       body: fd,
     });
 
+    // Read streaming response — Edge Function streams to keep Vercel connection alive,
+    // then sends a single JSON payload at the end once Claude finishes
     let result;
-    const ct = res.headers.get('content-type') || '';
-    if (ct.includes('application/json')) {
-      result = await res.json();
-    } else {
-      const txt = await res.text();
-      if (res.status === 504 || txt.includes('TIMEOUT')) {
-        throw new Error('Processing timed out. Please try again — this sometimes happens on the first request.');
+    try {
+      const reader  = res.body.getReader();
+      const decoder = new TextDecoder();
+      let fullText  = '';
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        fullText += decoder.decode(value, { stream: true });
       }
-      throw new Error(`Server error (${res.status}): ${txt.slice(0, 120)}`);
+      result = JSON.parse(fullText);
+    } catch (e) {
+      throw new Error('Could not read server response. Please try again.');
     }
 
-    if (!res.ok || !result.ok) throw new Error(result.error || 'Processing failed. Please try again.');
+    if (!result.ok) throw new Error(result?.error || 'Processing failed. Please try again.');
 
     mapAIStatementToPending(result.data);
     if (!S.pending.length) throw new Error('No valid transactions found in this file.');
