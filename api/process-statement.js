@@ -214,20 +214,52 @@ async function processRequest(req) {
   const claudeData = await claudeRes.json();
   const rawText    = claudeData.content?.[0]?.text || '';
 
-  // Parse JSON from Claude's response
+  // Parse JSON from Claude's response — robust extraction handles extra text + Thai chars
   try {
-    const clean = rawText
-      .replace(/^```json\s*/im, '')
-      .replace(/^```\s*/im, '')
-      .replace(/\s*```$/im, '')
-      .trim();
-    const data = JSON.parse(clean);
+    const data = extractJSON(rawText, mode);
     return jsonResponse({ ok: true, data, mode });
   } catch (e) {
     console.error('[process-statement] JSON parse error:', e.message);
-    console.error('[process-statement] Raw (first 300):', rawText.slice(0, 300));
+    console.error('[process-statement] Raw (first 400):', rawText.slice(0, 400));
     return jsonResponse({
-      error: 'Could not parse AI response. Try a different file or use the manual CSV import.',
+      error: 'Could not parse AI response. Details: ' + e.message,
     }, 500);
   }
+}
+
+// Robustly extract JSON from Claude's response even if it adds surrounding text
+function extractJSON(text, mode) {
+  if (!text) throw new Error('Empty response from AI');
+
+  // 1. Strip markdown code fences
+  text = text.replace(/^```json\s*/im, '').replace(/^```\s*/im, '').replace(/\s*```$/im, '').trim();
+
+  // 2. Try direct parse first
+  try { return JSON.parse(text); } catch {}
+
+  // 3. For statement mode: find the outermost JSON array
+  if (mode !== 'receipt') {
+    const start = text.indexOf('[');
+    const end   = text.lastIndexOf(']');
+    if (start !== -1 && end > start) {
+      try { return JSON.parse(text.slice(start, end + 1)); } catch {}
+    }
+  }
+
+  // 4. For receipt mode (or fallback): find the outermost JSON object
+  const oStart = text.indexOf('{');
+  const oEnd   = text.lastIndexOf('}');
+  if (oStart !== -1 && oEnd > oStart) {
+    try { return JSON.parse(text.slice(oStart, oEnd + 1)); } catch {}
+  }
+
+  // 5. Last resort: try to fix common JSON issues (Thai/special chars in strings)
+  try {
+    const fixed = text
+      .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '') // remove control chars
+      .replace(/,\s*([}\]])/g, '$1');                                  // trailing commas
+    return JSON.parse(fixed);
+  } catch {}
+
+  throw new Error('Response was not valid JSON — Claude may have added explanation text');
 }
