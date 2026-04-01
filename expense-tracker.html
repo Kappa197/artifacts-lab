@@ -394,6 +394,8 @@ html,body{overflow-x:hidden;max-width:100%;}
       <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none;" onclick="toggleManualEntry()">
         <span>✏️ Add Transaction</span>
         <div style="display:flex;align-items:center;gap:10px;">
+          <button id="scanReceiptBtn" onclick="event.stopPropagation();document.getElementById('receiptFileIn').click()" style="display:none;background:var(--navy3);border:1px solid var(--border2);border-radius:6px;color:var(--text2);font-family:var(--mono);font-size:0.62rem;padding:4px 10px;cursor:pointer;" onmouseover="this.style.borderColor='var(--amber2)'" onmouseout="this.style.borderColor='var(--border2)'">📷 Scan Receipt</button>
+          <input type="file" id="receiptFileIn" accept="image/*" capture="environment" style="display:none" onchange="handleReceiptScan(this.files[0])">
           <span id="manualEntrySubtitle" style="font-family:var(--mono);font-size:0.6rem;color:var(--text3);font-weight:400;letter-spacing:0.04em;"></span>
           <span id="manualEntryChevron" style="color:var(--amber2);font-size:0.9rem;transition:transform 0.2s;">▲</span>
         </div>
@@ -429,6 +431,49 @@ html,body{overflow-x:hidden;max-width:100%;}
       <button id="impP2Btn" class="btn btn-ghost" onclick="setImportProfile('p2')" style="min-width:120px;" id="impP2Btn"></button>
     </div>
     <p style="font-size:0.72rem;color:var(--text3);margin-top:10px;">Each file import belongs to one person. Switch before uploading a new file.</p>
+  </div>
+
+  <!-- AI Statement Import -->
+  <div class="card" id="aiImportCard" style="margin-bottom:18px;border-color:var(--green);">
+    <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
+      <span>🤖 AI Statement Import</span>
+      <span style="background:var(--green);color:#000;font-family:var(--mono);font-size:0.55rem;font-weight:700;letter-spacing:0.1em;padding:3px 8px;border-radius:99px;">RECOMMENDED</span>
+    </div>
+    <p style="font-size:0.78rem;color:var(--text3);line-height:1.65;margin-bottom:16px;">Upload your PDF or CSV bank statement. Claude reads it, categorises every transaction, and loads it into the review table — ready to save in seconds. No copy-paste needed.</p>
+
+    <!-- Drop zone -->
+    <div class="drop-zone" id="aiDropZone" onclick="document.getElementById('aiFileIn').click()" style="margin-bottom:0;">
+      <div class="drop-icon">🤖</div>
+      <h3>Drop PDF or CSV/Excel here</h3>
+      <p>Supports .pdf, .csv, .xlsx, .xls — click to browse</p>
+      <input type="file" id="aiFileIn" accept=".pdf,.csv,.xlsx,.xls" style="display:none" onchange="selectAIFile(this.files[0])">
+    </div>
+
+    <!-- File selected state -->
+    <div id="aiImportActions" style="display:none;margin-top:12px;display:none;align-items:center;gap:10px;flex-wrap:wrap;">
+      <span id="aiFileName" style="font-family:var(--mono);font-size:0.75rem;color:var(--amber2);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+      <button class="btn btn-amber" onclick="processWithAI()">🤖 Process with AI</button>
+      <button class="btn btn-ghost btn-sm" onclick="resetAIImport()">✕ Change file</button>
+    </div>
+
+    <!-- Loading state -->
+    <div id="aiImportLoading" style="display:none;margin-top:14px;padding:14px 16px;background:var(--navy3);border-radius:8px;display:none;align-items:center;gap:14px;">
+      <div style="width:22px;height:22px;border:2.5px solid var(--border2);border-top-color:var(--green);border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0;"></div>
+      <div>
+        <div style="font-size:0.8rem;color:var(--text);margin-bottom:2px;">Claude is reading your statement…</div>
+        <div style="font-family:var(--mono);font-size:0.65rem;color:var(--text3);">This takes 10–20 seconds. Please don't close the tab.</div>
+      </div>
+    </div>
+
+    <!-- Error state -->
+    <div id="aiImportError" style="display:none;margin-top:12px;"></div>
+  </div>
+
+  <!-- Divider -->
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">
+    <div style="flex:1;height:1px;background:var(--border);"></div>
+    <span style="font-family:var(--mono);font-size:0.6rem;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;">Or import a pre-processed CSV</span>
+    <div style="flex:1;height:1px;background:var(--border);"></div>
   </div>
 
   <!-- Stale categories warning -->
@@ -2455,6 +2500,10 @@ function initManualEntry() {
       : 'Free plan — enter transactions one by one';
   }
 
+  // Scan receipt button — Premium only
+  const scanBtn = document.getElementById('scanReceiptBtn');
+  if (scanBtn) scanBtn.style.display = can.pdfExport ? '' : 'none';
+
   populateManualCatSelect();
 
   // Default date to today
@@ -2578,6 +2627,185 @@ function renderManualTxList() {
   }).join('');
 }
 
+
+// ═══════════════════════════════════════════════
+// AI STATEMENT IMPORT
+// ═══════════════════════════════════════════════
+let _aiFile = null;
+
+function initAIImport() {
+  const dz = document.getElementById('aiDropZone');
+  if (!dz) return;
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('over'));
+  dz.addEventListener('drop', e => {
+    e.preventDefault(); dz.classList.remove('over');
+    const f = e.dataTransfer.files[0];
+    if (f) selectAIFile(f);
+  });
+}
+
+function selectAIFile(file) {
+  if (!file) return;
+  _aiFile = file;
+  const elId = id => document.getElementById(id);
+  if (elId('aiDropZone'))      elId('aiDropZone').style.display      = 'none';
+  if (elId('aiImportActions')) elId('aiImportActions').style.display = 'flex';
+  if (elId('aiFileName'))      elId('aiFileName').textContent        = file.name;
+  if (elId('aiImportError'))   elId('aiImportError').style.display   = 'none';
+}
+
+function resetAIImport() {
+  _aiFile = null;
+  const elId = id => document.getElementById(id);
+  if (elId('aiDropZone'))      elId('aiDropZone').style.display      = '';
+  if (elId('aiImportActions')) elId('aiImportActions').style.display = 'none';
+  if (elId('aiImportLoading')) elId('aiImportLoading').style.display = 'none';
+  if (elId('aiImportError'))   elId('aiImportError').style.display   = 'none';
+  if (elId('aiFileName'))      elId('aiFileName').textContent        = '';
+  if (elId('aiFileIn'))        elId('aiFileIn').value                = '';
+}
+
+async function processWithAI() {
+  if (!_aiFile) return;
+  const elId = id => document.getElementById(id);
+
+  elId('aiImportActions').style.display = 'none';
+  elId('aiImportLoading').style.display = 'flex';
+  elId('aiImportError').style.display   = 'none';
+
+  try {
+    const { data: { session } } = await _supa.auth.getSession();
+    if (!session?.access_token) throw new Error('Not logged in. Please refresh the page and try again.');
+
+    // Convert Excel → CSV client-side (keeps Edge Function simple)
+    let fileToSend = _aiFile;
+    if (_aiFile.name.match(/\.(xlsx|xls)$/i)) {
+      const ab  = await _aiFile.arrayBuffer();
+      const wb  = XLSX.read(ab, { type: 'array' });
+      const csv = XLSX.utils.sheet_to_csv(wb.Sheets[wb.SheetNames[0]]);
+      fileToSend = new File([csv], _aiFile.name.replace(/\.(xlsx|xls)$/i, '.csv'), { type: 'text/csv' });
+    }
+
+    const fd = new FormData();
+    fd.append('file',       fileToSend);
+    fd.append('mode',       'statement');
+    fd.append('currency',   S.currency.primary || 'THB');
+    fd.append('categories', JSON.stringify(S.cats));
+
+    const res    = await fetch('/api/process-statement', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${session.access_token}` },
+      body: fd,
+    });
+    const result = await res.json();
+    if (!res.ok || !result.ok) throw new Error(result.error || 'Processing failed. Please try again.');
+
+    mapAIStatementToPending(result.data);
+    if (!S.pending.length) throw new Error('No valid transactions found in this file.');
+
+    renderTxPreview();
+    resetAIImport();
+    toast(`✓ ${S.pending.length} transactions ready — review and save`, 'ok');
+
+  } catch(e) {
+    console.error('[AI Import]', e);
+    elId('aiImportLoading').style.display = 'none';
+    elId('aiImportActions').style.display = 'flex';
+    elId('aiImportError').style.display   = '';
+    elId('aiImportError').innerHTML = `<div style="padding:11px 14px;border-radius:8px;background:var(--red-dim);border:1px solid var(--red);font-size:0.78rem;color:#f87171;line-height:1.6;">⚠ ${esc(e.message)}</div>`;
+  }
+}
+
+function mapAIStatementToPending(transactions) {
+  if (!Array.isArray(transactions)) transactions = [transactions];
+  const catLookup = {};
+  S.cats.forEach(c => { catLookup[c.name.toLowerCase().trim()] = c.id; });
+  S.rawData = [];
+  S.pending = transactions.map((tx, i) => {
+    const dr = parseFloat(tx.debit)  || 0;
+    const cr = parseFloat(tx.credit) || 0;
+    if (dr === 0 && cr === 0) return null;
+    const catId = catLookup[(tx.category || '').trim().toLowerCase()] || '';
+    const date  = parseAIDate(String(tx.date || '').trim());
+    if (!date) return null;
+    return {
+      id:        'ai_' + Date.now() + '_' + i + '_' + Math.random().toString(36).slice(2, 5),
+      date,
+      desc:      String(tx.description || '').trim(),
+      rawDesc:   String(tx.description || '').trim(),
+      dr, cr, catId,
+      autoMatch: !!catId,
+      preFilled: !!catId,
+      skip:      false,
+      manual:    false,
+    };
+  }).filter(Boolean);
+}
+
+function parseAIDate(s) {
+  if (!s) return '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;                        // YYYY-MM-DD
+  let m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2})$/);
+  if (m) return `20${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`; // DD/MM/YY
+  m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  if (m) return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`; // DD/MM/YYYY
+  const d = new Date(s);
+  if (!isNaN(d)) return d.toISOString().slice(0, 10);
+  return '';
+}
+
+// ═══════════════════════════════════════════════
+// RECEIPT SCAN (Premium)
+// ═══════════════════════════════════════════════
+async function handleReceiptScan(file) {
+  if (!file) return;
+  if (!can.pdfExport) { toast('🔒 Receipt scanning is a Premium feature', 'err'); return; }
+
+  const btn = document.getElementById('scanReceiptBtn');
+  if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
+
+  try {
+    const { data: { session } } = await _supa.auth.getSession();
+    if (!session?.access_token) throw new Error('Not logged in');
+
+    const fd = new FormData();
+    fd.append('file',     file);
+    fd.append('mode',     'receipt');
+    fd.append('currency', S.currency.primary || 'THB');
+
+    const res    = await fetch('/api/process-statement', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${session.access_token}` },
+      body: fd,
+    });
+    const result = await res.json();
+    if (!res.ok || !result.ok) throw new Error(result.error || 'Scan failed');
+
+    const r = result.data;
+    if (r.date) { const d = parseAIDate(r.date); if (d) document.getElementById('meDate').value = d; }
+    if (r.description || r.merchant) document.getElementById('meDesc').value = r.description || r.merchant || '';
+    if (r.amount) document.getElementById('meAmt').value = parseFloat(r.amount).toFixed(2);
+
+    // Expand form if collapsed
+    const body = document.getElementById('manualEntryBody');
+    if (body && body.style.display === 'none') {
+      body.style.display = '';
+      const chev = document.getElementById('manualEntryChevron');
+      if (chev) chev.style.transform = '';
+    }
+    document.getElementById('meCat')?.focus();
+
+    const inp = document.getElementById('receiptFileIn');
+    if (inp) inp.value = '';
+    toast('✓ Receipt scanned — select a category and save', 'ok');
+
+  } catch(e) {
+    toast('Receipt scan failed: ' + e.message, 'err');
+  } finally {
+    if (btn) { btn.textContent = '📷 Scan Receipt'; btn.disabled = false; }
+  }
+}
 
 // ═══════════════════════════════════════════════
 function nudge(msg) {
@@ -2787,6 +3015,7 @@ function init() {
 
   applyTierGates();
   initManualEntry();
+  initAIImport();
 }
 
 window.addEventListener('load', initTier);
