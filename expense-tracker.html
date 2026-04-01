@@ -2743,7 +2743,6 @@ async function processWithAI() {
     fd.append('file',       fileToSend);
     fd.append('mode',       'statement');
     fd.append('currency',   S.currency.primary || 'THB');
-    fd.append('categories', JSON.stringify(S.cats));
 
     const res = await fetch('/api/process-statement', {
       method: 'POST',
@@ -2783,24 +2782,22 @@ async function processWithAI() {
 
 function mapAIStatementToPending(transactions) {
   if (!Array.isArray(transactions)) transactions = [transactions];
-  const catLookup = {};
-  S.cats.forEach(c => { catLookup[c.name.toLowerCase().trim()] = c.id; });
   S.rawData = [];
   S.pending = transactions.map((tx, i) => {
     const dr = parseFloat(tx.debit)  || 0;
     const cr = parseFloat(tx.credit) || 0;
     if (dr === 0 && cr === 0) return null;
-    const catId = catLookup[(tx.category || '').trim().toLowerCase()] || '';
-    const date  = parseAIDate(String(tx.date || '').trim());
+    const date = parseAIDate(String(tx.date || '').trim());
     if (!date) return null;
+    const desc  = String(tx.description || '').trim();
+    // Use existing keyword + rules engine (same as CSV import)
+    const catId = autoCat(desc);
     return {
       id:        'ai_' + Date.now() + '_' + i + '_' + Math.random().toString(36).slice(2, 5),
-      date,
-      desc:      String(tx.description || '').trim(),
-      rawDesc:   String(tx.description || '').trim(),
+      date, desc, rawDesc: desc,
       dr, cr, catId,
       autoMatch: !!catId,
-      preFilled: !!catId,
+      preFilled: false,
       skip:      false,
       manual:    false,
     };
