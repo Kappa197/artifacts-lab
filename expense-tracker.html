@@ -1803,6 +1803,7 @@ function renderBalance(txs,month) {
 
 function renderMOM(cur) {
   if (!can.momComparison) return;
+  const months=getAllMonthKeys();
   const idx=months.indexOf(cur);
   const prev=idx>0?months[idx-1]:null;
   const ct=getTxns(cur), pt=prev?getTxns(prev):[];
