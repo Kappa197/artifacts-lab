@@ -2693,12 +2693,22 @@ async function processWithAI() {
     fd.append('currency',   S.currency.primary || 'THB');
     fd.append('categories', JSON.stringify(S.cats));
 
-    const res    = await fetch('/api/process-statement', {
+    const res = await fetch('/api/process-statement', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${session.access_token}` },
       body: fd,
     });
-    const result = await res.json();
+
+    // Safely parse response — Edge Function may return plain text on crash
+    let result;
+    const contentType = res.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+      result = await res.json();
+    } else {
+      const text = await res.text();
+      throw new Error(`Server error (${res.status}): ${text.slice(0, 120)}`);
+    }
+
     if (!res.ok || !result.ok) throw new Error(result.error || 'Processing failed. Please try again.');
 
     mapAIStatementToPending(result.data);
