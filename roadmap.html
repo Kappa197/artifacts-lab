@@ -592,15 +592,19 @@ async function submitNotify() {
   btn.disabled = true;
   btn.textContent = 'Saving...';
   try {
-    // Update the most recent vote for this session with the email
     await db.from('roadmap_votes').insert({ tool: selectedTool, email });
-    document.getElementById('voteNotifyNote').textContent = '✓ We\'ll email you when it launches.';
+    // Send confirmation email
+    fetch('/api/send-vote-notification', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, tool: selectedTool })
+    }).catch(() => {});
+    document.getElementById('voteNotifyNote').textContent = '\u2713 We\'ll email you when it launches.';
     document.getElementById('voteNotifyNote').style.color = 'var(--green)';
     document.getElementById('voteEmail').style.display = 'none';
     btn.style.display = 'none';
   } catch(err) {
-    // Even on duplicate, treat as success silently
-    document.getElementById('voteNotifyNote').textContent = '✓ You\'re on the list.';
+    document.getElementById('voteNotifyNote').textContent = '\u2713 You\'re on the list.';
     document.getElementById('voteNotifyNote').style.color = 'var(--green)';
     document.getElementById('voteEmail').style.display = 'none';
     btn.style.display = 'none';

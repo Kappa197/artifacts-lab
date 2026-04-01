@@ -275,6 +275,7 @@ footer {
     <li><a href="/index.html#pricing">Pricing</a></li>
     <li><a href="/faq" class="active">FAQ</a></li>
     <li><a href="/blog">Blog</a></li>
+    <li><a href="/roadmap">Roadmap</a></li>
   </ul>
   <a href="/login.html" class="nav-cta">Sign In / Join</a>
   <button class="nav-hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
@@ -288,6 +289,7 @@ footer {
     <li><a href="/index.html#pricing" onclick="closeMenu()">Pricing <span class="menu-arrow">→</span></a></li>
     <li><a href="/faq" onclick="closeMenu()">FAQ <span class="menu-arrow">→</span></a></li>
     <li><a href="/blog" onclick="closeMenu()">Blog <span class="menu-arrow">→</span></a></li>
+    <li><a href="/roadmap" onclick="closeMenu()">Roadmap <span class="menu-arrow">→</span></a></li>
   </ul>
   <div class="nav-mobile-cta">
     <a href="/login.html" onclick="closeMenu()">Sign In / Join →</a>
@@ -298,7 +300,7 @@ footer {
 
   <div class="page-eyebrow">Help &amp; Support</div>
   <h1 class="page-title">Frequently asked<br><em>questions.</em></h1>
-  <p class="page-sub">Everything you need to know about The Artifacts Lab. Can't find your answer? <a href="mailto:hello@theartifactslab.com" style="color:var(--amber2)">Send us a message.</a></p>
+  <p class="page-sub">Everything you need to know about The Artifacts Lab. Can't find your answer? <a href="/cdn-cgi/l/email-protection#86eee3eaeae9c6f2eee3e7f4f2efe0e7e5f2f5eae7e4a8e5e9eb" style="color:var(--amber2)">Send us a message.</a></p>
 
   <!-- ── GENERAL ── -->
   <div class="faq-category">
@@ -456,11 +458,12 @@ footer {
     <li><a href="/index.html#pricing">Pricing</a></li>
     <li><a href="/faq">FAQ</a></li>
     <li><a href="/blog">Blog</a></li>
+    <li><a href="/roadmap">Roadmap</a></li>
   </ul>
   <div class="footer-copy">&copy; 2026 The Artifacts Lab. All rights reserved.</div>
 </footer>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 function toggleMenu() {
   const btn = document.getElementById('hamburger');
   const menu = document.getElementById('mobileMenu');
@@ -475,9 +478,4 @@ function closeMenu() {
   document.body.style.overflow = '';
 }
 window.addEventListener('scroll', () => {
-  document.getElementById('mainNav').style.boxShadow = window.scrollY > 20 ? '0 4px 32px rgba(0,0,0,0.4)' : 'none';
-  if (document.getElementById('mobileMenu').classList.contains('open')) closeMenu();
-});
-</script>
-</body>
-</html>
+  document.getElementById('mainNav').style.boxShadow = window.scrollY > 20 
