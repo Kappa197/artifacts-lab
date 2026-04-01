@@ -1840,34 +1840,67 @@ function renderMOM(cur) {
 
 function renderTrend() {
   if (!can.trendChart) return;
-  if(chartTrend)chartTrend.destroy();
-  // Build last 12 calendar months ending this month (empty slots for missing data)
+  if (chartTrend) { chartTrend.destroy(); chartTrend = null; }
+
+  const canvas = document.getElementById('trendC');
+  const card   = document.getElementById('trendCard');
+  if (!canvas || !card) return;
+
+  // Build last 12 calendar months ending this month
   const now = new Date();
   const months = [];
-  for(let i=11;i>=0;i--){
-    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+  for (let i=11; i>=0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
     months.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'));
   }
-  const labels=months.map(m=>{ const[y,mo]=m.split('-'); return new Date(y,mo-1).toLocaleDateString('en-US',{month:'short',year:'2-digit'}); });
-  const investIds=S.cats.filter(c=>c.bucket==='Investment').map(c=>c.id);
-  const expData=months.map(m=>toDisplay(getTxns(m).filter(t=>t.dr>0&&!investIds.includes(t.catId)).reduce((s,t)=>s+t.dr,0)));
-  const invData=months.map(m=>toDisplay(getTxns(m).filter(t=>t.dr>0&&investIds.includes(t.catId)).reduce((s,t)=>s+t.dr,0)));
-  const incData=months.map(m=>{ const tx=getTxns(m).filter(t=>t.cr>0).reduce((s,t)=>s+t.cr,0); return toDisplay(tx)||0; });
-  chartTrend=new Chart(document.getElementById('trendC').getContext('2d'),{
-    type:'bar',
-    data:{labels,datasets:[
-      {label:'Expenses',data:expData,backgroundColor:'rgba(224,82,82,0.75)',borderRadius:3,stack:'spend',order:2},
-      {label:'Investments',data:invData,backgroundColor:'rgba(74,144,217,0.75)',borderRadius:3,stack:'spend',order:2},
-      {label:'Income',data:incData,type:'line',borderColor:'#2ECC8A',backgroundColor:'rgba(46,204,138,0.08)',borderWidth:2,pointRadius:3,tension:0.3,order:1},
-    ]},
-    options:{responsive:true,
-      plugins:{legend:{labels:{color:'#9BAAC4',font:{family:'JetBrains Mono',size:11}}},tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${fmtAmt(c.parsed.y)}`}}},
-      scales:{
-        x:{grid:{color:'#1A2235'},ticks:{color:'#5A6A8A',font:{family:'JetBrains Mono',size:11}}},
-        y:{grid:{color:'#1A2235'},ticks:{color:'#5A6A8A',font:{family:'JetBrains Mono',size:11},callback:v=>fmtChart(v)},stacked:true,beginAtZero:true}
-      }
+
+  const investIds = S.cats.filter(c=>c.bucket==='Investment').map(c=>c.id);
+  const expData = months.map(m => toDisplay(getTxns(m).filter(t=>t.dr>0&&!investIds.includes(t.catId)).reduce((s,t)=>s+t.dr,0)));
+  const invData = months.map(m => toDisplay(getTxns(m).filter(t=>t.dr>0&&investIds.includes(t.catId)).reduce((s,t)=>s+t.dr,0)));
+  const incData = months.map(m => { const v=getTxns(m).filter(t=>t.cr>0).reduce((s,t)=>s+t.cr,0); return toDisplay(v)||0; });
+  const labels  = months.map(m => { const[y,mo]=m.split('-'); return new Date(y,+mo-1).toLocaleDateString('en-US',{month:'short',year:'2-digit'}); });
+
+  const hasData = expData.some(v=>v>0) || invData.some(v=>v>0) || incData.some(v=>v>0);
+
+  // Show no-data message instead of a blank chart
+  if (!hasData) {
+    canvas.style.display = 'none';
+    const existing = card.querySelector('.trend-no-data');
+    if (!existing) {
+      card.insertAdjacentHTML('beforeend',
+        '<div class="trend-no-data no-data" style="margin-top:8px;"><div class="ico">📈</div>No data for the last 12 months</div>');
     }
-  });
+    return;
+  }
+
+  // Remove any previous no-data message and restore canvas
+  const noData = card.querySelector('.trend-no-data');
+  if (noData) noData.remove();
+  canvas.style.display = '';
+
+  try {
+    chartTrend = new Chart(canvas.getContext('2d'), {
+      type: 'bar',
+      data: { labels, datasets: [
+        {label:'Expenses',    data:expData, backgroundColor:'rgba(224,82,82,0.75)', borderRadius:3, stack:'spend', order:2},
+        {label:'Investments', data:invData, backgroundColor:'rgba(74,144,217,0.75)', borderRadius:3, stack:'spend', order:2},
+        {label:'Income',      data:incData, type:'line', borderColor:'#2ECC8A', backgroundColor:'rgba(46,204,138,0.08)', borderWidth:2, pointRadius:3, tension:0.3, order:1},
+      ]},
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { labels: { color:'#9BAAC4', font:{family:'JetBrains Mono',size:11} } },
+          tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${fmtAmt(c.parsed.y)}` } }
+        },
+        scales: {
+          x: { grid:{color:'#1A2235'}, ticks:{color:'#5A6A8A',font:{family:'JetBrains Mono',size:11}} },
+          y: { grid:{color:'#1A2235'}, ticks:{color:'#5A6A8A',font:{family:'JetBrains Mono',size:11},callback:v=>fmtChart(v)}, stacked:true, beginAtZero:true }
+        }
+      }
+    });
+  } catch(e) {
+    console.warn('renderTrend failed:', e);
+  }
 }
 
 // ── Drill-down chart ──────────────────────────────────────
