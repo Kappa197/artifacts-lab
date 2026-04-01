@@ -2752,6 +2752,7 @@ async function processWithAI() {
     fd.append('file',       fileToSend);
     fd.append('mode',       'statement');
     fd.append('currency',   S.currency.primary || 'THB');
+    fd.append('categories', JSON.stringify(S.cats));
 
     const res = await fetch('/api/process-statement', {
       method: 'POST',
@@ -2796,6 +2797,11 @@ async function processWithAI() {
 
 function mapAIStatementToPending(transactions) {
   if (!Array.isArray(transactions)) transactions = [transactions];
+
+  // Build name→id lookup for Claude's category names
+  const catLookup = {};
+  S.cats.forEach(c => { catLookup[c.name.toLowerCase().trim()] = c.id; });
+
   S.rawData = [];
   S.pending = transactions.map((tx, i) => {
     const dr = parseFloat(tx.debit)  || 0;
@@ -2803,15 +2809,22 @@ function mapAIStatementToPending(transactions) {
     if (dr === 0 && cr === 0) return null;
     const date = parseAIDate(String(tx.date || '').trim());
     if (!date) return null;
-    const desc  = String(tx.description || '').trim();
-    // Use existing keyword + rules engine (same as CSV import)
-    const catId = autoCat(desc);
+    const desc = String(tx.description || '').trim();
+
+    // 1. Try Claude's category name first
+    const claudeCatName = (tx.category || '').trim().toLowerCase();
+    let catId      = claudeCatName ? (catLookup[claudeCatName] || '') : '';
+    let fromClaude = !!catId;
+
+    // 2. Fall back to local keyword/rules engine for anything Claude left uncategorized
+    if (!catId) catId = autoCat(desc) || '';
+
     return {
       id:        'ai_' + Date.now() + '_' + i + '_' + Math.random().toString(36).slice(2, 5),
       date, desc, rawDesc: desc,
       dr, cr, catId,
       autoMatch: !!catId,
-      preFilled: false,
+      preFilled: fromClaude,  // ⭐ badge in review table if Claude assigned it
       skip:      false,
       manual:    false,
     };
