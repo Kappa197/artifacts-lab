@@ -460,7 +460,7 @@ html,body{overflow-x:hidden;max-width:100%;}
     <div id="aiImportLoading" style="display:none;margin-top:14px;padding:14px 16px;background:var(--navy3);border-radius:8px;display:none;align-items:center;gap:14px;">
       <div style="width:22px;height:22px;border:2.5px solid var(--border2);border-top-color:var(--green);border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0;"></div>
       <div>
-        <div style="font-size:0.8rem;color:var(--text);margin-bottom:2px;">Claude is reading your statement…</div>
+        <div id="aiLoadingMsg" style="font-size:0.8rem;color:var(--text);margin-bottom:2px;">Claude is reading your statement…</div>
         <div style="font-family:var(--mono);font-size:0.65rem;color:var(--text3);">This takes 10–20 seconds. Please don't close the tab.</div>
       </div>
     </div>
@@ -2666,9 +2666,52 @@ function resetAIImport() {
   if (elId('aiFileIn'))        elId('aiFileIn').value                = '';
 }
 
+// ── PDF text extraction (lazy-loads PDF.js only when needed) ─────────────────
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
+    const s = document.createElement('script');
+    s.src = src; s.onload = resolve; s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+async function extractPDFText(file) {
+  const CDN    = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+  const WORKER = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  if (!window.pdfjsLib) {
+    await loadScript(CDN);
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc = WORKER;
+  }
+  const ab  = await file.arrayBuffer();
+  const pdf = await window.pdfjsLib.getDocument({ data: ab }).promise;
+  let text = '';
+  for (let p = 1; p <= pdf.numPages; p++) {
+    const page    = await pdf.getPage(p);
+    const content = await page.getTextContent();
+    // Reconstruct table rows by grouping items at the same Y position
+    const rows = {};
+    content.items.forEach(item => {
+      if (!item.str.trim()) return;
+      const y = Math.round(item.transform[5]);
+      if (!rows[y]) rows[y] = [];
+      rows[y].push({ x: item.transform[4], str: item.str });
+    });
+    Object.keys(rows)
+      .sort((a, b) => b - a) // top → bottom
+      .forEach(y => {
+        const line = rows[y].sort((a, b) => a.x - b.x).map(i => i.str).join('  ');
+        text += line + '\n';
+      });
+    text += '\n';
+  }
+  return text;
+}
+
 async function processWithAI() {
   if (!_aiFile) return;
   const elId = id => document.getElementById(id);
+  const loadingMsg = elId('aiLoadingMsg');
 
   elId('aiImportActions').style.display = 'none';
   elId('aiImportLoading').style.display = 'flex';
@@ -2678,9 +2721,18 @@ async function processWithAI() {
     const { data: { session } } = await _supa.auth.getSession();
     if (!session?.access_token) throw new Error('Not logged in. Please refresh the page and try again.');
 
-    // Convert Excel → CSV client-side (keeps Edge Function simple)
     let fileToSend = _aiFile;
-    if (_aiFile.name.match(/\.(xlsx|xls)$/i)) {
+    const name = _aiFile.name.toLowerCase();
+
+    if (name.endsWith('.pdf')) {
+      // Extract text from PDF client-side — avoids timeout on Edge Function
+      if (loadingMsg) loadingMsg.textContent = 'Extracting text from PDF…';
+      const text = await extractPDFText(_aiFile);
+      if (!text.trim()) throw new Error('Could not extract text from this PDF. The file may be scanned/image-only.');
+      fileToSend = new File([text], _aiFile.name.replace(/\.pdf$/i, '.txt'), { type: 'text/plain' });
+      if (loadingMsg) loadingMsg.textContent = 'Claude is analysing your transactions…';
+    } else if (name.match(/\.(xlsx|xls)$/i)) {
+      // Convert Excel → CSV client-side
       const ab  = await _aiFile.arrayBuffer();
       const wb  = XLSX.read(ab, { type: 'array' });
       const csv = XLSX.utils.sheet_to_csv(wb.Sheets[wb.SheetNames[0]]);
@@ -2699,14 +2751,16 @@ async function processWithAI() {
       body: fd,
     });
 
-    // Safely parse response — Edge Function may return plain text on crash
     let result;
-    const contentType = res.headers.get('content-type') || '';
-    if (contentType.includes('application/json')) {
+    const ct = res.headers.get('content-type') || '';
+    if (ct.includes('application/json')) {
       result = await res.json();
     } else {
-      const text = await res.text();
-      throw new Error(`Server error (${res.status}): ${text.slice(0, 120)}`);
+      const txt = await res.text();
+      if (res.status === 504 || txt.includes('TIMEOUT')) {
+        throw new Error('Processing timed out. Please try again — this sometimes happens on the first request.');
+      }
+      throw new Error(`Server error (${res.status}): ${txt.slice(0, 120)}`);
     }
 
     if (!res.ok || !result.ok) throw new Error(result.error || 'Processing failed. Please try again.');
