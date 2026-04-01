@@ -28,9 +28,18 @@ function jsonResponse(data, status = 200) {
   });
 }
 
-function statementPrompt(currency) {
+function statementPrompt(currency, categories) {
+  const expLines = categories
+    .filter(c => c.type !== 'income')
+    .map(c => `  - ${c.name}  | bucket: ${c.bucket}`)
+    .join('\n');
+  const incLines = categories
+    .filter(c => c.type === 'income')
+    .map(c => `  - ${c.name}`)
+    .join('\n');
+
   return `Convert this bank statement into a JSON array. Each object must have exactly these keys:
-{"date":"copy exactly as shown","description":"copy exactly, do not translate","debit":<number or null>,"credit":<number or null>}
+{"date":"copy exactly as shown","description":"copy exactly, do not translate","debit":<number or null>,"credit":<number or null>,"category":"exact name from list below"}
 
 RULES:
 1. Include EVERY transaction. Do not skip any row.
@@ -38,7 +47,16 @@ RULES:
 3. credit: amount when money ARRIVED (salary, refund, transfer in). null if outgoing.
 4. Amounts: plain numbers, period as decimal. Example: 1250.50. No currency symbols.
 5. Currency is ${currency}. Do not convert amounts.
-6. OUTPUT ONLY the raw JSON array. No explanation, no markdown. First character must be [
+6. category: use your knowledge of merchants, apps and services to assign the best match from the lists below. Write ONLY the category name — no bucket label.
+7. For credit transactions use INCOME CATEGORIES. For debit use EXPENSE CATEGORIES.
+8. If you cannot determine the category, write: Uncategorized
+9. OUTPUT ONLY the raw JSON array. No explanation, no markdown. First character must be [
+
+EXPENSE CATEGORIES:
+${expLines}
+
+INCOME CATEGORIES:
+${incLines}
 
 Your entire response must be the JSON array only, starting with [ and ending with ]`;
 }
@@ -106,9 +124,11 @@ async function processRequest(req) {
   try { formData = await req.formData(); }
   catch (e) { return jsonResponse({ error: 'Could not parse request: ' + e.message }, 400); }
 
-  const mode     = formData.get('mode') || 'statement';
-  const currency = formData.get('currency') || 'THB';
-  const file     = formData.get('file');
+  const mode       = formData.get('mode') || 'statement';
+  const currency   = formData.get('currency') || 'THB';
+  const file       = formData.get('file');
+  const catsRaw    = formData.get('categories');
+  const categories = catsRaw ? JSON.parse(catsRaw) : [];
   if (!file) return jsonResponse({ error: 'No file provided.' }, 400);
 
   // Build Claude message content
@@ -127,7 +147,7 @@ async function processRequest(req) {
     if (!text.trim()) return jsonResponse({ error: 'The file appears to be empty.' }, 400);
     content.push({ type:'text', text:`Bank statement (${file.name}):\n\n${text}` });
   }
-  content.push({ type:'text', text: mode === 'receipt' ? receiptPrompt(currency) : statementPrompt(currency) });
+  content.push({ type:'text', text: mode === 'receipt' ? receiptPrompt(currency) : statementPrompt(currency, categories) });
 
   // Call Claude API with streaming enabled
   const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
