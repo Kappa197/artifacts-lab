@@ -78,7 +78,7 @@ body::before{
 /* BUTTONS */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.65rem 1.4rem;border-radius:8px;font-family:var(--fb);font-size:.9rem;font-weight:600;cursor:pointer;border:none;transition:all .15s}
 .btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-d);transform:translateY(-1px)}
-.btn-outline{background:#fff;border:2px solid var(--border);color:var(--text)}.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+.btn-outline{background:transparent;border:2px solid var(--border2);color:var(--text2)}.btn-outline:hover{border-color:var(--amber);color:var(--amber2)}
 .btn-lg{padding:.9rem 2rem;font-size:1rem}
 .btn-sm{padding:.38rem .85rem;font-size:.78rem}
 
@@ -92,15 +92,69 @@ body::before{
 
 /* WIZARD */
 .wizard{max-width:580px;margin:0 auto}
-.step-dots{display:flex;justify-content:center;gap:.4rem;margin-bottom:1.4rem}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:all .2s;cursor:pointer}
-.dot.active{background:var(--primary);transform:scale(1.4);cursor:default}
-.dot.done{background:var(--ok)}
+/* Old step-dots removed — replaced by .setup-progress component below */
 .step-title{font-family:var(--fd);font-size:1.55rem;font-weight:800;text-transform:uppercase;letter-spacing:.02em;margin-bottom:.25rem}
 .step-sub{color:var(--muted);margin-bottom:1.4rem;font-size:.875rem;line-height:1.6}
 .form-group{margin-bottom:1.3rem}
 label.fl{display:block;font-weight:600;margin-bottom:.5rem;font-size:.81rem;color:var(--text);text-transform:uppercase;letter-spacing:.05em}
 label.fl .hint{font-size:.75rem;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;margin-left:.3rem}
+
+/* ── SETUP PROGRESS BAR — platform component ──────────────────── */
+.setup-progress{
+  background:rgba(11,15,26,0.96);
+  border-bottom:1px solid var(--border);
+  padding:14px 24px 0;
+  user-select:none;
+  position:sticky;
+  top:60px; /* platform header height */
+  z-index:90;
+}
+.sp-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.sp-tool-name{font-family:var(--mono);font-size:.58rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--text3)}
+.sp-fraction{font-family:var(--mono);font-size:.62rem;font-weight:500;color:var(--text3)}
+.sp-fraction span{color:var(--amber2);font-weight:700}
+.sp-steps{display:flex;align-items:flex-start;gap:0;position:relative}
+.sp-connector{flex:1;height:2px;margin-top:14px;background:var(--border);position:relative;overflow:hidden}
+.sp-connector-fill{position:absolute;top:0;left:0;height:100%;background:linear-gradient(90deg,var(--green),var(--amber));transition:width .5s cubic-bezier(.4,0,.2,1)}
+.sp-step{display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;cursor:default;position:relative}
+.sp-step.done{cursor:pointer}
+.sp-dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--border2);background:var(--navy3);display:flex;align-items:center;justify-content:center;transition:all .3s cubic-bezier(.4,0,.2,1);position:relative;z-index:2}
+.sp-dot-inner{width:8px;height:8px;border-radius:50%;background:var(--text3);transition:all .3s}
+/* Done state */
+.sp-step.done .sp-dot{border-color:var(--green);background:var(--green-dim)}
+.sp-step.done .sp-dot-inner{width:12px;height:12px;background:transparent;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 6l3 3 5-5' stroke='%232ECC8A' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-size:contain;background-repeat:no-repeat}
+/* Active state */
+.sp-step.active .sp-dot{border-color:var(--amber);background:var(--amber-dim);box-shadow:0 0 0 4px rgba(212,146,10,0.12)}
+.sp-step.active .sp-dot-inner{background:var(--amber2);width:10px;height:10px}
+/* Hover on done */
+.sp-step.done:hover .sp-dot{border-color:var(--border2);background:var(--navy4)}
+/* Labels */
+.sp-label{font-family:var(--body);font-size:.72rem;font-weight:500;color:var(--text3);text-align:center;max-width:80px;line-height:1.3;padding-bottom:10px;transition:color .2s;white-space:nowrap}
+.sp-step.active .sp-label{color:var(--amber2);font-weight:600}
+.sp-step.done .sp-label{color:var(--green)}
+.sp-step.done:hover .sp-label{color:var(--text2)}
+/* Active underline tab */
+.sp-step.active::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:24px;height:2px;background:var(--amber);border-radius:2px 2px 0 0}
+/* Tooltip on done steps */
+.sp-step .sp-tooltip{visibility:hidden;opacity:0;position:absolute;bottom:calc(100% + 12px);left:50%;transform:translateX(-50%);background:var(--navy2);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;width:180px;font-family:var(--body);font-size:.75rem;color:var(--text2);line-height:1.5;text-align:left;pointer-events:none;transition:opacity .15s,visibility .15s;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.4);white-space:normal}
+.sp-step .sp-tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:var(--border2)}
+.sp-step.done:hover .sp-tooltip{visibility:visible;opacity:1}
+.sp-tooltip-title{font-weight:600;color:var(--text);margin-bottom:4px;font-size:.78rem}
+/* ── MOBILE variant (< 640px) ─── */
+.setup-progress-mobile{background:rgba(11,15,26,0.96);border-bottom:1px solid var(--border);padding:12px 16px;position:sticky;top:60px;z-index:90}
+.spm-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.spm-label{font-family:var(--body);font-size:.88rem;font-weight:600;color:var(--text)}
+.spm-fraction{font-family:var(--mono);font-size:.65rem;color:var(--text3)}
+.spm-fraction span{color:var(--amber2);font-weight:700}
+.spm-bar{height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.spm-bar-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--amber));border-radius:2px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.spm-steps-row{display:flex;gap:4px;margin-top:8px}
+.spm-step-dot{height:3px;flex:1;border-radius:2px;background:var(--border);transition:background .3s}
+.spm-step-dot.done{background:var(--green)}
+.spm-step-dot.active{background:var(--amber)}
+/* Show/hide by breakpoint */
+@media(min-width:640px){.setup-progress-mobile{display:none}}
+@media(max-width:639px){.setup-progress{display:none}}
 
 /* SLIDER */
 .slider-wrap{display:flex;align-items:center;gap:1rem;background:var(--bg);border-radius:10px;padding:.85rem 1rem}
@@ -117,7 +171,7 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 
 /* CHIPS */
 .chip-grid{display:flex;flex-wrap:wrap;gap:.5rem}
-.chip{padding:.48rem .95rem;border-radius:8px;border:2px solid var(--border);background:#fff;cursor:pointer;font-size:.865rem;font-weight:500;transition:all .15s;user-select:none;line-height:1.35}
+.chip{padding:.48rem .95rem;border-radius:8px;border:2px solid var(--border);background:var(--navy3);cursor:pointer;font-size:.865rem;font-weight:500;transition:all .15s;user-select:none;line-height:1.35}
 .chip:hover{border-color:var(--primary);color:var(--primary)}
 .chip.sel{background:var(--primary);border-color:var(--primary);color:#fff}
 
@@ -150,9 +204,9 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 
 /* STATS */
 .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem;margin-bottom:1rem}
-.stat-card{background:#fff;border-radius:10px;padding:.85rem .6rem;text-align:center;box-shadow:var(--sh);border:1px solid var(--border)}
-.stat-v{font-family:var(--fd);font-size:1.85rem;font-weight:900;color:var(--primary);line-height:1}
-.stat-l{font-size:.68rem;color:var(--muted);margin-top:.25rem;font-weight:500;text-transform:uppercase;letter-spacing:.03em}
+.stat-card{background:var(--navy3);border-radius:10px;padding:.85rem .6rem;text-align:center;box-shadow:var(--sh);border:1px solid var(--border)}
+.stat-v{font-family:var(--fd);font-size:1.85rem;font-weight:900;color:var(--amber2);line-height:1}
+.stat-l{font-size:.68rem;color:var(--text2);margin-top:.25rem;font-weight:500;text-transform:uppercase;letter-spacing:.03em}
 
 /* RATIONALE */
 .rationale{background:var(--primary-l);border-left:4px solid var(--primary);border-radius:0 var(--r) var(--r) 0;padding:.9rem 1.1rem;margin-bottom:1rem}
@@ -164,14 +218,14 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 
 /* WEEK NAV */
 .week-nav{display:flex;gap:.3rem;flex-wrap:wrap;margin-bottom:.9rem}
-.wbtn{padding:.36rem .68rem;border-radius:6px;border:2px solid var(--border);background:#fff;cursor:pointer;font-family:var(--fb);font-size:.73rem;font-weight:600;transition:all .12s}
+.wbtn{padding:.36rem .68rem;border-radius:6px;border:2px solid var(--border);background:var(--navy3);cursor:pointer;font-family:var(--fb);font-size:.73rem;font-weight:600;transition:all .12s}
 .wbtn:hover{border-color:var(--primary);color:var(--primary)}
 .wbtn.active{background:var(--primary);border-color:var(--primary);color:#fff}
 .wbtn.deload{border-color:var(--warn);color:var(--warn)}
 .wbtn.deload.active{background:var(--warn);border-color:var(--warn);color:#fff}
 
 /* PHASE BANNER */
-.phase-banner{background:#fff;border:1px solid var(--border);border-radius:10px;padding:.7rem 1rem;margin-bottom:.7rem;display:flex;align-items:center;gap:.7rem;flex-wrap:wrap}
+.phase-banner{background:var(--navy3);border:1px solid var(--border);border-radius:10px;padding:.7rem 1rem;margin-bottom:.7rem;display:flex;align-items:center;gap:.7rem;flex-wrap:wrap}
 .wip-indicator{display:flex;align-items:center;gap:.3rem;margin-left:auto;flex-shrink:0}
 .wip-dot{width:.55rem;height:.55rem;border-radius:50%;background:var(--border);transition:background .2s}
 .wip-dot.active{background:var(--primary)}
@@ -182,7 +236,7 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 .phase-note{font-size:.78rem;color:var(--muted);font-style:italic;margin-bottom:.8rem;padding-left:.2rem}
 
 /* DAY CARD */
-.day-card{background:#fff;border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);margin-bottom:.9rem;border:1px solid var(--border)}
+.day-card{background:var(--navy2);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);margin-bottom:.9rem;border:1px solid var(--border)}
 .day-hdr{padding:.78rem 1.1rem;display:flex;align-items:center;justify-content:space-between;color:#fff}
 .day-hdr h3{font-family:var(--fd);font-size:1.05rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
 .day-hdr .day-meta{font-size:.7rem;opacity:.8;text-align:right}
@@ -191,9 +245,9 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 .warmup-txt{font-size:.75rem;color:#065f46;line-height:1.5}
 
 /* EXERCISE ROW */
-.ex-row{display:grid;grid-template-columns:1fr auto;padding:.72rem 1.1rem;border-bottom:1px solid #f1f5f9;gap:.65rem;align-items:start}
+.ex-row{display:grid;grid-template-columns:1fr auto;padding:.72rem 1.1rem;border-bottom:1px solid var(--border);gap:.65rem;align-items:start}
 .ex-row:last-child{border-bottom:none}
-.ex-row:nth-child(even){background:#fafbfc}
+.ex-row:nth-child(even){background:rgba(255,255,255,0.03)}
 .ex-num{font-family:var(--fd);font-size:.9rem;font-weight:700;color:#cbd5e1;margin-right:.35rem}
 .ex-name{font-weight:600;font-size:.9rem;color:var(--text);display:flex;align-items:center;gap:.3rem;flex-wrap:wrap}
 .ex-cat{font-size:.61rem;font-weight:700;padding:.1rem .36rem;border-radius:3px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
@@ -210,7 +264,7 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 
 .wbtn.completed{background:#e2e8f0;border-color:#cbd5e1;color:#94a3b8;text-decoration:line-through}
 .wbtn.completed.active{background:#94a3b8;border-color:#94a3b8;color:#fff}
-.complete-btn{width:100%;padding:.65rem;border-radius:8px;border:2px dashed var(--border);background:#fff;cursor:pointer;font-family:var(--fb);font-size:.82rem;font-weight:600;color:var(--muted);transition:all .15s;display:flex;align-items:center;justify-content:center;gap:.5rem;margin:.5rem 0}
+.complete-btn{width:100%;padding:.65rem;border-radius:8px;border:2px dashed var(--border);background:var(--navy3);cursor:pointer;font-family:var(--fb);font-size:.82rem;font-weight:600;color:var(--muted);transition:all .15s;display:flex;align-items:center;justify-content:center;gap:.5rem;margin:.5rem 0}
 .complete-btn:hover{border-color:var(--ok);color:var(--ok);background:var(--ok-l)}
 .complete-btn.done{border-style:solid;border-color:var(--ok);background:var(--ok-l);color:var(--ok)}
 
@@ -219,11 +273,11 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 .vol-table{border-collapse:collapse;width:100%;min-width:420px;font-size:.75rem}
 .vol-table th{padding:.38rem .5rem;text-align:center;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;border-bottom:2px solid var(--border);white-space:nowrap}
 .vol-table th.muscle-h{text-align:left;min-width:90px}
-.vol-table td{padding:.3rem .45rem;text-align:center;border-bottom:1px solid #f1f5f9}
+.vol-table td{padding:.3rem .45rem;text-align:center;border-bottom:1px solid var(--border)}
 .vol-table td.muscle-name{text-align:left;font-weight:600;color:var(--text);font-size:.72rem;padding-left:.2rem}
 .vol-cell{display:inline-block;min-width:1.8rem;padding:.1rem .3rem;border-radius:4px;font-weight:700;font-size:.72rem}
 .vol-0{color:#cbd5e1;font-weight:400}
-.vol-card{background:#fff;border-radius:var(--r);padding:1rem 1.2rem;box-shadow:var(--sh);border:1px solid var(--border);margin-bottom:1rem}
+.vol-card{background:var(--navy2);border-radius:var(--r);padding:1rem 1.2rem;box-shadow:var(--sh);border:1px solid var(--border);margin-bottom:1rem}
 .vol-title{font-family:var(--fd);font-size:1rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.15rem;color:var(--text)}
 .vol-sub{font-size:.72rem;color:var(--muted);margin-bottom:.8rem;line-height:1.5}
 .vol-legend{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:.75rem;align-items:center;font-size:.7rem;color:var(--muted)}
@@ -233,7 +287,7 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 /* MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(2px)}
 .modal-overlay.hidden{display:none!important}
-.modal-box{background:#fff;border-radius:var(--r);max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden;max-height:90vh;display:flex;flex-direction:column}
+.modal-box{background:var(--navy2);border:1px solid var(--border);border-radius:var(--r);max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.5);overflow:hidden;max-height:90vh;display:flex;flex-direction:column}
 .modal-hdr{padding:1rem 1.2rem .75rem;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem}
 .modal-hdr h3{font-family:var(--fd);font-size:1.1rem;font-weight:800;text-transform:uppercase;letter-spacing:.02em;line-height:1.2;color:var(--text)}
 .modal-hdr .modal-cat{font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:.2rem}
@@ -286,16 +340,16 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 /* B-TYPE MUSCULAR ENDURANCE CARD */
 .mendo-block{padding:1rem 1.2rem 1.2rem}
 .mendo-key-rule{background:#fef9c3;border:1px solid #fde047;border-radius:7px;padding:.55rem .85rem;font-size:.78rem;color:#713f12;font-weight:600;margin-bottom:.85rem;line-height:1.5}
-.mendo-warning{background:#fff1f2;border:1px solid #fecdd3;border-radius:7px;padding:.55rem .85rem;font-size:.78rem;color:#9f1239;font-weight:600;margin-bottom:.85rem;line-height:1.5}
+.mendo-warning{background:var(--rose-dim);border:1px solid var(--rose);border-radius:7px;padding:.55rem .85rem;font-size:.78rem;color:var(--rose);font-weight:600;margin-bottom:.85rem;line-height:1.5}
 .mendo-prescription{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:.5rem;margin-bottom:.85rem}
 .mendo-pres-box{background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:.5rem .65rem;text-align:center}
 .mendo-pres-val{font-family:var(--fb);font-size:1.05rem;font-weight:800;color:var(--text)}
 .mendo-pres-lbl{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:.1rem}
 .mendo-exercise-row{display:flex;align-items:center;justify-content:space-between;background:var(--primary-l);border:1.5px solid var(--primary);border-radius:8px;padding:.55rem .85rem;margin-bottom:.75rem;flex-wrap:wrap;gap:.4rem}
-.mendo-ex-name{font-size:.88rem;font-weight:800;color:var(--primary)}
+.mendo-ex-name{font-size:.88rem;font-weight:800;color:var(--amber2)}
 .mendo-ex-meta{font-size:.7rem;color:var(--muted);display:flex;gap:.4rem;flex-wrap:wrap}
-.mendo-ex-meta span{background:#fff;border-radius:4px;padding:.05rem .35rem;border:1px solid var(--border)}
-.mendo-swap-btn{padding:.2rem .6rem;border-radius:5px;border:1.5px solid var(--primary);background:#fff;color:var(--primary);font-size:.7rem;font-weight:700;cursor:pointer;transition:all .12s;flex-shrink:0}
+.mendo-ex-meta span{background:var(--navy4);border-radius:4px;padding:.05rem .35rem;border:1px solid var(--border)}
+.mendo-swap-btn{padding:.2rem .6rem;border-radius:5px;border:1.5px solid var(--amber);background:var(--navy3);color:var(--amber2);font-size:.7rem;font-weight:700;cursor:pointer;transition:all .12s;flex-shrink:0}
 .mendo-swap-btn:hover{background:var(--primary-l)}
 .mendo-circuit-num{display:inline-flex;align-items:center;justify-content:center;width:1.55rem;height:1.55rem;border-radius:50%;background:var(--primary);color:#fff;font-size:.68rem;font-weight:800;flex-shrink:0;font-family:var(--fd)}
 /* MENDO SWAP MODAL OVERRIDE */
@@ -306,7 +360,7 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 .day-focus-label{font-size:.78rem;font-weight:700;color:var(--text);min-width:90px;flex-shrink:0}
 .day-focus-label-wrap{display:flex;flex-direction:column;gap:.18rem;min-width:90px;flex-shrink:0}
 .day-split-badge{font-size:.55rem;font-weight:800;font-family:var(--jb);padding:.1rem .3rem;border-radius:3px;letter-spacing:.04em;white-space:nowrap;display:inline-block}
-.day-focus-chip{padding:.2rem .5rem;border-radius:5px;border:1.5px solid var(--border);background:#fff;cursor:pointer;font-size:.7rem;font-weight:600;color:var(--muted);transition:all .12s}
+.day-focus-chip{padding:.2rem .5rem;border-radius:5px;border:1.5px solid var(--border);background:var(--navy3);cursor:pointer;font-size:.7rem;font-weight:600;color:var(--text2);transition:all .12s}
 .day-focus-chip.sel{border-color:var(--primary);background:var(--primary-l);color:var(--primary)}
 /* RM BADGE */
 .rm-badge{display:inline-flex;align-items:center;padding:.18rem .5rem;border-radius:4px;font-size:.67rem;font-weight:700;letter-spacing:.02em;color:#fff;margin-top:.3rem;cursor:default}
@@ -328,7 +382,9 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 .duration-badge strong{color:var(--text)}
 
 /* PRINT BAR */
-.print-bar{display:flex;justify-content:flex-end;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap}
+.print-bar{display:flex;justify-content:flex-end;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap;align-items:center}
+.btn-adjust{background:none;border:1px solid var(--border2);color:var(--text2);border-radius:8px;padding:.4rem .9rem;font-size:.75rem;font-family:var(--body);font-weight:500;cursor:pointer;transition:all .18s;white-space:nowrap}
+.btn-adjust:hover{border-color:var(--amber);color:var(--amber2)}
 /* SAVED PLAN BANNER */
 .saved-plan-banner{background:rgba(99,102,241,.1);border:1.5px solid rgba(99,102,241,.3);border-radius:10px;padding:.55rem 1rem;margin-bottom:.8rem;font-size:.76rem;color:var(--primary);display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap}
 .save-cta-banner{background:linear-gradient(135deg,#d97706 0%,#f59e0b 45%,#fbbf24 100%);border-radius:14px;padding:1.1rem 1.4rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;box-shadow:0 4px 20px rgba(217,119,6,.35);flex-wrap:wrap}
@@ -558,7 +614,7 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 }
 
 @media print{
-  .tool-header,.tool-inner-nav,.print-bar,.week-nav,.step-nav,.btn{display:none!important}
+  .tool-header,.tool-inner-nav,.setup-progress,.setup-progress-mobile,.print-bar,.week-nav,.step-nav,.btn{display:none!important}
   .container{max-width:100%;padding:0}
   body{background:#fff;font-size:10px}
   .day-card{break-inside:avoid;margin-bottom:.4rem}
@@ -630,6 +686,25 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 <!-- ==================== WIZARD ==================== -->
 <div class="view active" id="view-wizard">
 
+  <!-- SETUP PROGRESS BAR — desktop (hidden on step-0 hero, shown steps 1–4) -->
+  <div class="setup-progress" id="setupProgress" style="display:none">
+    <div class="sp-top">
+      <div class="sp-tool-name">Workout Planner — Setup</div>
+      <div class="sp-fraction">Step <span id="spCurrentNum">1</span> of 4</div>
+    </div>
+    <div class="sp-steps" id="spSteps"></div>
+  </div>
+
+  <!-- SETUP PROGRESS BAR — mobile -->
+  <div class="setup-progress-mobile" id="setupProgressMobile" style="display:none">
+    <div class="spm-row">
+      <div class="spm-label" id="spmLabel">Your Goal</div>
+      <div class="spm-fraction">Step <span id="spmNum">1</span> of 4</div>
+    </div>
+    <div class="spm-bar"><div class="spm-bar-fill" id="spmBarFill" style="width:25%"></div></div>
+    <div class="spm-steps-row" id="spmDotsRow"></div>
+  </div>
+
   <!-- Step 0: Welcome -->
   <div id="step-0">
     <div class="welcome-hero">
@@ -650,7 +725,6 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
   <!-- Step 1: Basics -->
   <div id="step-1" class="wizard hidden">
     <div class="card">
-      <div class="step-dots" id="dots-1"></div>
       <div class="step-title">The Basics</div>
       <div class="step-sub">How often will you train, for how long, and what's your experience?</div>
 
@@ -703,7 +777,6 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
   <!-- Step 2: Equipment -->
   <div id="step-2" class="wizard hidden">
     <div class="card">
-      <div class="step-dots" id="dots-2"></div>
       <div class="step-title">Your Equipment</div>
       <div class="step-sub">Select everything available to you. Exercises will be matched only to what you have.</div>
       <div class="chip-grid" id="equipment-chips">
@@ -740,7 +813,6 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
   <!-- Step 3: Goals -->
   <div id="step-3" class="wizard hidden">
     <div class="card">
-      <div class="step-dots" id="dots-3"></div>
       <div class="step-title">Your Goals</div>
       <div class="step-sub">Set a focus for each training session. The plan will adapt exercises, sets, reps, and rest periods to match.</div>
 
@@ -1149,7 +1221,8 @@ async function initTier() {
 function initUI() {
   S.wpw = 3;
   updateSplitHint();
-  renderDots(1);
+  // Don't show progress bar on the welcome step (step 0)
+  // renderProgress is called by goStep when moving to step 1+
   updateDayFocusGrid();
   initTierGating();
 }
@@ -2819,12 +2892,12 @@ function renderPlan(){
   // Print bar — Basic+ only
   if(can.printExport){
     html+=`<div class="print-bar">
+      <button class="btn-adjust" onclick="adjustPlan()">← Adjust my plan</button>
       <button class="btn btn-outline btn-sm" onclick="window.print()">🖨️ Print Plan</button>
-      <button class="btn btn-outline btn-sm" onclick="showView('wizard')">⚙️ Edit Setup</button>
     </div>`;
   } else {
     html+=`<div class="print-bar">
-      <button class="btn btn-outline btn-sm" onclick="showView('wizard')">⚙️ Edit Setup</button>
+      <button class="btn-adjust" onclick="adjustPlan()">← Adjust my plan</button>
       <span class="tier-nudge" style="font-size:.72rem">🔒 <strong>Print/PDF</strong> — <a href="#" onclick="return showNudgeModal('basic')">Basic plan ($8/year)</a></span>
     </div>`;
   }
@@ -3247,42 +3320,133 @@ function buildAndShow(){
     }
   }
 
-  computeFocusSummary(); // derive S.focus and S.secondaryFocus from day assignments
+  computeFocusSummary();
   currentPlan=generatePlan();
   S.currentWeek=1;
   S.completedWeeks=new Set();
   renderPlan();
+  // Activate step 4 "Your Plan" on the progress bar — all 3 input steps done
+  const pb  = document.getElementById('setupProgress');
+  const pbm = document.getElementById('setupProgressMobile');
+  if(pb)  pb.style.display  = '';
+  if(pbm) pbm.style.display = '';
+  renderProgress(4);
   showView('plan');
 }
 
+// ── Adjust My Plan ────────────────────────────────────────────────────
+// Returns to wizard step 1 with all current S values pre-filled.
+// S is never cleared — sliders/chips re-render from S automatically.
+function adjustPlan(){
+  showView('wizard'); // resets to step-0 hero and hides progress bar
+  // Restore slider display values from current S
+  const slWpw = document.getElementById('sl-wpw');
+  const wpwVal = document.getElementById('wpw-val');
+  if(slWpw && wpwVal){ slWpw.value = S.wpw; wpwVal.textContent = S.wpw; }
+  const slDur = document.getElementById('sl-dur');
+  const durVal = document.getElementById('dur-val');
+  if(slDur && durVal){ slDur.value = S.duration; durVal.textContent = S.duration; }
+  // Restore weeks chip selection
+  document.querySelectorAll('#weeks-chips .chip').forEach(c=>{
+    c.classList.toggle('sel', parseInt(c.dataset.val)===S.weeks);
+  });
+  // Restore level chip selection
+  document.querySelectorAll('#level-chips .chip').forEach(c=>{
+    c.classList.toggle('sel', c.dataset.val===S.level);
+  });
+  // Equipment chips already carry their sel class from the last user interaction
+  // Day focus grid re-renders from S.dayFocus when goStep(3) is reached
+  updateWpwLockZone(can.sixSessionMax ? 6 : can.fiveSessionMax ? 5 : 3);
+  goStep(1); // land on Schedule — step 1
+}
+
 // =====================================================================
-// WIZARD NAVIGATION
+// WIZARD NAVIGATION + SETUP PROGRESS BAR
+// Steps: 1=Schedule, 2=Equipment, 3=Your Goal — maps to bar labels
+// Step 0 = welcome hero (no bar). "Your Plan" activates on buildAndShow.
 // =====================================================================
+const SP_STEPS = [
+  { label: 'Schedule',   tooltip: 'How many days, how long, and how many weeks — your training blueprint.' },
+  { label: 'Equipment',  tooltip: 'Select everything available to you — the plan matches exercises to your kit.' },
+  { label: 'Your Goal',  tooltip: 'Set a training focus for each session — strength, size, endurance, or power.' },
+  { label: 'Your Plan',  tooltip: 'Your personalised periodised programme — ready to save and start tracking.' },
+];
+
 function goStep(n){
   document.querySelectorAll('[id^="step-"]').forEach(el=>el.classList.add('hidden'));
   const target=document.getElementById(`step-${n}`);
-  if(target){target.classList.remove('hidden');}
-  if(n>0)renderDots(n);
-  if(n===1)updateSplitHint();
+  if(target) target.classList.remove('hidden');
+  // Show/hide progress bar (hidden on step 0 hero)
+  const show = n > 0;
+  const pb = document.getElementById('setupProgress');
+  const pbm = document.getElementById('setupProgressMobile');
+  if(pb)  pb.style.display  = show ? '' : 'none';
+  if(pbm) pbm.style.display = show ? '' : 'none';
+  if(show) renderProgress(n);
+  if(n===1) updateSplitHint();
   if(n===3){ updateDayFocusGrid(); updateSplitHint(); updateSupersetToggle(); }
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-function renderDots(active){
-  for(let i=1;i<=3;i++){
-    const el=document.getElementById(`dots-${i}`);
-    if(!el)continue;
-    let html='';
-    for(let j=1;j<=3;j++){
-      const cls=j<active?'done':j===active?'active':'';
-      // Active dot: no onclick (already here); others: free navigation
-      const click = j===active ? '' : `onclick="goStep(${j})"`;
-      const title = j===active ? '' : `title="Go to Step ${j}"`;
-      html+=`<div class="dot ${cls}" ${click} ${title}></div>`;
+function renderProgress(wizardStep){
+  // wizardStep: 1=Schedule, 2=Equipment, 3=Your Goal, 4=Your Plan (output)
+  const activeIdx = wizardStep - 1; // 0-based index into SP_STEPS
+  const container = document.getElementById('spSteps');
+  if(!container) return;
+
+  container.innerHTML = '';
+  SP_STEPS.forEach((step, i) => {
+    const isDone   = i < activeIdx;
+    const isActive = i === activeIdx;
+    const isLast   = i === SP_STEPS.length - 1;
+
+    // Connector before each step except the first
+    if(i > 0){
+      const conn = document.createElement('div');
+      conn.className = 'sp-connector';
+      conn.innerHTML = `<div class="sp-connector-fill" style="width:${isDone?100:0}%"></div>`;
+      container.appendChild(conn);
     }
-    el.innerHTML=html;
+
+    // Step node
+    const el = document.createElement('div');
+    el.className = `sp-step${isDone?' done':isActive?' active':''}`;
+    if(isDone) el.onclick = () => goStep(i + 1);
+
+    // Last step (Your Plan) gets ✦ inner when active
+    const innerContent = isActive && isLast
+      ? `<span style="font-size:.65rem;color:var(--amber2);line-height:1">✦</span>`
+      : `<div class="sp-dot-inner"></div>`;
+
+    el.innerHTML = `
+      <div class="sp-dot">${innerContent}</div>
+      <div class="sp-label">${step.label}</div>
+      ${isDone ? `<div class="sp-tooltip"><div class="sp-tooltip-title">${step.label}</div>${step.tooltip}</div>` : ''}
+    `;
+    container.appendChild(el);
+  });
+
+  // Fraction counter
+  const frac = document.getElementById('spCurrentNum');
+  if(frac) frac.textContent = Math.min(wizardStep, SP_STEPS.length);
+
+  // Mobile variant
+  const pct = (wizardStep / SP_STEPS.length) * 100;
+  const mobileBar = document.getElementById('spmBarFill');
+  const mobileLabel = document.getElementById('spmLabel');
+  const mobileNum = document.getElementById('spmNum');
+  const mobileDotsRow = document.getElementById('spmDotsRow');
+  if(mobileBar)   mobileBar.style.width = pct + '%';
+  if(mobileLabel) mobileLabel.textContent = SP_STEPS[Math.min(activeIdx, SP_STEPS.length-1)].label;
+  if(mobileNum)   mobileNum.textContent = Math.min(wizardStep, SP_STEPS.length);
+  if(mobileDotsRow){
+    mobileDotsRow.innerHTML = SP_STEPS.map((_,i) => {
+      const cls = i < activeIdx ? 'done' : i === activeIdx ? 'active' : '';
+      return `<div class="spm-step-dot ${cls}"></div>`;
+    }).join('');
   }
 }
+
 
 function updateSplitHint(){
   const endCount = Array.from({length:S.wpw},(_,i)=>S.dayFocus[i]||'hypertrophy').filter(f=>f==='endurance').length;
@@ -3627,6 +3791,13 @@ function showView(name){
   document.querySelectorAll('.tool-inner-nav button').forEach(b=>b.classList.remove('active'));
   document.getElementById(`nav-${name}`).classList.add('active');
   if(name==='tracker') initTracker();
+  // When returning to wizard, always reset to step 0 (hero) — hide progress bar
+  if(name==='wizard'){
+    document.querySelectorAll('[id^="step-"]').forEach(el=>el.classList.add('hidden'));
+    const s0=document.getElementById('step-0'); if(s0) s0.classList.remove('hidden');
+    const pb=document.getElementById('setupProgress'); if(pb) pb.style.display='none';
+    const pbm=document.getElementById('setupProgressMobile'); if(pbm) pbm.style.display='none';
+  }
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -3654,6 +3825,13 @@ document.addEventListener('keydown', e=>{
 });
 // initTier() fetches Supabase tier, builds can, then calls initUI()
 window.addEventListener('load', initTier);
+
+// bfcache guard — Android Chrome can restore pages from cache without
+// firing 'load', causing the tier badge and nav to show stale state.
+// Re-run initTier on any bfcache restore to keep tier/nav in sync.
+window.addEventListener('pageshow', (e) => {
+  if (e.persisted) initTier();
+});
 
 // =====================================================================
 // TIER GATING — all gates use can.xxx, never raw TIER comparisons
