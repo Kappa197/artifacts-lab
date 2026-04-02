@@ -11,7 +11,7 @@
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Finance Tracker — The Artifacts Lab</title>
+<title>Expense Tracker — The Artifacts Lab</title>
 <link rel="preconnect" href="https://fvgajfiksxmwioxnesry.supabase.co">
 <link rel="dns-prefetch" href="https://fvgajfiksxmwioxnesry.supabase.co">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -294,7 +294,7 @@ body.wizard-active #wizardOverlay{display:block!important;}
 
 <!-- Tier loading overlay — shown while Supabase resolves the user's plan -->
 <div id="tierLoadingOverlay" style="display:none;position:fixed;inset:0;z-index:99999;background:var(--navy);align-items:center;justify-content:center;flex-direction:column;gap:16px;">
-  <div style="font-family:var(--serif);font-size:1.3rem;color:var(--amber2);">Finance Tracker</div>
+  <div style="font-family:var(--serif);font-size:1.3rem;color:var(--amber2);">Expense Tracker</div>
   <div style="width:36px;height:36px;border:3px solid var(--border2);border-top-color:var(--amber2);border-radius:50%;animation:spin 0.8s linear infinite;"></div>
   <div style="font-family:var(--mono);font-size:0.68rem;color:var(--text3);letter-spacing:0.08em;">Loading your account…</div>
 </div>
@@ -307,7 +307,7 @@ body.wizard-active #wizardOverlay{display:block!important;}
       <div class="tool-nav-icon">⚗️</div>
       <div class="tool-nav-brand">The Artifacts Lab</div>
       <div class="tool-nav-sep">|</div>
-      <div class="tool-nav-title">Finance Tracker</div>
+      <div class="tool-nav-title">Expense Tracker</div>
     </a>
     <div class="tool-nav-right">
       <div class="tool-tier-badge" id="toolTierBadge">Free</div>
@@ -329,7 +329,7 @@ body.wizard-active #wizardOverlay{display:block!important;}
   <!-- Progress bar -->
   <div class="setup-progress" id="wizardBar">
     <div class="sp-top">
-      <div class="sp-tool-name">Finance Tracker — Setup</div>
+      <div class="sp-tool-name">Expense Tracker — Setup</div>
       <div class="sp-fraction">Step <span id="wStepNum">1</span> of 3</div>
     </div>
     <div class="sp-steps" id="wSteps"><!-- rendered by JS --></div>
@@ -403,7 +403,7 @@ body.wizard-active #wizardOverlay{display:block!important;}
   <div class="wizard-panel" id="wizPanel3" style="display:none;">
     <div class="wiz-done-icon">🎉</div>
     <h2 style="text-align:center;">You're all set!</h2>
-    <p class="wiz-sub" style="text-align:center;">Your Finance Tracker is ready. Head to your dashboard to see your data come to life.</p>
+    <p class="wiz-sub" style="text-align:center;">Your Expense Tracker is ready. Head to your dashboard to see your data come to life.</p>
     <div class="wiz-actions" style="justify-content:center;">
       <button class="btn btn-amber" style="padding:12px 36px;font-size:0.9rem;" onclick="completeWizard('dashboard')">Go to Dashboard →</button>
     </div>
@@ -720,7 +720,7 @@ body.wizard-active #wizardOverlay{display:block!important;}
 <div id="tab-dashboard" class="tab-panel">
   <!-- Print-only header -->
   <div id="printHeader">
-    <div style="font-family:var(--serif);font-size:1.4rem;font-weight:700;">Finance Tracker — Monthly Report</div>
+    <div style="font-family:var(--serif);font-size:1.4rem;font-weight:700;">Expense Tracker — Monthly Report</div>
     <div id="printMeta" style="font-size:0.85rem;margin-top:4px;color:#555;"></div>
   </div>
 
@@ -890,8 +890,8 @@ body.wizard-active #wizardOverlay{display:block!important;}
     <!-- Modal header -->
     <div style="background:linear-gradient(135deg,#1a2a1a,#1A2235);padding:28px 32px 24px;border-bottom:1px solid var(--border2);display:flex;align-items:flex-start;justify-content:space-between;gap:16px;">
       <div>
-        <div style="font-family:var(--serif);font-size:1.5rem;color:var(--green);margin-bottom:6px;">Get Started — 4 Simple Steps</div>
-        <div style="font-size:0.8rem;color:var(--text3);line-height:1.6;">Follow these steps each time you want to import a month of bank transactions. Takes about 5 minutes once you've done it once.</div>
+        <div style="font-family:var(--serif);font-size:1.5rem;color:var(--green);margin-bottom:6px;">How to Import Your Bank Statement</div>
+        <div style="font-size:0.82rem;color:var(--text3);line-height:1.6;">The built-in AI reads your statement, categorises every transaction, and loads everything into the review table — ready to save in seconds. No copy-paste needed.</div>
       </div>
       <button onclick="closeGuide()" style="background:none;border:1px solid var(--border2);border-radius:6px;color:var(--text3);cursor:pointer;padding:6px 11px;font-size:1rem;flex-shrink:0;" onmouseover="this.style.borderColor='var(--text2)'" onmouseout="this.style.borderColor='var(--border2)'">✕</button>
     </div>
@@ -903,9 +903,12 @@ body.wizard-active #wizardOverlay{display:block!important;}
       <div style="display:flex;gap:18px;align-items:flex-start;">
         <div style="width:36px;height:36px;border-radius:50%;background:var(--green);color:#000;font-family:var(--mono);font-weight:700;font-size:0.9rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div>
         <div style="flex:1;">
-          <div style="font-size:0.95rem;font-weight:600;color:var(--text);margin-bottom:6px;">Set up your categories &amp; profile names</div>
-          <div style="font-size:0.8rem;color:var(--text3);line-height:1.7;">In <strong style="color:var(--amber2);">Settings</strong>, enter names for each person using this tool, confirm your currency, and review the default expense categories. You can add, rename or recolour them. Click <strong style="color:var(--amber2);">Save</strong> when done — the AI prompt below will update automatically to match.</div>
-          <button onclick="closeGuide()" style="margin-top:10px;background:none;border:1px solid var(--border2);border-radius:6px;color:var(--amber2);font-family:var(--mono);font-size:0.7rem;padding:5px 12px;cursor:pointer;" onmouseover="this.style.borderColor='var(--amber2)'" onmouseout="this.style.borderColor='var(--border2)'">→ Go to Settings</button>
+          <div style="font-size:0.95rem;font-weight:600;color:var(--text);margin-bottom:6px;">Set up your categories</div>
+          <div style="font-size:0.82rem;color:var(--text3);line-height:1.7;">Go to <strong style="color:var(--amber2);">Settings</strong> and review the default expense categories. You can rename them, change colours, and add new ones to match how you actually spend. The AI uses your category list when it classifies transactions — so the more accurate your categories, the better the results.</div>
+          <div style="margin-top:10px;padding:10px 14px;background:var(--navy3);border-radius:6px;border-left:3px solid var(--green);font-size:0.78rem;color:var(--text3);line-height:1.6;">
+            💡 The defaults cover most common spending patterns. You only need to edit them if your situation is different — for example, if you want to track a specific merchant or separate out a type of expense.
+          </div>
+          <button onclick="closeGuide()" style="margin-top:10px;background:none;border:1px solid var(--border2);border-radius:6px;color:var(--amber2);font-family:var(--body);font-size:0.75rem;padding:5px 12px;cursor:pointer;" onmouseover="this.style.borderColor='var(--amber2)'" onmouseout="this.style.borderColor='var(--border2)'">→ Go to Settings</button>
         </div>
       </div>
 
@@ -916,9 +919,14 @@ body.wizard-active #wizardOverlay{display:block!important;}
         <div style="width:36px;height:36px;border-radius:50%;background:var(--blue);color:#fff;font-family:var(--mono);font-weight:700;font-size:0.9rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div>
         <div style="flex:1;">
           <div style="font-size:0.95rem;font-weight:600;color:var(--text);margin-bottom:6px;">Download your bank statement</div>
-          <div style="font-size:0.8rem;color:var(--text3);line-height:1.7;">Log in to your banking app or website and download your statement for the month you want to import. <strong style="color:var(--text2);">Excel or CSV format is strongly preferred over PDF</strong> — PDFs are sometimes misread by AI. Most banks offer both options. Download one month at a time.</div>
-          <div style="margin-top:10px;padding:10px 14px;background:var(--navy3);border-radius:6px;border-left:3px solid var(--blue);font-size:0.75rem;color:var(--text3);line-height:1.6;">
-            💡 <strong style="color:var(--text2);">Tip:</strong> If your bank only offers PDF, that usually works fine — just double-check the imported rows afterwards for any misread amounts.
+          <div style="font-size:0.82rem;color:var(--text3);line-height:1.7;">Log in to your banking app or website and download your statement for the month you want. <strong style="color:var(--text2);">PDF works fine</strong> — the tool reads it directly. CSV or Excel export also works if your bank offers it.</div>
+          <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div style="padding:10px 12px;background:var(--navy3);border-radius:6px;border:1px solid var(--border);font-size:0.75rem;color:var(--text3);line-height:1.6;">
+              <strong style="color:var(--green);">✓ Works with</strong><br>PDF statements · CSV exports · Excel files
+            </div>
+            <div style="padding:10px 12px;background:var(--navy3);border-radius:6px;border:1px solid var(--border);font-size:0.75rem;color:var(--text3);line-height:1.6;">
+              <strong style="color:var(--amber2);">⚠ Note</strong><br>Scanned or photographed PDFs may have lower accuracy — typed/digital PDFs work best.
+            </div>
           </div>
         </div>
       </div>
@@ -929,50 +937,86 @@ body.wizard-active #wizardOverlay{display:block!important;}
       <div style="display:flex;gap:18px;align-items:flex-start;">
         <div style="width:36px;height:36px;border-radius:50%;background:var(--amber);color:#000;font-family:var(--mono);font-weight:700;font-size:0.9rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div>
         <div style="flex:1;">
-          <div style="font-size:0.95rem;font-weight:600;color:var(--text);margin-bottom:6px;">Use AI to categorize your transactions</div>
-          <div style="font-size:0.8rem;color:var(--text3);line-height:1.7;margin-bottom:12px;">Open any AI assistant that supports file uploads — <strong style="color:var(--text2);">Claude, ChatGPT Plus, or Gemini Advanced</strong> all work well. Copy the prompt below, paste it into the chat, attach your bank statement file, and send. The AI will return a ready-to-import CSV file.</div>
+          <div style="font-size:0.95rem;font-weight:600;color:var(--text);margin-bottom:6px;">Upload to AI Import &amp; review</div>
+          <div style="font-size:0.82rem;color:var(--text3);line-height:1.7;margin-bottom:12px;">Go to <strong style="color:var(--amber2);">Add / Import</strong>, select whose statement this is (Person 1 or 2), then drop your file into the <strong style="color:var(--green);">🤖 AI Statement Import</strong> card and click <strong style="color:var(--text2);">Process with AI</strong>. Claude reads the statement, categorises every transaction, and loads them into a review table. Takes 10–25 seconds.</div>
 
-          <!-- Prompt box -->
-          <div style="background:var(--navy3);border:1px solid var(--border2);border-radius:8px;overflow:hidden;">
-            <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
-              <span style="font-family:var(--mono);font-size:0.65rem;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;">AI Prompt — copy everything below</span>
-              <button id="copyPromptBtn" onclick="copyPrompt()" style="background:var(--amber);color:#000;border:none;border-radius:5px;padding:4px 12px;font-family:var(--mono);font-size:0.68rem;font-weight:700;cursor:pointer;letter-spacing:0.04em;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">⎘ Copy Prompt</button>
+          <div style="background:var(--navy3);border:1px solid var(--border2);border-radius:10px;overflow:hidden;margin-bottom:12px;">
+            <div style="padding:10px 16px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:0.62rem;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;">In the review table you can:</div>
+            <div style="padding:12px 16px;display:flex;flex-direction:column;gap:8px;">
+              <div style="display:flex;align-items:center;gap:10px;font-size:0.8rem;color:var(--text2);">
+                <span style="color:var(--amber2);font-size:0.75rem;font-family:var(--mono);">⭐ Claude</span>
+                <span>Claude assigned this category — check it looks right</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;font-size:0.8rem;color:var(--text2);">
+                <span style="color:var(--amber2);font-size:0.75rem;font-family:var(--mono);">⚡ auto</span>
+                <span>Matched by your keyword rules</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;font-size:0.8rem;color:var(--text2);">
+                <span style="font-size:0.75rem;font-family:var(--mono);color:var(--text3);">+ rule</span>
+                <span>Click to save a rule so this merchant is always categorised the same way next time</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;font-size:0.8rem;color:var(--text2);">
+                <span style="font-size:0.75rem;font-family:var(--mono);color:var(--text3);">✕ skip</span>
+                <span>Exclude a row (e.g. bank-to-bank transfers you don't want to track)</span>
+              </div>
             </div>
-            <pre id="guidePromptText" style="margin:0;padding:14px;font-family:var(--mono);font-size:0.68rem;color:var(--text2);line-height:1.75;white-space:pre-wrap;word-break:break-word;max-height:300px;overflow-y:auto;"></pre>
           </div>
 
-          <div style="margin-top:10px;padding:10px 14px;background:var(--navy3);border-radius:6px;border-left:3px solid var(--amber);font-size:0.75rem;color:var(--text3);line-height:1.6;">
-            ⚠ <strong style="color:var(--text2);">Important:</strong> Make sure to also attach your bank statement file in the same message. The AI needs both the prompt and the file.
+          <div style="padding:10px 14px;background:var(--navy3);border-radius:6px;border-left:3px solid var(--amber);font-size:0.78rem;color:var(--text3);line-height:1.6;margin-bottom:12px;">
+            When you're happy with the categories, click <strong style="color:var(--green);">💾 Save to Dashboard</strong>. Your charts and KPIs update instantly.
+          </div>
+
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button onclick="closeGuide();showTab('import',document.querySelectorAll('.tab-btn')[1])" style="background:var(--amber);color:#000;border:none;border-radius:6px;font-family:var(--body);font-size:0.78rem;font-weight:600;padding:7px 16px;cursor:pointer;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">→ Go to Add / Import</button>
           </div>
         </div>
       </div>
 
       <div style="height:1px;background:var(--border);"></div>
 
-      <!-- Step 4 -->
+      <!-- Other ways to add data -->
       <div style="display:flex;gap:18px;align-items:flex-start;">
-        <div style="width:36px;height:36px;border-radius:50%;background:#A78BFA;color:#000;font-family:var(--mono);font-weight:700;font-size:0.9rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div>
+        <div style="width:36px;height:36px;border-radius:50%;background:var(--navy3);border:1.5px solid var(--border2);color:var(--text3);font-family:var(--mono);font-weight:700;font-size:0.9rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;">+</div>
         <div style="flex:1;">
-          <div style="font-size:0.95rem;font-weight:600;color:var(--text);margin-bottom:6px;">Import the CSV into this tool</div>
-          <div style="font-size:0.8rem;color:var(--text3);line-height:1.7;">The AI should reply with a downloadable CSV file. Go to the <strong style="color:var(--amber2);">Import tab</strong>, select the right person, drop the file in, map the columns, and save. Your dashboard updates instantly.</div>
-
-          <div style="margin-top:12px;padding:12px 14px;background:var(--navy3);border-radius:8px;border-left:3px solid #A78BFA;">
-            <div style="font-size:0.75rem;font-weight:600;color:#c4b5fd;margin-bottom:6px;">⚠ AI returned text instead of a file?</div>
-            <div style="font-size:0.75rem;color:var(--text3);line-height:1.7;">Some free AI plans display the CSV as text in the chat instead of generating a file. That's fine — just <strong style="color:var(--text2);">select all the CSV text</strong> in the reply, copy it, paste it into a blank Notepad or TextEdit file, and save it with a <code style="background:var(--navy2);padding:1px 5px;border-radius:3px;">.csv</code> extension (e.g. <code style="background:var(--navy2);padding:1px 5px;border-radius:3px;">january.csv</code>). Then import that file here normally.</div>
+          <div style="font-size:0.95rem;font-weight:600;color:var(--text);margin-bottom:10px;">Other ways to add transactions</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="padding:11px 14px;background:var(--navy3);border-radius:8px;border:1px solid var(--border);font-size:0.8rem;color:var(--text3);line-height:1.6;">
+              <strong style="color:var(--text2);">✏️ Manual entry</strong> — available on all plans. Use for cash expenses, reimbursements, or anything that doesn't appear in your bank statement. Find it at the top of the Add / Import tab.
+            </div>
+            <div style="padding:11px 14px;background:var(--navy3);border-radius:8px;border:1px solid var(--border);font-size:0.8rem;color:var(--text3);line-height:1.6;">
+              <strong style="color:var(--amber2);">📷 Receipt scan — Premium</strong> — point your phone camera at any receipt. The tool reads the amount, merchant and date, and pre-fills the entry form for you.
+            </div>
+            <div style="padding:11px 14px;background:var(--navy3);border-radius:8px;border:1px solid var(--border);font-size:0.8rem;color:var(--text3);line-height:1.6;">
+              <strong style="color:var(--text2);">📁 Manual CSV import</strong> — if you prefer to process your statement yourself, use the manual upload further down the Add / Import tab. You'll map the columns once and the mapping is remembered.
+            </div>
           </div>
+        </div>
+      </div>
 
-          <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
-            <button onclick="closeGuide();showTab('import',document.querySelectorAll('.tab-btn')[1])" style="background:none;border:1px solid var(--border2);border-radius:6px;color:var(--amber2);font-family:var(--mono);font-size:0.7rem;padding:5px 12px;cursor:pointer;" onmouseover="this.style.borderColor='var(--amber2)'" onmouseout="this.style.borderColor='var(--border2)'">→ Go to Import</button>
+      <!-- Collapsible: legacy prompt for manual AI workflow -->
+      <div style="border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--navy3);cursor:pointer;user-select:none;" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.guide-chev').style.transform=this.nextElementSibling.style.display==='none'?'':' rotate(180deg)'">
+          <span style="font-size:0.8rem;color:var(--text3);">Want to use an external AI instead? Copy the manual prompt →</span>
+          <span class="guide-chev" style="color:var(--text3);transition:transform 0.2s;">▼</span>
+        </div>
+        <div style="display:none;padding:16px;">
+          <div style="font-size:0.78rem;color:var(--text3);line-height:1.6;margin-bottom:12px;">If you prefer to use Claude.ai, ChatGPT or another AI directly, copy this prompt, paste it into the chat, attach your bank statement, and import the resulting CSV file using the manual upload below.</div>
+          <div style="background:var(--navy3);border:1px solid var(--border2);border-radius:8px;overflow:hidden;">
+            <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+              <span style="font-family:var(--mono);font-size:0.62rem;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;">Manual AI Prompt — copy everything below</span>
+              <button id="copyPromptBtn" onclick="copyPrompt()" style="background:var(--amber);color:#000;border:none;border-radius:5px;padding:4px 12px;font-family:var(--mono);font-size:0.68rem;font-weight:700;cursor:pointer;letter-spacing:0.04em;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">⎘ Copy Prompt</button>
+            </div>
+            <pre id="guidePromptText" style="margin:0;padding:14px;font-family:var(--mono);font-size:0.68rem;color:var(--text2);line-height:1.75;white-space:pre-wrap;word-break:break-word;max-height:260px;overflow-y:auto;"></pre>
           </div>
+          <div style="margin-top:8px;font-size:0.72rem;color:var(--text3);line-height:1.5;">The prompt updates automatically whenever you add or change a category in Settings.</div>
         </div>
       </div>
 
     </div><!-- /steps -->
 
     <!-- Footer -->
-    <div style="padding:18px 32px;border-top:1px solid var(--border);background:var(--navy3);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
-      <div style="font-size:0.72rem;color:var(--text3);line-height:1.6;">The prompt updates automatically whenever you add or change a category in Settings.</div>
-      <button onclick="closeGuide()" style="background:var(--green);color:#000;border:none;border-radius:7px;padding:9px 22px;font-family:var(--mono);font-size:0.75rem;font-weight:700;cursor:pointer;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">✓ Got it — close guide</button>
+    <div style="padding:18px 32px;border-top:1px solid var(--border);background:var(--navy3);display:flex;align-items:center;justify-content:flex-end;gap:12px;flex-wrap:wrap;">
+      <button onclick="closeGuide()" style="background:var(--green);color:#000;border:none;border-radius:7px;padding:9px 22px;font-family:var(--body);font-size:0.78rem;font-weight:700;cursor:pointer;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">✓ Got it — close guide</button>
     </div>
 
   </div>
@@ -1456,7 +1500,7 @@ let _restoreData = null;
 
 function doBackup() {
   const backup = {
-    _v:3, _at:new Date().toISOString(), _tool:'Finance Tracker',
+    _v:3, _at:new Date().toISOString(), _tool:'Expense Tracker',
     cats:S.cats, rules:S.rules, currency:S.currency,
     income:S.income, colMap:S.colMap, txns:S.txns,
   };
