@@ -69,16 +69,26 @@ INCOME CATEGORIES:
 ${incLines}`;
 }
 
-function receiptPrompt(currency) {
-  return `Extract key details from this receipt image.
+function receiptPrompt(currency, categories) {
+  const expLines = categories
+    .filter(c => c.type !== 'income')
+    .map(c => `  - ${c.name}  | bucket: ${c.bucket}`)
+    .join('\n');
 
-OUTPUT FORMAT — a single JSON object:
-{"date":"YYYY-MM-DD if readable, otherwise null","merchant":"store name","amount":<total as number>,"description":"merchant and brief context"}
+  return `Extract key details from this receipt image and return a single JSON object.
+
+OUTPUT FORMAT:
+{"date":"YYYY-MM-DD if readable, otherwise null","merchant":"store or restaurant name","amount":<total amount as number>,"description":"merchant name and brief context e.g. Starbucks Siam - coffee","category":"exact name from list below"}
 
 RULES:
-1. amount: the TOTAL charged. Plain number, period as decimal.
-2. Currency is ${currency}. Do not convert.
-3. OUTPUT ONLY the raw JSON object. No markdown. Start with {`;
+1. amount: the TOTAL charged (after tax, final amount). Plain number, period as decimal. Example: 245.00
+2. Currency is ${currency}. Do not convert amounts.
+3. category: use your knowledge of the merchant to assign the best matching category from the list below. Write ONLY the category name.
+4. If you cannot determine the category, write: Uncategorized
+5. OUTPUT ONLY the raw JSON object. No markdown, no explanation. Start with {
+
+EXPENSE CATEGORIES:
+${expLines}`;
 }
 
 async function verifyAuth(req) {
@@ -155,7 +165,7 @@ async function processRequest(req) {
     if (!text.trim()) return jsonResponse({ error: 'The file appears to be empty.' }, 400);
     content.push({ type:'text', text:`Bank statement (${file.name}):\n\n${text}` });
   }
-  content.push({ type:'text', text: mode === 'receipt' ? receiptPrompt(currency) : statementPrompt(currency, categories) });
+  content.push({ type:'text', text: mode === 'receipt' ? receiptPrompt(currency, categories) : statementPrompt(currency, categories) });
 
   // Call Claude API with streaming enabled
   const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
