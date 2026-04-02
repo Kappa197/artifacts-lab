@@ -185,11 +185,12 @@
   .solver-title { font-family: Georgia, serif; font-size: 16px; font-weight: 600; color: #60a5fa; margin-bottom: 14px; }
   .solver-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
   /* ── Tab system ── */
-  .tab-bar { display: flex; gap: 6px; margin-bottom: 28px; border-bottom: 1px solid #1e2535; padding-bottom: 0; }
+  .tab-bar { display: flex; gap: 4px; margin-bottom: 28px; border-bottom: 1px solid #1e2535; padding-bottom: 0; flex-wrap: wrap; }
   .tab-btn {
-    font-family: var(--mono); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;
-    padding: 10px 22px; border: 1px solid transparent; border-bottom: none; border-radius: 8px 8px 0 0;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.07em; text-transform: uppercase;
+    padding: 10px 16px; border: 1px solid transparent; border-bottom: none; border-radius: 8px 8px 0 0;
     cursor: pointer; background: transparent; color: #475569; transition: all 0.18s; margin-bottom: -1px;
+    white-space: nowrap;
   }
   .tab-btn:hover { color: #94a3b8; background: rgba(255,255,255,0.03); }
   .tab-btn.active { background: rgba(201,168,76,0.08); border-color: #1e2535; color: #c9a84c; border-bottom-color: #0f1625; }
@@ -284,16 +285,14 @@
 
 <!-- Tab bar -->
 <div class="tab-bar">
-  <button class="tab-btn active" id="tabBtnDashboard" onclick="switchTab('dashboard')">📊 Dashboard</button>
-  <button class="tab-btn" id="tabBtnMC" onclick="switchTab('mc')" title="Run thousands of random market scenarios to see the probability your savings last through retirement">🎲 Probabilistic Survival Test</button>
+  <button class="tab-btn active" id="tabBtnSetup" onclick="switchTab('setup')">⚙ My Plan</button>
+  <button class="tab-btn" id="tabBtnDashboard" onclick="switchTab('dashboard')">📊 Dashboard</button>
+  <button class="tab-btn" id="tabBtnMC" onclick="switchTab('mc')" title="Run thousands of random market scenarios to see the probability your savings last through retirement">🎲 Survival Test</button>
   <button class="tab-btn" id="tabBtnDetail" onclick="switchTab('detail')">📋 Year-by-Year</button>
 </div>
 
-<!-- ── DASHBOARD PANEL ──────────────────────────────────────────────────── -->
-<div id="panelDashboard">
-
-<!-- ══ SETUP / RESULTS SWITCHER ══════════════════════════════════════════════ -->
-<div id="setupView">
+<!-- ── SETUP PANEL (My Plan tab) ────────────────────────────────────────────── -->
+<div id="panelSetup">
 
   <!-- ── SECTION 1: About You ──────────────────────────────────────────────── -->
   <div class="setup-section">
@@ -643,20 +642,27 @@
     <div style="font-family:var(--mono);font-size:0.62rem;color:var(--text3);margin-top:10px;letter-spacing:0.08em;text-transform:uppercase">Results update automatically as you change inputs</div>
   </div>
 
-</div><!-- end #setupView -->
+</div><!-- end #panelSetup -->
 
-<!-- ══ RESULTS VIEW ═══════════════════════════════════════════════════════════ -->
-<div id="resultsView" style="display:none">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
-    <button onclick="showSetup()" style="
-      font-family:var(--mono);font-size:0.65rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;
-      background:transparent;color:var(--text3);border:1px solid var(--border2);
-      border-radius:6px;padding:8px 16px;cursor:pointer;transition:all 0.2s">
-      ← Edit Setup
-    </button>
-    <div style="font-family:var(--mono);font-size:0.62rem;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase">Results update as you change inputs</div>
-  </div>
+<!-- ── DASHBOARD PANEL (results) ─────────────────────────────────────────── -->
+<div id="panelDashboard" style="display:none">
 
+<!-- Empty state shown until first calculation runs -->
+<div id="dashboardEmpty" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 24px;text-align:center">
+  <div style="font-size:48px;margin-bottom:20px">📊</div>
+  <div style="font-family:Georgia,serif;font-size:1.4rem;font-weight:600;color:var(--amber2);margin-bottom:10px">Your dashboard is ready</div>
+  <div style="font-family:var(--body);font-size:0.9rem;color:var(--text2);max-width:380px;line-height:1.7;margin-bottom:28px">Fill in your details in the <strong style="color:var(--text)">My Plan</strong> tab, then click <strong style="color:var(--amber2)">"View My Projections"</strong> to see your full retirement analysis here.</div>
+  <button onclick="switchTab('setup')" style="
+    font-family:var(--body);font-size:0.95rem;font-weight:600;
+    background:var(--amber);color:#0B0F1A;
+    border:none;border-radius:8px;padding:12px 32px;
+    cursor:pointer;transition:opacity 0.2s">
+    ← Go to My Plan
+  </button>
+</div>
+
+<!-- Results (hidden until first calculation) -->
+<div id="dashboardResults" style="display:none">
 <!-- Outcome banner -->
 <div id="outcomeBanner" class="outcome-banner"></div>
 
@@ -845,7 +851,7 @@
 </div>
 
 
-</div><!-- end #resultsView -->
+</div><!-- end #dashboardResults -->
 </div><!-- end #panelDashboard -->
 
 <!-- ── YEAR-BY-YEAR PANEL ────────────────────────────────────────────────── -->
@@ -2762,20 +2768,27 @@ function renderMCSensTable() {
 let activeTab = 'dashboard';
 function switchTab(tab) {
   activeTab = tab;
-  document.getElementById('panelDashboard').style.display = tab === 'dashboard' ? '' : 'none';
-  document.getElementById('panelDetail').style.display    = tab === 'detail'    ? '' : 'none';
-  document.getElementById('panelMC').style.display        = tab === 'mc'        ? '' : 'none';
+  document.getElementById('panelSetup').style.display    = tab === 'setup'      ? '' : 'none';
+  document.getElementById('panelDashboard').style.display= tab === 'dashboard'  ? '' : 'none';
+  document.getElementById('panelDetail').style.display   = tab === 'detail'     ? '' : 'none';
+  document.getElementById('panelMC').style.display       = tab === 'mc'         ? '' : 'none';
+  document.getElementById('tabBtnSetup').classList.toggle('active',     tab === 'setup');
   document.getElementById('tabBtnDashboard').classList.toggle('active', tab === 'dashboard');
-  document.getElementById('tabBtnDetail').classList.toggle('active', tab === 'detail');
-  document.getElementById('tabBtnMC').classList.toggle('active', tab === 'mc');
+  document.getElementById('tabBtnDetail').classList.toggle('active',    tab === 'detail');
+  document.getElementById('tabBtnMC').classList.toggle('active',        tab === 'mc');
   // Defer redraws until after the panel is visible and layout has completed
   requestAnimationFrame(() => {
     if (tab === 'detail' && g_tableData) renderYbyTable();
     if (tab === 'dashboard' && g_chartData) {
-      const { baseData, optData, retirementAge, periodLen, lifespan, depletedAt,
-              periodMaxWd, periodFactor, retirementYears } = g_chartData;
-      drawChart(baseData, optData, retirementAge, periodLen, lifespan, depletedAt);
-      drawWdChart(g_chartData.wdData, periodMaxWd, periodFactor, retirementAge, periodLen, retirementYears);
+      // Only redraw if results are already revealed (not on first visit with empty state)
+      const dr = document.getElementById('dashboardResults');
+      if (dr && dr.style.display !== 'none') {
+        const { baseData, optData, retirementAge, periodLen, lifespan, depletedAt,
+                periodMaxWd, periodFactor, retirementYears, seqScenarios } = g_chartData;
+        drawChart(baseData, optData, retirementAge, periodLen, lifespan, depletedAt);
+        drawWdChart(g_chartData.wdData, periodMaxWd, periodFactor, retirementAge, periodLen, retirementYears);
+        if (seqScenarios) drawSeqChart(seqScenarios, retirementAge, periodLen, lifespan);
+      }
     }
     if (tab === 'mc' && mcState) { drawMCFan(); drawMCSurvival(); drawMCHist(); drawMCCashflows(); renderCashflowsPeriodTable(); }
   });
@@ -3500,13 +3513,21 @@ function recalc() {
     retirementAge, periodLen, lifespan,
     depletedAt: base.depletedAt,
     periodMaxWd, periodFactor, retirementYears,
+    seqScenarios,
   };
 
-  // Use requestAnimationFrame to ensure layout is complete before measuring canvas widths
+  // Draw charts only when the dashboard panel and results are visible
   requestAnimationFrame(() => {
-    drawChart(base.data, opt.data, retirementAge, periodLen, lifespan, base.depletedAt);
-    drawWdChart(base.data, periodMaxWd, periodFactor, retirementAge, periodLen, retirementYears);
-    drawSeqChart(seqScenarios, retirementAge, periodLen, lifespan);
+    const dr = document.getElementById('dashboardResults');
+    const dp = document.getElementById('panelDashboard');
+    const dashVisible = dr && dp
+      && dr.style.display !== 'none'
+      && dp.style.display !== 'none';
+    if (dashVisible) {
+      drawChart(base.data, opt.data, retirementAge, periodLen, lifespan, base.depletedAt);
+      drawWdChart(base.data, periodMaxWd, periodFactor, retirementAge, periodLen, retirementYears);
+      drawSeqChart(seqScenarios, retirementAge, periodLen, lifespan);
+    }
   });
 }
 
@@ -3535,21 +3556,28 @@ window.addEventListener('resize', recalc);
 
 // ── Setup / Results view switcher ────────────────────────────────────────────
 function showResults() {
-  document.getElementById('setupView').style.display   = 'none';
-  document.getElementById('resultsView').style.display = '';
-  // Ensure charts render correctly now they're visible
-  requestAnimationFrame(() => {
+  // 1. Reveal the results panel BEFORE switching tabs so layout is ready
+  const empty   = document.getElementById('dashboardEmpty');
+  const results = document.getElementById('dashboardResults');
+  if (empty)   empty.style.display   = 'none';
+  if (results) results.style.display = '';
+
+  // 2. Switch tab (makes panelDashboard visible)
+  switchTab('dashboard');
+
+  // 3. Double-RAF: first frame lets the browser paint, second measures real canvas dimensions
+  requestAnimationFrame(() => requestAnimationFrame(() => {
     if (g_chartData) {
       const { baseData, optData, retirementAge, periodLen, lifespan, depletedAt,
-              periodMaxWd, periodFactor, retirementYears } = g_chartData;
+              periodMaxWd, periodFactor, retirementYears, seqScenarios } = g_chartData;
       drawChart(baseData, optData, retirementAge, periodLen, lifespan, depletedAt);
       drawWdChart(g_chartData.wdData, periodMaxWd, periodFactor, retirementAge, periodLen, retirementYears);
+      if (seqScenarios) drawSeqChart(seqScenarios, retirementAge, periodLen, lifespan);
     }
-  });
+  }));
 }
 function showSetup() {
-  document.getElementById('setupView').style.display   = '';
-  document.getElementById('resultsView').style.display = 'none';
+  switchTab('setup');
 }
 
 // ── Collapsible section toggle ────────────────────────────────────────────────
@@ -3573,9 +3601,14 @@ function toggleTooltip(id) {
 // Full UI always shown. Locked sections get .tier-locked (gray + pointer-events:none)
 // with an inline upgrade nudge injected above them.
 function initUI() {
-  // ── Tabs: always visible — content gated inside each panel ─────────────────
-  document.getElementById('tabBtnMC').style.display     = '';
-  document.getElementById('tabBtnDetail').style.display = '';
+  // ── Start on setup tab (My Plan) ─────────────────────────────────────────
+  switchTab('setup');
+
+  // ── All 4 tabs always visible — content gated inside each panel ───────────
+  document.getElementById('tabBtnSetup').style.display    = '';
+  document.getElementById('tabBtnDashboard').style.display= '';
+  document.getElementById('tabBtnMC').style.display       = '';
+  document.getElementById('tabBtnDetail').style.display   = '';
 
   if (!can.yearByYear) {
     document.getElementById('yearByYearSection').innerHTML = `
@@ -3603,7 +3636,7 @@ function initUI() {
         padding:60px 24px;text-align:center">
         <div style="font-size:40px;margin-bottom:20px">🔒</div>
         <div style="font-family:Georgia,serif;font-size:22px;font-weight:600;color:#c9a84c;margin-bottom:10px">
-          Probabilistic Survival Test
+          Survival Test
         </div>
         <div style="font-family:var(--mono);font-size:12px;color:#64748b;margin-bottom:24px;max-width:380px;line-height:1.7">
           Run thousands of scenarios across 5 strategies and see the probability your money lasts — fan charts, survival curves, and withdrawal distributions.
