@@ -2735,14 +2735,8 @@ async function processWithAI() {
       const isSearchable = meaningfulLines.length >= 10;
 
       if (isSearchable) {
-        // Searchable PDF — filter to transaction lines and send as text (fast, cheap)
-        const filtered = rawText.split('\n').filter(line => {
-          const t = line.trim();
-          if (!t || t.length < 6) return false;
-          return /\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}/.test(t) || /\d{1,3}[,\d]*\.\d{2}/.test(t);
-        }).join('\n');
-        const textToSend = filtered.trim() || rawText;
-        fileToSend = new File([textToSend], _aiFile.name.replace(/\.pdf$/i, '.txt'), { type: 'text/plain' });
+        // Searchable PDF — send full extracted text including headers for context
+        fileToSend = new File([rawText], _aiFile.name.replace(/\.pdf$/i, '.txt'), { type: 'text/plain' });
         if (loadingMsg) loadingMsg.textContent = 'Claude is analysing your transactions…';
       } else {
         // Scanned/image PDF — send raw PDF bytes to Claude vision
