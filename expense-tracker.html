@@ -408,6 +408,14 @@ html,body{overflow-x:hidden;max-width:100%;}
           <div class="fg"><label class="fl">Type</label><select id="meType"><option value="expense">💸 Expense</option><option value="income">💰 Income</option></select></div>
           <div class="fg"><label class="fl">Category</label><select id="meCat"></select></div>
         </div>
+        <!-- Profile selector — shown for Premium (multiUser) only, hidden by initManualEntry -->
+        <div id="meProfileRow" style="display:none;margin-top:10px;display:none;align-items:center;gap:8px;">
+          <span style="font-family:var(--mono);font-size:0.62rem;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase;">Save to:</span>
+          <div style="display:flex;gap:4px;background:var(--navy3);border-radius:6px;padding:3px;">
+            <button id="meP1Btn" class="btn btn-sm btn-amber" onclick="setManualProfile('p1')" style="min-width:80px;font-size:0.68rem;"></button>
+            <button id="meP2Btn" class="btn btn-sm btn-ghost" onclick="setManualProfile('p2')" style="min-width:80px;font-size:0.68rem;"></button>
+          </div>
+        </div>
         <div style="margin-top:12px;display:flex;gap:8px;align-items:center;">
           <button class="btn btn-amber" onclick="saveManualTx()">+ Add Transaction</button>
           <span id="meError" style="font-family:var(--mono);font-size:0.7rem;color:var(--red);display:none;"></span>
@@ -979,6 +987,7 @@ function hydrate() {
 let _viewProfile   = 'p1';   // 'p1' | 'p2' | 'household'
 let _importProfile = 'p1';   // 'p1' | 'p2'
 let _annualProfile = 'p1';   // 'p1' | 'p2' | 'household'
+let _manualProfile = 'p1';   // 'p1' | 'p2' — which profile receives manual/receipt entries
 
 function getTxns(month) {
   if (_viewProfile === 'household') {
@@ -1048,6 +1057,8 @@ function refreshProfileLabels() {
   if (ap1) { ap1.textContent = pName('p1'); ap1.className='btn btn-sm '+(_annualProfile==='p1'?'btn-amber':'btn-ghost'); }
   if (ap2) { ap2.textContent = pName('p2'); ap2.className='btn btn-sm '+(_annualProfile==='p2'?'btn-amber':'btn-ghost'); }
   if (aph) { aph.className='btn btn-sm '+(_annualProfile==='household'?'btn-amber':'btn-ghost'); }
+  // Keep manual entry toggle in sync
+  if (can.multiUser) refreshManualProfileLabels();
 }
 
 function setImportProfile(pid) {
@@ -2481,6 +2492,22 @@ function toggleManualEntry() {
   if (chevron) chevron.style.transform = collapsed ? '' : 'rotate(180deg)';
 }
 
+function setManualProfile(pid) {
+  _manualProfile = pid;
+  const b1 = document.getElementById('meP1Btn');
+  const b2 = document.getElementById('meP2Btn');
+  if (b1) b1.className = 'btn btn-sm ' + (pid === 'p1' ? 'btn-amber' : 'btn-ghost');
+  if (b2) b2.className = 'btn btn-sm ' + (pid === 'p2' ? 'btn-amber' : 'btn-ghost');
+}
+
+function refreshManualProfileLabels() {
+  const b1 = document.getElementById('meP1Btn');
+  const b2 = document.getElementById('meP2Btn');
+  if (b1) b1.textContent = pName('p1');
+  if (b2) b2.textContent = pName('p2');
+  setManualProfile(_manualProfile);
+}
+
 function initManualEntry() {
   const card = document.getElementById('manualEntryCard');
   if (!card) return;
@@ -2503,6 +2530,13 @@ function initManualEntry() {
   // Scan receipt button — Premium only
   const scanBtn = document.getElementById('scanReceiptBtn');
   if (scanBtn) scanBtn.style.display = can.pdfExport ? '' : 'none';
+
+  // P1/P2 profile toggle — Premium only (multiUser)
+  const profileRow = document.getElementById('meProfileRow');
+  if (profileRow) {
+    profileRow.style.display = can.multiUser ? 'flex' : 'none';
+    if (can.multiUser) refreshManualProfileLabels();
+  }
 
   populateManualCatSelect();
 
@@ -2547,6 +2581,7 @@ function saveManualTx() {
 
   const month = date.slice(0, 7);
   const isIncome = type === 'income';
+  const prof = can.multiUser ? _manualProfile : 'p1';
 
   const tx = {
     id:       'manual_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
@@ -2562,9 +2597,8 @@ function saveManualTx() {
     manual:   true,
   };
 
-  // Save into p1 (free tier is single user)
-  if (!S.txns.p1[month]) S.txns.p1[month] = [];
-  S.txns.p1[month].push(tx);
+  if (!S.txns[prof][month]) S.txns[prof][month] = [];
+  S.txns[prof][month].push(tx);
   persist();
 
   // Reset form (keep date and type, clear desc/amt/cat)
@@ -2572,7 +2606,7 @@ function saveManualTx() {
   amtEl.value  = '';
   catEl.value  = '';
 
-  toast('✓ Transaction added', 'ok');
+  toast(`✓ Transaction added to ${pName(prof)}`, 'ok');
 
   // If the added month matches current dashboard month, re-render
   if (month === _currentMonth) {
@@ -2593,9 +2627,12 @@ function showMeError(msg) {
 }
 
 function deleteManualTx(month, txId) {
-  if (!S.txns.p1[month]) return;
-  S.txns.p1[month] = S.txns.p1[month].filter(t => t.id !== txId);
-  if (!S.txns.p1[month].length) delete S.txns.p1[month];
+  // Search both profiles since manual entries can be in either
+  ['p1','p2'].forEach(prof => {
+    if (!S.txns[prof]?.[month]) return;
+    S.txns[prof][month] = S.txns[prof][month].filter(t => t.id !== txId);
+    if (!S.txns[prof][month].length) delete S.txns[prof][month];
+  });
   persist();
   renderDash();
   renderManualTxList();
@@ -2608,7 +2645,9 @@ function renderManualTxList() {
   if (!wrap || !body) return;
 
   const month = _currentMonth;
-  const txs = (S.txns.p1[month] || []).slice().sort((a,b) => a.date.localeCompare(b.date));
+  // Show transactions from the currently selected manual profile (or p1 for free)
+  const prof = can.multiUser ? _manualProfile : 'p1';
+  const txs = (S.txns[prof]?.[month] || []).filter(t => t.manual).slice().sort((a,b) => a.date.localeCompare(b.date));
 
   if (!txs.length) { wrap.style.display = 'none'; return; }
   wrap.style.display = '';
@@ -2862,22 +2901,61 @@ async function handleReceiptScan(file) {
     if (!session?.access_token) throw new Error('Not logged in');
 
     const fd = new FormData();
-    fd.append('file',     file);
-    fd.append('mode',     'receipt');
-    fd.append('currency', S.currency.primary || 'THB');
+    fd.append('file',       file);
+    fd.append('mode',       'receipt');
+    fd.append('currency',   S.currency.primary || 'THB');
+    fd.append('categories', JSON.stringify(S.cats));
 
-    const res    = await fetch('/api/process-statement', {
+    const res = await fetch('/api/process-statement', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${session.access_token}` },
       body: fd,
     });
-    const result = await res.json();
-    if (!res.ok || !result.ok) throw new Error(result.error || 'Scan failed');
+
+    // Read streaming response
+    let result;
+    try {
+      const reader  = res.body.getReader();
+      const decoder = new TextDecoder();
+      let fullText  = '';
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        fullText += decoder.decode(value, { stream: true });
+      }
+      result = JSON.parse(fullText);
+    } catch (e) { throw new Error('Could not read server response'); }
+
+    if (!result.ok) throw new Error(result?.error || 'Scan failed');
 
     const r = result.data;
+
+    // Pre-fill date
     if (r.date) { const d = parseAIDate(r.date); if (d) document.getElementById('meDate').value = d; }
-    if (r.description || r.merchant) document.getElementById('meDesc').value = r.description || r.merchant || '';
+
+    // Pre-fill description
+    if (r.description || r.merchant) {
+      document.getElementById('meDesc').value = r.description || r.merchant || '';
+    }
+
+    // Pre-fill amount
     if (r.amount) document.getElementById('meAmt').value = parseFloat(r.amount).toFixed(2);
+
+    // Pre-fill category — match Claude's category name to catId
+    if (r.category) {
+      const catLookup = {};
+      S.cats.forEach(c => { catLookup[c.name.toLowerCase().trim()] = c.id; });
+      const catId = catLookup[r.category.trim().toLowerCase()];
+      if (catId) {
+        const typeEl = document.getElementById('meType');
+        const cat    = S.cats.find(c => c.id === catId);
+        // Set the correct type first so the dropdown populates correctly
+        if (cat && typeEl) typeEl.value = cat.type === 'income' ? 'income' : 'expense';
+        populateManualCatSelect();
+        const catEl = document.getElementById('meCat');
+        if (catEl) catEl.value = catId;
+      }
+    }
 
     // Expand form if collapsed
     const body = document.getElementById('manualEntryBody');
@@ -2886,11 +2964,10 @@ async function handleReceiptScan(file) {
       const chev = document.getElementById('manualEntryChevron');
       if (chev) chev.style.transform = '';
     }
-    document.getElementById('meCat')?.focus();
 
     const inp = document.getElementById('receiptFileIn');
     if (inp) inp.value = '';
-    toast('✓ Receipt scanned — select a category and save', 'ok');
+    toast('✓ Receipt scanned — review and save', 'ok');
 
   } catch(e) {
     toast('Receipt scan failed: ' + e.message, 'err');
