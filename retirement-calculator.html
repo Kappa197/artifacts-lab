@@ -127,11 +127,11 @@
   input[type=number] {
     background: #0a0e1a; border: 1px solid #1e2535; border-radius: 6px;
     color: #e2e8f0; padding: 8px 12px; font-size: 13px;
-    font-family: 'Courier New', monospace; width: 100%;
+    font-family: var(--mono); width: 100%;
     transition: border-color 0.2s; outline: none;
   }
   input[type=number]:focus { border-color: #c9a84c; }
-  .lbl { display: block; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #64748b; margin-bottom: 5px; font-family: 'Courier New', monospace; }
+  .lbl { display: block; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: #64748b; margin-bottom: 5px; font-family: var(--mono); }
   .field { margin-bottom: 14px; }
   .card { background: rgba(255,255,255,0.03); border: 1px solid #1e2535; border-radius: 12px; padding: 24px; margin-bottom: 20px; }
   .stitle { font-family: Georgia, serif; font-size: 18px; font-weight: 600; color: #c9a84c; margin-bottom: 18px; letter-spacing: 0.05em; border-bottom: 1px solid #1e2535; padding-bottom: 10px; }
@@ -143,13 +143,13 @@
   .sbox-blue  { background: rgba(96,165,250,0.07);  border: 1px solid rgba(96,165,250,0.25); }
   .sbox-green { background: rgba(52,211,153,0.08);  border: 1px solid rgba(52,211,153,0.3);  }
   .sbox-red   { background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.3); }
-  .slabel { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 5px; font-family: 'Courier New', monospace; }
+  .slabel { font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 5px; font-family: var(--mono); }
   .slabel-gold  { color: #c9a84c; }
   .slabel-blue  { color: #60a5fa; }
   .slabel-green { color: #34d399; }
   .slabel-red   { color: #f87171; }
   .sval { font-family: Georgia, serif; font-size: 24px; font-weight: 700; color: #fff; }
-  .ssub { font-size: 11px; color: #64748b; margin-top: 3px; font-family: 'Courier New', monospace; }
+  .ssub { font-size: 11px; color: #64748b; margin-top: 3px; font-family: var(--mono); }
   .outcome-banner { border-radius: 12px; padding: 18px 24px; margin-bottom: 20px; display: flex; align-items: center; gap: 16px; }
   .toggle-sw { appearance: none; -webkit-appearance: none; width: 36px; height: 20px; background: #1e2535; border-radius: 10px; cursor: pointer; position: relative; transition: background 0.2s; flex-shrink: 0; }
   .toggle-sw:checked { background: #c9a84c; }
@@ -157,28 +157,28 @@
   .toggle-sw:checked::after { transform: translateX(16px); }
   .toggle-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
   .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-  .ms-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid #1e2535; font-family: 'Courier New', monospace; font-size: 12px; }
+  .ms-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid #1e2535; font-family: var(--mono); font-size: 12px; }
   .seg-wrap { display: flex; justify-content: center; margin-bottom: 20px; }
-  .seg-btn { padding: 9px 22px; font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.08em; cursor: pointer; border: 1px solid #1e2535; background: #0a0e1a; color: #64748b; font-weight: 400; transition: all 0.2s; }
+  .seg-btn { padding: 9px 22px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; cursor: pointer; border: 1px solid #1e2535; background: #0a0e1a; color: #64748b; font-weight: 400; transition: all 0.2s; }
   .seg-btn.active { background: #c9a84c; color: #0a0e1a; font-weight: 700; }
   .seg-btn:first-child { border-right: none; border-radius: 8px 0 0 8px; }
   .seg-btn:last-child  { border-radius: 0 8px 8px 0; }
   .nest-preview { background: rgba(201,168,76,0.06); border: 1px solid rgba(201,168,76,0.15); border-radius: 8px; padding: 12px 14px; }
   .period-strip { border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; }
   .period-input-row { display: flex; align-items: center; gap: 10px; }
-  .period-badge { font-family: 'Courier New', monospace; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: 0.05em; flex-shrink: 0; }
-  .period-ages { font-family: 'Courier New', monospace; font-size: 11px; color: #64748b; flex: 1; }
+  .period-badge { font-family: var(--mono); font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: 0.05em; flex-shrink: 0; }
+  .period-ages { font-family: var(--mono); font-size: 11px; color: #64748b; flex: 1; }
   .period-irr-wrap { display: flex; align-items: center; gap: 6px; }
   .period-irr-wrap input { width: 80px; flex-shrink: 0; }
-  .period-irr-wrap .pct { font-family: 'Courier New', monospace; font-size: 12px; color: #94a3b8; }
+  .period-irr-wrap .pct { font-family: var(--mono); font-size: 12px; color: #94a3b8; }
   #chartCanvas { width: 100%; display: block; }
   .chart-wrap { position: relative; }
   .chart-tooltip { position: absolute; background: #0f1117; border: 1px solid #2a2d3a; border-radius: 8px; padding: 10px 14px; pointer-events: none; display: none; z-index: 10; white-space: nowrap; }
   .legend-row { display: flex; gap: 16px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
-  .legend-item { display: flex; align-items: center; gap: 6px; font-family: 'Courier New', monospace; font-size: 11px; color: #94a3b8; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11px; color: #94a3b8; }
   .legend-line { width: 24px; height: 3px; border-radius: 2px; flex-shrink: 0; }
   .legend-dashed { background: repeating-linear-gradient(to right, #60a5fa 0, #60a5fa 6px, transparent 6px, transparent 10px); height: 2px; }
-  .delta-pill { display: inline-block; padding: 3px 10px; border-radius: 20px; font-family: 'Courier New', monospace; font-size: 13px; font-weight: 700; }
+  .delta-pill { display: inline-block; padding: 3px 10px; border-radius: 20px; font-family: var(--mono); font-size: 13px; font-weight: 700; }
   .delta-pos { background: rgba(52,211,153,0.15); color: #34d399; border: 1px solid rgba(52,211,153,0.3); }
   .delta-neg { background: rgba(248,113,113,0.15); color: #f87171; border: 1px solid rgba(248,113,113,0.3); }
   .solver-box { background: rgba(96,165,250,0.06); border: 1px solid rgba(96,165,250,0.2); border-radius: 10px; padding: 18px 20px; margin-bottom: 20px; }
@@ -187,7 +187,7 @@
   /* ── Tab system ── */
   .tab-bar { display: flex; gap: 6px; margin-bottom: 28px; border-bottom: 1px solid #1e2535; padding-bottom: 0; }
   .tab-btn {
-    font-family: 'Courier New', monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;
     padding: 10px 22px; border: 1px solid transparent; border-bottom: none; border-radius: 8px 8px 0 0;
     cursor: pointer; background: transparent; color: #475569; transition: all 0.18s; margin-bottom: -1px;
   }
@@ -195,7 +195,7 @@
   .tab-btn.active { background: rgba(201,168,76,0.08); border-color: #1e2535; color: #c9a84c; border-bottom-color: #0f1625; }
   /* ── Year-by-year table ── */
   .yby-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid #1e2535; }
-  .yby-table { border-collapse: collapse; width: 100%; min-width: 900px; font-family: 'Courier New', monospace; font-size: 12px; }
+  .yby-table { border-collapse: collapse; width: 100%; min-width: 900px; font-family: var(--mono); font-size: 12px; }
   .yby-table th { padding: 9px 12px; font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; font-weight: 600; position: sticky; top: 0; z-index: 5; background: #0d1120; border-bottom: 1px solid #2a3444; white-space: nowrap; }
   .yby-table td { padding: 6px 12px; border-bottom: 1px solid #111827; white-space: nowrap; }
   .yby-table tr:last-child td { border-bottom: none; }
@@ -204,17 +204,61 @@
   .yby-table .period-divider td { background: #080b13 !important; border-top: 2px solid #1e2535; padding: 4px 12px; }
   .yby-table tr:hover td:not(.period-divider td) { background: rgba(255,255,255,0.025); }
   .yby-table tr:hover .col-sticky { background: #121828; }
-  .yby-toggle { display:flex; align-items:center; gap:10px; font-family:'Courier New',monospace; font-size:11px; color:#64748b; }
-  .yby-toggle button { padding:5px 14px; border-radius:6px; border:1px solid #1e2535; background:transparent; color:#475569; font-family:'Courier New',monospace; font-size:11px; cursor:pointer; transition:all 0.15s; }
+  .yby-toggle { display:flex; align-items:center; gap:10px; font-family:var(--mono); font-size:11px; color:#64748b; }
+  .yby-toggle button { padding:5px 14px; border-radius:6px; border:1px solid #1e2535; background:transparent; color:#475569; font-family:var(--mono); font-size:11px; cursor:pointer; transition:all 0.15s; }
   .yby-toggle button.active { background:rgba(201,168,76,0.12); border-color:rgba(201,168,76,0.4); color:#c9a84c; }
   @media (max-width: 760px) { .grid2, .grid3, .grid5, .two-col, .solver-grid { grid-template-columns: 1fr; } }
+  /* ── Setup sections ── */
+  .setup-section { margin-bottom: 28px; max-width: 760px; }
+  .setup-section-hdr { display:flex; gap:16px; align-items:flex-start; margin-bottom:16px; }
+  .setup-section-num {
+    width:32px; height:32px; border-radius:50%; flex-shrink:0;
+    background:var(--amber-dim); border:1px solid var(--amber);
+    font-family:var(--mono); font-size:0.75rem; font-weight:700; color:var(--amber2);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .setup-section-title {
+    font-family:var(--serif); font-size:1.1rem; font-weight:600;
+    color:var(--text); margin-bottom:4px;
+  }
+  .setup-section-desc {
+    font-family:var(--body); font-size:0.82rem;
+    color:var(--text2); line-height:1.6;
+  }
+  /* ── Field help tooltips ── */
+  .field-help-btn {
+    display:inline-flex; align-items:center; justify-content:center;
+    width:16px; height:16px; border-radius:50%;
+    background:rgba(74,144,217,0.15); border:1px solid rgba(74,144,217,0.4);
+    color:var(--blue); font-family:var(--mono); font-size:0.6rem; font-weight:700;
+    cursor:pointer; margin-left:5px; vertical-align:middle;
+    transition:all 0.15s; line-height:1;
+  }
+  .field-help-btn:hover { background:rgba(74,144,217,0.3); }
+  .field-tooltip {
+    margin-top:8px; padding:12px 14px;
+    background:rgba(74,144,217,0.06); border:1px solid rgba(74,144,217,0.2);
+    border-radius:8px; font-size:0.8rem; line-height:1.6;
+    font-family:var(--body);
+  }
+  .ft-title { font-weight:700; color:var(--blue); font-family:var(--mono); font-size:0.7rem; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:5px; }
+  .ft-body { color:var(--text2); margin-bottom:8px; }
+  .ft-typical { font-family:var(--mono); font-size:0.68rem; color:var(--green); background:var(--green-dim); padding:4px 8px; border-radius:4px; display:inline-block; }
+  /* ── Results summary card ── */
+  .results-summary {
+    background:var(--navy3); border:1px solid var(--border2);
+    border-left:3px solid var(--amber); border-radius:10px;
+    padding:16px 20px; margin-bottom:20px;
+    font-family:var(--body); font-size:0.9rem; line-height:1.7; color:var(--text);
+  }
+  .results-summary strong { color:var(--amber2); }
   /* ── Tier gating ── */
   .tier-locked { opacity:0.42; filter:grayscale(0.3); pointer-events:none; user-select:none; }
   .tier-nudge {
     display:flex; align-items:center; gap:9px; pointer-events:auto;
     padding:8px 13px; margin-bottom:10px;
     background:rgba(201,168,76,0.07); border:1px solid rgba(201,168,76,0.22); border-radius:8px;
-    font-family:'Courier New',monospace; font-size:11px; color:#64748b;
+    font-family:var(--mono); font-size:11px; color:#64748b;
   }
   .tier-nudge a { color:#c9a84c; text-decoration:none; font-weight:700; }
   .tier-nudge a:hover { text-decoration:underline; }
@@ -241,72 +285,77 @@
 <!-- Tab bar -->
 <div class="tab-bar">
   <button class="tab-btn active" id="tabBtnDashboard" onclick="switchTab('dashboard')">📊 Dashboard</button>
-  <button class="tab-btn" id="tabBtnMC" onclick="switchTab('mc')">🎲 Monte Carlo</button>
+  <button class="tab-btn" id="tabBtnMC" onclick="switchTab('mc')" title="Run thousands of random market scenarios to see the probability your savings last through retirement">🎲 Probabilistic Survival Test</button>
   <button class="tab-btn" id="tabBtnDetail" onclick="switchTab('detail')">📋 Year-by-Year</button>
 </div>
 
 <!-- ── DASHBOARD PANEL ──────────────────────────────────────────────────── -->
 <div id="panelDashboard">
-<div class="two-col">
 
-  <!-- LEFT COLUMN -->
-  <div>
-    <!-- Life params -->
+<!-- ══ SETUP / RESULTS SWITCHER ══════════════════════════════════════════════ -->
+<div id="setupView">
+
+  <!-- ── SECTION 1: About You ──────────────────────────────────────────────── -->
+  <div class="setup-section">
+    <div class="setup-section-hdr">
+      <div class="setup-section-num">1</div>
+      <div>
+        <div class="setup-section-title">About You</div>
+        <div class="setup-section-desc">Start with the basics — your age, when you plan to retire, and what you currently spend. This is the foundation of every projection in the tool.</div>
+      </div>
+    </div>
     <div class="card">
-      <div class="stitle">Life Parameters</div>
       <div class="grid2">
         <div class="field"><label class="lbl">Current Age</label><input type="number" id="currentAge" value="37" min="1" max="99"/></div>
         <div class="field"><label class="lbl">Retirement Age</label><input type="number" id="retirementAge" value="53" min="1" max="99"/></div>
         <div class="field"><label class="lbl">Lifespan Target</label><input type="number" id="lifespan" value="100" min="1" max="120"/></div>
-        <div class="field"><label class="lbl">Inflation Rate %</label><input type="number" id="inflation" value="3.0" step="0.1" min="0"/></div>
+        <div class="field"><label class="lbl">How fast prices rise each year (%) <button class="field-help-btn" onclick="toggleTooltip('tt-inflation')">?</button></label><input type="number" id="inflation" value="3.0" step="0.1" min="0"/>
+        <div id="tt-inflation" class="field-tooltip" style="display:none">
+          <div class="ft-title">Inflation rate</div>
+          <div class="ft-body">The average annual rate at which prices rise. This erodes the purchasing power of your money over time — a $5,000/month budget today might need $9,000/month in 30 years at 2% inflation, or $12,000 at 3%. The tool adjusts all projections for inflation automatically.</div>
+          <div class="ft-typical">Typical value: 2.5%–3.5% for most developed countries. Use 4–5% if you're concerned about persistent inflation.</div>
+        </div></div>
       </div>
       <div class="field"><label class="lbl">Current Yearly Expenses ($)</label><input type="number" id="currentExpenses" value="45600" min="0"/></div>
     </div>
-
-    <!-- 5-period IRR -->
-    <div class="card" id="fivePeriodSection">
-      <div class="stitle">5-Period Return on Investment</div>
-      <p style="font-family:'Courier New',monospace;font-size:11px;color:#64748b;margin-bottom:16px" id="periodNote">Retirement split into 5 equal periods</p>
-      <div id="periodInputs"></div>
-      <div style="margin-top:14px;padding-top:14px;border-top:1px solid #1e2535;display:flex;justify-content:space-between;align-items:center">
-        <span style="font-family:'Courier New',monospace;font-size:11px;color:#64748b">Weighted average IRR</span>
-        <span style="font-family:'Courier New',monospace;font-size:14px;font-weight:700;color:#c9a84c" id="avgIRRInline">—</span>
-      </div>
-    </div>
-
-    <!-- Sequence-of-returns callout -->
-    <div style="background:rgba(201,168,76,0.05);border:1px solid rgba(201,168,76,0.15);border-radius:10px;padding:14px 18px;margin-bottom:20px">
-      <p style="font-family:'Courier New',monospace;font-size:11px;color:#c9a84c;margin-bottom:6px;letter-spacing:0.05em">⚠ SEQUENCE OF RETURNS RISK</p>
-      <p style="font-size:12px;color:#94a3b8;line-height:1.6">Two portfolios with the same average IRR can have very different outcomes. Bad returns early force you to sell more units at low prices — the damage compounds. Use the 5 periods to simulate <em>when</em> bad years hit, not just how bad they are.</p>
-    </div>
   </div>
 
-  <!-- RIGHT COLUMN -->
-  <div>
-    <!-- Nest egg -->
+  <!-- ── SECTION 2: Your Savings ────────────────────────────────────────────── -->
+  <div class="setup-section">
+    <div class="setup-section-hdr">
+      <div class="setup-section-num">2</div>
+      <div>
+        <div class="setup-section-title">Your Savings &amp; Portfolio</div>
+        <div class="setup-section-desc">Enter what you have saved today and what you expect to add before retirement. If you hold multiple asset types — equities, bonds, pension funds — you can add them all so the nest-egg projection is as accurate as possible.</div>
+      </div>
+    </div>
     <div class="card">
       <div class="stitle">Nest Egg at Retirement</div>
       <div class="toggle-row">
         <input class="toggle-sw" type="checkbox" id="useManual" onchange="recalc()"/>
-        <label for="useManual" style="font-family:'Courier New',monospace;font-size:12px;color:#94a3b8;cursor:pointer">Enter nest egg manually</label>
+        <label for="useManual" style="font-family:var(--body);font-size:0.85rem;color:var(--text2);cursor:pointer">Enter nest egg manually</label>
       </div>
       <div id="autoInputs">
-        <!-- ── Asset class: Equities (always shown) ── -->
+        <!-- ── Equities (always shown) ── -->
         <div style="padding:12px;background:rgba(255,255,255,0.02);border:1px solid #1e2535;border-radius:8px;margin-bottom:10px">
-          <div style="font-family:'Courier New',monospace;font-size:10px;color:#c9a84c;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">📈 Equities</div>
+          <div style="font-family:var(--mono);font-size:10px;color:#c9a84c;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">📈 Equities</div>
           <div class="grid3">
             <div class="field" style="margin-bottom:0"><label class="lbl">Current Balance ($)</label><input type="number" id="currentSavings" value="250000" min="0" oninput="recalc()"/></div>
             <div class="field" style="margin-bottom:0"><label class="lbl">Annual Contributions ($)</label><input type="number" id="annualContrib" value="40000" min="0" oninput="recalc()"/></div>
-            <div class="field" style="margin-bottom:0"><label class="lbl">Expected IRR %</label><input type="number" id="accumIRR" value="8.4" step="0.1" min="0" oninput="recalc()"/></div>
+            <div class="field" style="margin-bottom:0"><label class="lbl">Expected annual growth (%) <button class="field-help-btn" onclick="toggleTooltip('tt-accumirr')">?</button></label><input type="number" id="accumIRR" value="8.4" step="0.1" min="0" oninput="recalc()"/>
+            <div id="tt-accumirr" class="field-tooltip" style="display:none">
+              <div class="ft-title">Expected annual growth</div>
+              <div class="ft-body">The average annual return you expect from your investments during the accumulation phase — the years before retirement. This determines how fast your current savings grow. A higher number produces a larger nest egg but introduces more risk if returns disappoint.</div>
+              <div class="ft-typical">Typical value: 6–8% for a diversified equity portfolio historically (before inflation). Use 4–5% for a more conservative mixed portfolio.</div>
+            </div></div>
           </div>
         </div>
-
         <div id="multiAssetSection">
-        <!-- ── Asset class: Bonds ── -->
+        <!-- ── Bonds ── -->
         <div style="margin-bottom:8px">
           <div class="toggle-row" style="margin-bottom:0">
             <input class="toggle-sw" type="checkbox" id="useBonds" onchange="toggleAsset('bonds');recalc()"/>
-            <label for="useBonds" style="font-family:'Courier New',monospace;font-size:12px;color:#94a3b8;cursor:pointer">🏛 Bonds</label>
+            <label for="useBonds" style="font-family:var(--body);font-size:0.85rem;color:var(--text2);cursor:pointer">🏛 Bonds</label>
           </div>
           <div id="bondsInputs" style="display:none;margin-top:8px;padding:12px;background:rgba(96,165,250,0.04);border:1px solid rgba(96,165,250,0.15);border-radius:8px">
             <div class="grid3">
@@ -314,15 +363,14 @@
               <div class="field" style="margin-bottom:0"><label class="lbl">Annual Contributions ($)</label><input type="number" id="bondsContrib" value="0" min="0" oninput="recalc()"/></div>
               <div class="field" style="margin-bottom:0"><label class="lbl">Expected IRR %</label><input type="number" id="bondsIRR" value="4.0" step="0.1" min="0" oninput="recalc()"/></div>
             </div>
-            <div style="font-family:'Courier New',monospace;font-size:10px;color:#60a5fa;margin-top:8px" id="bondsPreview"></div>
+            <div style="font-family:var(--mono);font-size:10px;color:#60a5fa;margin-top:8px" id="bondsPreview"></div>
           </div>
         </div>
-
-        <!-- ── Asset class: Pension Fund ── -->
+        <!-- ── Pension Fund ── -->
         <div style="margin-bottom:8px">
           <div class="toggle-row" style="margin-bottom:0">
             <input class="toggle-sw" type="checkbox" id="usePensionFund" onchange="toggleAsset('pensionFund');recalc()"/>
-            <label for="usePensionFund" style="font-family:'Courier New',monospace;font-size:12px;color:#94a3b8;cursor:pointer">🏦 Pension Fund</label>
+            <label for="usePensionFund" style="font-family:var(--body);font-size:0.85rem;color:var(--text2);cursor:pointer">🏦 Pension Fund</label>
           </div>
           <div id="pensionFundInputs" style="display:none;margin-top:8px;padding:12px;background:rgba(52,211,153,0.04);border:1px solid rgba(52,211,153,0.15);border-radius:8px">
             <div class="grid3">
@@ -330,15 +378,14 @@
               <div class="field" style="margin-bottom:0"><label class="lbl">Annual Contributions ($)</label><input type="number" id="pensionFundContrib" value="0" min="0" oninput="recalc()"/></div>
               <div class="field" style="margin-bottom:0"><label class="lbl">Expected IRR %</label><input type="number" id="pensionFundIRR" value="5.0" step="0.1" min="0" oninput="recalc()"/></div>
             </div>
-            <div style="font-family:'Courier New',monospace;font-size:10px;color:#34d399;margin-top:8px" id="pensionFundPreview"></div>
+            <div style="font-family:var(--mono);font-size:10px;color:#34d399;margin-top:8px" id="pensionFundPreview"></div>
           </div>
         </div>
-
-        <!-- ── Asset class: Insurance / Life Policy ── -->
+        <!-- ── Insurance / Life Policy ── -->
         <div style="margin-bottom:10px">
           <div class="toggle-row" style="margin-bottom:0">
             <input class="toggle-sw" type="checkbox" id="useInsurance" onchange="toggleAsset('insurance');recalc()"/>
-            <label for="useInsurance" style="font-family:'Courier New',monospace;font-size:12px;color:#94a3b8;cursor:pointer">🛡 Insurance / Policy</label>
+            <label for="useInsurance" style="font-family:var(--body);font-size:0.85rem;color:var(--text2);cursor:pointer">🛡 Insurance / Policy</label>
           </div>
           <div id="insuranceInputs" style="display:none;margin-top:8px;padding:12px;background:rgba(192,132,252,0.04);border:1px solid rgba(192,132,252,0.15);border-radius:8px">
             <div class="grid3">
@@ -346,204 +393,275 @@
               <div class="field" style="margin-bottom:0"><label class="lbl">Annual Premiums ($)</label><input type="number" id="insuranceContrib" value="0" min="0" oninput="recalc()"/></div>
               <div class="field" style="margin-bottom:0"><label class="lbl">Expected IRR %</label><input type="number" id="insuranceIRR" value="3.0" step="0.1" min="0" oninput="recalc()"/></div>
             </div>
-            <div style="font-family:'Courier New',monospace;font-size:10px;color:#c084fc;margin-top:8px" id="insurancePreview"></div>
+            <div style="font-family:var(--mono);font-size:10px;color:#c084fc;margin-top:8px" id="insurancePreview"></div>
           </div>
         </div>
-
         </div><!-- end multiAssetSection -->
-        <!-- Nest egg preview breakdown -->
+        <!-- Nest egg preview -->
         <div class="nest-preview">
-          <div style="font-family:'Courier New',monospace;font-size:11px;color:#c9a84c;margin-bottom:6px" id="nestLabel">Projected Nest Egg in 13y</div>
+          <div style="font-family:var(--mono);font-size:11px;color:#c9a84c;margin-bottom:6px" id="nestLabel">Projected Nest Egg in 13y</div>
           <div style="font-family:Georgia,serif;font-size:22px;font-weight:700;color:#fff;margin-bottom:6px" id="nestPreview">—</div>
-          <div id="nestBreakdown" style="font-family:'Courier New',monospace;font-size:10px;color:#475569;line-height:1.8"></div>
+          <div id="nestBreakdown" style="font-family:var(--mono);font-size:10px;color:#475569;line-height:1.8"></div>
         </div>
       </div>
       <div id="manualInputs" style="display:none">
         <div class="field"><label class="lbl">Manual Nest Egg at Retirement ($)</label><input type="number" id="manualNestEgg" value="2000000" min="0"/></div>
       </div>
-
       <div id="incomeSection">
-      <!-- ── Supplemental Income ── -->
+      <!-- Supplemental Income -->
       <div style="margin-top:16px;padding-top:16px;border-top:1px solid #1e2535">
-        <div style="font-family:'Courier New',monospace;font-size:10px;color:#64748b;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px">Supplemental Income (reduces portfolio withdrawals)</div>
-
-        <!-- Pension toggle -->
+        <div style="font-family:var(--mono);font-size:10px;color:#64748b;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px">Supplemental Income (reduces portfolio withdrawals)</div>
         <div style="margin-bottom:8px">
           <div class="toggle-row" style="margin-bottom:0">
             <input class="toggle-sw" type="checkbox" id="usePension" onchange="toggleIncome('pension');recalc()"/>
-            <label for="usePension" style="font-family:'Courier New',monospace;font-size:12px;color:#94a3b8;cursor:pointer">🏛 Pension</label>
+            <label for="usePension" style="font-family:var(--body);font-size:0.85rem;color:var(--text2);cursor:pointer">🏛 Pension</label>
           </div>
           <div id="pensionInputs" style="display:none;margin-top:10px;padding:12px;background:rgba(96,165,250,0.04);border:1px solid rgba(96,165,250,0.15);border-radius:8px">
             <div class="grid3">
-              <div class="field" style="margin-bottom:0">
-                <label class="lbl">Annual Amount ($)</label>
-                <input type="number" id="pensionAmount" value="18000" min="0" step="500" oninput="recalc()"/>
-              </div>
-              <div class="field" style="margin-bottom:0">
-                <label class="lbl">Start Age</label>
-                <input type="number" id="pensionStartAge" value="67" min="0" max="120" oninput="recalc()"/>
-              </div>
-              <div class="field" style="margin-bottom:0">
-                <label class="lbl">Annual Increase %</label>
-                <input type="number" id="pensionGrowth" value="2.0" step="0.1" min="0" oninput="recalc()"/>
-              </div>
+              <div class="field" style="margin-bottom:0"><label class="lbl">Annual Amount ($)</label><input type="number" id="pensionAmount" value="18000" min="0" step="500" oninput="recalc()"/></div>
+              <div class="field" style="margin-bottom:0"><label class="lbl">Start Age</label><input type="number" id="pensionStartAge" value="67" min="0" max="120" oninput="recalc()"/></div>
+              <div class="field" style="margin-bottom:0"><label class="lbl">Annual Increase %</label><input type="number" id="pensionGrowth" value="2.0" step="0.1" min="0" oninput="recalc()"/></div>
             </div>
-            <div style="font-family:'Courier New',monospace;font-size:10px;color:#475569;margin-top:8px" id="pensionPreview"></div>
+            <div style="font-family:var(--mono);font-size:10px;color:#475569;margin-top:8px" id="pensionPreview"></div>
           </div>
         </div>
-
-        <!-- Rental toggle -->
         <div>
           <div class="toggle-row" style="margin-bottom:0">
             <input class="toggle-sw" type="checkbox" id="useRental" onchange="toggleIncome('rental');recalc()"/>
-            <label for="useRental" style="font-family:'Courier New',monospace;font-size:12px;color:#94a3b8;cursor:pointer">🏠 Rental Income</label>
+            <label for="useRental" style="font-family:var(--body);font-size:0.85rem;color:var(--text2);cursor:pointer">🏠 Rental Income</label>
           </div>
           <div id="rentalInputs" style="display:none;margin-top:10px;padding:12px;background:rgba(52,211,153,0.04);border:1px solid rgba(52,211,153,0.15);border-radius:8px">
             <div class="grid3">
-              <div class="field" style="margin-bottom:0">
-                <label class="lbl">Annual Amount ($)</label>
-                <input type="number" id="rentalAmount" value="12000" min="0" step="500" oninput="recalc()"/>
-              </div>
-              <div class="field" style="margin-bottom:0">
-                <label class="lbl">Start Age</label>
-                <input type="number" id="rentalStartAge" value="53" min="0" max="120" oninput="recalc()"/>
-              </div>
-              <div class="field" style="margin-bottom:0">
-                <label class="lbl">Annual Increase %</label>
-                <input type="number" id="rentalGrowth" value="2.0" step="0.1" min="0" oninput="recalc()"/>
-              </div>
+              <div class="field" style="margin-bottom:0"><label class="lbl">Annual Amount ($)</label><input type="number" id="rentalAmount" value="12000" min="0" step="500" oninput="recalc()"/></div>
+              <div class="field" style="margin-bottom:0"><label class="lbl">Start Age</label><input type="number" id="rentalStartAge" value="53" min="0" max="120" oninput="recalc()"/></div>
+              <div class="field" style="margin-bottom:0"><label class="lbl">Annual Increase %</label><input type="number" id="rentalGrowth" value="2.0" step="0.1" min="0" oninput="recalc()"/></div>
             </div>
-            <div style="font-family:'Courier New',monospace;font-size:10px;color:#475569;margin-top:8px" id="rentalPreview"></div>
+            <div style="font-family:var(--mono);font-size:10px;color:#475569;margin-top:8px" id="rentalPreview"></div>
           </div>
         </div>
-
-        <!-- Total income indicator (shown when at least one is active) -->
-        <div id="incomeTotal" style="display:none;margin-top:10px;padding:8px 12px;background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.2);border-radius:6px;font-family:'Courier New',monospace;font-size:11px;color:#c9a84c"></div>
+        <div id="incomeTotal" style="display:none;margin-top:10px;padding:8px 12px;background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.2);border-radius:6px;font-family:var(--mono);font-size:11px;color:#c9a84c"></div>
       </div>
-    </div>
       </div><!-- end incomeSection -->
-
-    <!-- Optimizer settings -->
-    <div class="card" id="optimizerSettingsSection">
-      <div class="stitle">Optimizer Settings</div>
-      <div class="field">
-        <label class="lbl">Minimum Legacy Balance ($)</label>
-        <div style="display:flex;gap:8px;align-items:center">
-          <input type="number" id="minLegacy" value="0" min="0" style="flex:1"/>
-          <button onclick="lockToNominal()" title="Set to nominal scenario final balance — makes all 3 scenarios directly comparable" style="
-            font-family:'Courier New',monospace;font-size:10px;color:#c9a84c;
-            background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.25);
-            border-radius:6px;padding:5px 10px;cursor:pointer;white-space:nowrap;
-            transition:background 0.15s" 
-            onmouseover="this.style.background='rgba(201,168,76,0.18)'"
-            onmouseout="this.style.background='rgba(201,168,76,0.08)'">
-            🔒 Lock to Nominal
-          </button>
-        </div>
-        <p style="font-family:'Courier New',monospace;font-size:10px;color:#64748b;margin-top:5px">⚠ Re-lock after changing any parameters to keep scenarios comparable.</p>
-        <p style="font-family:'Courier New',monospace;font-size:11px;color:#475569;margin-top:4px">The portfolio balance you want to be left with at age <span id="lifespanRef">100</span>. Set to $0 to fully exhaust the portfolio. <span style="color:#64748b">Lock to Nominal makes all 3 stress-test scenarios end at the same target — so the only variable is return sequence, not ambition.</span></p>
-        <div id="lockToNominalHint" style="display:none;margin-top:6px;font-family:'Courier New',monospace;font-size:10px;color:#c9a84c"></div>
-      </div>
-
     </div>
+  </div>
 
-    <!-- Tax Settings -->
-    <div class="card" id="taxSection">
-      <div class="stitle">💸 Tax Settings</div>
+  <!-- ── SECTION 3: Tax Settings ────────────────────────────────────────────── -->
+  <div class="setup-section" id="taxSection">
+    <div class="setup-section-hdr">
+      <div class="setup-section-num">3</div>
+      <div>
+        <div class="setup-section-title">Tax Settings <span style="font-family:var(--mono);font-size:0.58rem;letter-spacing:0.1em;color:var(--text3);text-transform:uppercase;margin-left:8px;vertical-align:middle">Optional · Premium</span></div>
+        <div class="setup-section-desc">Because the amount you <em>keep</em> after tax is what actually funds your retirement — not the gross figure you withdraw. Enable this to model the real cost of each withdrawal based on your account types and tax rates.</div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:0">
       <div class="toggle-row" style="margin-bottom:12px">
         <input class="toggle-sw" type="checkbox" id="useTax" onchange="toggleTax();recalc()"/>
-        <label for="useTax" style="font-family:'Courier New',monospace;font-size:12px;color:#94a3b8;cursor:pointer">Model tax impact on withdrawals</label>
+        <label for="useTax" style="font-family:var(--body);font-size:0.85rem;color:var(--text2);cursor:pointer">Model tax impact on withdrawals</label>
       </div>
-
       <div id="taxInputs" style="display:none">
         <!-- Account mix -->
         <div style="margin-bottom:16px;padding:12px;background:rgba(255,255,255,0.02);border:1px solid #1e2535;border-radius:8px">
-          <div style="font-family:'Courier New',monospace;font-size:10px;color:#c9a84c;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">Portfolio Account Mix</div>
-          <p style="font-family:'Courier New',monospace;font-size:10px;color:#64748b;margin-bottom:12px">Must sum to 100%. Determines what portion of withdrawals faces each tax regime.</p>
+          <div style="font-family:var(--mono);font-size:10px;color:#c9a84c;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">Portfolio Account Mix</div>
+          <p style="font-family:var(--mono);font-size:10px;color:#64748b;margin-bottom:12px">Must sum to 100%. Determines what portion of withdrawals faces each tax regime.</p>
           <div class="grid3">
             <div class="field" style="margin-bottom:0">
               <label class="lbl">Pre-tax % <span style="color:#f87171">(401k/IRA)</span></label>
               <input type="number" id="taxPrePct" value="60" min="0" max="100" step="5" oninput="onTaxMixChange('pre');recalc()"/>
-              <p style="font-family:'Courier New',monospace;font-size:10px;color:#475569;margin-top:4px">Fully taxable on withdrawal</p>
+              <p style="font-family:var(--mono);font-size:10px;color:#475569;margin-top:4px">Fully taxable on withdrawal</p>
             </div>
             <div class="field" style="margin-bottom:0">
               <label class="lbl">Post-tax % <span style="color:#34d399">(Roth)</span></label>
               <input type="number" id="taxRothPct" value="20" min="0" max="100" step="5" oninput="onTaxMixChange('roth');recalc()"/>
-              <p style="font-family:'Courier New',monospace;font-size:10px;color:#475569;margin-top:4px">Tax-free withdrawals</p>
+              <p style="font-family:var(--mono);font-size:10px;color:#475569;margin-top:4px">Tax-free withdrawals</p>
             </div>
             <div class="field" style="margin-bottom:0">
               <label class="lbl">Brokerage % <span style="color:#60a5fa">(taxable)</span></label>
               <input type="number" id="taxBrokerPct" value="20" min="0" max="100" step="5" oninput="onTaxMixChange('broker');recalc()"/>
-              <p style="font-family:'Courier New',monospace;font-size:10px;color:#475569;margin-top:4px">Gains only taxed</p>
+              <p style="font-family:var(--mono);font-size:10px;color:#475569;margin-top:4px">Gains only taxed</p>
             </div>
           </div>
-          <div id="taxMixWarning" style="margin-top:8px;font-family:'Courier New',monospace;font-size:10px;color:#f87171;display:none">⚠ Percentages must sum to 100%</div>
+          <div id="taxMixWarning" style="margin-top:8px;font-family:var(--mono);font-size:10px;color:#f87171;display:none">⚠ Percentages must sum to 100%</div>
           <div style="margin-top:10px;height:8px;border-radius:4px;overflow:hidden;display:flex">
             <div id="taxBarPre"    style="background:#f87171;transition:width 0.2s"></div>
             <div id="taxBarRoth"   style="background:#34d399;transition:width 0.2s"></div>
             <div id="taxBarBroker" style="background:#60a5fa;transition:width 0.2s"></div>
           </div>
         </div>
-
         <!-- Tax rates -->
         <div style="margin-bottom:16px;padding:12px;background:rgba(255,255,255,0.02);border:1px solid #1e2535;border-radius:8px">
-          <div style="font-family:'Courier New',monospace;font-size:10px;color:#c9a84c;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">Effective Tax Rates</div>
-          <p style="font-family:'Courier New',monospace;font-size:10px;color:#64748b;margin-bottom:12px">Use your blended marginal rate including state/local tax. Country-agnostic — you know your situation best.</p>
+          <div style="font-family:var(--mono);font-size:10px;color:#c9a84c;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">Effective Tax Rates</div>
+          <p style="font-family:var(--mono);font-size:10px;color:#64748b;margin-bottom:12px">Use your blended marginal rate including state/local tax. Country-agnostic — you know your situation best.</p>
           <div class="grid2">
             <div class="field" style="margin-bottom:0">
               <label class="lbl">Pre-tax withdrawal rate %</label>
               <input type="number" id="taxPreRate" value="25" min="0" max="60" step="1" oninput="recalc()"/>
-              <p style="font-family:'Courier New',monospace;font-size:10px;color:#475569;margin-top:4px">Federal + state on ordinary income</p>
+              <p style="font-family:var(--mono);font-size:10px;color:#475569;margin-top:4px">Federal + state on ordinary income</p>
             </div>
             <div class="field" style="margin-bottom:0">
               <label class="lbl">Brokerage gains rate %</label>
               <input type="number" id="taxBrokerRate" value="15" min="0" max="40" step="1" oninput="recalc()"/>
-              <p style="font-family:'Courier New',monospace;font-size:10px;color:#475569;margin-top:4px">Long-term capital gains rate</p>
+              <p style="font-family:var(--mono);font-size:10px;color:#475569;margin-top:4px">Long-term capital gains rate</p>
             </div>
           </div>
         </div>
-
-        <!-- Other income & basis -->
+        <!-- Adjustments -->
         <div style="padding:12px;background:rgba(255,255,255,0.02);border:1px solid #1e2535;border-radius:8px">
-          <div style="font-family:'Courier New',monospace;font-size:10px;color:#c9a84c;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">Adjustments</div>
+          <div style="font-family:var(--mono);font-size:10px;color:#c9a84c;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">Adjustments</div>
           <div class="grid2">
             <div class="field" style="margin-bottom:0">
               <label class="lbl">Other taxable income ($/yr)</label>
               <input type="number" id="taxOtherIncome" value="0" min="0" step="1000" oninput="recalc()"/>
-              <p style="font-family:'Courier New',monospace;font-size:10px;color:#475569;margin-top:4px">Pension, SS etc. that fills lower brackets first — reduces effective rate on withdrawals</p>
+              <p style="font-family:var(--mono);font-size:10px;color:#475569;margin-top:4px">Pension, SS etc. — reduces effective rate on withdrawals</p>
             </div>
             <div class="field" style="margin-bottom:0">
               <label class="lbl">Brokerage cost basis %</label>
               <input type="number" id="taxBasis" value="40" min="0" max="100" step="5" oninput="recalc()"/>
-              <p style="font-family:'Courier New',monospace;font-size:10px;color:#475569;margin-top:4px">% of brokerage portfolio that is original contribution (not gain) — only gains are taxed</p>
+              <p style="font-family:var(--mono);font-size:10px;color:#475569;margin-top:4px">% of brokerage that is original contribution — only gains are taxed</p>
             </div>
           </div>
         </div>
-
-        <!-- Tax summary preview -->
-        <div id="taxPreview" style="margin-top:12px;padding:12px;background:rgba(248,113,113,0.04);border:1px solid rgba(248,113,113,0.15);border-radius:8px;font-family:'Courier New',monospace;font-size:11px;color:#94a3b8"></div>
+        <div id="taxPreview" style="margin-top:12px;padding:12px;background:rgba(248,113,113,0.04);border:1px solid rgba(248,113,113,0.15);border-radius:8px;font-family:var(--mono);font-size:11px;color:#94a3b8"></div>
       </div>
-    </div>
-
-    <!-- Withdrawal milestones -->
-    <div class="card" id="milestonesSection">
-      <div class="stitle">Withdrawal by Period — Rolling Re-Optimizer</div>
-      <p style="font-family:'Courier New',monospace;font-size:11px;color:#64748b;margin-bottom:16px">At the start of each period, given the actual portfolio balance, the max sustainable withdrawal is re-solved through all remaining years and IRRs. P1's factor = the global optimum. Later periods show how sequence-of-returns risk accumulates.</p>
-      <div style="display:grid;grid-template-columns:110px 1fr 1fr 1fr;gap:0;padding:6px 0;border-bottom:1px solid #2a3444;margin-bottom:4px">
-        <div style="font-family:'Courier New',monospace;font-size:10px;color:#475569;letter-spacing:0.08em;text-transform:uppercase">Period</div>
-        <div style="font-family:'Courier New',monospace;font-size:10px;color:#94a3b8;letter-spacing:0.08em;text-transform:uppercase;text-align:right">Planned</div>
-        <div style="font-family:'Courier New',monospace;font-size:10px;color:#34d399;letter-spacing:0.08em;text-transform:uppercase;text-align:right">Max / yr</div>
-        <div style="font-family:'Courier New',monospace;font-size:10px;color:#34d399;letter-spacing:0.08em;text-transform:uppercase;text-align:right">Factor</div>
-      </div>
-      <div id="milestones"></div>
-      <!-- End-of-retirement summary -->
-      <div style="margin-top:14px;padding-top:12px;border-top:1px solid #2a3444" id="retirementEndRow"></div>
     </div>
   </div>
-</div>
+
+  <!-- ── SECTION 4: Investment Returns ──────────────────────────────────────── -->
+  <div class="setup-section">
+    <div class="setup-section-hdr">
+      <div class="setup-section-num">4</div>
+      <div>
+        <div class="setup-section-title">Investment Returns Over Time <span style="font-family:var(--mono);font-size:0.58rem;letter-spacing:0.1em;color:var(--text3);text-transform:uppercase;margin-left:8px;vertical-align:middle">Premium</span></div>
+        <div class="setup-section-desc">Your expected return won't be the same at 62 as it is at 85. Set a different growth rate for each stage of retirement — from a growth-oriented early phase to a conservative late phase. The calculator uses each period's rate to project your portfolio accurately.</div>
+      </div>
+    </div>
+    <div class="card" id="fivePeriodSection" style="margin-bottom:12px">
+      <p style="font-family:var(--mono);font-size:11px;color:#64748b;margin-bottom:8px" id="periodNote">Retirement split into 5 equal periods</p>
+      <p style="font-family:var(--body);font-size:0.8rem;color:var(--text2);margin-bottom:14px;line-height:1.6">Set a different expected return for each period of your retirement. <button class="field-help-btn" onclick="toggleTooltip('tt-5period')" style="width:auto;height:auto;border-radius:4px;padding:2px 8px;font-size:0.7rem">? What is IRR?</button></p>
+      <div id="tt-5period" class="field-tooltip" style="display:none;margin-bottom:14px">
+        <div class="ft-title">Investment Return Rate (IRR)</div>
+        <div class="ft-body">IRR is the average annual return you expect from your investment portfolio in each period. A 7% IRR means your portfolio grows by an average of 7% per year. In early retirement you might hold more equities (higher return, higher risk); later you typically shift to bonds and cash (lower return, lower risk). The calculator uses each period's rate to project your portfolio accurately rather than assuming one flat rate for 40+ years.</div>
+        <div class="ft-typical">Typical values: 7–9% early retirement (equity-heavy) · 4–6% mid-retirement · 2–4% late retirement (conservative)</div>
+      </div>
+      <div id="periodInputs"></div>
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid #1e2535;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-family:var(--mono);font-size:11px;color:#64748b">Weighted average IRR</span>
+        <span style="font-family:var(--mono);font-size:14px;font-weight:700;color:#c9a84c" id="avgIRRInline">—</span>
+      </div>
+    </div>
+    <div style="background:rgba(201,168,76,0.05);border:1px solid rgba(201,168,76,0.15);border-radius:10px;padding:14px 18px">
+      <p style="font-family:var(--mono);font-size:11px;color:#c9a84c;margin-bottom:6px;letter-spacing:0.05em">⚠ SEQUENCE OF RETURNS RISK</p>
+      <p style="font-size:0.85rem;color:#94a3b8;line-height:1.6;font-family:var(--body)">Two portfolios with the same average return can have very different outcomes. Bad returns early force you to sell more units at low prices — the damage compounds. Use the 5 periods to model <em>when</em> bad years hit, not just how bad they are.</p>
+    </div>
+  </div>
+
+  <!-- ── SECTION 5: Stress Test Settings ───────────────────────────────────── -->
+  <div class="setup-section">
+    <div class="setup-section-hdr">
+      <div class="setup-section-num">5</div>
+      <div>
+        <div class="setup-section-title">Stress Test Settings &amp; Legacy <span style="font-family:var(--mono);font-size:0.58rem;letter-spacing:0.1em;color:var(--text3);text-transform:uppercase;margin-left:8px;vertical-align:middle">Premium</span></div>
+        <div class="setup-section-desc">Configure how aggressively your spending tracks investment returns across periods, and set an inheritance target. These settings drive the Sequence of Returns Stress Test in your results.</div>
+      </div>
+    </div>
+    <div class="card" id="optimizerSettingsSection" style="margin-bottom:0">
+      <div class="field">
+        <label class="lbl">Amount to leave behind ($) <button class="field-help-btn" onclick="toggleTooltip('tt-legacy')">?</button></label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="number" id="minLegacy" value="0" min="0" style="flex:1"/>
+          <span id="lockToNominalBtn">
+          <button onclick="lockToNominal()" style="
+            font-family:var(--mono);font-size:10px;color:#c9a84c;
+            background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.25);
+            border-radius:6px;padding:5px 10px;cursor:pointer;white-space:nowrap;
+            transition:background 0.15s"
+            onmouseover="this.style.background='rgba(201,168,76,0.18)'"
+            onmouseout="this.style.background='rgba(201,168,76,0.08)'">
+            🔒 Lock to Nominal
+          </button>
+          </span>
+        </div>
+        <div id="tt-legacy" class="field-tooltip" style="display:none">
+          <div class="ft-title">Amount to leave behind</div>
+          <div class="ft-body">The portfolio balance you want to preserve at the end of retirement — for your estate, heirs, or a safety buffer. Setting this to $0 means you plan to fully use your savings. This target anchors the stress-test scenarios so results are comparable.</div>
+          <div class="ft-typical">Typical value: $0 (full drawdown) or 1–2 years of expenses as a buffer</div>
+        </div>
+        <p style="font-family:var(--mono);font-size:10px;color:#64748b;margin-top:5px">⚠ Re-lock after changing any parameters to keep scenarios comparable.</p>
+        <div id="lockToNominalHint" style="display:none;margin-top:6px;font-family:var(--mono);font-size:10px;color:#c9a84c"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Geometric Rule (MC) Settings ──────────────────────────────────────── -->
+  <div class="setup-section" id="geoSettingsSection">
+    <div class="setup-section-hdr" style="cursor:pointer;user-select:none" onclick="toggleSection('geoSettingsBody')">
+      <div class="setup-section-num" style="font-size:0.7rem">⚙</div>
+      <div style="flex:1">
+        <div class="setup-section-title" style="font-size:0.9rem">Probabilistic Simulation Settings <span style="font-family:var(--mono);font-size:0.58rem;letter-spacing:0.1em;color:var(--text3);text-transform:uppercase;margin-left:8px;vertical-align:middle">Premium · Advanced</span></div>
+        <div class="setup-section-desc" style="font-size:0.78rem">Parameters for the geometric spending rule used in probabilistic scenarios. Defaults work well for most users.</div>
+      </div>
+      <span id="geoSettingsChevron" style="color:var(--text3);font-size:1rem;transition:transform 0.2s">▼</span>
+    </div>
+    <div id="geoSettingsBody" style="display:none">
+    <div class="card" style="margin-bottom:0">
+      <div class="solver-grid">
+        <div class="field" style="margin-bottom:0">
+          <label class="lbl">Smoothing rate α <button class="field-help-btn" onclick="toggleTooltip('tt-geoalpha')">?</button></label>
+          <input type="number" id="geoAlpha" value="0.75" min="0" max="0.99" step="0.05"/>
+          <div id="tt-geoalpha" class="field-tooltip" style="display:none">
+            <div class="ft-title">Smoothing rate (α)</div>
+            <div class="ft-body">Controls how much this year's spending is anchored to last year's vs the portfolio value. 0 = pure % of portfolio each year. 1 = pure inflation-linked (ignores portfolio). 0.75 is a practical balance.</div>
+            <div class="ft-typical">Typical value: 0.70–0.80</div>
+          </div>
+          <p style="font-family:var(--mono);font-size:10px;color:#475569;margin-top:4px">0 = pure % of portfolio · 1 = pure inflation link</p>
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label class="lbl">Target rate p % <span id="geoRateAutoLabel" style="color:#34d399;font-size:9px;letter-spacing:0.05em">· auto-synced to safe withdrawal rate</span></label>
+          <input type="number" id="geoRate" value="4.0" min="0.5" max="20" step="0.1" oninput="onGeoRateManualEdit()"/>
+          <p style="font-family:var(--mono);font-size:10px;color:#475569;margin-top:4px">% of current portfolio used as anchor — auto-set to your actual safe withdrawal rate</p>
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label class="lbl">Floor (% of Year 1 withdrawal)</label>
+          <input type="number" id="geoFloor" value="70" min="10" max="100" step="5"/>
+          <p style="font-family:var(--mono);font-size:10px;color:#475569;margin-top:4px">Minimum spending as % of year-1 withdrawal</p>
+        </div>
+      </div>
+      <div id="geoPreview" style="margin-top:10px;font-family:var(--mono);font-size:10px;color:#c084fc"></div>
+    </div>
+    </div>
+  </div>
+
+  <!-- ── View Results CTA ─────────────────────────────────────────────────── -->
+  <div style="text-align:center;padding:32px 0 16px">
+    <button onclick="showResults()" style="
+      font-family:var(--body);font-size:1rem;font-weight:600;
+      background:var(--amber);color:#0B0F1A;
+      border:none;border-radius:10px;padding:16px 48px;
+      cursor:pointer;transition:opacity 0.2s;letter-spacing:0.02em">
+      View My Projections →
+    </button>
+    <div style="font-family:var(--mono);font-size:0.62rem;color:var(--text3);margin-top:10px;letter-spacing:0.08em;text-transform:uppercase">Results update automatically as you change inputs</div>
+  </div>
+
+</div><!-- end #setupView -->
+
+<!-- ══ RESULTS VIEW ═══════════════════════════════════════════════════════════ -->
+<div id="resultsView" style="display:none">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+    <button onclick="showSetup()" style="
+      font-family:var(--mono);font-size:0.65rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;
+      background:transparent;color:var(--text3);border:1px solid var(--border2);
+      border-radius:6px;padding:8px 16px;cursor:pointer;transition:all 0.2s">
+      ← Edit Setup
+    </button>
+    <div style="font-family:var(--mono);font-size:0.62rem;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase">Results update as you change inputs</div>
+  </div>
 
 <!-- Outcome banner -->
 <div id="outcomeBanner" class="outcome-banner"></div>
+
+<!-- ── RESULTS SUMMARY (plain English) ────────────────────────────────────── -->
+<div class="results-summary" id="resultsSummary" style="display:none"></div>
 
 <!-- ── KEY STATS ─────────────────────────────────────────────────────────── -->
 <div class="grid3" style="margin-bottom:20px">
@@ -553,9 +671,14 @@
     <div class="ssub" id="statNestFull">—</div>
   </div>
   <div class="sbox sbox-gold">
-    <div class="slabel slabel-gold">Baseline Year 1 Withdrawal</div>
+    <div class="slabel slabel-gold">Baseline Year 1 Withdrawal <button class="field-help-btn" onclick="toggleTooltip('tt-swr')">?</button></div>
     <div class="sval" id="statWd">—</div>
-    <div class="ssub" id="statWdSub">SWR: —%</div>
+    <div class="ssub" id="statWdSub">Safe withdrawal rate: —%</div>
+    <div id="tt-swr" class="field-tooltip" style="display:none;margin-top:8px">
+      <div class="ft-title">Safe Withdrawal Rate (SWR)</div>
+      <div class="ft-body">The safe withdrawal rate is your planned year-1 withdrawal expressed as a percentage of your total nest egg. A 4% SWR on a $1M portfolio means withdrawing $40,000 in year 1, then adjusting for inflation each year. Lower is safer — a 3% rate gives your portfolio far more buffer against bad market sequences than a 6% rate.</div>
+      <div class="ft-typical">Typical value: 3–4% is considered conservative and sustainable over 30+ years. Above 5% carries meaningful depletion risk.</div>
+    </div>
   </div>
   <div class="sbox sbox-gold">
     <div class="slabel slabel-gold">Avg Portfolio IRR</div>
@@ -564,24 +687,42 @@
   </div>
 </div>
 
-<!-- ── OPTIMIZER RESULTS ──────────────────────────────────────────────────── -->
-<div class="solver-box" id="optimizerSection">
-  <div class="solver-title">⚡ Withdrawal Optimizer Results</div>
-  <div class="solver-grid">
+<!-- ── OPTIMIZER RESULTS (collapsible) ────────────────────────────────────── -->
+<div id="optimizerSection" style="margin-bottom:20px">
+  <button onclick="toggleSection('optimizerBody')" style="
+    width:100%;display:flex;align-items:center;justify-content:space-between;
+    background:rgba(96,165,250,0.05);border:1px solid rgba(96,165,250,0.2);
+    border-radius:10px;padding:12px 18px;cursor:pointer;transition:all 0.2s;
+    font-family:var(--body);text-align:left">
     <div>
-      <div class="slabel slabel-blue">Max Affordable Year 1 Withdrawal</div>
-      <div style="font-family:Georgia,serif;font-size:26px;font-weight:700;color:#60a5fa" id="optWd">—</div>
-      <div class="ssub" id="optWdFull">—</div>
+      <span style="font-family:Georgia,serif;font-size:1rem;font-weight:600;color:#60a5fa">⚡ Maximum Withdrawal Reference</span>
+      <span style="font-family:var(--mono);font-size:0.6rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-left:12px">Advanced · click to expand</span>
     </div>
-    <div>
-      <div class="slabel slabel-blue">vs. Your Planned Spending</div>
-      <div style="margin-top:6px" id="spendingDelta">—</div>
-      <div class="ssub" id="optSWR">Optimized SWR: —%</div>
+    <span id="optimizerBodyChevron" style="color:var(--text3);font-size:1rem;transition:transform 0.2s">▼</span>
+  </button>
+  <div id="optimizerBody" style="display:none">
+    <div style="background:rgba(251,113,133,0.06);border:1px solid rgba(251,113,133,0.2);border-left:3px solid #f87171;border-radius:0 8px 8px 0;padding:12px 16px;margin:10px 0 14px;font-size:0.82rem;color:var(--text2);line-height:1.6;font-family:var(--body)">
+      <strong style="color:#f87171;font-family:var(--mono);font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:4px">⚠ Reference only — extreme case</strong>
+      This shows the mathematically maximum amount you <em>could</em> withdraw if you planned to fully exhaust your portfolio by your lifespan target. It assumes your investments return exactly as modelled, every year, with no surprises. In reality, markets fluctuate, plans change, and most people want a safety buffer. <strong>Anchoring to this number for actual spending decisions is not recommended.</strong> Use your planned spending and the stress test results as your primary guide.
     </div>
-    <div>
-      <div class="slabel slabel-blue">Legacy Balance at End</div>
-      <div style="font-family:Georgia,serif;font-size:26px;font-weight:700;color:#60a5fa" id="optLegacy">—</div>
-      <div class="ssub" id="optLegacySub">target minimum</div>
+    <div class="solver-box" style="margin-bottom:0">
+      <div class="solver-grid">
+        <div>
+          <div class="slabel slabel-blue">Max Affordable Year 1 Withdrawal</div>
+          <div style="font-family:Georgia,serif;font-size:26px;font-weight:700;color:#60a5fa" id="optWd">—</div>
+          <div class="ssub" id="optWdFull">—</div>
+        </div>
+        <div>
+          <div class="slabel slabel-blue">vs. Your Planned Spending</div>
+          <div style="margin-top:6px" id="spendingDelta">—</div>
+          <div class="ssub" id="optSWR">Optimized safe withdrawal rate: —%</div>
+        </div>
+        <div>
+          <div class="slabel slabel-blue">Legacy Balance at End</div>
+          <div style="font-family:Georgia,serif;font-size:26px;font-weight:700;color:#60a5fa" id="optLegacy">—</div>
+          <div class="ssub" id="optLegacySub">target minimum</div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -596,7 +737,7 @@
 <div class="card" style="margin-bottom:20px">
   <div class="stitle">
     Portfolio Balance Through Retirement
-    <span style="font-family:'Courier New',monospace;font-size:11px;font-weight:400;color:#64748b;margin-left:10px" id="timingLabel">— withdraw → earn (conservative)</span>
+    <span style="font-family:var(--mono);font-size:11px;font-weight:400;color:#64748b;margin-left:10px" id="timingLabel">— withdraw → earn (conservative)</span>
   </div>
   <div class="legend-row">
     <div class="legend-item"><div class="legend-line" style="background:#c9a84c"></div>Baseline (planned spending)</div>
@@ -606,7 +747,7 @@
   <div class="chart-wrap">
     <canvas id="chartCanvas" height="340"></canvas>
     <div class="chart-tooltip" id="tooltip">
-      <div style="color:#c9a84c;font-weight:700;font-family:'Courier New',monospace;font-size:12px;margin-bottom:6px" id="ttAge"></div>
+      <div style="color:#c9a84c;font-weight:700;font-family:var(--mono);font-size:12px;margin-bottom:6px" id="ttAge"></div>
       <div style="color:#e2e8f0;font-size:13px;margin-bottom:3px" id="ttBase"></div>
       <div style="color:#60a5fa;font-size:13px" id="ttOpt"></div>
     </div>
@@ -623,7 +764,7 @@
   <div class="chart-wrap">
     <canvas id="wdCanvas" height="260"></canvas>
     <div class="chart-tooltip" id="wdTooltip">
-      <div style="color:#c9a84c;font-weight:700;font-family:'Courier New',monospace;font-size:12px;margin-bottom:6px" id="wdTtAge"></div>
+      <div style="color:#c9a84c;font-weight:700;font-family:var(--mono);font-size:12px;margin-bottom:6px" id="wdTtAge"></div>
       <div style="color:#94a3b8;font-size:12px;margin-bottom:2px" id="wdTtPlanned"></div>
       <div style="font-size:12px" id="wdTtMax"></div>
       <div style="font-size:11px;margin-top:3px" id="wdTtFactor"></div>
@@ -634,7 +775,7 @@
 <!-- ── SEQUENCE RISK STRESS TEST ─────────────────────────────────────────── -->
 <div class="card" id="stressTestSection" style="margin-bottom:20px">
   <div class="stitle">⚡ Sequence of Returns — Stress Test</div>
-  <p style="font-family:'Courier New',monospace;font-size:11px;color:#64748b;margin-bottom:14px">
+  <p style="font-family:var(--mono);font-size:11px;color:#64748b;margin-bottom:14px">
     Same 5 IRR values, two orderings. Any difference in outcome is <em>purely</em> sequence risk — not average return risk.
     Pessimistic = worst returns first — the hardest possible scenario for a given IRR set.
   </p>
@@ -643,10 +784,10 @@
   <div style="margin-bottom:18px;padding:14px 16px;background:rgba(255,255,255,0.02);border:1px solid #1e2535;border-radius:10px">
     <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
       <div style="flex:1;min-width:200px">
-        <div style="font-family:'Courier New',monospace;font-size:11px;color:#94a3b8;margin-bottom:3px">
+        <div style="font-family:var(--mono);font-size:11px;color:#94a3b8;margin-bottom:3px">
           Return Sensitivity (α) — how much period spending tracks each period's IRR
         </div>
-        <div style="font-family:'Courier New',monospace;font-size:10px;color:#475569">
+        <div style="font-family:var(--mono);font-size:10px;color:#475569">
           0 = flat uniform spending · 1 = fully IRR-driven · factors = α·√(IRRᵢ/avg) + (1−α)
         </div>
       </div>
@@ -655,13 +796,13 @@
           style="width:140px;accent-color:#c9a84c;cursor:pointer" oninput="onAlphaChange()"/>
         <div style="text-align:center;min-width:42px">
           <div style="font-family:Georgia,serif;font-size:22px;font-weight:700;color:#c9a84c" id="alphaDisplay">0.70</div>
-          <div style="font-family:'Courier New',monospace;font-size:9px;color:#475569">α</div>
+          <div style="font-family:var(--mono);font-size:9px;color:#475569">α</div>
         </div>
       </div>
     </div>
     <!-- Factor preview: shows the 5 resulting aᵢ values live -->
     <div id="alphaFactorPreview" style="margin-top:12px;padding:10px 12px;background:rgba(0,0,0,0.15);border-radius:6px;
-      font-family:'Courier New',monospace;font-size:10px;color:#64748b;display:flex;gap:0;flex-wrap:wrap"></div>
+      font-family:var(--mono);font-size:10px;color:#64748b;display:flex;gap:0;flex-wrap:wrap"></div>
   </div>
 
   <!-- 3-scenario IRR order display -->
@@ -675,22 +816,22 @@
   <div class="chart-wrap" style="margin-bottom:20px">
     <canvas id="seqCanvas" height="300"></canvas>
     <div class="chart-tooltip" id="seqTooltip">
-      <div style="font-weight:700;font-family:'Courier New',monospace;font-size:12px;margin-bottom:6px;color:#c9a84c" id="seqTtAge"></div>
+      <div style="font-weight:700;font-family:var(--mono);font-size:12px;margin-bottom:6px;color:#c9a84c" id="seqTtAge"></div>
       <div style="font-size:12px;color:#c9a84c;margin-bottom:2px" id="seqTtPlan"></div>
       <div style="font-size:12px;color:#f87171" id="seqTtPess"></div>
     </div>
   </div>
 
   <!-- Per-period comparison table -->
-  <div style="font-family:'Courier New',monospace;font-size:10px;color:#475569;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px">Max Withdrawal by Period — Your Plan vs Pessimistic</div>
+  <div style="font-family:var(--mono);font-size:10px;color:#475569;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px">Max Withdrawal by Period — Your Plan vs Pessimistic</div>
   <!-- header -->
   <div style="display:grid;grid-template-columns:110px 1fr 1fr 1fr 1fr 1fr;gap:0;padding:6px 8px;border-bottom:1px solid #2a3444;margin-bottom:4px">
-    <div style="font-family:'Courier New',monospace;font-size:10px;color:#475569;text-transform:uppercase">Period</div>
-    <div style="font-family:'Courier New',monospace;font-size:10px;color:#94a3b8;text-transform:uppercase;text-align:right">Planned</div>
-    <div style="font-family:'Courier New',monospace;font-size:10px;color:#c9a84c;text-transform:uppercase;text-align:right">Plan Max</div>
-    <div style="font-family:'Courier New',monospace;font-size:10px;color:#f87171;text-transform:uppercase;text-align:right">Pess. Max</div>
-    <div style="font-family:'Courier New',monospace;font-size:10px;color:#64748b;text-transform:uppercase;text-align:right">Δ% nominal</div>
-    <div style="font-family:'Courier New',monospace;font-size:10px;color:#64748b;text-transform:uppercase;text-align:right">Seq. Risk</div>
+    <div style="font-family:var(--mono);font-size:10px;color:#475569;text-transform:uppercase">Period</div>
+    <div style="font-family:var(--mono);font-size:10px;color:#94a3b8;text-transform:uppercase;text-align:right">Planned</div>
+    <div style="font-family:var(--mono);font-size:10px;color:#c9a84c;text-transform:uppercase;text-align:right">Plan Max</div>
+    <div style="font-family:var(--mono);font-size:10px;color:#f87171;text-transform:uppercase;text-align:right">Pess. Max</div>
+    <div style="font-family:var(--mono);font-size:10px;color:#64748b;text-transform:uppercase;text-align:right">Δ% nominal</div>
+    <div style="font-family:var(--mono);font-size:10px;color:#64748b;text-transform:uppercase;text-align:right">Seq. Risk</div>
   </div>
   <div id="seqTable"></div>
 
@@ -699,10 +840,12 @@
 </div>
 
 
-<div style="text-align:center;font-family:'Courier New',monospace;font-size:10px;color:#334155;margin-top:24px">
+<div style="text-align:center;font-family:var(--mono);font-size:10px;color:#334155;margin-top:24px">
   For illustrative purposes only. Not financial advice. Projections assume constant inflation-adjusted withdrawals and fixed returns per period.
 </div>
 
+
+</div><!-- end #resultsView -->
 </div><!-- end #panelDashboard -->
 
 <!-- ── YEAR-BY-YEAR PANEL ────────────────────────────────────────────────── -->
@@ -713,7 +856,7 @@
   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px">
     <div>
       <div style="font-family:Georgia,serif;font-size:20px;font-weight:600;color:#c9a84c;margin-bottom:4px">Year-by-Year Projection</div>
-      <div style="font-family:'Courier New',monospace;font-size:11px;color:#475569">5 scenarios · withdrawal at <span id="ybyTimingLabel">beginning</span> of year · geometric columns shown after running MC</div>
+      <div style="font-family:var(--mono);font-size:11px;color:#475569">5 scenarios · withdrawal at <span id="ybyTimingLabel">beginning</span> of year · geometric columns shown after running MC</div>
     </div>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
       <!-- $ vs % toggle -->
@@ -744,7 +887,7 @@
       <div style="width:14px;height:14px;border-radius:3px;background:rgba(248,113,113,0.18);border:1px solid rgba(248,113,113,0.3)"></div>
       <span>below nominal</span>
     </div>
-    <div id="ybyMCNote" style="font-family:'Courier New',monospace;font-size:10px;color:#475569;font-style:italic;margin-left:auto"></div>
+    <div id="ybyMCNote" style="font-family:var(--mono);font-size:10px;color:#475569;font-style:italic;margin-left:auto"></div>
   </div>
 
   <!-- Table -->
@@ -755,7 +898,7 @@
     </table>
   </div>
 
-  <div style="text-align:center;font-family:'Courier New',monospace;font-size:10px;color:#334155;margin-top:20px">
+  <div style="text-align:center;font-family:var(--mono);font-size:10px;color:#334155;margin-top:20px">
     For illustrative purposes only. Not financial advice.
   </div>
 </div><!-- end yearByYearSection -->
@@ -769,12 +912,12 @@
   <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:20px">
     <div style="flex:1;min-width:260px">
       <div style="font-family:Georgia,serif;font-size:20px;font-weight:600;color:#c9a84c;margin-bottom:4px">Monte Carlo Simulation</div>
-      <div style="font-family:'Courier New',monospace;font-size:11px;color:#475569">Each run draws log-normally distributed annual returns where the <em>geometric</em> mean equals your IRR input — so the MC and deterministic models share the same effective return assumption. σ controls the year-to-year volatility around that geometric mean.</div>
+      <div style="font-family:var(--mono);font-size:11px;color:#475569">Each run draws log-normally distributed annual returns where the <em>geometric</em> mean equals your IRR input — so the MC and deterministic models share the same effective return assumption. σ controls the year-to-year volatility around that geometric mean.</div>
     </div>
     <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
       <div>
         <label class="lbl">Simulations</label>
-        <select id="mcRuns" style="background:#0a0e1a;border:1px solid #1e2535;border-radius:6px;color:#e2e8f0;padding:7px 12px;font-family:'Courier New',monospace;font-size:13px;cursor:pointer">
+        <select id="mcRuns" style="background:#0a0e1a;border:1px solid #1e2535;border-radius:6px;color:#e2e8f0;padding:7px 12px;font-family:var(--mono);font-size:13px;cursor:pointer">
           <option value="1000">1,000</option>
           <option value="5000" selected>5,000</option>
           <option value="10000">10,000</option>
@@ -784,43 +927,16 @@
         <button id="mcRunBtn" onclick="runMonteCarlo()"
           style="padding:10px 28px;border-radius:8px;border:none;
             background:linear-gradient(135deg,#c9a84c,#a07c32);
-            color:#000;font-family:'Courier New',monospace;font-size:13px;
+            color:#000;font-family:var(--mono);font-size:13px;
             font-weight:700;cursor:pointer;letter-spacing:0.08em;
             transition:opacity 0.2s">▶ RUN</button>
       </div>
     </div>
   </div>
 
-  <!-- Geometric spending rule parameters -->
-  <div style="margin-bottom:20px;padding:14px 16px;background:rgba(192,132,252,0.04);border:1px solid rgba(192,132,252,0.2);border-radius:10px">
-    <div style="font-family:'Courier New',monospace;font-size:10px;color:#c084fc;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">🔢 Geometric Spending Rule Parameters</div>
-    <div style="font-family:'Courier New',monospace;font-size:10px;color:#64748b;margin-bottom:12px;line-height:1.7">
-      W(t) = α × W(t−1) × (1+inf) + (1−α) × p% × Portfolio(t) &nbsp;·&nbsp;
-      α = smoothing (inertia from last year) &nbsp;·&nbsp; p% = target withdrawal rate
-    </div>
-    <div class="grid3">
-      <div class="field" style="margin-bottom:0">
-        <label class="lbl">Smoothing rate α</label>
-        <input type="number" id="geoAlpha" value="0.75" min="0" max="0.99" step="0.05"/>
-        <p style="font-family:'Courier New',monospace;font-size:10px;color:#475569;margin-top:4px">0 = pure % of portfolio · 1 = pure inflation link</p>
-      </div>
-      <div class="field" style="margin-bottom:0">
-        <label class="lbl">Target rate p % <span id="geoRateAutoLabel" style="color:#34d399;font-size:9px;letter-spacing:0.05em">· auto-synced to SWR</span></label>
-        <input type="number" id="geoRate" value="4.0" min="0.5" max="20" step="0.1" oninput="onGeoRateManualEdit()"/>
-        <p style="font-family:'Courier New',monospace;font-size:10px;color:#475569;margin-top:4px">% of current portfolio used as anchor each year — auto-set to your actual SWR so geometric spending is centred on your plan</p>
-      </div>
-      <div class="field" style="margin-bottom:0">
-        <label class="lbl">Floor (% of W₀)</label>
-        <input type="number" id="geoFloor" value="70" min="10" max="100" step="5"/>
-        <p style="font-family:'Courier New',monospace;font-size:10px;color:#475569;margin-top:4px">Min spending as % of year-1 withdrawal</p>
-      </div>
-    </div>
-    <div id="geoPreview" style="margin-top:10px;font-family:'Courier New',monospace;font-size:10px;color:#c084fc"></div>
-  </div>
-
   <!-- Progress bar (hidden until running) -->
   <div id="mcProgress" style="display:none;margin-bottom:20px">
-    <div style="font-family:'Courier New',monospace;font-size:11px;color:#475569;margin-bottom:6px" id="mcProgressLabel">Running…</div>
+    <div style="font-family:var(--mono);font-size:11px;color:#475569;margin-bottom:6px" id="mcProgressLabel">Running…</div>
     <div style="background:#1e2535;border-radius:4px;height:6px;overflow:hidden">
       <div id="mcProgressBar" style="height:100%;background:#c9a84c;width:0%;transition:width 0.1s"></div>
     </div>
@@ -845,7 +961,7 @@
       <div class="chart-wrap">
         <canvas id="mcFanCanvas" height="380"></canvas>
         <div class="chart-tooltip" id="mcTooltip">
-          <div style="font-weight:700;font-family:'Courier New',monospace;font-size:12px;color:#c9a84c;margin-bottom:6px" id="mcTtAge"></div>
+          <div style="font-weight:700;font-family:var(--mono);font-size:12px;color:#c9a84c;margin-bottom:6px" id="mcTtAge"></div>
           <div style="font-size:11px;color:#94a3b8;margin-bottom:3px" id="mcTt90"></div>
           <div style="font-size:11px;color:#60a5fa;margin-bottom:3px" id="mcTt75"></div>
           <div style="font-size:12px;color:#60a5fa;font-weight:700;margin-bottom:3px" id="mcTt50"></div>
@@ -859,7 +975,7 @@
     <!-- Simulated Cashflows chart — full width -->
     <div class="card" style="margin-bottom:20px">
       <div class="stitle">Simulated Annual Withdrawals — Percentile Fan</div>
-      <div style="font-family:'Courier New',monospace;font-size:10px;color:#64748b;margin-bottom:10px">
+      <div style="font-family:var(--mono);font-size:10px;color:#64748b;margin-bottom:10px">
         Year-by-year withdrawal amounts across all simulations. Vertical lines mark the start of each 5-period. Shaded bands = 10th–90th (light) and 25th–75th (dark) percentiles. Median = solid line.
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;margin-bottom:10px" id="cashflowsLegend"></div>
@@ -867,7 +983,7 @@
 
       <!-- Period snapshot table -->
       <div style="margin-top:20px;padding-top:16px;border-top:1px solid #1e2535">
-        <div style="font-family:'Courier New',monospace;font-size:10px;color:#64748b;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">
+        <div style="font-family:var(--mono);font-size:10px;color:#64748b;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">
           Withdrawal Snapshot — Period Start Years &nbsp;·&nbsp; <span style="color:#475569">P50 median · <span style="color:#334155">P10–P90 range</span></span>
         </div>
         <div id="cashflowsPeriodTable" style="overflow-x:auto"></div>
@@ -893,7 +1009,7 @@
       <!-- Withdrawal sensitivity table -->
       <div class="card">
         <div class="stitle" style="font-size:15px">Withdrawal Sensitivity</div>
-        <div style="font-family:'Courier New',monospace;font-size:10px;color:#475569;margin-bottom:10px">
+        <div style="font-family:var(--mono);font-size:10px;color:#475569;margin-bottom:10px">
           Success rate at different year-1 withdrawal levels (% of your nominal plan)
         </div>
         <div id="mcSensTable"></div>
@@ -943,6 +1059,7 @@ function buildCan(tier) {
     taxAware:           tier === 'premium',
     incomeSeries:       tier === 'premium',
     monteCarlo:         tier === 'premium',
+    advancedSettings:   tier === 'premium',
   };
 }
 
@@ -2134,9 +2251,9 @@ function renderMCResults() {
       <div class="sbox" style="background:rgba(255,255,255,0.02);border:1px solid #1e2535;border-left:3px solid ${s.color}">
         <div class="slabel" style="color:${s.color}">${s.label}</div>
         <div style="font-family:Georgia,serif;font-size:26px;font-weight:700;color:${col};margin:6px 0">${(s.successRate*100).toFixed(1)}%</div>
-        <div style="font-family:'Courier New',monospace;font-size:10px;color:#475569;margin-bottom:4px">success to age ${lifespan}</div>
-        <div style="font-family:'Courier New',monospace;font-size:11px;color:#64748b">median final: ${fmt(s.medianFinal)}</div>
-        <div style="font-family:'Courier New',monospace;font-size:11px;color:#64748b">10th pctile:  ${fmt(s.p10Final)}</div>
+        <div style="font-family:var(--mono);font-size:10px;color:#475569;margin-bottom:4px">success to age ${lifespan}</div>
+        <div style="font-family:var(--mono);font-size:11px;color:#64748b">median final: ${fmt(s.medianFinal)}</div>
+        <div style="font-family:var(--mono);font-size:11px;color:#64748b">10th pctile:  ${fmt(s.p10Final)}</div>
       </div>`;
   }).join('');
 
@@ -2566,7 +2683,7 @@ function drawMCCashflows() {
   const legendEl = document.getElementById('cashflowsLegend');
   if (legendEl) {
     legendEl.innerHTML = stratStats.map(s =>
-      `<div style="display:flex;align-items:center;gap:8px;font-family:'Courier New',monospace;font-size:10px;color:#94a3b8">
+      `<div style="display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10px;color:#94a3b8">
         <div style="width:22px;height:3px;background:${s.color};border-radius:2px;flex-shrink:0"></div>${s.label}
       </div>`
     ).join('');
@@ -2587,9 +2704,9 @@ function renderCashflowsPeriodTable() {
   let html = `<div style="display:grid;grid-template-columns:${cols};gap:0;min-width:320px">`;
 
   // Header row
-  html += `<div style="font-family:'Courier New',monospace;font-size:9px;color:#475569;text-transform:uppercase;padding:6px 8px;border-bottom:1px solid #1e2535">Period<br>/ Age</div>`;
+  html += `<div style="font-family:var(--mono);font-size:9px;color:#475569;text-transform:uppercase;padding:6px 8px;border-bottom:1px solid #1e2535">Period<br>/ Age</div>`;
   stratStats.forEach(s => {
-    html += `<div style="font-family:'Courier New',monospace;font-size:9px;text-transform:uppercase;padding:6px 8px;border-bottom:1px solid #1e2535;border-left:1px solid #1e2535;color:${s.color}">${s.label.replace('Nominal','Nom.').replace('Pessimistic','Pess.').replace('Fixed','Fix').replace('Geometric','Geo')}</div>`;
+    html += `<div style="font-family:var(--mono);font-size:9px;text-transform:uppercase;padding:6px 8px;border-bottom:1px solid #1e2535;border-left:1px solid #1e2535;color:${s.color}">${s.label.replace('Nominal','Nom.').replace('Pessimistic','Pess.').replace('Fixed','Fix').replace('Geometric','Geo')}</div>`;
   });
 
   // Data rows — one per period
@@ -2599,7 +2716,7 @@ function renderCashflowsPeriodTable() {
     const rowBg = p%2===0 ? '' : 'background:rgba(255,255,255,0.018)';
 
     // Period label cell
-    html += `<div style="font-family:'Courier New',monospace;font-size:10px;color:#64748b;padding:8px;${rowBg};border-bottom:1px solid #0d1525">
+    html += `<div style="font-family:var(--mono);font-size:10px;color:#64748b;padding:8px;${rowBg};border-bottom:1px solid #0d1525">
       <span style="font-weight:700;color:#94a3b8">${PERIOD_NAMES_SHORT[p]}</span><br>
       <span style="font-size:9px">Age ${age}</span>
     </div>`;
@@ -2612,7 +2729,7 @@ function renderCashflowsPeriodTable() {
       const swr = nestEgg > 0 ? (p50 / nestEgg * 100).toFixed(1) : '—';
       // Range width as % of p50 — indicates how tight/wide the spread is
       const spread = p50 > 0 ? ((p90-p10)/p50*100).toFixed(0) : '0';
-      html += `<div style="font-family:'Courier New',monospace;padding:8px;${rowBg};border-bottom:1px solid #0d1525;border-left:1px solid #1e2535">
+      html += `<div style="font-family:var(--mono);padding:8px;${rowBg};border-bottom:1px solid #0d1525;border-left:1px solid #1e2535">
         <div style="font-size:12px;font-weight:700;color:${s.color}">${fmt(p50)}</div>
         <div style="font-size:9px;color:#475569;margin-top:2px">${fmt(p10)} – ${fmt(p90)}</div>
         <div style="font-size:9px;color:#334155;margin-top:1px">SWR ${swr}% · ±${spread}% spread</div>
@@ -2621,7 +2738,7 @@ function renderCashflowsPeriodTable() {
   }
 
   html += `</div>`;
-  html += `<div style="font-family:'Courier New',monospace;font-size:9px;color:#334155;margin-top:8px">SWR = withdrawal ÷ initial nest egg. Spread = (P90−P10) ÷ P50 — how wide the range of outcomes is. Fixed strategies have near-zero spread; geometric strategies widen with time.</div>`;
+  html += `<div style="font-family:var(--mono);font-size:9px;color:#334155;margin-top:8px">SWR = withdrawal ÷ initial nest egg. Spread = (P90−P10) ÷ P50 — how wide the range of outcomes is. Fixed strategies have near-zero spread; geometric strategies widen with time.</div>`;
   el.innerHTML = html;
 }
 
@@ -2629,7 +2746,7 @@ function renderMCSensTable() {
   const { sensResults, baselineWd } = mcState;
   const fCol = p => p>=0.9?'#34d399':p>=0.75?'#f59e0b':'#f87171';
   document.getElementById('mcSensTable').innerHTML = `
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;font-family:'Courier New',monospace;font-size:11px">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;font-family:var(--mono);font-size:11px">
       <div style="color:#475569;padding:5px 8px;border-bottom:1px solid #1e2535;text-transform:uppercase;font-size:10px">Year-1 Wd</div>
       <div style="color:#475569;padding:5px 8px;border-bottom:1px solid #1e2535;text-transform:uppercase;font-size:10px">Amount</div>
       <div style="color:#475569;padding:5px 8px;border-bottom:1px solid #1e2535;text-transform:uppercase;font-size:10px;text-align:right">Success</div>
@@ -2759,7 +2876,7 @@ function renderYbyTable() {
       const extraCols = (hasIncome ? 1 : 0) + (hasTax ? 1 : 0);
       bodyHTML += `<tr class="period-divider">
         <td colspan="${1 + extraCols + SCEN.length * 2}" style="
-          font-family:'Courier New',monospace;font-size:10px;font-weight:700;
+          font-family:var(--mono);font-size:10px;font-weight:700;
           color:${PERIOD_COLORS[p]};letter-spacing:0.1em;text-transform:uppercase;
           background:rgba(${pr},${pg},${pb},0.06) !important;
           border-top:2px solid rgba(${pr},${pg},${pb},0.3) !important;">
@@ -3069,7 +3186,7 @@ function recalc() {
           ? `Baseline portfolio survives to age ${lifespan}`
           : `Baseline portfolio depleted at age ${retirementAge + base.depletedAt}`}
       </p>
-      <p style="font-family:'Courier New',monospace;font-size:12px;color:#64748b;margin-top:4px">
+      <p style="font-family:var(--mono);font-size:12px;color:#64748b;margin-top:4px">
         ${baselineSurvives
           ? `Final balance: <span style="color:#10b981">${fmtFull(finalBaseline)}</span> — see optimizer below for max affordable spending`
           : `${lifespan - (retirementAge + base.depletedAt)} years short — the optimizer shows your safe max withdrawal`}
@@ -3081,7 +3198,22 @@ function recalc() {
   document.getElementById('statNest').textContent      = fmt(nestEgg);
   document.getElementById('statNestFull').textContent  = fmtFull(nestEgg);
   document.getElementById('statWd').textContent        = fmt(baselineWd);
-  document.getElementById('statWdSub').textContent     = `SWR: ${((baselineWd/nestEgg)*100).toFixed(2)}%`;
+  document.getElementById('statWdSub').textContent     = `Safe withdrawal rate: ${((baselineWd/nestEgg)*100).toFixed(2)}%`;
+
+  // ── Action 07: plain-English results summary ──────────────────────────────
+  const summaryEl = document.getElementById('resultsSummary');
+  if (summaryEl) {
+    const retYrsLeft = lifespan - retirementAge;
+    const monthlyWd  = (baselineWd / 12);
+    const todayMoney = (baselineWd / Math.pow(1 + inflation/100, yearsToRetire));
+    if (baselineSurvives) {
+      summaryEl.innerHTML = `Based on your inputs, your savings are projected to last to age <strong>${lifespan}</strong> — all <strong>${retYrsLeft} years</strong> of your retirement. Your year-1 withdrawal would be <strong>${fmt(baselineWd)}/year</strong> (that's <strong>${fmt(todayMoney)}</strong> in today's money). Your safe withdrawal rate is <strong>${((baselineWd/nestEgg)*100).toFixed(2)}%</strong>.`;
+    } else {
+      const depleteAge = retirementAge + base.depletedAt;
+      summaryEl.innerHTML = `⚠ Based on your inputs, your portfolio is projected to run out at age <strong>${depleteAge}</strong> — <strong>${lifespan - depleteAge} years</strong> before your target. Consider reducing spending, increasing savings, or adjusting your return assumptions. Your current withdrawal is <strong>${fmt(baselineWd)}/year</strong>.`;
+    }
+    summaryEl.style.display = '';
+  }
 
   // ── Auto-sync geoRate to SWR unless user has manually overridden it ──
   if (!window._geoRateManualOverride) {
@@ -3104,7 +3236,7 @@ function recalc() {
   const pill = document.getElementById('spendingDelta');
   const isPos = spendingDeltaPct >= 0;
   pill.innerHTML = `<span class="delta-pill ${isPos?'delta-pos':'delta-neg'}">${isPos?'+':''}${spendingDeltaPct.toFixed(1)}%</span>
-    <div style="font-family:'Courier New',monospace;font-size:11px;color:#64748b;margin-top:6px">
+    <div style="font-family:var(--mono);font-size:11px;color:#64748b;margin-top:6px">
       ${isPos ? 'You can spend more than planned' : 'You need to reduce spending'}
     </div>`;
 
@@ -3157,23 +3289,23 @@ function recalc() {
         border:1px solid rgba(${pr},${pg},${pb},0.15);
         align-items:start">
       <div>
-        <span style="font-family:'Courier New',monospace;font-size:10px;font-weight:700;
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;
           padding:2px 6px;border-radius:4px;display:inline-block;margin-bottom:5px;
           background:rgba(${pr},${pg},${pb},0.2);color:${PERIOD_COLORS[i]}">${PERIOD_NAMES[i]}</span>
-        <div style="font-family:'Courier New',monospace;font-size:11px;color:#e2e8f0">Age ${startAge}–${endAge}</div>
-        <div style="font-family:'Courier New',monospace;font-size:10px;color:#475569;margin-top:2px">${PERIOD_HINTS[i]} · ${irrs[i]}% IRR</div>
+        <div style="font-family:var(--mono);font-size:11px;color:#e2e8f0">Age ${startAge}–${endAge}</div>
+        <div style="font-family:var(--mono);font-size:10px;color:#475569;margin-top:2px">${PERIOD_HINTS[i]} · ${irrs[i]}% IRR</div>
       </div>
       <div style="text-align:right">
-        <div style="font-family:'Courier New',monospace;font-size:13px;font-weight:700;color:#94a3b8">${plannedWd.toFixed(2)}K</div>
-        <div style="font-family:'Courier New',monospace;font-size:10px;color:#475569;margin-top:2px">planned / yr</div>
+        <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:#94a3b8">${plannedWd.toFixed(2)}K</div>
+        <div style="font-family:var(--mono);font-size:10px;color:#475569;margin-top:2px">planned / yr</div>
       </div>
       <div style="text-align:right">
-        <div style="font-family:'Courier New',monospace;font-size:13px;font-weight:700;color:${factorColor}">${maxWp.toFixed(2)}K</div>
-        <div style="font-family:'Courier New',monospace;font-size:10px;color:${factorColor};margin-top:2px">max / yr</div>
+        <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:${factorColor}">${maxWp.toFixed(2)}K</div>
+        <div style="font-family:var(--mono);font-size:10px;color:${factorColor};margin-top:2px">max / yr</div>
       </div>
       <div style="text-align:right">
-        <div style="font-family:'Courier New',monospace;font-size:20px;font-weight:700;color:${factorColor}">×${factor.toFixed(2)}</div>
-        <div style="font-family:'Courier New',monospace;font-size:10px;color:${factorColor};margin-top:2px">
+        <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:${factorColor}">×${factor.toFixed(2)}</div>
+        <div style="font-family:var(--mono);font-size:10px;color:${factorColor};margin-top:2px">
           ${factor >= 1 ? 'can spend more' : `cut ${((1-factor)*100).toFixed(0)}% vs planned`}
         </div>
       </div>
@@ -3185,9 +3317,9 @@ function recalc() {
   const lastOpt  = opt.data[retirementYears-1];
   document.getElementById('retirementEndRow').innerHTML = `
     <div style="display:grid;grid-template-columns:110px 1fr 1fr 1fr;gap:0;align-items:center;padding:8px 10px;background:rgba(255,255,255,0.02);border-radius:6px">
-      <div style="font-family:'Courier New',monospace;font-size:10px;color:#475569;letter-spacing:0.06em;text-transform:uppercase;grid-column:1/3">Final Balance at Age ${lifespan}</div>
-      <div style="text-align:right;font-family:'Courier New',monospace;font-size:13px;font-weight:700;color:${(lastBase?.balance??0)>0?'#c9a84c':'#ef4444'};grid-column:3">${fmt(lastBase?.balance??0)}</div>
-      <div style="text-align:right;font-family:'Courier New',monospace;font-size:13px;font-weight:700;color:#60a5fa">${fmt(lastOpt?.balance??0)}</div>
+      <div style="font-family:var(--mono);font-size:10px;color:#475569;letter-spacing:0.06em;text-transform:uppercase;grid-column:1/3">Final Balance at Age ${lifespan}</div>
+      <div style="text-align:right;font-family:var(--mono);font-size:13px;font-weight:700;color:${(lastBase?.balance??0)>0?'#c9a84c':'#ef4444'};grid-column:3">${fmt(lastBase?.balance??0)}</div>
+      <div style="text-align:right;font-family:var(--mono);font-size:13px;font-weight:700;color:#60a5fa">${fmt(lastOpt?.balance??0)}</div>
     </div>`;
 
   // ── Sequence of returns stress test ──────────────────────────────────────
@@ -3221,22 +3353,22 @@ function recalc() {
   const PERIOD_HINTS_SHORT = ['P1','P2','P3','P4','P5'];
   document.getElementById('scenarioIrrBadge').innerHTML = seqScenarios.map(sc => `
     <div style="background:rgba(255,255,255,0.03);border:1px solid #1e2535;border-radius:8px;padding:10px 14px">
-      <div style="font-family:'Courier New',monospace;font-size:10px;font-weight:700;color:${sc.color};letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px">${sc.label}</div>
+      <div style="font-family:var(--mono);font-size:10px;font-weight:700;color:${sc.color};letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px">${sc.label}</div>
       ${sc.irrs.map((irr,i) => `
-        <div style="display:flex;justify-content:space-between;font-family:'Courier New',monospace;font-size:11px;margin-bottom:3px">
+        <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;margin-bottom:3px">
           <span style="color:#475569">${PERIOD_HINTS_SHORT[i]}</span>
           <span style="color:#e2e8f0;font-weight:700">${irr}%</span>
         </div>`).join('')}
       <div style="margin-top:8px;padding-top:6px;border-top:1px solid #1e2535">
-        <div style="display:flex;justify-content:space-between;font-family:'Courier New',monospace;font-size:11px;margin-bottom:3px">
+        <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;margin-bottom:3px">
           <span style="color:#475569">P1 factor (start)</span>
           <span style="color:${sc.color};font-weight:700">×${sc.f1.toFixed(3)}</span>
         </div>
-        <div style="display:flex;justify-content:space-between;font-family:'Courier New',monospace;font-size:11px">
+        <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px">
           <span style="color:#475569">P5 factor (end)</span>
           <span style="color:${sc.color};font-weight:700">×${sc.f5.toFixed(3)}</span>
         </div>
-        <div style="margin-top:5px;font-family:'Courier New',monospace;font-size:10px;color:#334155;text-align:center">α = ${getAlpha().toFixed(2)} · factors IRR-relative</div>
+        <div style="margin-top:5px;font-family:var(--mono);font-size:10px;color:#334155;text-align:center">α = ${getAlpha().toFixed(2)} · factors IRR-relative</div>
       </div>
     </div>`).join('');
 
@@ -3256,25 +3388,25 @@ function recalc() {
         border:1px solid rgba(${pr},${pg},${pb},0.12);
         align-items:center">
       <div>
-        <span style="font-family:'Courier New',monospace;font-size:10px;font-weight:700;
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;
           padding:2px 5px;border-radius:3px;display:inline-block;
           background:rgba(${pr},${pg},${pb},0.2);color:${PERIOD_COLORS[i]}">${PERIOD_NAMES[i]}</span>
-        <div style="font-family:'Courier New',monospace;font-size:10px;color:#475569;margin-top:3px">Age ${startAge}–${endAge}</div>
+        <div style="font-family:var(--mono);font-size:10px;color:#475569;margin-top:3px">Age ${startAge}–${endAge}</div>
       </div>
-      <div style="text-align:right;font-family:'Courier New',monospace;font-size:12px;color:#94a3b8">${(nomWdAtP/1000).toFixed(1)}K</div>
+      <div style="text-align:right;font-family:var(--mono);font-size:12px;color:#94a3b8">${(nomWdAtP/1000).toFixed(1)}K</div>
       <div style="text-align:right">
-        <div style="font-family:'Courier New',monospace;font-size:12px;font-weight:700;color:#c9a84c">${(scPlan.periodMaxWd[i]/1000).toFixed(1)}K</div>
-        <div style="font-family:'Courier New',monospace;font-size:10px;color:${fCol(fPlan)}">×${fPlan.toFixed(3)}</div>
+        <div style="font-family:var(--mono);font-size:12px;font-weight:700;color:#c9a84c">${(scPlan.periodMaxWd[i]/1000).toFixed(1)}K</div>
+        <div style="font-family:var(--mono);font-size:10px;color:${fCol(fPlan)}">×${fPlan.toFixed(3)}</div>
       </div>
       <div style="text-align:right">
-        <div style="font-family:'Courier New',monospace;font-size:12px;font-weight:700;color:#f87171">${(scPess.periodMaxWd[i]/1000).toFixed(1)}K</div>
-        <div style="font-family:'Courier New',monospace;font-size:10px;color:${fCol(fPess)}">×${fPess.toFixed(3)}</div>
+        <div style="font-family:var(--mono);font-size:12px;font-weight:700;color:#f87171">${(scPess.periodMaxWd[i]/1000).toFixed(1)}K</div>
+        <div style="font-family:var(--mono);font-size:10px;color:${fCol(fPess)}">×${fPess.toFixed(3)}</div>
       </div>
-      <div style="text-align:right;font-family:'Courier New',monospace;font-size:11px">
+      <div style="text-align:right;font-family:var(--mono);font-size:11px">
         <div style="color:#c9a84c">plan: ${fPlan>=1?'+':''}${((fPlan-1)*100).toFixed(1)}%</div>
         <div style="color:#f87171">pess: ${fPess>=1?'+':''}${((fPess-1)*100).toFixed(1)}%</div>
       </div>
-      <div style="text-align:right;font-family:'Courier New',monospace;font-size:11px">
+      <div style="text-align:right;font-family:var(--mono);font-size:11px">
         <div style="color:#64748b;font-size:10px">risk gap</div>
         <div style="color:#f87171;font-weight:700">${((fPlan-fPess)*100).toFixed(1)}pp</div>
       </div>
@@ -3290,30 +3422,30 @@ function recalc() {
         const survives = sc.sim.depletedAt === null;
         const lastBal  = sc.sim.data[retirementYears-1]?.balance ?? 0;
         return `<div style="background:rgba(255,255,255,0.02);border:1px solid #1e2535;border-radius:8px;padding:12px">
-          <div style="font-family:'Courier New',monospace;font-size:10px;color:${sc.color};text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">${sc.label}</div>
+          <div style="font-family:var(--mono);font-size:10px;color:${sc.color};text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">${sc.label}</div>
           <div style="display:flex;justify-content:space-between;margin-bottom:2px">
-            <span style="font-family:'Courier New',monospace;font-size:10px;color:#475569">P1 →</span>
+            <span style="font-family:var(--mono);font-size:10px;color:#475569">P1 →</span>
             <span style="font-family:Georgia,serif;font-size:15px;font-weight:700;color:${sc.color}">${fmt(sc.periodMaxWd[0])}/yr</span>
           </div>
           <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-            <span style="font-family:'Courier New',monospace;font-size:10px;color:#475569">P5 →</span>
+            <span style="font-family:var(--mono);font-size:10px;color:#475569">P5 →</span>
             <span style="font-family:Georgia,serif;font-size:15px;font-weight:700;color:${sc.color}">${fmt(sc.periodMaxWd[4])}/yr</span>
           </div>
-          <div style="font-family:'Courier New',monospace;font-size:11px;color:#64748b">Final: ${fmt(lastBal)}</div>
-          <div style="font-family:'Courier New',monospace;font-size:10px;margin-top:3px;color:${survives?'#34d399':'#ef4444'}">${survives ? '✓ survives to '+lifespan : '✗ depleted at age '+(retirementAge + sc.sim.depletedAt)}</div>
+          <div style="font-family:var(--mono);font-size:11px;color:#64748b">Final: ${fmt(lastBal)}</div>
+          <div style="font-family:var(--mono);font-size:10px;margin-top:3px;color:${survives?'#34d399':'#ef4444'}">${survives ? '✓ survives to '+lifespan : '✗ depleted at age '+(retirementAge + sc.sim.depletedAt)}</div>
         </div>`;
       }).join('')}
     </div>
     <div style="margin-top:12px;background:rgba(248,113,113,0.06);border:1px solid rgba(248,113,113,0.2);border-radius:8px;padding:12px;display:flex;align-items:center;gap:24px">
       <div>
-        <div style="font-family:'Courier New',monospace;font-size:10px;color:#64748b;text-transform:uppercase;margin-bottom:4px">P1 Sequence Risk <span style="color:#334155">(early retirement)</span></div>
+        <div style="font-family:var(--mono);font-size:10px;color:#64748b;text-transform:uppercase;margin-bottom:4px">P1 Sequence Risk <span style="color:#334155">(early retirement)</span></div>
         <div style="font-family:Georgia,serif;font-size:22px;font-weight:700;color:#f87171">${fmt(seqRiskWd)}/yr</div>
-        <div style="font-family:'Courier New',monospace;font-size:9px;color:#475569;margin-bottom:10px">withdrawal you give up if bad years hit first</div>
-        <div style="font-family:'Courier New',monospace;font-size:10px;color:#64748b;text-transform:uppercase;margin-bottom:4px">P5 Sequence Risk <span style="color:#334155">(late retirement)</span></div>
+        <div style="font-family:var(--mono);font-size:9px;color:#475569;margin-bottom:10px">withdrawal you give up if bad years hit first</div>
+        <div style="font-family:var(--mono);font-size:10px;color:#64748b;text-transform:uppercase;margin-bottom:4px">P5 Sequence Risk <span style="color:#334155">(late retirement)</span></div>
         <div style="font-family:Georgia,serif;font-size:22px;font-weight:700;color:#f87171">${fmt(seqRiskP5Wd)}/yr</div>
-        <div style="font-family:'Courier New',monospace;font-size:9px;color:#475569">compounded spending gap 40+ years later</div>
+        <div style="font-family:var(--mono);font-size:9px;color:#475569">compounded spending gap 40+ years later</div>
       </div>
-      <div style="font-family:'Courier New',monospace;font-size:11px;color:#64748b;flex:1">
+      <div style="font-family:var(--mono);font-size:11px;color:#64748b;flex:1">
         Both scenarios use the same 5 IRR values — only the order differs. Worst returns hit in P1 (your first ~10 retirement years) in the Pessimistic case. P1 risk is the immediate cost: you must accept a lower starting withdrawal to survive an early crash, since selling depressed assets to fund spending permanently impairs the portfolio. P5 risk is the compounded cost: that smaller starting base, grown over 40+ years, means late-life spending power shrinks disproportionately — hence the much larger P5 gap.
       </div>
     </div>`;
@@ -3401,6 +3533,42 @@ function recalc() {
 
 window.addEventListener('resize', recalc);
 
+// ── Setup / Results view switcher ────────────────────────────────────────────
+function showResults() {
+  document.getElementById('setupView').style.display   = 'none';
+  document.getElementById('resultsView').style.display = '';
+  // Ensure charts render correctly now they're visible
+  requestAnimationFrame(() => {
+    if (g_chartData) {
+      const { baseData, optData, retirementAge, periodLen, lifespan, depletedAt,
+              periodMaxWd, periodFactor, retirementYears } = g_chartData;
+      drawChart(baseData, optData, retirementAge, periodLen, lifespan, depletedAt);
+      drawWdChart(g_chartData.wdData, periodMaxWd, periodFactor, retirementAge, periodLen, retirementYears);
+    }
+  });
+}
+function showSetup() {
+  document.getElementById('setupView').style.display   = '';
+  document.getElementById('resultsView').style.display = 'none';
+}
+
+// ── Collapsible section toggle ────────────────────────────────────────────────
+function toggleSection(bodyId) {
+  const body    = document.getElementById(bodyId);
+  const chevron = document.getElementById(bodyId + 'Chevron');
+  if (!body) return;
+  const open = body.style.display === '';
+  body.style.display   = open ? 'none' : '';
+  if (chevron) chevron.style.transform = open ? '' : 'rotate(180deg)';
+}
+
+// ── Field tooltip toggle ──────────────────────────────────────────────────────
+function toggleTooltip(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.style.display = el.style.display === 'none' ? '' : 'none';
+}
+
 // ── Tier-aware UI initialisation ─────────────────────────────────────────────
 // Full UI always shown. Locked sections get .tier-locked (gray + pointer-events:none)
 // with an inline upgrade nudge injected above them.
@@ -3417,7 +3585,7 @@ function initUI() {
         <div style="font-family:Georgia,serif;font-size:22px;font-weight:600;color:#c9a84c;margin-bottom:10px">
           Year-by-Year Detail
         </div>
-        <div style="font-family:'Courier New',monospace;font-size:12px;color:#64748b;margin-bottom:24px;max-width:380px;line-height:1.7">
+        <div style="font-family:var(--mono);font-size:12px;color:#64748b;margin-bottom:24px;max-width:380px;line-height:1.7">
           See every year of your retirement — withdrawals, portfolio balance,
           and scenario comparisons across all strategies.
         </div>
@@ -3435,11 +3603,10 @@ function initUI() {
         padding:60px 24px;text-align:center">
         <div style="font-size:40px;margin-bottom:20px">🔒</div>
         <div style="font-family:Georgia,serif;font-size:22px;font-weight:600;color:#c9a84c;margin-bottom:10px">
-          Monte Carlo Simulation
+          Probabilistic Survival Test
         </div>
-        <div style="font-family:'Courier New',monospace;font-size:12px;color:#64748b;margin-bottom:24px;max-width:380px;line-height:1.7">
-          Run thousands of simulations across 5 strategies to stress-test your plan
-          and see survival probabilities, fan charts, and withdrawal distributions.
+        <div style="font-family:var(--mono);font-size:12px;color:#64748b;margin-bottom:24px;max-width:380px;line-height:1.7">
+          Run thousands of scenarios across 5 strategies and see the probability your money lasts — fan charts, survival curves, and withdrawal distributions.
         </div>
         <div class="tier-nudge" style="max-width:420px;justify-content:center">
           <span class="lock-icon">🔒</span>
@@ -3468,6 +3635,14 @@ function initUI() {
     applyLock('stressTestSection', 'premium', 'Sequence of Returns Stress Test');
   if (!can.rollingReopt)
     applyLock('milestonesSection', 'premium', 'Rolling Re-Optimizer');
+
+  // ── Lock to Nominal button: Premium only ──────────────────────────────────
+  const lockBtn = document.getElementById('lockToNominalBtn');
+  if (lockBtn) lockBtn.style.display = can.advancedSettings ? '' : 'none';
+
+  // ── Geo/simulation settings: hide for non-premium ────────────────────────
+  const geoSection = document.getElementById('geoSettingsSection');
+  if (geoSection) geoSection.style.display = can.fivePeriodIRR ? '' : 'none';
 }
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
