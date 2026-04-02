@@ -38,27 +38,35 @@ function statementPrompt(currency, categories) {
     .map(c => `  - ${c.name}`)
     .join('\n');
 
-  return `Convert this bank statement into a JSON array. Each object must have exactly these keys:
-{"date":"copy exactly as shown","description":"copy exactly, do not translate","debit":<number or null>,"credit":<number or null>,"category":"exact name from list below"}
+  return `You are a financial data assistant helping to process a bank statement. The statement is in ${currency} from a bank account. It may include a header section with account details and a transaction table below.
 
-RULES:
-1. Include EVERY transaction. Do not skip any row.
-2. debit: amount when money LEFT the account (purchase, fee, transfer out). null if incoming.
-3. credit: amount when money ARRIVED (salary, refund, transfer in). null if outgoing.
-4. Amounts: plain numbers, period as decimal. Example: 1250.50. No currency symbols.
-5. Currency is ${currency}. Do not convert amounts.
-6. category: use your knowledge of merchants, apps and services to assign the best match from the lists below. Write ONLY the category name — no bucket label.
-7. For credit transactions use INCOME CATEGORIES. For debit use EXPENSE CATEGORIES.
-8. If you cannot determine the category, write: Uncategorized
-9. OUTPUT ONLY the raw JSON array. No explanation, no markdown. First character must be [
+Your task: extract every transaction and return a JSON array. Each object must have exactly these keys:
+{"date":"copy exactly as shown in source","description":"copy original description exactly, do not translate","debit":<number or null>,"credit":<number or null>,"category":"exact name from list below"}
+
+EXTRACTION RULES:
+1. Include EVERY transaction row. Do not skip any row, including fees, transfers, and small amounts.
+2. Ignore header rows, page numbers, running balance rows, and summary totals — these are not transactions.
+3. debit: the amount when money LEFT the account (purchase, fee, withdrawal, transfer out). Use null if this is an incoming transaction.
+4. credit: the amount when money ARRIVED in the account (salary, refund, deposit, transfer in). Use null if this is an outgoing transaction.
+5. Amounts: plain numbers only, period as decimal separator. No currency symbols, no commas. Example: 1250.50
+6. Do not convert amounts — currency is ${currency}.
+
+CATEGORIZATION RULES:
+7. Use your knowledge of merchants, brands, apps, and services worldwide (including Thai businesses) to assign the best matching category.
+8. Consider the full description — app names, merchant codes, and partial names are all useful clues.
+9. Assign categories from EXPENSE CATEGORIES for debit transactions, and INCOME CATEGORIES for credit transactions.
+10. Write ONLY the category name — do not include the bucket label in parentheses.
+11. If you genuinely cannot determine the category after considering the description, write: Uncategorized
+
+OUTPUT:
+- Output ONLY the raw JSON array. No introduction, no explanation, no markdown, no code blocks.
+- The very first character of your response must be [ and the last must be ]
 
 EXPENSE CATEGORIES:
 ${expLines}
 
 INCOME CATEGORIES:
-${incLines}
-
-Your entire response must be the JSON array only, starting with [ and ending with ]`;
+${incLines}`;
 }
 
 function receiptPrompt(currency) {
