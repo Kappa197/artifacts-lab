@@ -585,7 +585,7 @@
           <div class="ft-body">The portfolio balance you want to preserve at the end of retirement — for your estate, heirs, or a safety buffer. Setting this to $0 means you plan to fully use your savings. This target anchors the stress-test scenarios so results are comparable.</div>
           <div class="ft-typical">Typical value: $0 (full drawdown) or 1–2 years of expenses as a buffer</div>
         </div>
-        <p style="font-family:var(--mono);font-size:10px;color:#64748b;margin-top:5px">⚠ Re-lock after changing any parameters to keep scenarios comparable.</p>
+        <p style="font-family:var(--mono);font-size:10px;color:#64748b;margin-top:5px">⚠ Re-lock after changing any parameters to keep scenarios comparable. Set to $0 to fully exhaust the portfolio by age <span id="lifespanRef">100</span>.</p>
         <div id="lockToNominalHint" style="display:none;margin-top:6px;font-family:var(--mono);font-size:10px;color:#c9a84c"></div>
       </div>
     </div>
@@ -647,7 +647,7 @@
 <!-- ── DASHBOARD PANEL (results) ─────────────────────────────────────────── -->
 <div id="panelDashboard" style="display:none">
 
-<!-- Empty state shown until first calculation runs -->
+<!-- Empty state shown until first calculation runs (hidden by showResults) -->
 <div id="dashboardEmpty" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 24px;text-align:center">
   <div style="font-size:48px;margin-bottom:20px">📊</div>
   <div style="font-family:Georgia,serif;font-size:1.4rem;font-weight:600;color:var(--amber2);margin-bottom:10px">Your dashboard is ready</div>
@@ -661,8 +661,8 @@
   </button>
 </div>
 
-<!-- Results (hidden until first calculation) -->
-<div id="dashboardResults" style="display:none">
+<!-- Results — always in DOM, charts drawn when tab is switched to -->
+<div id="dashboardResults">
 <!-- Outcome banner -->
 <div id="outcomeBanner" class="outcome-banner"></div>
 
@@ -845,6 +845,20 @@
   <div style="margin-top:14px;padding-top:12px;border-top:1px solid #2a3444" id="seqSummary"></div>
 </div>
 
+
+<!-- ── ROLLING RE-OPTIMIZER ──────────────────────────────────────────────── -->
+<div class="card" id="milestonesSection" style="margin-bottom:20px">
+  <div class="stitle">Withdrawal by Period — Rolling Re-Optimizer</div>
+  <p style="font-family:var(--mono);font-size:11px;color:#64748b;margin-bottom:16px">At the start of each period, given the actual portfolio balance, the max sustainable withdrawal is re-solved through all remaining years and IRRs. Period 1's factor is the global optimum. Later periods show how sequence-of-returns risk accumulates.</p>
+  <div style="display:grid;grid-template-columns:110px 1fr 1fr 1fr;gap:0;padding:6px 0;border-bottom:1px solid #2a3444;margin-bottom:4px">
+    <div style="font-family:var(--mono);font-size:10px;color:#475569;letter-spacing:0.08em;text-transform:uppercase">Period</div>
+    <div style="font-family:var(--mono);font-size:10px;color:#94a3b8;letter-spacing:0.08em;text-transform:uppercase;text-align:right">Planned</div>
+    <div style="font-family:var(--mono);font-size:10px;color:#34d399;letter-spacing:0.08em;text-transform:uppercase;text-align:right">Max / yr</div>
+    <div style="font-family:var(--mono);font-size:10px;color:#34d399;letter-spacing:0.08em;text-transform:uppercase;text-align:right">Factor</div>
+  </div>
+  <div id="milestones"></div>
+  <div style="margin-top:14px;padding-top:12px;border-top:1px solid #2a3444" id="retirementEndRow"></div>
+</div>
 
 <div style="text-align:center;font-family:var(--mono);font-size:10px;color:#334155;margin-top:24px">
   For illustrative purposes only. Not financial advice. Projections assume constant inflation-adjusted withdrawals and fixed returns per period.
@@ -2777,21 +2791,17 @@ function switchTab(tab) {
   document.getElementById('tabBtnDetail').classList.toggle('active',    tab === 'detail');
   document.getElementById('tabBtnMC').classList.toggle('active',        tab === 'mc');
   // Defer redraws until after the panel is visible and layout has completed
-  requestAnimationFrame(() => {
+  requestAnimationFrame(() => requestAnimationFrame(() => {
     if (tab === 'detail' && g_tableData) renderYbyTable();
     if (tab === 'dashboard' && g_chartData) {
-      // Only redraw if results are already revealed (not on first visit with empty state)
-      const dr = document.getElementById('dashboardResults');
-      if (dr && dr.style.display !== 'none') {
-        const { baseData, optData, retirementAge, periodLen, lifespan, depletedAt,
-                periodMaxWd, periodFactor, retirementYears, seqScenarios } = g_chartData;
-        drawChart(baseData, optData, retirementAge, periodLen, lifespan, depletedAt);
-        drawWdChart(g_chartData.wdData, periodMaxWd, periodFactor, retirementAge, periodLen, retirementYears);
-        if (seqScenarios) drawSeqChart(seqScenarios, retirementAge, periodLen, lifespan);
-      }
+      const { baseData, optData, retirementAge, periodLen, lifespan, depletedAt,
+              periodMaxWd, periodFactor, retirementYears, seqScenarios } = g_chartData;
+      drawChart(baseData, optData, retirementAge, periodLen, lifespan, depletedAt);
+      drawWdChart(g_chartData.wdData, periodMaxWd, periodFactor, retirementAge, periodLen, retirementYears);
+      if (seqScenarios) drawSeqChart(seqScenarios, retirementAge, periodLen, lifespan);
     }
     if (tab === 'mc' && mcState) { drawMCFan(); drawMCSurvival(); drawMCHist(); drawMCCashflows(); renderCashflowsPeriodTable(); }
-  });
+  }));
 }
 
 // ── Year-by-year table state ───────────────────────────────────────────────────
@@ -3176,7 +3186,8 @@ function recalc() {
   updatePeriodLabels(retirementAge, periodLen, lifespan);
   document.getElementById('periodNote').textContent =
     `Retirement of ${retirementYears} years split into 5 equal periods of ~${periodLen} years`;
-  document.getElementById('lifespanRef').textContent = lifespan;
+  const lifespanRefEl = document.getElementById('lifespanRef');
+  if (lifespanRefEl) lifespanRefEl.textContent = lifespan;
 
   // ── Nest egg preview ──
   document.getElementById('nestLabel').textContent = `Projected Nest Egg in ${yearsToRetire}y`;
@@ -3280,7 +3291,8 @@ function recalc() {
 
   // ── Milestones (one row per period) ──
   const PERIOD_HINTS = ['Growth-oriented','Balanced','Moderate','Cautious','Conservative'];
-  document.getElementById('milestones').innerHTML = Array.from({length:5}, (_,i) => {
+  const milestonesEl = document.getElementById('milestones');
+  if (milestonesEl) milestonesEl.innerHTML = Array.from({length:5}, (_,i) => {
     const startYr    = i * periodLen;
     const endYr      = i === 4 ? retirementYears - 1 : (i+1) * periodLen - 1;
     const startAge   = retirementAge + startYr;
@@ -3328,7 +3340,8 @@ function recalc() {
   // End of retirement balance row
   const lastBase = base.data[retirementYears-1];
   const lastOpt  = opt.data[retirementYears-1];
-  document.getElementById('retirementEndRow').innerHTML = `
+  const endRowEl = document.getElementById('retirementEndRow');
+  if (endRowEl) endRowEl.innerHTML = `
     <div style="display:grid;grid-template-columns:110px 1fr 1fr 1fr;gap:0;align-items:center;padding:8px 10px;background:rgba(255,255,255,0.02);border-radius:6px">
       <div style="font-family:var(--mono);font-size:10px;color:#475569;letter-spacing:0.06em;text-transform:uppercase;grid-column:1/3">Final Balance at Age ${lifespan}</div>
       <div style="text-align:right;font-family:var(--mono);font-size:13px;font-weight:700;color:${(lastBase?.balance??0)>0?'#c9a84c':'#ef4444'};grid-column:3">${fmt(lastBase?.balance??0)}</div>
@@ -3556,25 +3569,13 @@ window.addEventListener('resize', recalc);
 
 // ── Setup / Results view switcher ────────────────────────────────────────────
 function showResults() {
-  // 1. Reveal the results panel BEFORE switching tabs so layout is ready
-  const empty   = document.getElementById('dashboardEmpty');
-  const results = document.getElementById('dashboardResults');
-  if (empty)   empty.style.display   = 'none';
-  if (results) results.style.display = '';
+  // Hide empty state
+  const empty = document.getElementById('dashboardEmpty');
+  if (empty) empty.style.display = 'none';
 
-  // 2. Switch tab (makes panelDashboard visible)
+  // Switch to Dashboard tab (makes panelDashboard visible)
   switchTab('dashboard');
-
-  // 3. Double-RAF: first frame lets the browser paint, second measures real canvas dimensions
-  requestAnimationFrame(() => requestAnimationFrame(() => {
-    if (g_chartData) {
-      const { baseData, optData, retirementAge, periodLen, lifespan, depletedAt,
-              periodMaxWd, periodFactor, retirementYears, seqScenarios } = g_chartData;
-      drawChart(baseData, optData, retirementAge, periodLen, lifespan, depletedAt);
-      drawWdChart(g_chartData.wdData, periodMaxWd, periodFactor, retirementAge, periodLen, retirementYears);
-      if (seqScenarios) drawSeqChart(seqScenarios, retirementAge, periodLen, lifespan);
-    }
-  }));
+  // switchTab already triggers the RAF redraw via its own requestAnimationFrame
 }
 function showSetup() {
   switchTab('setup');
