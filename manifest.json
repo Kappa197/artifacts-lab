@@ -4,7 +4,7 @@
   "description": "Smart tools for real life — expense tracking, retirement planning, meal planning and more.",
   "start_url": "/dashboard.html",
   "display": "standalone",
-  "orientation": "portrait-primary",
+  "orientation": "any",
   "background_color": "#0B0F1A",
   "theme_color": "#D4920A",
   "lang": "en",
