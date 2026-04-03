@@ -77,7 +77,7 @@ h1,h2,h3{font-family:var(--serif)}
 .diet-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .diet-card{border:2px solid var(--border);border-radius:var(--radius);padding:14px;cursor:pointer;transition:all .2s;background:var(--navy2);text-align:center;user-select:none}
 .diet-card:hover{border-color:var(--primary-light)}
-.diet-card.sel{border-color:var(--amber);background:#F0F7F0}
+.diet-card.sel{border-color:var(--amber);border-width:2px;background:var(--amber-dim)}
 .diet-icon{font-size:26px;margin-bottom:6px}
 .diet-name{font-weight:600;font-size:13px}
 .diet-desc{font-size:11px;color:var(--text2);margin-top:2px}
@@ -90,7 +90,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 input[type=range]::-moz-range-track{height:4px;background:var(--navy4);border-radius:2px}
 .slots-grid{display:flex;flex-direction:column;gap:8px}
 .slot-tog{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border:2px solid var(--border);border-radius:var(--radius);background:var(--navy2);cursor:pointer;transition:all .2s;user-select:none}
-.slot-tog.on{border-color:var(--amber);background:#F0F7F0}
+.slot-tog.on{border-color:var(--amber);border-width:2px;background:var(--amber-dim)}
 .slot-left{display:flex;align-items:center;gap:12px}
 .slot-icon{font-size:20px;width:32px;text-align:center}
 .slot-name{font-weight:600;font-size:14px}
@@ -118,7 +118,7 @@ input[type=range]::-moz-range-track{height:4px;background:var(--navy4);border-ra
 .diff-btn .di{font-size:20px;margin-bottom:4px}
 .diff-btn .dl{font-size:12px;font-weight:600;color:var(--text2)}
 .diff-btn .ds{font-size:10px;color:var(--text2)}
-.diff-btn.sel{border-color:var(--amber);background:#F0F7F0}
+.diff-btn.sel{border-color:var(--amber);border-width:2px;background:var(--amber-dim)}
 .diff-btn.sel .dl{color:var(--amber)}
 .excl-row{display:flex;gap:8px;margin-bottom:10px}
 .excl-input{flex:1;padding:10px 14px;border:2px solid var(--border);border-radius:var(--radius-sm);font-family:var(--body);font-size:14px;outline:none;transition:border-color .2s;background:var(--navy2);color:var(--text)}
@@ -157,14 +157,8 @@ input[type=range]::-moz-range-track{height:4px;background:var(--navy4);border-ra
 .nutr-expand-btn{width:26px;height:26px;border-radius:50%;background:var(--navy3);border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;color:var(--amber);font-size:12px;}
 .nutr-expand-btn:hover{border-color:var(--amber);background:var(--amber-dim);}
 .nutr-micro-section{overflow:hidden;transition:max-height .4s ease;max-height:0;}
-.nutr-micro-section.open{max-height:400px;}
+.nutr-micro-section.open{max-height:420px;}
 .nutr-content{padding:10px 14px 14px;}
-.nutr-bar.collapsed{max-height:44px}
-.nutr-bar.expanded{max-height:500px}
-.nutr-toggle{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;user-select:none}
-.nutr-toggle-label{font-size:13px;font-weight:600;color:var(--amber)}
-.nutr-arrow{font-size:11px;color:var(--text2);transition:transform .3s}
-.nutr-bar.expanded .nutr-arrow{transform:rotate(180deg)}
 .nutr-macro-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
 .nutr-box{background:var(--navy);border-radius:8px;padding:10px;text-align:center}
 .nutr-val{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--amber)}
@@ -197,9 +191,9 @@ input[type=range]::-moz-range-track{height:4px;background:var(--navy4);border-ra
 .meal-card:hover{box-shadow:var(--card-shadow);transform:translateY(-2px)}
 .mc-inner{cursor:pointer}
 .mc-emoji{font-size:16px;margin-bottom:2px;display:block}
-.mc-name{font-size:11px;font-weight:600;color:var(--text);line-height:1.3;margin-bottom:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.mc-meta{font-size:10px;color:var(--text2)}
-.swap-btn{position:absolute;bottom:5px;right:5px;width:22px;height:22px;border-radius:50%;background:var(--navy);border:1px solid var(--border);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;color:var(--text)}
+.mc-name{font-size:12px;font-weight:600;color:var(--text);line-height:1.3;margin-bottom:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mc-meta{font-size:11px;color:var(--text2)}
+.swap-btn{position:absolute;bottom:5px;right:5px;width:22px;height:22px;border-radius:50%;background:var(--navy);border:1px solid var(--border);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0.5;transition:opacity .2s;color:var(--text)}
 .meal-card:hover .swap-btn{opacity:1}
 .day-tot-row{display:grid;gap:5px;margin-bottom:16px}
 .day-tot{text-align:center;font-size:10px;color:var(--text2);padding:3px}
@@ -244,7 +238,7 @@ input[type=range]::-moz-range-track{height:4px;background:var(--navy4);border-ra
 .tip-box{background:linear-gradient(135deg,#FFF5F0,#FEF0EA);border-left:3px solid var(--accent);border-radius:8px;padding:11px 13px;margin-top:14px}
 .tip-lbl{font-size:10px;font-weight:700;letter-spacing:.4px;color:var(--green);text-transform:uppercase;margin-bottom:3px}
 .tip-txt{font-size:12px;line-height:1.5;font-style:italic}
-.scale-bar{display:flex;align-items:center;justify-content:space-between;background:#F0F7F0;border:1.5px solid var(--primary);border-radius:10px;padding:10px 14px;margin:14px 0 4px}
+.scale-bar{display:flex;align-items:center;justify-content:space-between;background:var(--amber-dim);border:1.5px solid var(--primary);border-radius:10px;padding:10px 14px;margin:14px 0 4px}
 .scale-label{font-size:13px;font-weight:600;color:var(--amber)}
 .scale-sub{font-size:11px;color:var(--text2);margin-top:1px}
 .scale-toggle{position:relative;width:46px;height:26px;flex-shrink:0;cursor:pointer}
@@ -260,7 +254,7 @@ input[type=range]::-moz-range-track{height:4px;background:var(--navy4);border-ra
 .swap-sub{font-size:12px;color:var(--text2);margin-bottom:14px}
 .swap-list{display:flex;flex-direction:column;gap:8px}
 .swap-item{display:flex;align-items:center;gap:12px;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;transition:all .2s}
-.swap-item:hover{border-color:var(--amber);background:#F0F7F0}
+.swap-item:hover{border-color:var(--amber);background:var(--amber-dim)}
 .swap-em{font-size:22px;flex-shrink:0}
 .swap-item-name{font-size:13px;font-weight:600}
 .swap-item-meta{font-size:11px;color:var(--text2);margin-top:2px}
@@ -340,7 +334,7 @@ input[type=range]::-moz-range-track{height:4px;background:var(--navy4);border-ra
 /* PREP TIME BUTTONS */
 .prep-row{display:flex;gap:8px;flex-wrap:wrap}
 .prep-btn{padding:9px 14px;border:2px solid var(--border);border-radius:var(--radius-sm);background:var(--navy2);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--text2);transition:all .2s}
-.prep-btn.sel{border-color:var(--amber);background:#F0F7F0;color:var(--amber)}
+.prep-btn.sel{border-color:var(--amber);background:var(--amber-dim);color:var(--amber)}
 /* MACRO DETAIL (premium) */
 .macro-detail{margin-bottom:4px}
 .macro-donut-wrap{display:flex;align-items:center;gap:16px;margin-bottom:14px}
@@ -427,29 +421,67 @@ body.day-view .day-selector{display:flex}
 body.day-view .mobile-day-view{display:flex}
 
 
+/* Mobile swap link — always visible below meal name */
+.mc-swap-link{display:none;font-size:10px;color:var(--amber2);font-family:var(--mono);font-weight:600;letter-spacing:.04em;cursor:pointer;background:none;border:none;padding:0;margin-top:3px;text-decoration:none}
+@media(max-width:640px){.mc-swap-link{display:block}.swap-btn{display:none}}
+
+
+/* ── SCROLL PROGRESS BAR ─────────────────────────── */
+.setup-progress{position:sticky;top:60px;z-index:90;background:var(--navy2);border-bottom:1px solid var(--border);padding:10px 16px;}
+.sp-steps{display:flex;align-items:center;max-width:680px;margin:0 auto;}
+.sp-step{display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;cursor:pointer;transition:opacity .2s;}
+.sp-step:hover{opacity:.8;}
+.sp-dot{width:10px;height:10px;border-radius:50%;background:var(--border2);border:2px solid var(--border2);transition:all .3s;}
+.sp-label{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);white-space:nowrap;transition:color .3s;}
+.sp-line{flex:1;height:2px;background:var(--border);margin:0 4px;margin-bottom:14px;transition:background .3s;}
+.sp-step.active .sp-dot{background:var(--amber);border-color:var(--amber);box-shadow:0 0 6px rgba(212,146,10,.4);}
+.sp-step.active .sp-label{color:var(--amber2);}
+.sp-step.done .sp-dot{background:var(--green);border-color:var(--green);}
+.sp-step.done .sp-label{color:var(--green);}
+.sp-line.done{background:var(--green);}
+@media(max-width:480px){.sp-label{display:none;}.sp-dot{width:8px;height:8px;}.sp-line{margin-bottom:0;}}
+
+
 /* ── SHOPPING LIST FAB ───────────────────────── */
-.shop-fab{
-  position:fixed; bottom:24px; right:20px; z-index:120;
-  width:56px; height:56px; border-radius:50%;
-  background:var(--amber); border:none; cursor:pointer;
-  display:none; align-items:center; justify-content:center;
-  font-size:22px; box-shadow:0 4px 20px rgba(212,146,10,.45);
-  transition:transform .2s, box-shadow .2s;
-}
-.shop-fab:hover{ transform:scale(1.08); box-shadow:0 6px 28px rgba(212,146,10,.6); }
-.shop-fab:active{ transform:scale(.95); }
-.page.active#planPage ~ .shop-fab{ display:flex; }
-/* hide when shopping list is open */
-body.shop-open .shop-fab{ display:none!important; }
+.shop-fab{position:fixed;bottom:24px;right:20px;z-index:120;width:56px;height:56px;border-radius:50%;background:var(--amber);border:none;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 20px rgba(212,146,10,.45);transition:transform .2s,box-shadow .2s;}
+.shop-fab:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(212,146,10,.6);}
+.shop-fab:active{transform:scale(.95);}
+.page.active#planPage ~ .shop-fab{display:flex;}
+body.shop-open .shop-fab{display:none!important;}
 
 
-/* ── COMPACT SHOP LIST ───────────────────────── */
-.shop-item{padding:5px 8px;} /* was 7px 10px */
-.shop-item-text{font-size:13px;}
+.shop-item{padding:5px 8px;}
 .shop-item-qty{font-size:12px;color:var(--amber2);font-weight:700;white-space:nowrap;}
-.shop-cat-title{font-size:10px;padding-bottom:4px;margin-bottom:6px;}
-.shop-cat{margin-bottom:14px;}
-.shop-item-check{width:16px;height:16px;border-radius:3px;font-size:10px;}
+
+
+/* ── TDEE CALCULATOR ─────────────────────────── */
+.calc-toggle{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:7px 14px;background:var(--navy3);border:1.5px solid var(--border2);border-radius:8px;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;transition:all .2s;font-family:inherit;}
+.calc-toggle:hover{border-color:var(--amber);color:var(--amber2);}
+.calc-toggle.open{border-color:var(--amber);background:var(--amber-dim);color:var(--amber2);}
+.calc-panel{overflow:hidden;transition:max-height .35s ease;max-height:0;}
+.calc-panel.open{max-height:600px;}
+.calc-body{background:var(--navy3);border:1px solid var(--border);border-radius:10px;padding:16px;margin-top:10px;}
+.calc-title{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);margin-bottom:14px;}
+.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.calc-field{display:flex;flex-direction:column;gap:5px;}
+.calc-field label{font-size:11px;font-weight:600;color:var(--text2);}
+.calc-input{padding:8px 10px;background:var(--navy2);border:1.5px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:13px;outline:none;width:100%;transition:border-color .2s;}
+.calc-input:focus{border-color:var(--amber);}
+.calc-select{padding:8px 10px;background:var(--navy2);border:1.5px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:13px;outline:none;width:100%;cursor:pointer;appearance:none;transition:border-color .2s;}
+.calc-select:focus{border-color:var(--amber);}
+.calc-goal-row{display:flex;gap:6px;margin-bottom:14px;}
+.calc-goal-btn{flex:1;padding:7px 6px;border:1.5px solid var(--border);border-radius:6px;background:transparent;color:var(--text2);font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit;text-align:center;}
+.calc-goal-btn.sel{border-color:var(--amber);background:var(--amber-dim);color:var(--amber2);}
+.calc-result{background:var(--navy2);border-radius:8px;padding:12px 14px;margin-bottom:12px;display:none;}
+.calc-result.show{display:block;}
+.calc-result-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}
+.calc-result-lbl{font-size:12px;color:var(--text2);}
+.calc-result-val{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--amber);}
+.calc-result-note{font-size:10px;color:var(--text3);margin-top:2px;}
+.calc-import-btn{width:100%;padding:11px;background:var(--amber);color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;display:none;}
+.calc-import-btn.show{display:block;}
+.calc-import-btn:hover{background:var(--amber2);}
+@media(max-width:400px){.calc-grid{grid-template-columns:1fr;}}
 
 </style>
 </head>
@@ -472,8 +504,31 @@ body.shop-open .shop-fab{ display:none!important; }
 
 <div id="setupPage" class="page active">
   <div class="setup-body">
+  <div class="setup-progress" id="setupProgress">
+    <div class="sp-steps">
+      <div class="sp-step active" data-target="sect-diet">
+        <div class="sp-dot"></div>
+        <span class="sp-label">Diet Style</span>
+      </div>
+      <div class="sp-line"></div>
+      <div class="sp-step" data-target="sect-meals">
+        <div class="sp-dot"></div>
+        <span class="sp-label">Meals &amp; Portions</span>
+      </div>
+      <div class="sp-line"></div>
+      <div class="sp-step" data-target="sect-ingr">
+        <div class="sp-dot"></div>
+        <span class="sp-label">Ingredients</span>
+      </div>
+      <div class="sp-line"></div>
+      <div class="sp-step" data-target="sect-generate">
+        <div class="sp-dot"></div>
+        <span class="sp-label">Generate Plan</span>
+      </div>
+    </div>
+  </div>
 
-    <div class="section">
+    <div class="section" id="sect-diet">
       <div class="section-label">Step 1</div>
       <div class="section-title">What's your diet?</div>
       <p class="section-desc">Filters the recipe database to match your lifestyle.</p>
@@ -491,7 +546,7 @@ body.shop-open .shop-fab{ display:none!important; }
       <div class="section-body"><div class="chips" id="cuisineChips"></div></div>
     </div>
 
-    <div class="section">
+    <div class="section" id="sect-meals">
       <div class="section-label">Step 3</div>
       <div class="section-title">How many weeks?</div>
       <p class="section-desc">A full 7-day plan per week.</p>
@@ -520,6 +575,61 @@ body.shop-open .shop-fab{ display:none!important; }
       <div id="calWarn" class="warn-box"><span>⚠️ </span><span id="calWarnTxt"></span></div>
       <div class="check-row"><input type="checkbox" id="calUnk"><label for="calUnk">I don't know — use 1600 kcal default</label></div>
       <div id="calNudge"></div>
+      <!-- TDEE Calculator -->
+      <button class="calc-toggle" id="calcToggle" type="button">🧮 Calculate my calorie target</button>
+      <div class="calc-panel" id="calcPanel">
+        <div class="calc-body">
+          <div class="calc-title">Daily Calorie Estimator (Mifflin-St Jeor)</div>
+          <div class="calc-grid">
+            <div class="calc-field">
+              <label for="calcAge">Age</label>
+              <input class="calc-input" id="calcAge" type="number" min="16" max="99" placeholder="e.g. 35">
+            </div>
+            <div class="calc-field">
+              <label>Sex</label>
+              <select class="calc-select" id="calcSex">
+                <option value="m">Male</option>
+                <option value="f">Female</option>
+              </select>
+            </div>
+            <div class="calc-field">
+              <label for="calcWeight">Weight (kg)</label>
+              <input class="calc-input" id="calcWeight" type="number" min="30" max="250" placeholder="e.g. 75">
+            </div>
+            <div class="calc-field">
+              <label for="calcHeight">Height (cm)</label>
+              <input class="calc-input" id="calcHeight" type="number" min="120" max="230" placeholder="e.g. 175">
+            </div>
+          </div>
+          <div class="calc-field" style="margin-bottom:12px">
+            <label for="calcActivity">Activity level</label>
+            <select class="calc-select" id="calcActivity">
+              <option value="1.2">Sedentary (desk job, little exercise)</option>
+              <option value="1.375">Lightly active (1–3 days/week)</option>
+              <option value="1.55" selected>Moderately active (3–5 days/week)</option>
+              <option value="1.725">Very active (6–7 days/week)</option>
+              <option value="1.9">Extremely active (physical job + training)</option>
+            </select>
+          </div>
+          <div class="calc-goal-row">
+            <button class="calc-goal-btn" data-goal="-0.2" type="button">🔽 Lose weight<br><span style="font-size:9px;opacity:.7">−20% calories</span></button>
+            <button class="calc-goal-btn sel" data-goal="0" type="button">⚖️ Maintain<br><span style="font-size:9px;opacity:.7">maintenance</span></button>
+            <button class="calc-goal-btn" data-goal="0.1" type="button">🔼 Build muscle<br><span style="font-size:9px;opacity:.7">+10% calories</span></button>
+          </div>
+          <div class="calc-result" id="calcResult">
+            <div class="calc-result-row">
+              <span class="calc-result-lbl">Daily calorie target</span>
+              <span class="calc-result-val" id="calcKcalVal">—</span>
+            </div>
+            <div class="calc-result-row">
+              <span class="calc-result-lbl">Suggested protein</span>
+              <span class="calc-result-val" id="calcProtVal">—</span>
+            </div>
+            <div class="calc-result-note" id="calcNote"></div>
+          </div>
+          <button class="calc-import-btn" id="calcImportBtn" type="button">✓ Use these targets in my plan</button>
+        </div>
+      </div>
     </div>
 
     <div class="section" id="protSection">
@@ -531,7 +641,7 @@ body.shop-open .shop-fab{ display:none!important; }
       <div class="check-row"><input type="checkbox" id="protUnk" checked><label for="protUnk">No specific protein goal</label></div>
     </div>
 
-    <div class="section">
+    <div class="section" id="sect-ingr">
       <div class="section-label">Step 7 · Optional</div>
       <div class="section-title">Dietary restrictions</div>
       <p class="section-desc">Select common allergens to exclude from your plan.</p>
@@ -581,6 +691,7 @@ body.shop-open .shop-fab{ display:none!important; }
     </div>
 
   </div>
+  <div id="sect-generate"></div>
   <div class="setup-footer">
     <button class="gen-btn" id="genBtn">✨ Generate My Meal Plan</button>
     <div class="help-links"><button class="help-link" id="manualBtn">📖 User Manual</button><button class="help-link" id="faqBtn">❓ FAQ</button></div>
@@ -604,9 +715,7 @@ body.shop-open .shop-fab{ display:none!important; }
     <span class="portion-note">Scales ingredient quantities &amp; macros</span>
   </div>
   <div class="nutr-bar" id="nutrBar">
-    <div class="nutr-macro-always" id="nutrMacroRow">
-      <!-- filled by renderNutrition -->
-    </div>
+    <div class="nutr-macro-always" id="nutrMacroRow"></div>
     <div class="nutr-expand-row" id="nutrToggle">
       <span class="nutr-expand-label">Micronutrients</span>
       <div class="nutr-expand-btn" id="nutrExpandBtn">▼</div>
@@ -1094,6 +1203,18 @@ function makeMealCard(r,wi,di,slot){
   inner.innerHTML="<span class='mc-emoji'>"+r.em+"</span><div class='mc-name'>"+r.name+"</div><div class='mc-meta'>~"+mk+" kcal · "+mp+"g prot</div>";
   inner.addEventListener("click",function(){openModal(r);});
   card.appendChild(inner);
+  // Mobile swap link (always visible on touch devices)
+  var mobileSwap=document.createElement("button");
+  mobileSwap.className="mc-swap-link";
+  mobileSwap.textContent="↻ Swap";
+  (function(capturedWi,capturedDi,capturedSlot){
+    mobileSwap.addEventListener("click",function(e){
+      e.stopPropagation();
+      if(!can.recipeSwap){nudge("Recipe swap — available on Basic plan");return;}
+      openSwap(capturedWi,capturedDi,capturedSlot);
+    });
+  })(wi,di,slot);
+  card.appendChild(mobileSwap);
   // Heart button
   var heart=document.createElement("button");
   heart.className="heart-btn"+(isFav?" fav":"");
@@ -1156,13 +1277,11 @@ function renderNutrition(wi){
       "<span class='micro-bar-rda'>"+rdaInfo.rda+"</span>"+
     "</div>";
   }).join("");
-  // Always-visible macro row
   document.getElementById("nutrMacroRow").innerHTML=
     "<div class='nutr-box'><div class='nutr-val'>"+aK+"</div><div class='nutr-lbl'>Avg kcal</div></div>"+
     "<div class='nutr-box'><div class='nutr-val'>"+aP+"g</div><div class='nutr-lbl'>Protein</div></div>"+
     "<div class='nutr-box'><div class='nutr-val'>"+aC+"g</div><div class='nutr-lbl'>Carbs</div></div>"+
     "<div class='nutr-box'><div class='nutr-val'>"+aF+"g</div><div class='nutr-lbl'>Fat</div></div>";
-  // Micro section (expandable)
   document.getElementById("nutrContent").innerHTML=
     "<div class='nutr-micro-title'>Est. % of daily RDA met by this plan</div>"+
     "<div class='nutr-micro-note'>🟡 &lt;50% · 🟠 50–79% · 🟢 80%+</div>"+
@@ -1335,135 +1454,70 @@ function openModal(r){ renderModalBody(r,false); document.getElementById("recipe
 function closeModal(){ document.getElementById("recipeModal").classList.remove("open"); document.body.style.overflow=""; }
 
 // ─── SHOPPING LIST ───────────────────────────────────
-// Canonical ingredient dictionary: maps any variant → base name
-// Format: "fragment": "Display Name"
-var ING_CANON = {
-  // Eggs
-  "egg white":"Eggs", "egg yolk":"Eggs", "poached egg":"Eggs", "fried egg":"Eggs",
-  "scrambled egg":"Eggs", "boiled egg":"Eggs", "hard-boiled egg":"Eggs",
-  "soft-boiled egg":"Eggs", "whole egg":"Eggs",
-  // Chicken
-  "chicken breast":"Chicken", "chicken thigh":"Chicken", "chicken strip":"Chicken",
-  "chicken fillet":"Chicken", "chicken mince":"Chicken", "rotisserie chicken":"Chicken",
-  // Beef / Turkey / Pork
-  "lean beef":"Beef", "ground beef":"Beef", "beef mince":"Beef", "beef steak":"Beef",
-  "lean turkey":"Turkey", "turkey breast":"Turkey", "turkey mince":"Turkey",
-  "pork loin":"Pork", "pork tenderloin":"Pork",
-  // Fish & seafood
-  "salmon fillet":"Salmon", "smoked salmon":"Salmon",
-  "sea bass fillet":"Sea Bass", "cod fillet":"Cod",
-  "tuna in water":"Tuna", "canned tuna":"Tuna",
-  "raw prawn":"Prawns", "cooked prawn":"Prawns", "frozen prawn":"Prawns",
-  "raw shrimp":"Prawns", "shrimp":"Prawns",
-  // Tofu / tempeh
-  "firm tofu":"Tofu", "silken tofu":"Tofu", "soft tofu":"Tofu",
-  // Dairy
-  "greek yogurt":"Greek Yogurt", "0% greek yogurt":"Greek Yogurt",
-  "low-fat cottage cheese":"Cottage Cheese",
-  "light cream cheese":"Cream Cheese",
-  "grated parmesan":"Parmesan", "grana padano":"Parmesan",
-  "grated cheese":"Cheese",
-  // Vegetables
-  "baby spinach":"Spinach", "fresh spinach":"Spinach", "wilted spinach":"Spinach",
-  "frozen spinach":"Spinach",
-  "cherry tomato":"Tomatoes", "crushed tomato":"Tomatoes", "chopped tomato":"Tomatoes",
-  "sun-dried tomato":"Tomatoes", "tomato paste":"Tomato Paste",
-  "red pepper":"Bell Pepper", "yellow pepper":"Bell Pepper", "green pepper":"Bell Pepper",
-  "bell pepper":"Bell Pepper",
-  "spring onion":"Spring Onion", "green onion":"Spring Onion", "scallion":"Spring Onion",
-  "red onion":"Onion", "white onion":"Onion", "brown onion":"Onion",
-  "sweet potato":"Sweet Potato",
-  "butternut squash":"Squash", "pumpkin":"Squash",
-  "broccoli floret":"Broccoli",
-  "shiitake mushroom":"Mushrooms", "mixed mushroom":"Mushrooms",
-  "portobello mushroom":"Mushrooms",
-  "baby carrot":"Carrots", "carrot stick":"Carrots",
-  "celery stick":"Celery", "celery stalk":"Celery",
-  "cucumber":"Cucumber",
-  "courgette":"Courgette", "zucchini":"Courgette",
-  // Citrus / acids — consolidate to fruit not juice
-  "lemon juice":"Lemon", "squeeze of lemon":"Lemon", "lemon zest":"Lemon",
-  "lime juice":"Lime", "squeeze of lime":"Lime",
-  // Grains
-  "basmati rice":"Rice", "short-grain rice":"Rice", "long-grain rice":"Rice",
-  "brown rice":"Rice", "white rice":"Rice",
-  "soba noodle":"Noodles", "rice noodle":"Noodles", "egg noodle":"Noodles",
-  "rolled oat":"Oats", "steel-cut oat":"Oats",
-  "wholegrain bread":"Bread", "sourdough":"Bread", "rye bread":"Bread",
-  "pitta bread":"Bread", "corn tortilla":"Tortillas", "flour tortilla":"Tortillas",
-  "rice cake":"Rice Cakes", "oatcake":"Oatcakes",
+var ING_CANON={
+  "egg white":"Eggs","egg yolk":"Eggs","poached egg":"Eggs","fried egg":"Eggs",
+  "scrambled egg":"Eggs","boiled egg":"Eggs","hard-boiled egg":"Eggs","soft-boiled egg":"Eggs","whole egg":"Eggs",
+  "chicken breast":"Chicken","chicken thigh":"Chicken","chicken strip":"Chicken","chicken fillet":"Chicken","chicken mince":"Chicken",
+  "lean beef":"Beef","ground beef":"Beef","beef mince":"Beef","beef steak":"Beef","lean turkey":"Turkey","turkey breast":"Turkey","turkey mince":"Turkey","pork loin":"Pork","pork tenderloin":"Pork",
+  "salmon fillet":"Salmon","smoked salmon":"Salmon","sea bass fillet":"Sea Bass","cod fillet":"Cod","tuna in water":"Tuna","canned tuna":"Tuna",
+  "raw prawn":"Prawns","cooked prawn":"Prawns","frozen prawn":"Prawns","raw shrimp":"Prawns","shrimp":"Prawns",
+  "firm tofu":"Tofu","silken tofu":"Tofu","soft tofu":"Tofu",
+  "greek yogurt":"Greek Yogurt","0% greek yogurt":"Greek Yogurt","low-fat cottage cheese":"Cottage Cheese","light cream cheese":"Cream Cheese","grated parmesan":"Parmesan","grana padano":"Parmesan","grated cheese":"Cheese",
+  "baby spinach":"Spinach","fresh spinach":"Spinach","wilted spinach":"Spinach","frozen spinach":"Spinach",
+  "cherry tomato":"Tomatoes","crushed tomato":"Tomatoes","chopped tomato":"Tomatoes","sun-dried tomato":"Sun-dried Tomatoes","tomato paste":"Tomato Paste",
+  "red pepper":"Bell Pepper","yellow pepper":"Bell Pepper","green pepper":"Bell Pepper","bell pepper":"Bell Pepper",
+  "spring onion":"Spring Onion","green onion":"Spring Onion","scallion":"Spring Onion",
+  "red onion":"Onion","white onion":"Onion","brown onion":"Onion",
+  "butternut squash":"Squash","pumpkin":"Squash","broccoli floret":"Broccoli",
+  "shiitake mushroom":"Mushrooms","mixed mushroom":"Mushrooms","portobello mushroom":"Mushrooms",
+  "baby carrot":"Carrots","carrot stick":"Carrots","celery stick":"Celery","celery stalk":"Celery",
+  "courgette":"Courgette","zucchini":"Courgette",
+  "lemon juice":"Lemon","squeeze of lemon":"Lemon","lemon zest":"Lemon",
+  "lime juice":"Lime","squeeze of lime":"Lime",
+  "basmati rice":"Rice","short-grain rice":"Rice","long-grain rice":"Rice","brown rice":"Rice","white rice":"Rice",
+  "soba noodle":"Noodles","rice noodle":"Noodles","egg noodle":"Noodles",
+  "rolled oat":"Oats","steel-cut oat":"Oats",
+  "wholegrain bread":"Bread","sourdough":"Bread","rye bread":"Bread","pitta bread":"Bread",
+  "corn tortilla":"Tortillas","flour tortilla":"Tortillas",
   "bulgur wheat":"Bulgur",
-  // Legumes
-  "cooked chickpea":"Chickpeas", "canned chickpea":"Chickpeas",
-  "cooked black bean":"Black Beans", "canned black bean":"Black Beans",
-  "cannellini bean":"White Beans", "white bean":"White Beans",
-  "cooked lentil":"Lentils", "red lentil":"Lentils", "brown lentil":"Lentils",
-  "green lentil":"Lentils",
+  "cooked chickpea":"Chickpeas","canned chickpea":"Chickpeas",
+  "cooked black bean":"Black Beans","canned black bean":"Black Beans",
+  "cannellini bean":"White Beans","white bean":"White Beans",
+  "cooked lentil":"Lentils","red lentil":"Lentils","brown lentil":"Lentils","green lentil":"Lentils",
   "frozen edamame":"Edamame",
-  // Nuts & seeds
-  "pumpkin seed":"Seeds", "sunflower seed":"Seeds", "chia seed":"Seeds",
-  "mixed seed":"Seeds", "sesame seed":"Seeds",
-  "whole almond":"Almonds", "flaked almond":"Almonds",
-  "walnut half":"Walnuts",
-  "medjool date":"Dates",
-  // Pantry
-  "olive oil":"Olive Oil", "extra virgin olive oil":"Olive Oil",
-  "sesame oil":"Sesame Oil",
-  "coconut milk":"Coconut Milk", "coconut water":"Coconut Water",
-  "soy sauce":"Soy Sauce", "tamari":"Soy Sauce",
-  "vegetable broth":"Stock", "chicken broth":"Stock", "veg broth":"Stock",
-  "vegetable stock":"Stock", "chicken stock":"Stock",
-  "maple syrup":"Honey/Maple", "honey":"Honey/Maple",
-  "balsamic vinegar":"Vinegar", "rice vinegar":"Vinegar", "red wine vinegar":"Vinegar",
+  "pumpkin seed":"Seeds","sunflower seed":"Seeds","chia seed":"Seeds","mixed seed":"Seeds","sesame seed":"Seeds",
+  "whole almond":"Almonds","flaked almond":"Almonds","walnut half":"Walnuts","medjool date":"Dates",
+  "olive oil":"Olive Oil","extra virgin olive oil":"Olive Oil","sesame oil":"Sesame Oil",
+  "coconut milk":"Coconut Milk","coconut water":"Coconut Water",
+  "soy sauce":"Soy Sauce","tamari":"Soy Sauce",
+  "vegetable broth":"Stock","chicken broth":"Stock","veg broth":"Stock","vegetable stock":"Stock","chicken stock":"Stock",
+  "maple syrup":"Honey/Maple","honey":"Honey/Maple",
+  "balsamic vinegar":"Vinegar","rice vinegar":"Vinegar","red wine vinegar":"Vinegar",
   "dijon mustard":"Mustard",
-  "green curry paste":"Curry Paste", "red curry paste":"Curry Paste",
-  "garam masala":"Spices", "cumin":"Spices", "turmeric":"Spices",
-  "smoked paprika":"Spices", "paprika":"Spices", "cinnamon":"Spices",
-  "chilli flake":"Spices", "chilli powder":"Spices", "cayenne":"Spices",
-  "ras el hanout":"Spices",
-  "vanilla extract":"Vanilla", "vanilla":"Vanilla",
-  "cocoa powder":"Cocoa",
-  "protein powder":"Protein Powder",
-  // Fresh herbs — don't consolidate, keep generic
-  "fresh coriander":"Coriander", "coriander leaf":"Coriander",
-  "fresh parsley":"Parsley", "fresh basil":"Basil",
-  "fresh mint":"Mint", "fresh dill":"Dill", "fresh thyme":"Thyme",
+  "green curry paste":"Curry Paste","red curry paste":"Curry Paste",
+  "garam masala":"Spices","cumin":"Spices","turmeric":"Spices","smoked paprika":"Spices","paprika":"Spices","cinnamon":"Spices","chilli flake":"Spices","chilli powder":"Spices","cayenne":"Spices","ras el hanout":"Spices",
+  "vanilla extract":"Vanilla","cocoa powder":"Cocoa","protein powder":"Protein Powder",
+  "fresh coriander":"Coriander","coriander leaf":"Coriander","fresh parsley":"Parsley","fresh basil":"Basil","fresh mint":"Mint","fresh dill":"Dill","fresh thyme":"Thyme",
 };
-
-var PREP_WORDS=["diced","sliced","chopped","crushed","minced","grated","halved","peeled",
-  "cubed","shredded","julienned","torn","crumbled","mashed","roasted","cooked","dried",
-  "fresh","frozen","canned","tinned","raw","whole","ground","large","medium","small",
-  "ripe","firm","boneless","skinless","washed","trimmed","rinsed","drained","blanched",
-  "steamed","wilted","sautéed","par-cooked","well-dried","soft-boiled","hard-boiled","poached"];
-
+var PREP_WORDS=["diced","sliced","chopped","crushed","minced","grated","halved","peeled","cubed","shredded","julienned","torn","crumbled","mashed","roasted","cooked","dried","fresh","frozen","canned","tinned","raw","whole","ground","large","medium","small","ripe","firm","boneless","skinless","washed","trimmed","rinsed","drained","blanched","steamed","wilted","sautéed","par-cooked","well-dried","soft-boiled","hard-boiled","poached"];
 function canonicalKey(desc){
   var lower=desc.toLowerCase().split(",")[0].split("(")[0].split(" in ")[0].trim();
-  // Try canonical dictionary first (longest match wins)
-  var best=null, bestLen=0;
+  var best=null,bestLen=0;
   Object.keys(ING_CANON).forEach(function(frag){
-    if(lower.includes(frag) && frag.length>bestLen){
-      best=ING_CANON[frag]; bestLen=frag.length;
-    }
+    if(lower.includes(frag)&&frag.length>bestLen){best=ING_CANON[frag];bestLen=frag.length;}
   });
   if(best) return best.toLowerCase();
-  // Fall back to prep-word stripping
   var k=lower;
   PREP_WORDS.forEach(function(w){k=k.replace(new RegExp("\\b"+w+"\\b","g"),"");});
-  k=k.replace(/\s+/g," ").trim();
-  // Strip possessives, punctuation
-  k=k.replace(/['']/g,"").replace(/[^a-z0-9 ]/g," ").replace(/\s+/g," ").trim();
+  k=k.replace(/\s+/g," ").trim().replace(/[^a-z0-9 ]/g," ").replace(/\s+/g," ").trim();
   return k.replace(/es$/,"").replace(/s$/,"")||k;
 }
-
-// Get display name from canonical key
 function canonicalDisplay(key){
-  // Check if it came from ING_CANON (capitalised value)
   var found=null;
-  Object.keys(ING_CANON).forEach(function(frag){
-    if(ING_CANON[frag].toLowerCase()===key) found=ING_CANON[frag];
-  });
-  return found || (key.charAt(0).toUpperCase()+key.slice(1));
+  Object.keys(ING_CANON).forEach(function(frag){if(ING_CANON[frag].toLowerCase()===key)found=ING_CANON[frag];});
+  return found||(key.charAt(0).toUpperCase()+key.slice(1));
 }
+
 function buildShoppingList(){
   var en=Object.keys(S.slots).filter(function(k){return S.slots[k];});
   var allIng=[];
@@ -1477,10 +1531,7 @@ function buildShoppingList(){
     if(!key) return;
     var display=canonicalDisplay(key);
     if(!itemMap[key]){itemMap[key]={display:display,qtyLo:0,qtyHi:0,unit:unit,count:0};}
-    if(qty>0){
-      itemMap[key].qtyLo+=qty*S.portions*0.85; // -15% lower bound
-      itemMap[key].qtyHi+=qty*S.portions*1.15; // +15% upper bound
-    }
+    if(qty>0){itemMap[key].qtyLo+=qty*S.portions*0.85;itemMap[key].qtyHi+=qty*S.portions*1.15;}
     itemMap[key].count++;
   });
   var cats={}; Object.keys(SHOP_CATS).forEach(function(k){cats[k]=[];}); cats.other=[];
@@ -1512,8 +1563,7 @@ function openShopList(){
       var it=entry.item;
       var qtyStr="";
       if(it.qtyLo>0&&it.unit){
-        var lo=Math.round(it.qtyLo/10)*10; // round to nearest 10
-        var hi=Math.round(it.qtyHi/10)*10;
+        var lo=Math.round(it.qtyLo/10)*10,hi=Math.round(it.qtyHi/10)*10;
         qtyStr=(lo===hi?lo:lo+"–"+hi)+it.unit;
       }
       var el=document.createElement("div"); el.className="shop-item";
@@ -1538,10 +1588,9 @@ function copyShopList(){
     lines.push(catId==="other"?"Other":SHOP_CATS[catId].label);
     items.forEach(function(e){
       var it=e.item;
-      var lo=it.qtyLo>0?Math.round(it.qtyLo/10)*10:0;
-      var hi=it.qtyHi>0?Math.round(it.qtyHi/10)*10:0;
-      var qCopy=lo>0&&it.unit?" ("+(lo===hi?lo:lo+"–"+hi)+it.unit+")":"";
-      lines.push("  ☐ "+it.display+qCopy);
+      var lo2=it.qtyLo>0?Math.round(it.qtyLo/10)*10:0,hi2=it.qtyHi>0?Math.round(it.qtyHi/10)*10:0;
+      var qc=lo2>0&&it.unit?" ("+(lo2===hi2?lo2:lo2+"–"+hi2)+it.unit+")":"";
+      lines.push("  ☐ "+it.display+qc);
     });
     lines.push("");
   });
@@ -1946,6 +1995,148 @@ function buildDaySelector(wi){
   });
   renderMobileDay(wi, 0);
 }
+
+
+// ─── SCROLL PROGRESS BAR ─────────────────────────
+(function(){
+  var sections = ['sect-diet','sect-meals','sect-ingr','sect-generate'];
+  var steps = document.querySelectorAll('.sp-step');
+  var lines = document.querySelectorAll('.sp-line');
+  function updateProgress(){
+    var scrollY = window.scrollY || window.pageYOffset;
+    var winH = window.innerHeight;
+    var activeIdx = 0;
+    sections.forEach(function(id, i){
+      var el = document.getElementById(id);
+      if(!el) return;
+      var rect = el.getBoundingClientRect();
+      if(rect.top <= winH * 0.5) activeIdx = i;
+    });
+    steps.forEach(function(s, i){
+      s.classList.remove('active','done');
+      if(i < activeIdx) s.classList.add('done');
+      else if(i === activeIdx) s.classList.add('active');
+    });
+    lines.forEach(function(l, i){
+      l.classList.toggle('done', i < activeIdx);
+    });
+  }
+  // Click to scroll
+  steps.forEach(function(step, i){
+    step.addEventListener('click', function(){
+      var el = document.getElementById(step.dataset.target);
+      if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+  });
+  var ticking = false;
+  window.addEventListener('scroll', function(){
+    if(!ticking){ requestAnimationFrame(function(){ updateProgress(); ticking=false; }); ticking=true; }
+  }, {passive:true});
+  updateProgress();
+})();
+
+
+// ─── TDEE CALCULATOR ─────────────────────────────
+(function(){
+  var calcGoal = 0; // modifier: -0.2 / 0 / 0.1
+
+  function calcTDEE(){
+    var age    = parseFloat(document.getElementById('calcAge').value);
+    var weight = parseFloat(document.getElementById('calcWeight').value);
+    var height = parseFloat(document.getElementById('calcHeight').value);
+    var sex    = document.getElementById('calcSex').value;
+    var act    = parseFloat(document.getElementById('calcActivity').value);
+    if(!age || !weight || !height || isNaN(act)) return;
+
+    // Mifflin-St Jeor BMR
+    var bmr = sex === 'm'
+      ? 10*weight + 6.25*height - 5*age + 5
+      : 10*weight + 6.25*height - 5*age - 161;
+    var tdee = Math.round(bmr * act);
+    var target = Math.round(tdee * (1 + calcGoal));
+    target = Math.max(1200, Math.min(4000, target)); // safety clamp
+
+    // Protein: 1.5g/kg sedentary (<1.375), else 1.7–2.2g/kg midpoint 1.95g/kg
+    var protPerKg = act <= 1.375 ? 1.5 : 1.95;
+    var prot = Math.round(weight * protPerKg);
+
+    document.getElementById('calcKcalVal').textContent = target + ' kcal';
+    document.getElementById('calcProtVal').textContent = prot + 'g / day';
+    var noteText = calcGoal < 0
+      ? 'Maintenance: '+tdee+' kcal · Reduced by 20% for weight loss'
+      : calcGoal > 0
+        ? 'Maintenance: '+tdee+' kcal · Increased by 10% for muscle building'
+        : 'Estimated maintenance calories based on your profile';
+    noteText += ' · Protein: '+(act<=1.375?'1.5':'1.7–2.2')+'g per kg bodyweight';
+    document.getElementById('calcNote').textContent = noteText;
+    document.getElementById('calcResult').classList.add('show');
+    document.getElementById('calcImportBtn').classList.add('show');
+    document.getElementById('calcImportBtn').dataset.kcal = target;
+    document.getElementById('calcImportBtn').dataset.prot = prot;
+  }
+
+  // Toggle panel open/close
+  document.getElementById('calcToggle').addEventListener('click', function(){
+    var panel = document.getElementById('calcPanel');
+    var btn   = document.getElementById('calcToggle');
+    var isOpen = panel.classList.toggle('open');
+    btn.classList.toggle('open', isOpen);
+    btn.innerHTML = isOpen ? '🧮 Hide calculator' : '🧮 Calculate my calorie target';
+  });
+
+  // Recalculate on any input change
+  ['calcAge','calcWeight','calcHeight','calcSex','calcActivity'].forEach(function(id){
+    document.getElementById(id).addEventListener('input', calcTDEE);
+  });
+
+  // Goal buttons
+  document.querySelectorAll('.calc-goal-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.calc-goal-btn').forEach(function(b){b.classList.remove('sel');});
+      btn.classList.add('sel');
+      calcGoal = parseFloat(btn.dataset.goal);
+      calcTDEE();
+    });
+  });
+
+  // Import into sliders
+  document.getElementById('calcImportBtn').addEventListener('click', function(){
+    var kcal = parseInt(this.dataset.kcal);
+    var prot = parseInt(this.dataset.prot);
+    if(!kcal) return;
+
+    // Set calorie slider
+    var cs = document.getElementById('calSlider');
+    var cv = document.getElementById('calVal');
+    var calUnk = document.getElementById('calUnk');
+    if(calUnk.checked){ calUnk.checked=false; document.getElementById('calWrap').style.opacity='1'; cs.disabled=false; }
+    cs.value = Math.max(+cs.min, Math.min(+cs.max, kcal));
+    cv.textContent = cs.value;
+    S.kcal = +cs.value;
+
+    // Set protein slider if premium
+    if(can.proteinTarget){
+      var ps = document.getElementById('protSlider');
+      var pv = document.getElementById('protVal');
+      var protUnk = document.getElementById('protUnk');
+      if(ps && pv){
+        if(protUnk && protUnk.checked){ protUnk.checked=false; document.getElementById('protWrap').style.opacity='1'; ps.disabled=false; S.protUnk=false; }
+        ps.value = Math.max(+ps.min, Math.min(+ps.max, prot));
+        pv.textContent = ps.value;
+        S.prot = +ps.value;
+      }
+    }
+
+    checkWarnings();
+
+    // Close calculator
+    document.getElementById('calcPanel').classList.remove('open');
+    document.getElementById('calcToggle').classList.remove('open');
+    document.getElementById('calcToggle').innerHTML = '🧮 Calculate my calorie target';
+
+    toast('✓ Targets imported: '+kcal+' kcal'+(can.proteinTarget?' · '+prot+'g protein':''));
+  });
+})();
 
 window.addEventListener('load', initTier);
 
