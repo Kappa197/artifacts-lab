@@ -77,7 +77,7 @@ h1,h2,h3{font-family:var(--serif)}
 .diet-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .diet-card{border:2px solid var(--border);border-radius:var(--radius);padding:14px;cursor:pointer;transition:all .2s;background:var(--navy2);text-align:center;user-select:none}
 .diet-card:hover{border-color:var(--primary-light)}
-.diet-card.sel{border-color:var(--amber);border-width:2px;background:var(--amber-dim)}
+.diet-card.sel{border-color:var(--amber);background:#F0F7F0}
 .diet-icon{font-size:26px;margin-bottom:6px}
 .diet-name{font-weight:600;font-size:13px}
 .diet-desc{font-size:11px;color:var(--text2);margin-top:2px}
@@ -90,7 +90,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 input[type=range]::-moz-range-track{height:4px;background:var(--navy4);border-radius:2px}
 .slots-grid{display:flex;flex-direction:column;gap:8px}
 .slot-tog{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border:2px solid var(--border);border-radius:var(--radius);background:var(--navy2);cursor:pointer;transition:all .2s;user-select:none}
-.slot-tog.on{border-color:var(--amber);border-width:2px;background:var(--amber-dim)}
+.slot-tog.on{border-color:var(--amber);background:#F0F7F0}
 .slot-left{display:flex;align-items:center;gap:12px}
 .slot-icon{font-size:20px;width:32px;text-align:center}
 .slot-name{font-weight:600;font-size:14px}
@@ -118,7 +118,7 @@ input[type=range]::-moz-range-track{height:4px;background:var(--navy4);border-ra
 .diff-btn .di{font-size:20px;margin-bottom:4px}
 .diff-btn .dl{font-size:12px;font-weight:600;color:var(--text2)}
 .diff-btn .ds{font-size:10px;color:var(--text2)}
-.diff-btn.sel{border-color:var(--amber);border-width:2px;background:var(--amber-dim)}
+.diff-btn.sel{border-color:var(--amber);background:#F0F7F0}
 .diff-btn.sel .dl{color:var(--amber)}
 .excl-row{display:flex;gap:8px;margin-bottom:10px}
 .excl-input{flex:1;padding:10px 14px;border:2px solid var(--border);border-radius:var(--radius-sm);font-family:var(--body);font-size:14px;outline:none;transition:border-color .2s;background:var(--navy2);color:var(--text)}
@@ -150,14 +150,21 @@ input[type=range]::-moz-range-track{height:4px;background:var(--navy4);border-ra
 .portion-btn{width:34px;height:34px;border:2px solid var(--border);border-radius:8px;background:var(--navy2);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;font-family:inherit;color:var(--text2)}
 .portion-btn.sel{border-color:var(--amber);background:var(--amber);color:#fff}
 .portion-note{font-size:11px;color:var(--text2)}
-.nutr-bar{background:var(--navy2);border-bottom:1px solid var(--border);overflow:hidden;transition:max-height .4s ease}
+.nutr-bar{background:var(--navy2);border-bottom:1px solid var(--border);}
+.nutr-macro-always{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px 14px 0;}
+.nutr-expand-row{display:flex;align-items:center;justify-content:center;padding:6px 14px 8px;cursor:pointer;user-select:none;gap:6px;}
+.nutr-expand-label{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);}
+.nutr-expand-btn{width:26px;height:26px;border-radius:50%;background:var(--navy3);border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;color:var(--amber);font-size:12px;}
+.nutr-expand-btn:hover{border-color:var(--amber);background:var(--amber-dim);}
+.nutr-micro-section{overflow:hidden;transition:max-height .4s ease;max-height:0;}
+.nutr-micro-section.open{max-height:400px;}
+.nutr-content{padding:10px 14px 14px;}
 .nutr-bar.collapsed{max-height:44px}
 .nutr-bar.expanded{max-height:500px}
 .nutr-toggle{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;user-select:none}
 .nutr-toggle-label{font-size:13px;font-weight:600;color:var(--amber)}
 .nutr-arrow{font-size:11px;color:var(--text2);transition:transform .3s}
 .nutr-bar.expanded .nutr-arrow{transform:rotate(180deg)}
-.nutr-content{padding:0 16px 16px}
 .nutr-macro-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
 .nutr-box{background:var(--navy);border-radius:8px;padding:10px;text-align:center}
 .nutr-val{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--amber)}
@@ -190,9 +197,9 @@ input[type=range]::-moz-range-track{height:4px;background:var(--navy4);border-ra
 .meal-card:hover{box-shadow:var(--card-shadow);transform:translateY(-2px)}
 .mc-inner{cursor:pointer}
 .mc-emoji{font-size:16px;margin-bottom:2px;display:block}
-.mc-name{font-size:12px;font-weight:600;color:var(--text);line-height:1.3;margin-bottom:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.mc-meta{font-size:11px;color:var(--text2)}
-.swap-btn{position:absolute;bottom:5px;right:5px;width:22px;height:22px;border-radius:50%;background:var(--navy);border:1px solid var(--border);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0.5;transition:opacity .2s;color:var(--text)}
+.mc-name{font-size:11px;font-weight:600;color:var(--text);line-height:1.3;margin-bottom:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mc-meta{font-size:10px;color:var(--text2)}
+.swap-btn{position:absolute;bottom:5px;right:5px;width:22px;height:22px;border-radius:50%;background:var(--navy);border:1px solid var(--border);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;color:var(--text)}
 .meal-card:hover .swap-btn{opacity:1}
 .day-tot-row{display:grid;gap:5px;margin-bottom:16px}
 .day-tot{text-align:center;font-size:10px;color:var(--text2);padding:3px}
@@ -237,7 +244,7 @@ input[type=range]::-moz-range-track{height:4px;background:var(--navy4);border-ra
 .tip-box{background:linear-gradient(135deg,#FFF5F0,#FEF0EA);border-left:3px solid var(--accent);border-radius:8px;padding:11px 13px;margin-top:14px}
 .tip-lbl{font-size:10px;font-weight:700;letter-spacing:.4px;color:var(--green);text-transform:uppercase;margin-bottom:3px}
 .tip-txt{font-size:12px;line-height:1.5;font-style:italic}
-.scale-bar{display:flex;align-items:center;justify-content:space-between;background:var(--amber-dim);border:1.5px solid var(--primary);border-radius:10px;padding:10px 14px;margin:14px 0 4px}
+.scale-bar{display:flex;align-items:center;justify-content:space-between;background:#F0F7F0;border:1.5px solid var(--primary);border-radius:10px;padding:10px 14px;margin:14px 0 4px}
 .scale-label{font-size:13px;font-weight:600;color:var(--amber)}
 .scale-sub{font-size:11px;color:var(--text2);margin-top:1px}
 .scale-toggle{position:relative;width:46px;height:26px;flex-shrink:0;cursor:pointer}
@@ -253,7 +260,7 @@ input[type=range]::-moz-range-track{height:4px;background:var(--navy4);border-ra
 .swap-sub{font-size:12px;color:var(--text2);margin-bottom:14px}
 .swap-list{display:flex;flex-direction:column;gap:8px}
 .swap-item{display:flex;align-items:center;gap:12px;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;transition:all .2s}
-.swap-item:hover{border-color:var(--amber);background:var(--amber-dim)}
+.swap-item:hover{border-color:var(--amber);background:#F0F7F0}
 .swap-em{font-size:22px;flex-shrink:0}
 .swap-item-name{font-size:13px;font-weight:600}
 .swap-item-meta{font-size:11px;color:var(--text2);margin-top:2px}
@@ -333,7 +340,7 @@ input[type=range]::-moz-range-track{height:4px;background:var(--navy4);border-ra
 /* PREP TIME BUTTONS */
 .prep-row{display:flex;gap:8px;flex-wrap:wrap}
 .prep-btn{padding:9px 14px;border:2px solid var(--border);border-radius:var(--radius-sm);background:var(--navy2);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--text2);transition:all .2s}
-.prep-btn.sel{border-color:var(--amber);background:var(--amber-dim);color:var(--amber)}
+.prep-btn.sel{border-color:var(--amber);background:#F0F7F0;color:var(--amber)}
 /* MACRO DETAIL (premium) */
 .macro-detail{margin-bottom:4px}
 .macro-donut-wrap{display:flex;align-items:center;gap:16px;margin-bottom:14px}
@@ -420,25 +427,29 @@ body.day-view .day-selector{display:flex}
 body.day-view .mobile-day-view{display:flex}
 
 
-/* Mobile swap link — always visible below meal name */
-.mc-swap-link{display:none;font-size:10px;color:var(--amber2);font-family:var(--mono);font-weight:600;letter-spacing:.04em;cursor:pointer;background:none;border:none;padding:0;margin-top:3px;text-decoration:none}
-@media(max-width:640px){.mc-swap-link{display:block}.swap-btn{display:none}}
+/* ── SHOPPING LIST FAB ───────────────────────── */
+.shop-fab{
+  position:fixed; bottom:24px; right:20px; z-index:120;
+  width:56px; height:56px; border-radius:50%;
+  background:var(--amber); border:none; cursor:pointer;
+  display:none; align-items:center; justify-content:center;
+  font-size:22px; box-shadow:0 4px 20px rgba(212,146,10,.45);
+  transition:transform .2s, box-shadow .2s;
+}
+.shop-fab:hover{ transform:scale(1.08); box-shadow:0 6px 28px rgba(212,146,10,.6); }
+.shop-fab:active{ transform:scale(.95); }
+.page.active#planPage ~ .shop-fab{ display:flex; }
+/* hide when shopping list is open */
+body.shop-open .shop-fab{ display:none!important; }
 
 
-/* ── SCROLL PROGRESS BAR ─────────────────────────── */
-.setup-progress{position:sticky;top:60px;z-index:90;background:var(--navy2);border-bottom:1px solid var(--border);padding:10px 16px;}
-.sp-steps{display:flex;align-items:center;max-width:680px;margin:0 auto;}
-.sp-step{display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;cursor:pointer;transition:opacity .2s;}
-.sp-step:hover{opacity:.8;}
-.sp-dot{width:10px;height:10px;border-radius:50%;background:var(--border2);border:2px solid var(--border2);transition:all .3s;}
-.sp-label{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);white-space:nowrap;transition:color .3s;}
-.sp-line{flex:1;height:2px;background:var(--border);margin:0 4px;margin-bottom:14px;transition:background .3s;}
-.sp-step.active .sp-dot{background:var(--amber);border-color:var(--amber);box-shadow:0 0 6px rgba(212,146,10,.4);}
-.sp-step.active .sp-label{color:var(--amber2);}
-.sp-step.done .sp-dot{background:var(--green);border-color:var(--green);}
-.sp-step.done .sp-label{color:var(--green);}
-.sp-line.done{background:var(--green);}
-@media(max-width:480px){.sp-label{display:none;}.sp-dot{width:8px;height:8px;}.sp-line{margin-bottom:0;}}
+/* ── COMPACT SHOP LIST ───────────────────────── */
+.shop-item{padding:5px 8px;} /* was 7px 10px */
+.shop-item-text{font-size:13px;}
+.shop-item-qty{font-size:12px;color:var(--amber2);font-weight:700;white-space:nowrap;}
+.shop-cat-title{font-size:10px;padding-bottom:4px;margin-bottom:6px;}
+.shop-cat{margin-bottom:14px;}
+.shop-item-check{width:16px;height:16px;border-radius:3px;font-size:10px;}
 
 </style>
 </head>
@@ -461,31 +472,8 @@ body.day-view .mobile-day-view{display:flex}
 
 <div id="setupPage" class="page active">
   <div class="setup-body">
-  <div class="setup-progress" id="setupProgress">
-    <div class="sp-steps">
-      <div class="sp-step active" data-target="sect-diet">
-        <div class="sp-dot"></div>
-        <span class="sp-label">Diet Style</span>
-      </div>
-      <div class="sp-line"></div>
-      <div class="sp-step" data-target="sect-meals">
-        <div class="sp-dot"></div>
-        <span class="sp-label">Meals &amp; Portions</span>
-      </div>
-      <div class="sp-line"></div>
-      <div class="sp-step" data-target="sect-ingr">
-        <div class="sp-dot"></div>
-        <span class="sp-label">Ingredients</span>
-      </div>
-      <div class="sp-line"></div>
-      <div class="sp-step" data-target="sect-generate">
-        <div class="sp-dot"></div>
-        <span class="sp-label">Generate Plan</span>
-      </div>
-    </div>
-  </div>
 
-    <div class="section" id="sect-diet">
+    <div class="section">
       <div class="section-label">Step 1</div>
       <div class="section-title">What's your diet?</div>
       <p class="section-desc">Filters the recipe database to match your lifestyle.</p>
@@ -503,7 +491,7 @@ body.day-view .mobile-day-view{display:flex}
       <div class="section-body"><div class="chips" id="cuisineChips"></div></div>
     </div>
 
-    <div class="section" id="sect-meals">
+    <div class="section">
       <div class="section-label">Step 3</div>
       <div class="section-title">How many weeks?</div>
       <p class="section-desc">A full 7-day plan per week.</p>
@@ -543,7 +531,7 @@ body.day-view .mobile-day-view{display:flex}
       <div class="check-row"><input type="checkbox" id="protUnk" checked><label for="protUnk">No specific protein goal</label></div>
     </div>
 
-    <div class="section" id="sect-ingr">
+    <div class="section">
       <div class="section-label">Step 7 · Optional</div>
       <div class="section-title">Dietary restrictions</div>
       <p class="section-desc">Select common allergens to exclude from your plan.</p>
@@ -593,7 +581,6 @@ body.day-view .mobile-day-view{display:flex}
     </div>
 
   </div>
-  <div id="sect-generate"></div>
   <div class="setup-footer">
     <button class="gen-btn" id="genBtn">✨ Generate My Meal Plan</button>
     <div class="help-links"><button class="help-link" id="manualBtn">📖 User Manual</button><button class="help-link" id="faqBtn">❓ FAQ</button></div>
@@ -604,7 +591,7 @@ body.day-view .mobile-day-view{display:flex}
 <div id="planPage" class="page">
   <div class="plan-subheader">
     <div class="plan-hinfo"><div class="plan-htitle">Meal Plan</div><div class="plan-hsub" id="planSub"></div></div>
-    <div class="hdr-btns"><button class="view-toggle-btn" id="viewToggleBtn">☰ Day</button><button class="hdr-btn shop-btn-styled" id="shopBtn">🛒 Shopping List</button><button class="hdr-btn" id="printBtn">🖨️</button></div>
+    <div class="hdr-btns"><button class="view-toggle-btn" id="viewToggleBtn">☰ Day</button><button class="hdr-btn" id="shopBtn" title="Shopping list" style="opacity:0;pointer-events:none;width:0;padding:0;border:0;overflow:hidden"></button><button class="hdr-btn" id="printBtn">🖨️</button></div>
   </div>
   <div class="portion-bar">
     <span class="portion-label">Serves</span>
@@ -616,9 +603,17 @@ body.day-view .mobile-day-view{display:flex}
     </div>
     <span class="portion-note">Scales ingredient quantities &amp; macros</span>
   </div>
-  <div class="nutr-bar collapsed" id="nutrBar">
-    <div class="nutr-toggle" id="nutrToggle"><span class="nutr-toggle-label">📊 Weekly Nutrition Summary</span><span class="nutr-arrow">▼</span></div>
-    <div class="nutr-content" id="nutrContent"></div>
+  <div class="nutr-bar" id="nutrBar">
+    <div class="nutr-macro-always" id="nutrMacroRow">
+      <!-- filled by renderNutrition -->
+    </div>
+    <div class="nutr-expand-row" id="nutrToggle">
+      <span class="nutr-expand-label">Micronutrients</span>
+      <div class="nutr-expand-btn" id="nutrExpandBtn">▼</div>
+    </div>
+    <div class="nutr-micro-section" id="nutrMicroSection">
+      <div class="nutr-content" id="nutrContent"></div>
+    </div>
   </div>
   <nav class="week-tabs" id="weekTabs"></nav>
   <nav class="day-selector" id="daySelector"></nav>
@@ -1099,18 +1094,6 @@ function makeMealCard(r,wi,di,slot){
   inner.innerHTML="<span class='mc-emoji'>"+r.em+"</span><div class='mc-name'>"+r.name+"</div><div class='mc-meta'>~"+mk+" kcal · "+mp+"g prot</div>";
   inner.addEventListener("click",function(){openModal(r);});
   card.appendChild(inner);
-  // Mobile swap link (always visible on touch devices)
-  var mobileSwap=document.createElement("button");
-  mobileSwap.className="mc-swap-link";
-  mobileSwap.textContent="↻ Swap";
-  (function(capturedWi,capturedDi,capturedSlot){
-    mobileSwap.addEventListener("click",function(e){
-      e.stopPropagation();
-      if(!can.recipeSwap){nudge("Recipe swap — available on Basic plan");return;}
-      openSwap(capturedWi,capturedDi,capturedSlot);
-    });
-  })(wi,di,slot);
-  card.appendChild(mobileSwap);
   // Heart button
   var heart=document.createElement("button");
   heart.className="heart-btn"+(isFav?" fav":"");
@@ -1173,13 +1156,14 @@ function renderNutrition(wi){
       "<span class='micro-bar-rda'>"+rdaInfo.rda+"</span>"+
     "</div>";
   }).join("");
+  // Always-visible macro row
+  document.getElementById("nutrMacroRow").innerHTML=
+    "<div class='nutr-box'><div class='nutr-val'>"+aK+"</div><div class='nutr-lbl'>Avg kcal</div></div>"+
+    "<div class='nutr-box'><div class='nutr-val'>"+aP+"g</div><div class='nutr-lbl'>Protein</div></div>"+
+    "<div class='nutr-box'><div class='nutr-val'>"+aC+"g</div><div class='nutr-lbl'>Carbs</div></div>"+
+    "<div class='nutr-box'><div class='nutr-val'>"+aF+"g</div><div class='nutr-lbl'>Fat</div></div>";
+  // Micro section (expandable)
   document.getElementById("nutrContent").innerHTML=
-    "<div class='nutr-macro-grid'>"+
-      "<div class='nutr-box'><div class='nutr-val'>"+aK+"</div><div class='nutr-lbl'>Avg kcal/day</div></div>"+
-      "<div class='nutr-box'><div class='nutr-val'>"+aP+"g</div><div class='nutr-lbl'>Avg protein</div></div>"+
-      "<div class='nutr-box'><div class='nutr-val'>"+aC+"g</div><div class='nutr-lbl'>Avg carbs</div></div>"+
-      "<div class='nutr-box'><div class='nutr-val'>"+aF+"g</div><div class='nutr-lbl'>Avg fat</div></div>"+
-    "</div>"+
     "<div class='nutr-micro-title'>Est. % of daily RDA met by this plan</div>"+
     "<div class='nutr-micro-note'>🟡 &lt;50% · 🟠 50–79% · 🟢 80%+</div>"+
     "<div class='micro-bars'>"+microRows+"</div>";
@@ -1351,12 +1335,134 @@ function openModal(r){ renderModalBody(r,false); document.getElementById("recipe
 function closeModal(){ document.getElementById("recipeModal").classList.remove("open"); document.body.style.overflow=""; }
 
 // ─── SHOPPING LIST ───────────────────────────────────
-var PREP_WORDS=["diced","sliced","chopped","crushed","minced","grated","halved","peeled","cubed","shredded","julienned","torn","crumbled","mashed","roasted","cooked","dried","fresh","frozen","canned","tinned","raw","whole","ground","large","medium","small","ripe","firm","boneless","skinless","washed","trimmed","rinsed","drained","blanched","steamed"];
+// Canonical ingredient dictionary: maps any variant → base name
+// Format: "fragment": "Display Name"
+var ING_CANON = {
+  // Eggs
+  "egg white":"Eggs", "egg yolk":"Eggs", "poached egg":"Eggs", "fried egg":"Eggs",
+  "scrambled egg":"Eggs", "boiled egg":"Eggs", "hard-boiled egg":"Eggs",
+  "soft-boiled egg":"Eggs", "whole egg":"Eggs",
+  // Chicken
+  "chicken breast":"Chicken", "chicken thigh":"Chicken", "chicken strip":"Chicken",
+  "chicken fillet":"Chicken", "chicken mince":"Chicken", "rotisserie chicken":"Chicken",
+  // Beef / Turkey / Pork
+  "lean beef":"Beef", "ground beef":"Beef", "beef mince":"Beef", "beef steak":"Beef",
+  "lean turkey":"Turkey", "turkey breast":"Turkey", "turkey mince":"Turkey",
+  "pork loin":"Pork", "pork tenderloin":"Pork",
+  // Fish & seafood
+  "salmon fillet":"Salmon", "smoked salmon":"Salmon",
+  "sea bass fillet":"Sea Bass", "cod fillet":"Cod",
+  "tuna in water":"Tuna", "canned tuna":"Tuna",
+  "raw prawn":"Prawns", "cooked prawn":"Prawns", "frozen prawn":"Prawns",
+  "raw shrimp":"Prawns", "shrimp":"Prawns",
+  // Tofu / tempeh
+  "firm tofu":"Tofu", "silken tofu":"Tofu", "soft tofu":"Tofu",
+  // Dairy
+  "greek yogurt":"Greek Yogurt", "0% greek yogurt":"Greek Yogurt",
+  "low-fat cottage cheese":"Cottage Cheese",
+  "light cream cheese":"Cream Cheese",
+  "grated parmesan":"Parmesan", "grana padano":"Parmesan",
+  "grated cheese":"Cheese",
+  // Vegetables
+  "baby spinach":"Spinach", "fresh spinach":"Spinach", "wilted spinach":"Spinach",
+  "frozen spinach":"Spinach",
+  "cherry tomato":"Tomatoes", "crushed tomato":"Tomatoes", "chopped tomato":"Tomatoes",
+  "sun-dried tomato":"Tomatoes", "tomato paste":"Tomato Paste",
+  "red pepper":"Bell Pepper", "yellow pepper":"Bell Pepper", "green pepper":"Bell Pepper",
+  "bell pepper":"Bell Pepper",
+  "spring onion":"Spring Onion", "green onion":"Spring Onion", "scallion":"Spring Onion",
+  "red onion":"Onion", "white onion":"Onion", "brown onion":"Onion",
+  "sweet potato":"Sweet Potato",
+  "butternut squash":"Squash", "pumpkin":"Squash",
+  "broccoli floret":"Broccoli",
+  "shiitake mushroom":"Mushrooms", "mixed mushroom":"Mushrooms",
+  "portobello mushroom":"Mushrooms",
+  "baby carrot":"Carrots", "carrot stick":"Carrots",
+  "celery stick":"Celery", "celery stalk":"Celery",
+  "cucumber":"Cucumber",
+  "courgette":"Courgette", "zucchini":"Courgette",
+  // Citrus / acids — consolidate to fruit not juice
+  "lemon juice":"Lemon", "squeeze of lemon":"Lemon", "lemon zest":"Lemon",
+  "lime juice":"Lime", "squeeze of lime":"Lime",
+  // Grains
+  "basmati rice":"Rice", "short-grain rice":"Rice", "long-grain rice":"Rice",
+  "brown rice":"Rice", "white rice":"Rice",
+  "soba noodle":"Noodles", "rice noodle":"Noodles", "egg noodle":"Noodles",
+  "rolled oat":"Oats", "steel-cut oat":"Oats",
+  "wholegrain bread":"Bread", "sourdough":"Bread", "rye bread":"Bread",
+  "pitta bread":"Bread", "corn tortilla":"Tortillas", "flour tortilla":"Tortillas",
+  "rice cake":"Rice Cakes", "oatcake":"Oatcakes",
+  "bulgur wheat":"Bulgur",
+  // Legumes
+  "cooked chickpea":"Chickpeas", "canned chickpea":"Chickpeas",
+  "cooked black bean":"Black Beans", "canned black bean":"Black Beans",
+  "cannellini bean":"White Beans", "white bean":"White Beans",
+  "cooked lentil":"Lentils", "red lentil":"Lentils", "brown lentil":"Lentils",
+  "green lentil":"Lentils",
+  "frozen edamame":"Edamame",
+  // Nuts & seeds
+  "pumpkin seed":"Seeds", "sunflower seed":"Seeds", "chia seed":"Seeds",
+  "mixed seed":"Seeds", "sesame seed":"Seeds",
+  "whole almond":"Almonds", "flaked almond":"Almonds",
+  "walnut half":"Walnuts",
+  "medjool date":"Dates",
+  // Pantry
+  "olive oil":"Olive Oil", "extra virgin olive oil":"Olive Oil",
+  "sesame oil":"Sesame Oil",
+  "coconut milk":"Coconut Milk", "coconut water":"Coconut Water",
+  "soy sauce":"Soy Sauce", "tamari":"Soy Sauce",
+  "vegetable broth":"Stock", "chicken broth":"Stock", "veg broth":"Stock",
+  "vegetable stock":"Stock", "chicken stock":"Stock",
+  "maple syrup":"Honey/Maple", "honey":"Honey/Maple",
+  "balsamic vinegar":"Vinegar", "rice vinegar":"Vinegar", "red wine vinegar":"Vinegar",
+  "dijon mustard":"Mustard",
+  "green curry paste":"Curry Paste", "red curry paste":"Curry Paste",
+  "garam masala":"Spices", "cumin":"Spices", "turmeric":"Spices",
+  "smoked paprika":"Spices", "paprika":"Spices", "cinnamon":"Spices",
+  "chilli flake":"Spices", "chilli powder":"Spices", "cayenne":"Spices",
+  "ras el hanout":"Spices",
+  "vanilla extract":"Vanilla", "vanilla":"Vanilla",
+  "cocoa powder":"Cocoa",
+  "protein powder":"Protein Powder",
+  // Fresh herbs — don't consolidate, keep generic
+  "fresh coriander":"Coriander", "coriander leaf":"Coriander",
+  "fresh parsley":"Parsley", "fresh basil":"Basil",
+  "fresh mint":"Mint", "fresh dill":"Dill", "fresh thyme":"Thyme",
+};
+
+var PREP_WORDS=["diced","sliced","chopped","crushed","minced","grated","halved","peeled",
+  "cubed","shredded","julienned","torn","crumbled","mashed","roasted","cooked","dried",
+  "fresh","frozen","canned","tinned","raw","whole","ground","large","medium","small",
+  "ripe","firm","boneless","skinless","washed","trimmed","rinsed","drained","blanched",
+  "steamed","wilted","sautéed","par-cooked","well-dried","soft-boiled","hard-boiled","poached"];
+
 function canonicalKey(desc){
-  var k=desc.toLowerCase().split(",")[0].split("(")[0].split(" in ")[0].trim();
+  var lower=desc.toLowerCase().split(",")[0].split("(")[0].split(" in ")[0].trim();
+  // Try canonical dictionary first (longest match wins)
+  var best=null, bestLen=0;
+  Object.keys(ING_CANON).forEach(function(frag){
+    if(lower.includes(frag) && frag.length>bestLen){
+      best=ING_CANON[frag]; bestLen=frag.length;
+    }
+  });
+  if(best) return best.toLowerCase();
+  // Fall back to prep-word stripping
+  var k=lower;
   PREP_WORDS.forEach(function(w){k=k.replace(new RegExp("\\b"+w+"\\b","g"),"");});
   k=k.replace(/\s+/g," ").trim();
+  // Strip possessives, punctuation
+  k=k.replace(/['']/g,"").replace(/[^a-z0-9 ]/g," ").replace(/\s+/g," ").trim();
   return k.replace(/es$/,"").replace(/s$/,"")||k;
+}
+
+// Get display name from canonical key
+function canonicalDisplay(key){
+  // Check if it came from ING_CANON (capitalised value)
+  var found=null;
+  Object.keys(ING_CANON).forEach(function(frag){
+    if(ING_CANON[frag].toLowerCase()===key) found=ING_CANON[frag];
+  });
+  return found || (key.charAt(0).toUpperCase()+key.slice(1));
 }
 function buildShoppingList(){
   var en=Object.keys(S.slots).filter(function(k){return S.slots[k];});
@@ -1369,8 +1475,13 @@ function buildShoppingList(){
     var desc=line.replace(/^[\d\.\/]+\s*(g|ml|kg|l|tbsp|tsp|cup|oz|lb|slice|piece|handful|bunch|clove|can|tin|sprig)?\s*/i,"").trim();
     var key=canonicalKey(desc);
     if(!key) return;
-    if(!itemMap[key]){itemMap[key]={display:key.charAt(0).toUpperCase()+key.slice(1),qty:0,unit:unit};}
-    if(qty>0) itemMap[key].qty+=qty*S.portions;
+    var display=canonicalDisplay(key);
+    if(!itemMap[key]){itemMap[key]={display:display,qtyLo:0,qtyHi:0,unit:unit,count:0};}
+    if(qty>0){
+      itemMap[key].qtyLo+=qty*S.portions*0.85; // -15% lower bound
+      itemMap[key].qtyHi+=qty*S.portions*1.15; // +15% upper bound
+    }
+    itemMap[key].count++;
   });
   var cats={}; Object.keys(SHOP_CATS).forEach(function(k){cats[k]=[];}); cats.other=[];
   Object.keys(itemMap).forEach(function(key){
@@ -1399,7 +1510,12 @@ function openShopList(){
     var itemsEl=document.createElement("div"); itemsEl.className="shop-items";
     items.forEach(function(entry){
       var it=entry.item;
-      var qtyStr=it.qty>0&&it.unit?(Math.round(it.qty*10)/10)+it.unit:"";
+      var qtyStr="";
+      if(it.qtyLo>0&&it.unit){
+        var lo=Math.round(it.qtyLo/10)*10; // round to nearest 10
+        var hi=Math.round(it.qtyHi/10)*10;
+        qtyStr=(lo===hi?lo:lo+"–"+hi)+it.unit;
+      }
       var el=document.createElement("div"); el.className="shop-item";
       el.innerHTML="<div class='shop-item-check'></div><span class='shop-item-text'>"+it.display+"</span>"+(qtyStr?"<span class='shop-item-qty'>"+qtyStr+"</span>":"");
       el.addEventListener("click",function(){
@@ -1411,9 +1527,9 @@ function openShopList(){
     section.appendChild(itemsEl); body.appendChild(section);
   });
   document.getElementById("shopPortionNote").textContent=S.portions>1?"Quantities for "+S.portions+" people · Week "+(S.week+1):"Week "+(S.week+1);
-  document.getElementById("shopOv").classList.add("open"); document.body.style.overflow="hidden";
+  document.getElementById("shopOv").classList.add("open"); document.body.style.overflow="hidden"; document.body.classList.add("shop-open");
 }
-function closeShopList(){ document.getElementById("shopOv").classList.remove("open"); document.body.style.overflow=""; }
+function closeShopList(){ document.getElementById("shopOv").classList.remove("open"); document.body.style.overflow=""; document.body.classList.remove("shop-open"); }
 function copyShopList(){
   var cats=buildShoppingList();
   var lines=["🛒 SHOPPING LIST","Week "+(S.week+1)+(S.portions>1?" · "+S.portions+" people":""),""];
@@ -1422,7 +1538,10 @@ function copyShopList(){
     lines.push(catId==="other"?"Other":SHOP_CATS[catId].label);
     items.forEach(function(e){
       var it=e.item;
-      lines.push("  ☐ "+it.display+(it.qty>0&&it.unit?" ("+Math.round(it.qty*10)/10+it.unit+")":""));
+      var lo=it.qtyLo>0?Math.round(it.qtyLo/10)*10:0;
+      var hi=it.qtyHi>0?Math.round(it.qtyHi/10)*10:0;
+      var qCopy=lo>0&&it.unit?" ("+(lo===hi?lo:lo+"–"+hi)+it.unit+")":"";
+      lines.push("  ☐ "+it.display+qCopy);
     });
     lines.push("");
   });
@@ -1659,8 +1778,10 @@ function init(){
     nt.addEventListener("click",function(){nudge("Nutrition summary — available on Basic plan");});
   } else {
     document.getElementById("nutrToggle").addEventListener("click",function(){
-      var bar=document.getElementById("nutrBar");
-      bar.classList.toggle("collapsed"); bar.classList.toggle("expanded");
+      var ms=document.getElementById("nutrMicroSection");
+      var btn=document.getElementById("nutrExpandBtn");
+      var isOpen=ms.classList.toggle("open");
+      btn.style.transform=isOpen?"rotate(180deg)":"";
     });
   }
 
@@ -1684,10 +1805,13 @@ function init(){
   if(vtb){ vtb.addEventListener("click", function(){ setViewMode(!dayViewActive); }); }
 
   var shopBtn=document.getElementById("shopBtn");
+  var shopFab=document.getElementById("shopFab");
   if(!can.shoppingList){
     shopBtn.addEventListener("click",function(){nudge("Shopping list — available on Basic plan");});
+    if(shopFab) shopFab.addEventListener("click",function(){nudge("Shopping list — available on Basic plan");});
   } else {
     shopBtn.addEventListener("click",openShopList);
+    if(shopFab) shopFab.addEventListener("click",openShopList);
   }
   document.getElementById("shopClose").addEventListener("click",closeShopList);
   document.getElementById("shopCopy").addEventListener("click",copyShopList);
@@ -1823,48 +1947,11 @@ function buildDaySelector(wi){
   renderMobileDay(wi, 0);
 }
 
-
-// ─── SCROLL PROGRESS BAR ─────────────────────────
-(function(){
-  var sections = ['sect-diet','sect-meals','sect-ingr','sect-generate'];
-  var steps = document.querySelectorAll('.sp-step');
-  var lines = document.querySelectorAll('.sp-line');
-  function updateProgress(){
-    var scrollY = window.scrollY || window.pageYOffset;
-    var winH = window.innerHeight;
-    var activeIdx = 0;
-    sections.forEach(function(id, i){
-      var el = document.getElementById(id);
-      if(!el) return;
-      var rect = el.getBoundingClientRect();
-      if(rect.top <= winH * 0.5) activeIdx = i;
-    });
-    steps.forEach(function(s, i){
-      s.classList.remove('active','done');
-      if(i < activeIdx) s.classList.add('done');
-      else if(i === activeIdx) s.classList.add('active');
-    });
-    lines.forEach(function(l, i){
-      l.classList.toggle('done', i < activeIdx);
-    });
-  }
-  // Click to scroll
-  steps.forEach(function(step, i){
-    step.addEventListener('click', function(){
-      var el = document.getElementById(step.dataset.target);
-      if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
-    });
-  });
-  var ticking = false;
-  window.addEventListener('scroll', function(){
-    if(!ticking){ requestAnimationFrame(function(){ updateProgress(); ticking=false; }); ticking=true; }
-  }, {passive:true});
-  updateProgress();
-})();
-
 window.addEventListener('load', initTier);
 
 </script>
+
+<button class="shop-fab" id="shopFab" title="Shopping list">🛒</button>
 
 <div id="appLoader" style="display:none;position:fixed;inset:0;background:#F7F4EF;z-index:999;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
   <div style="font-size:40px">🌿</div>
