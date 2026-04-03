@@ -507,6 +507,14 @@ body.shop-open .shop-fab{display:none!important;}
 .flavor-locked{margin-top:4px;text-align:center;}
 .flavor-locked-inner{padding:14px;background:var(--navy3);border-radius:8px;margin-bottom:8px;}
 
+
+/* ── AUTO-ADJUSTMENT BADGE ───────────────────── */
+.mc-adj-badge{display:inline-block;background:var(--teal-dim);border:1px solid var(--teal);color:var(--teal);font-size:8px;font-weight:700;letter-spacing:.04em;padding:1px 5px;border-radius:6px;margin-left:5px;vertical-align:middle;font-family:var(--mono);}
+/* Scale bar — auto version (no toggle) */
+.scale-bar{display:flex;align-items:center;background:var(--navy3);border:1.5px solid var(--teal);border-radius:10px;padding:10px 14px;margin:14px 0 4px;}
+.scale-label{font-size:13px;font-weight:600;color:var(--teal);}
+.scale-sub{font-size:11px;color:var(--text2);margin-top:1px;}
+
 </style>
 </head>
 <body>
@@ -1023,6 +1031,8 @@ var S = {
   cuisines:["all"],
   prepTimeMax:999,
   plan:null, week:0, portions:1,
+  dayScales:[],     // [week][day] float multiplier for kcal
+  dayProtSlot:[],   // [week][day] slot key that got auto-protein-scaled
   swapWeek:-1, swapDay:-1, swapSlot:"",
   favourites: JSON.parse(localStorage.getItem('mp_favourites')||'[]'),
 };
@@ -1130,7 +1140,56 @@ function generate(){
     }
     plan.push(week);
   }
+
+  // ── AUTO-ADJUST: protein scaling + calorie normalisation ──────────────
+  var dayScales=[], dayProtSlot=[];
+  for(var aw=0;aw<plan.length;aw++){
+    dayScales.push([]); dayProtSlot.push([]);
+    for(var ad=0;ad<plan[aw].length;ad++){
+      var aDay=plan[aw][ad];
+      var protSlotKey=null;
+
+      // Step 1: protein auto-scale if user set a target
+      if(!S.protUnk && S.prot>0){
+        var dayProtAct=en.reduce(function(s,sl){return s+(aDay[sl].prot[0]+aDay[sl].prot[1])/2;},0);
+        var dayProtGap=S.prot - dayProtAct;
+        if(dayProtGap/S.prot > 0.18){ // gap >18% → auto-scale
+          // Find the slot with the most scalable protein ingredients (highest base protein)
+          var bestSlot=null, bestProt=0;
+          en.forEach(function(sl){
+            var r=aDay[sl];
+            var hasProt=getProteinIngLines(r.ing).length>0;
+            var midProt=(r.prot[0]+r.prot[1])/2;
+            if(hasProt && midProt>bestProt){bestProt=midProt;bestSlot=sl;}
+          });
+          if(bestSlot) protSlotKey=bestSlot;
+        }
+      }
+      dayProtSlot[aw].push(protSlotKey);
+
+      // Step 2: calorie day-scale
+      // Compute actual day kcal (with protein scaling applied if any)
+      var dayKcalAct=en.reduce(function(s,sl){
+        var r=aDay[sl];
+        var base=(r.kcal[0]+r.kcal[1])/2;
+        // If this slot got protein-scaled, add ~40% to kcal for that recipe
+        if(sl===protSlotKey) base*=1.4;
+        return s+base;
+      },0);
+      var scale=1;
+      if(S.kcal>0 && !S.kcalUnk){
+        var gap=(S.kcal-dayKcalAct)/S.kcal;
+        if(Math.abs(gap)>0.08){ // gap >8% → apply day scale
+          scale=S.kcal/dayKcalAct;
+          scale=Math.max(0.75, Math.min(1.5, scale)); // clamp safety
+          scale=Math.round(scale*100)/100; // 2dp
+        }
+      }
+      dayScales[aw].push(scale);
+    }
+  }
   S.plan=plan; S.week=0; S.portions=1;
+  S.dayScales=dayScales; S.dayProtSlot=dayProtSlot;
   // reset portion UI
   document.querySelectorAll(".portion-btn").forEach(function(b){
     b.classList.toggle("sel",b.dataset.p==="1");
@@ -1179,6 +1238,25 @@ function showPlan(){
 }
 
 // ─── RENDER WEEK ─────────────────────────────────────
+
+// ─── EFFECTIVE MACRO HELPERS ─────────────────────────
+// Returns {mk, mp, mc, mf, protScaled, dayScale} for a recipe in context
+function effectiveMacros(r, wi, di, slot){
+  var ds = (S.dayScales && S.dayScales[wi] && S.dayScales[wi][di]) || 1;
+  var ps = (S.dayProtSlot && S.dayProtSlot[wi] && S.dayProtSlot[wi][di]) === slot;
+  var protFactor = ps ? 1.8 : 1;
+  var kcalFactor = ps ? 1.4 : 1;
+  var pf = S.portions;
+  return {
+    mk: Math.round((r.kcal[0]+r.kcal[1])/2 * kcalFactor * ds * pf),
+    mp: Math.round((r.prot[0]+r.prot[1])/2 * protFactor * ds * pf),
+    mc: Math.round((r.carbs[0]+r.carbs[1])/2 * ds * pf),
+    mf: Math.round((r.fat[0]+r.fat[1])/2 * ds * pf),
+    protScaled: ps,
+    dayScale: ds,
+  };
+}
+
 function renderWeek(wi){
   var en=Object.keys(S.slots).filter(function(k){return S.slots[k];});
   var week=S.plan[wi];
@@ -1207,12 +1285,11 @@ function renderWeek(wi){
   tlbl.style.cssText="text-align:right;font-size:9px;color:var(--text2);padding:4px 2px 0;";
   tlbl.textContent="Est. Total";
   trow.appendChild(tlbl);
-  week.forEach(function(day){
+  week.forEach(function(day,di2){
     var slots2=Object.keys(S.slots).filter(function(k){return S.slots[k];});
-    var lo=slots2.reduce(function(s,sl){return s+day[sl].kcal[0];},0);
-    var hi=slots2.reduce(function(s,sl){return s+day[sl].kcal[1];},0);
+    var total=slots2.reduce(function(s,sl){return s+effectiveMacros(day[sl],wi,di2,sl).mk;},0);
     var cell=document.createElement("div"); cell.className="day-tot";
-    cell.innerHTML="<strong>"+Math.round((lo+hi)/2*S.portions)+"</strong>kcal";
+    cell.innerHTML="<strong>"+total+"</strong>kcal";
     trow.appendChild(cell);
   });
   wrap.appendChild(trow);
@@ -1221,12 +1298,13 @@ function renderWeek(wi){
 
 function makeMealCard(r,wi,di,slot){
   var card=document.createElement("div"); card.className="meal-card "+slot;
-  var mk=Math.round((r.kcal[0]+r.kcal[1])/2*S.portions);
-  var mp=Math.round((r.prot[0]+r.prot[1])/2*S.portions);
+  var em=effectiveMacros(r,wi,di,slot);
+  var mk=em.mk, mp=em.mp;
   var isFav=S.favourites.includes(r.id);
   var inner=document.createElement("div"); inner.className="mc-inner";
-  inner.innerHTML="<span class='mc-emoji'>"+r.em+"</span><div class='mc-name'>"+r.name+"</div><div class='mc-meta'>~"+mk+" kcal · "+mp+"g prot</div>";
-  inner.addEventListener("click",function(){openModal(r);});
+  var adjBadge = em.protScaled ? "<span class='mc-adj-badge'>🔧 +prot</span>" : (em.dayScale!==1 ? "<span class='mc-adj-badge'>🔧</span>" : "");
+  inner.innerHTML="<span class='mc-emoji'>"+r.em+"</span><div class='mc-name'>"+r.name+adjBadge+"</div><div class='mc-meta'>~"+mk+" kcal · "+mp+"g prot</div>";
+  inner.addEventListener("click",function(){openModal(r,wi,di,slot);});
   card.appendChild(inner);
   // Mobile swap link (always visible on touch devices)
   var mobileSwap=document.createElement("button");
@@ -1408,7 +1486,7 @@ function macroBreakdownHTML(r,mk,mp,mc,mf){
   "</div>";
 }
 
-function renderModalBody(r,scaled){
+function renderModalBody(r,wi,di,slot){
   var tagDefs=[
     [r.tags.vg,"tv","🌱 Vegan"],[r.tags.ve&&!r.tags.vg,"tvg","🥗 Veg"],
     [r.tags.pe&&!r.tags.ve,"tp","🐟 Pesc"],[r.tags.gf,"tgf","🌾 GF"],
@@ -1417,26 +1495,29 @@ function renderModalBody(r,scaled){
   ];
   var tags=tagDefs.filter(function(t){return t[0];}).map(function(t){return "<span class='tag "+t[1]+"'>"+t[2]+"</span>";}).join("");
   var protLines=getProteinIngLines(r.ing);
+  var em3=(wi>=0)?effectiveMacros(r,wi,di,slot):{mk:Math.round((r.kcal[0]+r.kcal[1])/2),mp:Math.round((r.prot[0]+r.prot[1])/2),mc:Math.round((r.carbs[0]+r.carbs[1])/2),mf:Math.round((r.fat[0]+r.fat[1])/2),protScaled:false,dayScale:1};
   var pf=S.portions;
-  var mk=Math.round((r.kcal[0]+r.kcal[1])/2*(scaled?1.4:1)*pf);
-  var mp=Math.round((r.prot[0]+r.prot[1])/2*(scaled?1.8:1)*pf);
-  var mc=Math.round((r.carbs[0]+r.carbs[1])/2*pf);
-  var mf=Math.round((r.fat[0]+r.fat[1])/2*(scaled?1.5:1)*pf);
+  var scaled=em3.protScaled;
+  var ds=em3.dayScale;
+  var mk=em3.mk, mp=em3.mp, mc=em3.mc, mf=em3.mf;
   var ingHTML=r.ing.map(function(line,i){
     var scalable=protLines.indexOf(i)>=0;
     var protF=(scaled&&scalable)?2:1;
-    var dl=scaleIngLine(line,pf*protF);
-    var badge=(scaled&&scalable)?" <span class='scaled-badge'>2x prot</span>":"";
+    var factor=pf*protF*(ds||1);
+    var dl=scaleIngLine(line,factor);
+    var badge=(scaled&&scalable)?" <span class='scaled-badge'>+prot</span>":"";
     var cls=(scaled&&scalable)?" class='ing-scaled'":"";
     return "<li"+cls+">"+dl+badge+"</li>";
   }).join("");
-  var showScale=protLines.length>0&&can.macroBreakdown;
-  var scaleHTML=showScale?
-    "<div class='scale-bar'>"+
-      "<div><div class='scale-label'>"+(scaled?"💪 High Protein Active":"💪 Scale Up Protein")+"</div>"+
-      "<div class='scale-sub'>"+(scaled?"Protein source doubled · macros updated":"Double the protein source to hit your daily target")+"</div></div>"+
-      "<label class='scale-toggle'><input type='checkbox' id='scaleChk'"+(scaled?" checked":"")+"><span class='scale-track'></span></label>"+
-    "</div>":"";
+  // Auto-adjusted banner (replaces manual toggle)
+  var scaleHTML="";
+  if(scaled){
+    scaleHTML="<div class='scale-bar'><div><div class='scale-label'>🔧 Auto-adjusted for your protein target</div>"+
+      "<div class='scale-sub'>Protein source increased to help meet your daily goal · macros updated</div></div></div>";
+  } else if(ds && ds!==1){
+    scaleHTML="<div class='scale-bar'><div><div class='scale-label'>🔧 Portions adjusted for your calorie target</div>"+
+      "<div class='scale-sub'>Quantities scaled by "+(Math.round(ds*100))+"%  to bring this day closer to your "+S.kcal+" kcal target</div></div></div>";
+  }
   var isFav=S.favourites.includes(r.id);
   var portNote=pf>1?" <span style='font-size:12px;color:var(--text2);font-weight:400'>(×"+pf+")</span>":"";
   var titleBadge=scaled?" <span class='scaled-badge' style='font-size:11px'>High Protein</span>":"";
@@ -1463,9 +1544,7 @@ function renderModalBody(r,scaled){
     (r.tip?"<div class='tip-box'><div class='tip-lbl'>💡 Nutritionist Tip</div><div class='tip-txt'>"+r.tip+"</div></div>":"")+
     "<div class='m-sec-flavor'>🌶️ Flavour Analysis</div>"+
     buildFlavorHTML(r);
-  if(showScale){
-    document.getElementById("scaleChk").addEventListener("change",function(e){renderModalBody(r,e.target.checked);});
-  }
+  // Auto-scaling: no manual toggle needed
   document.getElementById("modalHeart").addEventListener("click",function(){
     if(!can.savedFavourites){nudge("Save favourites — available on Premium");return;}
     var idx=S.favourites.indexOf(r.id);
@@ -1477,7 +1556,7 @@ function renderModalBody(r,scaled){
   });
 }
 
-function openModal(r){ renderModalBody(r,false); document.getElementById("recipeModal").classList.add("open"); document.body.style.overflow="hidden"; }
+function openModal(r,wi,di,slot){ renderModalBody(r,wi!=null?wi:-1,di!=null?di:-1,slot||null); document.getElementById("recipeModal").classList.add("open"); document.body.style.overflow="hidden"; }
 function closeModal(){ document.getElementById("recipeModal").classList.remove("open"); document.body.style.overflow=""; }
 
 // ─── SHOPPING LIST ───────────────────────────────────
@@ -1941,8 +2020,8 @@ function renderMobileDay(wi, di){
   view.innerHTML = "";
   en.forEach(function(slot){
     var r = day[slot];
-    var mk = Math.round((r.kcal[0]+r.kcal[1])/2*S.portions);
-    var mp = Math.round((r.prot[0]+r.prot[1])/2*S.portions);
+    var em2=effectiveMacros(r,wi,di,slot);
+    var mk=em2.mk, mp=em2.mp;
     var isFav = S.favourites.includes(r.id);
     var card = document.createElement("div");
     card.className = "mobile-meal-card";
@@ -1960,12 +2039,13 @@ function renderMobileDay(wi, di){
     var emojiEl = document.createElement("div");
     emojiEl.className = "mmc-emoji";
     emojiEl.textContent = r.em;
-    emojiEl.addEventListener("click", function(){openModal(r);});
+    emojiEl.addEventListener("click", function(){openModal(r,wi,di,slot);});
     content.appendChild(emojiEl);
     var info = document.createElement("div");
     info.className = "mmc-info";
-    info.innerHTML = "<div class='mmc-name'>" + r.name + "</div><div class='mmc-meta'>~" + mk + " kcal · " + mp + "g prot</div>";
-    info.addEventListener("click", function(){openModal(r);});
+    var adjB2=em2.protScaled?"<span class='mc-adj-badge'>🔧 +prot</span>":em2.dayScale!==1?"<span class='mc-adj-badge'>🔧</span>":"";
+    info.innerHTML = "<div class='mmc-name'>" + r.name + adjB2 + "</div><div class='mmc-meta'>~" + mk + " kcal · " + mp + "g prot</div>";
+    info.addEventListener("click", function(){openModal(r,wi,di,slot);});
     content.appendChild(info);
     var actions = document.createElement("div");
     actions.className = "mmc-actions";
@@ -2000,11 +2080,10 @@ function renderMobileDay(wi, di){
     card.appendChild(body);
     view.appendChild(card);
   });
-  var lo = en.reduce(function(s,sl){return s+day[sl].kcal[0];},0);
-  var hi = en.reduce(function(s,sl){return s+day[sl].kcal[1];},0);
+  var dayTot=en.reduce(function(s,sl){return s+effectiveMacros(day[sl],wi,di,sl).mk;},0);
   var tot = document.createElement("div");
   tot.className = "mobile-day-total";
-  tot.innerHTML = "Est. daily total: <strong>" + Math.round((lo+hi)/2*S.portions) + " kcal</strong>";
+  tot.innerHTML = "Est. daily total: <strong>" + dayTot + " kcal</strong>";
   view.appendChild(tot);
 }
 
