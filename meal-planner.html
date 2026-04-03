@@ -1357,13 +1357,17 @@ function renderNutrition(wi){
   var week=S.plan[wi];
   var totK=0,totP=0,totC=0,totF=0;
   var mSum={}; MICROS.forEach(function(m){mSum[m.id]=0;});
-  week.forEach(function(day){
+  week.forEach(function(day,di){
     en.forEach(function(slot){
       var r=day[slot];
-      totK+=(r.kcal[0]+r.kcal[1])/2; totP+=(r.prot[0]+r.prot[1])/2;
-      totC+=(r.carbs[0]+r.carbs[1])/2; totF+=(r.fat[0]+r.fat[1])/2;
+      // Use effectiveMacros so adjusted days are correctly reflected
+      var em=effectiveMacros(r,wi,di,slot);
+      totK+=em.mk/S.portions; totP+=em.mp/S.portions;
+      totC+=em.mc/S.portions; totF+=em.mf/S.portions;
+      // Scale micro contribution by day multiplier
+      var ds=em.dayScale||1;
       r.mc.forEach(function(m){
-        if(mSum[m]!==undefined&&MICRO_RDA[m]) mSum[m]+=MICRO_RDA[m].pct;
+        if(mSum[m]!==undefined&&MICRO_RDA[m]) mSum[m]+=MICRO_RDA[m].pct*ds;
       });
     });
   });
