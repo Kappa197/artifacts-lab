@@ -209,8 +209,15 @@
   .yby-toggle button { padding:5px 14px; border-radius:6px; border:1px solid #1e2535; background:transparent; color:#475569; font-family:var(--mono); font-size:11px; cursor:pointer; transition:all 0.15s; }
   .yby-toggle button.active { background:rgba(201,168,76,0.12); border-color:rgba(201,168,76,0.4); color:#c9a84c; }
   @media (max-width: 760px) { .grid2, .grid3, .grid5, .two-col, .solver-grid { grid-template-columns: 1fr; } }
+  /* ── MC gauges responsive grid ── */
+  .mc-gauges {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
   /* ── Setup sections ── */
-  .setup-section { margin-bottom: 28px; max-width: 760px; }
+  .setup-section { margin-bottom: 28px; max-width: 760px; margin-left: auto; margin-right: auto; }
   .setup-section-hdr { display:flex; gap:16px; align-items:flex-start; margin-bottom:16px; }
   .setup-section-num {
     width:32px; height:32px; border-radius:50%; flex-shrink:0;
@@ -293,8 +300,7 @@
 
 <!-- ── SETUP PANEL (My Plan tab) ────────────────────────────────────────────── -->
 <div id="panelSetup">
-
-  <!-- ── SECTION 1: About You ──────────────────────────────────────────────── -->
+<div style="max-width:800px;margin:0 auto;padding-top:8px">  <!-- ── SECTION 1: About You ──────────────────────────────────────────────── -->
   <div class="setup-section">
     <div class="setup-section-hdr">
       <div class="setup-section-num">1</div>
@@ -461,8 +467,13 @@
       <div id="taxInputs" style="display:none">
         <!-- Account mix -->
         <div style="margin-bottom:16px;padding:12px;background:rgba(255,255,255,0.02);border:1px solid #1e2535;border-radius:8px">
-          <div style="font-family:var(--mono);font-size:10px;color:#c9a84c;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">Portfolio Account Mix</div>
-          <p style="font-family:var(--mono);font-size:10px;color:#64748b;margin-bottom:12px">Must sum to 100%. Determines what portion of withdrawals faces each tax regime.</p>
+          <div style="font-family:var(--mono);font-size:10px;color:#c9a84c;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px">Portfolio Account Mix</div>
+          <p style="font-family:var(--mono);font-size:10px;color:#64748b;margin-bottom:12px">Must sum to 100%. Determines what portion of your withdrawals faces each tax regime. <button class="field-help-btn" onclick="toggleTooltip('tt-accountmix')" style="width:auto;height:auto;border-radius:4px;padding:2px 8px;font-size:0.7rem">? What are these?</button></p>
+          <div id="tt-accountmix" class="field-tooltip" style="display:none;margin-bottom:12px">
+            <div class="ft-title">Account types &amp; tax treatment</div>
+            <div class="ft-body"><strong style="color:var(--rose)">Pre-tax (401k/IRA):</strong> You contributed before tax, so every dollar you withdraw is taxed as ordinary income. Most common in the US. <strong style="color:var(--green)">Post-tax (Roth):</strong> You already paid tax on contributions — withdrawals are completely tax-free, including growth. <strong style="color:var(--blue)">Taxable brokerage:</strong> A regular investment account — only the gains (not the original investment) are taxed, at the lower capital gains rate. <a href="https://www.investopedia.com/articles/personal-finance/120315/roth-vs-traditional-ira-which-right-you.asp" target="_blank" rel="noopener" style="color:var(--amber2)">Roth vs Traditional IRA →</a></div>
+            <div class="ft-typical">Typical split: 60% pre-tax / 20% Roth / 20% brokerage for a US saver with 401k + some Roth contributions</div>
+          </div>
           <div class="grid3">
             <div class="field" style="margin-bottom:0">
               <label class="lbl">Pre-tax % <span style="color:#f87171">(401k/IRA)</span></label>
@@ -489,17 +500,27 @@
         </div>
         <!-- Tax rates -->
         <div style="margin-bottom:16px;padding:12px;background:rgba(255,255,255,0.02);border:1px solid #1e2535;border-radius:8px">
-          <div style="font-family:var(--mono);font-size:10px;color:#c9a84c;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">Effective Tax Rates</div>
-          <p style="font-family:var(--mono);font-size:10px;color:#64748b;margin-bottom:12px">Use your blended marginal rate including state/local tax. Country-agnostic — you know your situation best.</p>
+          <div style="font-family:var(--mono);font-size:10px;color:#c9a84c;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px">Effective Tax Rates</div>
+          <p style="font-family:var(--mono);font-size:10px;color:#64748b;margin-bottom:12px">Use your blended marginal rate including state/local tax. Country-agnostic — you know your situation best. <a href="https://www.investopedia.com/terms/e/effectivetaxrate.asp" target="_blank" rel="noopener" style="color:var(--amber2)">What is effective tax rate? →</a></p>
           <div class="grid2">
             <div class="field" style="margin-bottom:0">
-              <label class="lbl">Pre-tax withdrawal rate %</label>
+              <label class="lbl">Pre-tax withdrawal rate % <button class="field-help-btn" onclick="toggleTooltip('tt-taxprerate')">?</button></label>
               <input type="number" id="taxPreRate" value="25" min="0" max="60" step="1" oninput="recalc()"/>
+              <div id="tt-taxprerate" class="field-tooltip" style="display:none">
+                <div class="ft-title">Pre-tax withdrawal rate</div>
+                <div class="ft-body">The blended tax rate you expect to pay on money withdrawn from pre-tax accounts (401k, Traditional IRA). This includes federal + state income tax. It's your <em>effective</em> rate on that income, not your top marginal bracket. <a href="https://www.investopedia.com/terms/m/marginaltaxrate.asp" target="_blank" rel="noopener" style="color:var(--amber2)">Marginal vs effective rate →</a></div>
+                <div class="ft-typical">Typical value: 20–30% for most retirees in the US. Use a lower rate if you expect to be in a lower bracket in retirement.</div>
+              </div>
               <p style="font-family:var(--mono);font-size:10px;color:#475569;margin-top:4px">Federal + state on ordinary income</p>
             </div>
             <div class="field" style="margin-bottom:0">
-              <label class="lbl">Brokerage gains rate %</label>
+              <label class="lbl">Brokerage gains rate % <button class="field-help-btn" onclick="toggleTooltip('tt-taxbrokerrate')">?</button></label>
               <input type="number" id="taxBrokerRate" value="15" min="0" max="40" step="1" oninput="recalc()"/>
+              <div id="tt-taxbrokerrate" class="field-tooltip" style="display:none">
+                <div class="ft-title">Capital gains tax rate</div>
+                <div class="ft-body">The tax rate on long-term investment gains in a taxable brokerage account. Long-term gains (assets held 1+ year) are taxed at a lower rate than ordinary income. <a href="https://www.investopedia.com/terms/c/capital_gains_tax.asp" target="_blank" rel="noopener" style="color:var(--amber2)">Capital gains tax explained →</a></div>
+                <div class="ft-typical">Typical value: 15% for most US investors (0% if low income, 20% for high earners). Non-US users: use your local equivalent.</div>
+              </div>
               <p style="font-family:var(--mono);font-size:10px;color:#475569;margin-top:4px">Long-term capital gains rate</p>
             </div>
           </div>
@@ -509,13 +530,23 @@
           <div style="font-family:var(--mono);font-size:10px;color:#c9a84c;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">Adjustments</div>
           <div class="grid2">
             <div class="field" style="margin-bottom:0">
-              <label class="lbl">Other taxable income ($/yr)</label>
+              <label class="lbl">Other taxable income ($/yr) <button class="field-help-btn" onclick="toggleTooltip('tt-taxotherincome')">?</button></label>
               <input type="number" id="taxOtherIncome" value="0" min="0" step="1000" oninput="recalc()"/>
+              <div id="tt-taxotherincome" class="field-tooltip" style="display:none">
+                <div class="ft-title">Other taxable income</div>
+                <div class="ft-body">Income you receive in retirement that is already taxable and fills up lower tax brackets before your portfolio withdrawals — for example, a pension, Social Security, or rental income. Including this prevents the model from under-estimating your tax burden on withdrawals. <a href="https://www.investopedia.com/terms/t/taxableincome.asp" target="_blank" rel="noopener" style="color:var(--amber2)">Taxable income explained →</a></div>
+                <div class="ft-typical">Examples: $18,000/yr Social Security benefit, a $15,000/yr pension. Set to $0 if none.</div>
+              </div>
               <p style="font-family:var(--mono);font-size:10px;color:#475569;margin-top:4px">Pension, SS etc. — reduces effective rate on withdrawals</p>
             </div>
             <div class="field" style="margin-bottom:0">
-              <label class="lbl">Brokerage cost basis %</label>
+              <label class="lbl">Brokerage cost basis % <button class="field-help-btn" onclick="toggleTooltip('tt-taxbasis')">?</button></label>
               <input type="number" id="taxBasis" value="40" min="0" max="100" step="5" oninput="recalc()"/>
+              <div id="tt-taxbasis" class="field-tooltip" style="display:none">
+                <div class="ft-title">Cost basis</div>
+                <div class="ft-body">The percentage of your brokerage portfolio that represents your original contributions (not gains). Only the growth portion is taxed — the basis is returned to you tax-free. A 40% basis means 60% of the account is gains. <a href="https://www.investopedia.com/terms/c/costbasis.asp" target="_blank" rel="noopener" style="color:var(--amber2)">Cost basis explained →</a></div>
+                <div class="ft-typical">Typical value: 30–50% for a long-held account with significant growth. Use 80–90% for a recently opened account.</div>
+              </div>
               <p style="font-family:var(--mono);font-size:10px;color:#475569;margin-top:4px">% of brokerage that is original contribution — only gains are taxed</p>
             </div>
           </div>
@@ -549,8 +580,9 @@
       </div>
     </div>
     <div style="background:rgba(201,168,76,0.05);border:1px solid rgba(201,168,76,0.15);border-radius:10px;padding:14px 18px">
-      <p style="font-family:var(--mono);font-size:11px;color:#c9a84c;margin-bottom:6px;letter-spacing:0.05em">⚠ SEQUENCE OF RETURNS RISK</p>
-      <p style="font-size:0.85rem;color:#94a3b8;line-height:1.6;font-family:var(--body)">Two portfolios with the same average return can have very different outcomes. Bad returns early force you to sell more units at low prices — the damage compounds. Use the 5 periods to model <em>when</em> bad years hit, not just how bad they are.</p>
+      <p style="font-family:var(--mono);font-size:11px;color:#c9a84c;margin-bottom:6px;letter-spacing:0.05em">⚠ SEQUENCE OF RETURNS RISK — <a href="https://www.investopedia.com/terms/s/sequence-risk.asp" target="_blank" rel="noopener" style="color:var(--amber2);font-size:10px">What is this? →</a></p>
+      <p style="font-size:0.85rem;color:#94a3b8;line-height:1.6;font-family:var(--body);margin-bottom:8px">Two portfolios with identical average returns can have very different outcomes depending on the <em>order</em> those returns arrive. If markets crash in your first years of retirement and you're withdrawing to live on, you're selling more units at low prices — a hole the portfolio may never fully recover from, even when markets rebound.</p>
+      <p style="font-size:0.82rem;color:#64748b;line-height:1.6;font-family:var(--body)">This tool uses the 5 IRR values you entered above to run two scenarios side-by-side: your plan as entered, and a worst-case version where the <strong style="color:var(--text2)">same returns arrive in reverse order</strong> (bad periods first). Any difference in outcome is pure sequence risk — not a different average return.</p>
     </div>
   </div>
 
@@ -642,6 +674,7 @@
     <div style="font-family:var(--mono);font-size:0.62rem;color:var(--text3);margin-top:10px;letter-spacing:0.08em;text-transform:uppercase">Results update automatically as you change inputs</div>
   </div>
 
+</div><!-- end inner centering wrapper -->
 </div><!-- end #panelSetup -->
 
 <!-- ── DASHBOARD PANEL (results) ─────────────────────────────────────────── -->
@@ -748,7 +781,13 @@
   <div class="legend-row">
     <div class="legend-item"><div class="legend-line" style="background:#c9a84c"></div>Baseline (planned spending)</div>
     <div class="legend-item"><div class="legend-line legend-dashed"></div>Optimized (max withdrawal)</div>
+    <div class="legend-item"><button class="field-help-btn" onclick="toggleTooltip('tt-chartlines')" style="margin-left:4px">?</button></div>
     <div class="legend-item" id="legendPeriods"></div>
+  </div>
+  <div id="tt-chartlines" class="field-tooltip" style="display:none;margin-bottom:10px">
+    <div class="ft-title">Why the two lines may overlap or diverge</div>
+    <div class="ft-body">The <strong style="color:#c9a84c">amber line</strong> shows your portfolio if you withdraw exactly your planned annual amount (adjusted for inflation each year). The <strong style="color:#9BAAC4">dashed line</strong> shows what happens if you withdraw the mathematical maximum the portfolio can sustain — right up to your legacy target at the end. When both lines are identical, it means your planned spending already equals the maximum sustainable amount. When the dashed line sits higher, you could afford to spend more. The gap between them is your financial buffer.</div>
+    <div class="ft-typical">Tip: The two lines converge when your "Amount to leave behind" is set to $0 and your planned withdrawal equals the optimizer's answer.</div>
   </div>
   <div class="chart-wrap">
     <canvas id="chartCanvas" height="340"></canvas>
@@ -931,7 +970,12 @@
   <!-- Header + run controls -->
   <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:20px">
     <div style="flex:1;min-width:260px">
-      <div style="font-family:Georgia,serif;font-size:20px;font-weight:600;color:#c9a84c;margin-bottom:4px">Monte Carlo Simulation</div>
+      <div style="font-family:Georgia,serif;font-size:20px;font-weight:600;color:#c9a84c;margin-bottom:4px">Monte Carlo Simulation <button class="field-help-btn" onclick="toggleTooltip('tt-montecarlo')" style="width:auto;height:auto;border-radius:4px;padding:2px 8px;font-size:0.7rem;vertical-align:middle">? What is this?</button></div>
+      <div id="tt-montecarlo" class="field-tooltip" style="display:none;margin-bottom:10px">
+        <div class="ft-title">Monte Carlo simulation</div>
+        <div class="ft-body">A Monte Carlo simulation runs your retirement plan thousands of times, each time with slightly different random annual returns drawn from a realistic distribution. Instead of a single projected outcome, you get a range — showing the 10th, 25th, 50th, 75th and 90th percentile results. The "success rate" is simply the percentage of runs where your portfolio survived to your target age. <a href="https://www.investopedia.com/terms/m/montecarlosimulation.asp" target="_blank" rel="noopener" style="color:var(--amber2)">Monte Carlo explained →</a></div>
+        <div class="ft-typical">A success rate above 85–90% is generally considered robust. Below 70% suggests your plan needs adjustment.</div>
+      </div>
       <div style="font-family:var(--mono);font-size:11px;color:#475569">Each run draws log-normally distributed annual returns where the <em>geometric</em> mean equals your IRR input — so the MC and deterministic models share the same effective return assumption. σ controls the year-to-year volatility around that geometric mean.</div>
     </div>
     <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
@@ -966,7 +1010,7 @@
   <div id="mcResults" style="display:none">
 
     <!-- Success gauges row -->
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:20px" id="mcGauges"></div>
+    <div class="mc-gauges" id="mcGauges"></div>
 
     <!-- Fan + Cashflows: side by side on desktop, stacked on mobile -->
     <!-- Fan chart — full width -->
@@ -2459,75 +2503,78 @@ function drawMCHist() {
   const wrap = canvas.parentElement;
   const dpr = window.devicePixelRatio || 1;
   const cssW = getWrapWidth(wrap);
-  const cssH = cssW < 500 ? 280 : 360;  // taller on desktop
+  const cssH = cssW < 500 ? 300 : 380;
   canvas.style.width=cssW+'px'; canvas.style.height=cssH+'px';
   canvas.width=cssW*dpr; canvas.height=cssH*dpr;
   const ctx=canvas.getContext('2d'); ctx.scale(dpr,dpr);
   const W=cssW, H=cssH;
   ctx.clearRect(0,0,W,H);
 
-  // Layout: generous header rows, clear separation
-  const headerH = 42;   // space for title + subtitle at top of each panel
-  const failW   = 128;  // left panel width
-  const divX    = failW + 10;  // divider x
-  const succX   = divX + 10;  // right panel start
+  const headerH = 46;
+  const failW   = Math.min(160, W * 0.22);  // proportional, not fixed
+  const divX    = failW + 8;
+  const succX   = divX + 8;
   const succW   = W - succX;
-  const padB    = 42;
+  const padB    = 48;
   const barTop  = headerH;
   const barH    = H - headerH - padB;
+  const nStrats = stratStats.length;
+
+  // Helper: parse hex color to rgb string
+  const toRGB = hex => {
+    const m = hex.slice(1).match(/.{2}/g).map(h=>parseInt(h,16));
+    return `${m[0]},${m[1]},${m[2]}`;
+  };
 
   // ── Panel header backgrounds ──
-  ctx.fillStyle='rgba(255,255,255,0.025)';
+  ctx.fillStyle='rgba(255,255,255,0.03)';
   ctx.fillRect(0, 0, failW, headerH-4);
   ctx.fillRect(succX, 0, succW, headerH-4);
 
   // ── Left panel header ──
-  ctx.textAlign='center'; ctx.fillStyle='#94a3b8';
-  ctx.font='bold 11px Courier New';
+  ctx.textAlign='center'; ctx.fillStyle='#9BAAC4';
+  ctx.font='bold 11px JetBrains Mono, monospace';
   ctx.fillText('Failure Rate', failW/2, 16);
-  ctx.font='9px Courier New'; ctx.fillStyle='#475569';
+  ctx.font='9px JetBrains Mono, monospace'; ctx.fillStyle='#475569';
   ctx.fillText('% of runs depleted', failW/2, 30);
 
   // ── Right panel header ──
-  ctx.fillStyle='#94a3b8'; ctx.font='bold 11px Courier New';
+  ctx.fillStyle='#9BAAC4'; ctx.font='bold 11px JetBrains Mono, monospace';
   ctx.fillText('Final Balance Distribution', succX + succW/2, 16);
-  ctx.font='9px Courier New'; ctx.fillStyle='#475569';
+  ctx.font='9px JetBrains Mono, monospace'; ctx.fillStyle='#475569';
   ctx.fillText('surviving runs only · overlap = more strategies agree', succX + succW/2, 30);
 
   // ── Divider ──
-  ctx.strokeStyle='#2a3444'; ctx.lineWidth=1; ctx.setLineDash([3,4]);
+  ctx.strokeStyle='#334466'; ctx.lineWidth=1; ctx.setLineDash([3,4]);
   ctx.beginPath(); ctx.moveTo(divX, 0); ctx.lineTo(divX, H-padB); ctx.stroke();
   ctx.setLineDash([]);
 
   // ── LEFT: failure rate bars ──
-  const nStrats = stratStats.length;
   const barSlot = (failW - 12) / nStrats;
   stratStats.forEach((s, si) => {
     const failRate = 1 - s.successRate;
     const bx  = 6 + si * barSlot;
     const bh  = failRate * barH;
     const by  = barTop + barH - bh;
-    const [r,g,b] = s.color.slice(1).match(/.{2}/g).map(h=>parseInt(h,16));
-    // Bar fill
-    ctx.fillStyle = `rgba(${r},${g},${b},0.45)`;
+    const rgb = toRGB(s.color);
+    ctx.fillStyle   = `rgba(${rgb},0.55)`;
     ctx.fillRect(bx, by, barSlot-4, bh);
-    // Bar border
-    ctx.strokeStyle = s.color; ctx.lineWidth=1;
+    ctx.strokeStyle = s.color; ctx.lineWidth=1.5;
     ctx.strokeRect(bx, by, barSlot-4, bh);
-    // % label above bar
-    ctx.fillStyle = s.color; ctx.font='bold 10px Courier New'; ctx.textAlign='center';
-    ctx.fillText((failRate*100).toFixed(0)+'%', bx + (barSlot-4)/2, Math.max(by-4, barTop+8));
-    // Strategy initial below bar
-    ctx.fillStyle='#475569'; ctx.font='8px Courier New';
+    if (bh > 0) {
+      ctx.fillStyle = s.color; ctx.font='bold 10px JetBrains Mono, monospace'; ctx.textAlign='center';
+      ctx.fillText((failRate*100).toFixed(0)+'%', bx + (barSlot-4)/2, Math.max(by-5, barTop+10));
+    }
+    ctx.fillStyle='#5A6A8A'; ctx.font='8px JetBrains Mono, monospace';
     const shortLabel = s.label.replace('Nominal','N').replace('Pessimistic','P').replace('Fixed','Fix').replace('Geometric','Geo');
     ctx.fillText(shortLabel, bx + (barSlot-4)/2, barTop+barH+14);
   });
   // Y-axis grid lines
-  ctx.strokeStyle='#1e2535'; ctx.lineWidth=0.5;
   [0, 0.25, 0.5, 0.75, 1.0].forEach(f => {
     const y = barTop + barH - f*barH;
+    ctx.strokeStyle='#2A3B55'; ctx.lineWidth=0.5;
     ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(failW-4, y); ctx.stroke();
-    ctx.fillStyle='#475569'; ctx.font='8px Courier New'; ctx.textAlign='left';
+    ctx.fillStyle='#5A6A8A'; ctx.font='8px JetBrains Mono, monospace'; ctx.textAlign='left';
     if (f===0 || f===0.5 || f===1.0)
       ctx.fillText((f*100).toFixed(0)+'%', 2, y-2);
   });
@@ -2536,13 +2583,13 @@ function drawMCHist() {
   const successFinals = stratStats.map(s => s.finalBals.filter(v => v > 0));
   const allSuccess = successFinals.flat();
   if (allSuccess.length === 0) {
-    ctx.fillStyle='#f87171'; ctx.font='11px Courier New'; ctx.textAlign='center';
+    ctx.fillStyle='#f87171'; ctx.font='11px JetBrains Mono, monospace'; ctx.textAlign='center';
     ctx.fillText('No surviving runs', succX+succW/2, H/2); return;
   }
   const gMax = Math.max(...allSuccess);
-  const BINS = 32;
+  const BINS = 28;
   const binW = gMax / BINS;
-  const padLsuc=8, padRsuc=8;
+  const padLsuc=10, padRsuc=10;
   const cWs = succW - padLsuc - padRsuc;
   const cHs = barH;
   const bpx = cWs / BINS;
@@ -2561,37 +2608,38 @@ function drawMCHist() {
   // Grid lines
   [0,0.25,0.5,0.75,1].forEach(f => {
     const y = barTop + f*cHs;
-    ctx.strokeStyle='#1e2535'; ctx.lineWidth=0.5;
+    ctx.strokeStyle='#2A3B55'; ctx.lineWidth=0.5;
     ctx.beginPath(); ctx.moveTo(succX, y); ctx.lineTo(succX+succW, y); ctx.stroke();
   });
 
-  // Bars per strategy (staggered z-order: draw wider bars first)
+  // Bars per strategy — draw with solid fills for readability
   allCounts.forEach((counts, si) => {
     const s = stratStats[si];
-    const hex = s.color.slice(1).match(/.{2}/g).map(h=>parseInt(h,16));
+    const rgb = toRGB(s.color);
     counts.forEach((c, i) => {
       if (!c) return;
       const x = xS(i*binW), y = yS(c), bh = barTop+cHs-y;
-      ctx.fillStyle   = `rgba(${hex},0.4)`;
-      ctx.strokeStyle = `rgba(${hex},0.8)`;
-      ctx.lineWidth = 0.5;
+      ctx.fillStyle   = `rgba(${rgb},0.50)`;
+      ctx.strokeStyle = `rgba(${rgb},0.90)`;
+      ctx.lineWidth = 1;
       ctx.fillRect(x+0.5, y, bpx-1, bh);
       ctx.strokeRect(x+0.5, y, bpx-1, bh);
     });
   });
 
   // X axis labels
-  ctx.textAlign='center'; ctx.fillStyle='#64748b'; ctx.font='10px Courier New';
+  ctx.textAlign='center'; ctx.fillStyle='#9BAAC4'; ctx.font='10px JetBrains Mono, monospace';
   [0, 0.5, 1].forEach(f => ctx.fillText(fmt(f*gMax), xS(f*gMax), barTop+cHs+16));
-  ctx.fillStyle='#475569'; ctx.font='9px Courier New';
-  ctx.fillText('Final balance at target age', succX+succW/2, H-4);
+  ctx.fillStyle='#5A6A8A'; ctx.font='9px JetBrains Mono, monospace';
+  ctx.fillText('Final balance at target age', succX+succW/2, H-6);
 
   // Strategy colour legend inside right panel
+  const legendItemW = cWs / nStrats;
   stratStats.forEach((s,si) => {
-    const lx = succX+padLsuc + si*(cWs/nStrats);
-    ctx.fillStyle=s.color; ctx.fillRect(lx, barTop+cHs+22, 12, 3);
-    ctx.fillStyle='#475569'; ctx.font='8px Courier New'; ctx.textAlign='left';
-    ctx.fillText(s.label.replace('Nominal','N.').replace('Pessimistic','P.').replace('Fixed','Fix').replace('Geometric','Geo'), lx+15, barTop+cHs+26);
+    const lx = succX+padLsuc + si*legendItemW;
+    ctx.fillStyle=s.color; ctx.fillRect(lx, barTop+cHs+22, 14, 3);
+    ctx.fillStyle='#9BAAC4'; ctx.font='8px JetBrains Mono, monospace'; ctx.textAlign='left';
+    ctx.fillText(s.label.replace('Nominal','N.').replace('Pessimistic','P.').replace('Fixed','Fix').replace('Geometric','Geo'), lx+17, barTop+cHs+26);
   });
 }
 
