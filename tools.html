@@ -218,8 +218,11 @@ nav {
 .tc-meal::before      { background: linear-gradient(90deg, var(--purple), var(--green)); }
 .tc-pregnancy::before { background: linear-gradient(90deg, var(--rose), var(--purple)); }
 .tc-sleep::before     { background: linear-gradient(90deg, var(--blue), var(--purple)); }
-.tc-body::before      { background: linear-gradient(90deg, var(--teal), var(--green)); }
+.tc-to-do::before      { background: linear-gradient(90deg, var(--teal), var(--green)); }
 .tc-doctor::before    { background: linear-gradient(90deg, var(--green), var(--teal)); }
+.tc-travel::before    { background: linear-gradient(90deg, var(--green), var(--teal)); }
+.tc-pet::before    { background: linear-gradient(90deg, var(--green), var(--teal)); }
+
 
 .tool-card.coming-soon { opacity: 0.5; border-style: dashed; }
 .tool-card.coming-soon:hover { transform: none; box-shadow: none; border-color: var(--border); }
@@ -235,8 +238,10 @@ nav {
 .tc-meal     .tc-icon { background: rgba(155,114,207,0.12);border: 1px solid rgba(155,114,207,0.25); }
 .tc-pregnancy .tc-icon{ background: var(--rose-dim);       border: 1px solid rgba(251,113,133,0.25); }
 .tc-sleep    .tc-icon { background: var(--blue-dim);       border: 1px solid rgba(74,144,217,0.25); }
-.tc-body     .tc-icon { background: var(--teal-dim);       border: 1px solid rgba(45,212,191,0.25); }
+.tc-to-do    .tc-icon { background: var(--teal-dim);       border: 1px solid rgba(45,212,191,0.25); }
 .tc-doctor   .tc-icon { background: rgba(46,204,138,0.1);  border: 1px solid rgba(46,204,138,0.25); }
+.tc-travel    .tc-icon { background: var(--teal-dim);       border: 1px solid rgba(45,212,191,0.25); }
+.tc-pet    .tc-icon { background: var(--teal-dim);       border: 1px solid rgba(45,212,191,0.25); }
 
 .tc-tier-wrap { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
 .tc-tier-tag {
@@ -473,7 +478,7 @@ footer {
     <div class="cat-header">
       <span class="cat-icon">&#127947;</span>
       <span class="cat-title">Health &amp; Fitness</span>
-      <span class="cat-count">2 tools live</span>
+      <span class="cat-count">3 tools live</span>
     </div>
     <div class="tools-grid">
 
@@ -519,6 +524,28 @@ footer {
         </div>
         <div class="tc-actions">
           <a href="meal-planner.html" class="btn-try">Try Free &#8594;</a>
+        </div>Fs
+      </div>
+
+      <div class="tool-card tc-meal" data-tier="free" data-cat="health">
+        <div class="tc-head">
+          <div class="tc-icon">&#129367;</div>
+          <div class="tc-tier-wrap">
+            <span class="tc-tier-tag tag-live">&#9679; Live</span>
+            <span class="tc-tier-tag tag-free">Free</span>
+          </div>
+        </div>
+        <div class="tc-name">Grocery & Meal Prepping</div>
+        <div class="tc-desc">Generate your weekly grocery shopping list from your Calories and Macros needs, and dietary preferences. Buil your weekly meal prepping batches with 0 waste (of products and time) </div>
+        <div class="tc-features">
+          <span class="tc-feat">Weekly Marcos needs</span>
+          <span class="tc-feat">Grocery list</span>
+          <span class="tc-feat">Full week meal prepping</span>
+          <span class="tc-feat">32 batch recipes</span>
+          <span class="tc-feat">Preference filters</span>
+        </div>
+        <div class="tc-actions">
+          <a href="grocery-planner.html" class="btn-try">Try Free &#8594;</a>
         </div>
       </div>
 
@@ -536,12 +563,12 @@ footer {
 
       <div class="tool-card tc-sleep coming-soon" data-tier="soon" data-cat="life">
         <div class="tc-head">
-          <div class="tc-icon">&#128564;</div>
+          <div class="tc-icon">🧠</div>
           <div class="tc-tier-wrap">
             <span class="tc-tier-tag tag-soon">Coming Soon</span>
           </div>
         </div>
-        <div class="tc-name">Sleep Tracker</div>
+        <div class="tc-name">Sleep & Brain Fog Tracker</div>
         <div class="tc-desc">Log sleep quality, spot patterns and get evidence-based tips to improve your rest and recovery.</div>
         <div class="tc-features">
           <span class="tc-feat">Sleep logging</span>
@@ -553,19 +580,19 @@ footer {
         </div>
       </div>
 
-      <div class="tool-card tc-body coming-soon" data-tier="soon" data-cat="life">
+      <div class="tool-card tc-to-do coming-soon" data-tier="soon" data-cat="life">
         <div class="tc-head">
           <div class="tc-icon">&#128202;</div>
           <div class="tc-tier-wrap">
             <span class="tc-tier-tag tag-soon">Coming Soon</span>
           </div>
         </div>
-        <div class="tc-name">Body Metrics</div>
-        <div class="tc-desc">Track weight, body fat and measurements over time. Visualise trends and tie into your workout and nutrition goals.</div>
+        <div class="tc-name">To-Do & Notes Tracker</div>
+        <div class="tc-desc">Capture tasks, notes and reminders in one private place. Organised by project or day, with a clean interface.</div>
         <div class="tc-features">
-          <span class="tc-feat">Weight tracking</span>
-          <span class="tc-feat">Body fat %</span>
-          <span class="tc-feat">TDEE calculator</span>
+          <span class="tc-feat">Track your tasks</span>
+          <span class="tc-feat">Note everythinhg</span>
+          <span class="tc-feat">Keep everything in one place</span>
         </div>
         <div class="tc-actions">
           <span class="btn-soon">In Development</span>
@@ -579,12 +606,31 @@ footer {
             <span class="tc-tier-tag tag-soon">Coming Soon</span>
           </div>
         </div>
-        <div class="tc-name">Doctor Visit Prep</div>
+        <div class="tc-name">Doctor Visit & Medication Tracker</div>
         <div class="tc-desc">Log symptoms, medications and questions. Generate a clean printable summary to bring to your next appointment.</div>
         <div class="tc-features">
           <span class="tc-feat">Symptom log</span>
           <span class="tc-feat">Med tracker</span>
           <span class="tc-feat">PDF summary</span>
+        </div>
+        <div class="tc-actions">
+          <span class="btn-soon">In Development</span>
+        </div>
+      </div>
+
+      <div class="tool-card tc-travel coming-soon" data-tier="soon" data-cat="life">
+        <div class="tc-head">
+          <div class="tc-icon">&#128657;</div>
+          <div class="tc-tier-wrap">
+            <span class="tc-tier-tag tag-soon">Coming Soon</span>
+          </div>
+        </div>
+        <div class="tc-name">Travel Planner</div>
+        <div class="tc-desc">Plan trips from scratch — itinerary, budget by category, activities and bookings in one place.</div>
+        <div class="tc-features">
+          <span class="tc-feat">Plan your budget</span>
+          <span class="tc-feat">Plan your timeline</span>
+          <span class="tc-feat">Import from calendars & emails</span>
         </div>
         <div class="tc-actions">
           <span class="btn-soon">In Development</span>
@@ -622,6 +668,25 @@ footer {
         </div>
         <div class="tc-actions">
           <a href="pregnancy-roadmap.html" class="btn-try">Try Free &#8594;</a>
+        </div>
+      </div>
+
+      <div class="tool-card tc-pet coming-soon" data-tier="soon" data-cat="life">
+        <div class="tc-head">
+          <div class="tc-icon">&#128202;</div>
+          <div class="tc-tier-wrap">
+            <span class="tc-tier-tag tag-soon">Coming Soon</span>
+          </div>
+        </div>
+        <div class="tc-name">Did I Feed the Pet</div>
+        <div class="tc-desc">Track feeding times, vet appointments, medications, activity and general wellbeing for your pet.</div>
+        <div class="tc-features">
+          <span class="tc-feat">Feedind schedule & quantities</span>
+          <span class="tc-feat">Pet behaviours explained</span>
+          <span class="tc-feat">Medications and vet appointments</span>
+        </div>
+        <div class="tc-actions">
+          <span class="btn-soon">In Development</span>
         </div>
       </div>
 
