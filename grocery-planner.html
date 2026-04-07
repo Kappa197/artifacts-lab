@@ -581,6 +581,19 @@ input[type=range]:active::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(212,146
   </div>
   <!-- Cooking style wizard -->
   <div class="mp-wizard" id="mpWizard"></div>
+  <!-- Basket-changed banner (shown after swaps on prep page) -->
+  <div id="mpBasketChangedBanner" style="display:none;padding:12px 16px;background:rgba(212,146,10,.15);border-bottom:2px solid var(--amber);display:none">
+    <div style="max-width:800px;margin:0 auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <span style="font-size:18px">🔄</span>
+      <div style="flex:1;font-size:12px;color:var(--amber2);line-height:1.5">
+        <strong>Your recipe swaps have changed the shopping list.</strong>
+        When you're happy with the meal plan, update your basket to reflect these changes.
+      </div>
+      <button onclick="acceptBasketChanges()" style="padding:8px 16px;background:var(--amber);color:#000;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">
+        ✓ Update Shopping List
+      </button>
+    </div>
+  </div>
   <!-- Portions selector -->
   <div class="mp-portions-bar" id="mpPortionsBar"></div>
   <!-- Meal cards -->
@@ -623,32 +636,32 @@ input[type=range]:active::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(212,146
 // ═══════════════════════════════════════════════════
 var FOODS = [
   // ── Proteins: Meat ──
-  {id:"chicken_breast",  name:"Chicken breast",     em:"🍗", p:31,  c:0,   f:3.6, kcal:165, mc:["b12"],           diet:{om:1,pe:0,ve:0,vg:0}, cat:"protein", typical:[300,800]},
-  {id:"turkey_breast",   name:"Turkey breast",      em:"🦃", p:29,  c:0,   f:1.5, kcal:135, mc:["b12"],           diet:{om:1,pe:0,ve:0,vg:0}, cat:"protein", typical:[200,600]},
-  {id:"lean_beef",       name:"Lean beef mince",    em:"🥩", p:26,  c:0,   f:10,  kcal:196, mc:["iron","b12"],     diet:{om:1,pe:0,ve:0,vg:0}, cat:"protein", typical:[200,500]},
-  {id:"beef_steak",      name:"Beef steak",         em:"🥩", p:27,  c:0,   f:8,   kcal:185, mc:["iron","b12"],     diet:{om:1,pe:0,ve:0,vg:0}, cat:"protein", typical:[200,500]},
-  {id:"pork_loin",       name:"Pork loin",          em:"🥩", p:26,  c:0,   f:4,   kcal:143, mc:["b12"],           diet:{om:1,pe:0,ve:0,vg:0}, cat:"protein", typical:[200,500]},
+  {id:"chicken_breast",  name:"Chicken breast",     em:"🍗", p:31,  c:0,   f:3.6, kcal:165, mc:["b12"],           diet:{om:1,pe:0,ve:0,vg:0}, cat:"protein", typical:[300,800], ptype:"white_meat"},
+  {id:"turkey_breast",   name:"Turkey breast",      em:"🦃", p:29,  c:0,   f:1.5, kcal:135, mc:["b12"],           diet:{om:1,pe:0,ve:0,vg:0}, cat:"protein", typical:[200,600], ptype:"white_meat"},
+  {id:"lean_beef",       name:"Lean beef mince",    em:"🥩", p:26,  c:0,   f:10,  kcal:196, mc:["iron","b12"],     diet:{om:1,pe:0,ve:0,vg:0}, cat:"protein", typical:[200,500], ptype:"red_meat"},
+  {id:"beef_steak",      name:"Beef steak",         em:"🥩", p:27,  c:0,   f:8,   kcal:185, mc:["iron","b12"],     diet:{om:1,pe:0,ve:0,vg:0}, cat:"protein", typical:[200,500], ptype:"red_meat"},
+  {id:"pork_loin",       name:"Pork loin",          em:"🥩", p:26,  c:0,   f:4,   kcal:143, mc:["b12"],           diet:{om:1,pe:0,ve:0,vg:0}, cat:"protein", typical:[200,500], ptype:"pork"},
   // ── Proteins: Fish & Seafood ──
-  {id:"salmon",          name:"Salmon fillet",      em:"🐟", p:25,  c:0,   f:13,  kcal:208, mc:["omega3","vitD","b12"], diet:{om:1,pe:1,ve:0,vg:0}, cat:"protein", typical:[200,600]},
-  {id:"tuna_can",        name:"Tuna (canned)",      em:"🐟", p:26,  c:0,   f:1,   kcal:116, mc:["omega3","b12"],  diet:{om:1,pe:1,ve:0,vg:0}, cat:"protein", typical:[200,500]},
-  {id:"cod",             name:"Cod fillet",         em:"🐠", p:23,  c:0,   f:1,   kcal:105, mc:["vitD","b12"],    diet:{om:1,pe:1,ve:0,vg:0}, cat:"protein", typical:[200,500]},
-  {id:"mackerel",        name:"Mackerel",           em:"🐟", p:19,  c:0,   f:14,  kcal:205, mc:["omega3","vitD","b12"], diet:{om:1,pe:1,ve:0,vg:0}, cat:"protein", typical:[150,400]},
-  {id:"prawns",          name:"Prawns",             em:"🦐", p:24,  c:0,   f:1.7, kcal:119, mc:["b12"],           diet:{om:1,pe:1,ve:0,vg:0}, cat:"protein", typical:[150,400]},
-  {id:"sardines",        name:"Sardines (canned)",  em:"🐟", p:25,  c:0,   f:11,  kcal:208, mc:["omega3","calcium","vitD","b12"], diet:{om:1,pe:1,ve:0,vg:0}, cat:"protein", typical:[100,300]},
-  // ── Proteins: Eggs & Dairy ──
-  {id:"eggs",            name:"Eggs",               em:"🥚", p:13,  c:1.1, f:11,  kcal:155, mc:["vitD","b12"],    diet:{om:1,pe:1,ve:1,vg:0}, cat:"protein", typical:[200,700]},
-  {id:"greek_yogurt",    name:"Greek yogurt (0%)",  em:"🫙", p:10,  c:3.6, f:0.4, kcal:59,  mc:["calcium","b12"], diet:{om:1,pe:1,ve:1,vg:0}, cat:"dairy",   typical:[400,1000]},
-  {id:"cottage_cheese",  name:"Cottage cheese",     em:"🧀", p:11,  c:3.4, f:4.3, kcal:98,  mc:["calcium","b12"], diet:{om:1,pe:1,ve:1,vg:0}, cat:"dairy",   typical:[200,600]},
-  {id:"milk",            name:"Milk (semi-skimmed)",em:"🥛", p:3.4, c:4.8, f:1.6, kcal:46,  mc:["calcium","b12","vitD"], diet:{om:1,pe:1,ve:1,vg:0}, cat:"dairy",   typical:[300,1000]},
+  {id:"salmon",          name:"Salmon fillet",      em:"🐟", p:25,  c:0,   f:13,  kcal:208, mc:["omega3","vitD","b12"], diet:{om:1,pe:1,ve:0,vg:0}, cat:"protein", typical:[200,600], ptype:"fish"},
+  {id:"tuna_can",        name:"Tuna (canned)",      em:"🐟", p:26,  c:0,   f:1,   kcal:116, mc:["omega3","b12"],  diet:{om:1,pe:1,ve:0,vg:0}, cat:"protein", typical:[200,500], ptype:"fish"},
+  {id:"cod",             name:"Cod fillet",         em:"🐠", p:23,  c:0,   f:1,   kcal:105, mc:["vitD","b12"],    diet:{om:1,pe:1,ve:0,vg:0}, cat:"protein", typical:[200,500], ptype:"fish"},
+  {id:"mackerel",        name:"Mackerel",           em:"🐟", p:19,  c:0,   f:14,  kcal:205, mc:["omega3","vitD","b12"], diet:{om:1,pe:1,ve:0,vg:0}, cat:"protein", typical:[150,400], ptype:"fish"},
+  {id:"prawns",          name:"Prawns",             em:"🦐", p:24,  c:0,   f:1.7, kcal:119, mc:["b12"],           diet:{om:1,pe:1,ve:0,vg:0}, cat:"protein", typical:[150,400], ptype:"shellfish"},
+  {id:"sardines",        name:"Sardines (canned)",  em:"🐟", p:25,  c:0,   f:11,  kcal:208, mc:["omega3","calcium","vitD","b12"], diet:{om:1,pe:1,ve:0,vg:0}, cat:"protein", typical:[100,300], ptype:"fish"},
+  // ── Proteins: Eggs & Dairy (always quick-prep) ──
+  {id:"eggs",            name:"Eggs",               em:"🥚", p:13,  c:1.1, f:11,  kcal:155, mc:["vitD","b12"],    diet:{om:1,pe:1,ve:1,vg:0}, cat:"protein", typical:[200,700], ptype:"egg"},
+  {id:"greek_yogurt",    name:"Greek yogurt (0%)",  em:"🫙", p:10,  c:3.6, f:0.4, kcal:59,  mc:["calcium","b12"], diet:{om:1,pe:1,ve:1,vg:0}, cat:"dairy",   typical:[400,1000], ptype:"dairy"},
+  {id:"cottage_cheese",  name:"Cottage cheese",     em:"🧀", p:11,  c:3.4, f:4.3, kcal:98,  mc:["calcium","b12"], diet:{om:1,pe:1,ve:1,vg:0}, cat:"dairy",   typical:[200,600], ptype:"dairy"},
+  {id:"milk",            name:"Milk (semi-skimmed)",em:"🥛", p:3.4, c:4.8, f:1.6, kcal:46,  mc:["calcium","b12","vitD"], diet:{om:1,pe:1,ve:1,vg:0}, cat:"dairy",   typical:[300,1000], ptype:"dairy"},
   // ── Proteins: Plant ──
-  {id:"tofu",            name:"Tofu (firm)",        em:"🧊", p:17,  c:2,   f:9,   kcal:144, mc:["calcium","iron"],diet:{om:1,pe:1,ve:1,vg:1}, cat:"protein", typical:[200,700]},
-  {id:"tempeh",          name:"Tempeh",             em:"🟤", p:19,  c:9,   f:11,  kcal:195, mc:["calcium","iron"],diet:{om:1,pe:1,ve:1,vg:1}, cat:"protein", typical:[150,400]},
-  {id:"chickpeas",       name:"Chickpeas",          em:"🫘", p:9,   c:27,  f:2.6, kcal:164, mc:["iron","folate","fiber","magnesium"], diet:{om:1,pe:1,ve:1,vg:1}, cat:"legumes", typical:[300,800]},
-  {id:"lentils",         name:"Lentils",            em:"🫘", p:9,   c:20,  f:0.4, kcal:116, mc:["iron","folate","fiber","magnesium"], diet:{om:1,pe:1,ve:1,vg:1}, cat:"legumes", typical:[300,800]},
-  {id:"black_beans",     name:"Black beans",        em:"🫘", p:9,   c:24,  f:0.5, kcal:132, mc:["iron","folate","fiber"],  diet:{om:1,pe:1,ve:1,vg:1}, cat:"legumes", typical:[200,600]},
-  {id:"edamame",         name:"Edamame",            em:"🫛", p:11,  c:8,   f:5,   kcal:122, mc:["folate","iron","calcium"], diet:{om:1,pe:1,ve:1,vg:1}, cat:"legumes", typical:[200,500]},
-  {id:"protein_powder",  name:"Protein powder",     em:"🥤", p:75,  c:10,  f:4,   kcal:380, mc:["calcium"],       diet:{om:1,pe:1,ve:1,vg:0}, cat:"protein", typical:[150,400]},
-  {id:"plant_protein",   name:"Plant protein powder",em:"🌱",p:70,  c:12,  f:3,   kcal:355, mc:["iron"],          diet:{om:1,pe:1,ve:1,vg:1}, cat:"protein", typical:[150,400]},
+  {id:"tofu",            name:"Tofu (firm)",        em:"🧊", p:17,  c:2,   f:9,   kcal:144, mc:["calcium","iron"],diet:{om:1,pe:1,ve:1,vg:1}, cat:"protein", typical:[200,700], ptype:"plant"},
+  {id:"tempeh",          name:"Tempeh",             em:"🟤", p:19,  c:9,   f:11,  kcal:195, mc:["calcium","iron"],diet:{om:1,pe:1,ve:1,vg:1}, cat:"protein", typical:[150,400], ptype:"plant"},
+  {id:"chickpeas",       name:"Chickpeas",          em:"🫘", p:9,   c:27,  f:2.6, kcal:164, mc:["iron","folate","fiber","magnesium"], diet:{om:1,pe:1,ve:1,vg:1}, cat:"legumes", typical:[300,800], ptype:"legume"},
+  {id:"lentils",         name:"Lentils",            em:"🫘", p:9,   c:20,  f:0.4, kcal:116, mc:["iron","folate","fiber","magnesium"], diet:{om:1,pe:1,ve:1,vg:1}, cat:"legumes", typical:[300,800], ptype:"legume"},
+  {id:"black_beans",     name:"Black beans",        em:"🫘", p:9,   c:24,  f:0.5, kcal:132, mc:["iron","folate","fiber"],  diet:{om:1,pe:1,ve:1,vg:1}, cat:"legumes", typical:[200,600], ptype:"legume"},
+  {id:"edamame",         name:"Edamame",            em:"🫛", p:11,  c:8,   f:5,   kcal:122, mc:["folate","iron","calcium"], diet:{om:1,pe:1,ve:1,vg:1}, cat:"legumes", typical:[200,500], ptype:"legume"},
+  {id:"protein_powder",  name:"Protein powder",     em:"🥤", p:75,  c:10,  f:4,   kcal:380, mc:["calcium"],       diet:{om:1,pe:1,ve:1,vg:0}, cat:"protein", typical:[150,400], ptype:"supplement"},
+  {id:"plant_protein",   name:"Plant protein powder",em:"🌱",p:70,  c:12,  f:3,   kcal:355, mc:["iron"],          diet:{om:1,pe:1,ve:1,vg:1}, cat:"protein", typical:[150,400], ptype:"supplement"},
   // ── Grains & Carbs ──
   {id:"oats",            name:"Oats",               em:"🌾", p:13,  c:67,  f:7,   kcal:389, mc:["fiber","magnesium","iron"], diet:{om:1,pe:1,ve:1,vg:1}, cat:"grains", typical:[300,700]},
   {id:"brown_rice",      name:"Brown rice",         em:"🍚", p:2.6, c:23,  f:0.9, kcal:111, mc:["magnesium","fiber"],   diet:{om:1,pe:1,ve:1,vg:1}, cat:"grains", typical:[400,900]},
@@ -692,17 +705,17 @@ var FOODS = [
   {id:"vegan_yogurt",    name:"Coconut yogurt",     em:"🫙", p:1.5, c:6,   f:7,   kcal:95,  mc:[],                diet:{om:1,pe:1,ve:1,vg:1}, cat:"dairy",   typical:[200,600]},
 
   // ── Additional Animal Proteins ──
-  {id:"lamb",           name:"Lamb (lean)",         em:"🥩", p:26,  c:0,   f:9,   kcal:182, mc:["iron","b12","zinc"],   diet:{om:1,pe:0,ve:0,vg:0}, cat:"protein", typical:[150,400]},
-  {id:"chicken_thigh",  name:"Chicken thigh",        em:"🍗", p:26,  c:0,   f:8,   kcal:177, mc:["b12"],                diet:{om:1,pe:0,ve:0,vg:0}, cat:"protein", typical:[200,600]},
-  {id:"sea_bass",       name:"Sea bass fillet",       em:"🐠", p:24,  c:0,   f:3,   kcal:124, mc:["vitD","b12","omega3"],diet:{om:1,pe:1,ve:0,vg:0}, cat:"protein", typical:[200,500]},
-  {id:"trout",          name:"Rainbow trout",         em:"🐟", p:22,  c:0,   f:5,   kcal:141, mc:["omega3","vitD","b12"],diet:{om:1,pe:1,ve:0,vg:0}, cat:"protein", typical:[150,400]},
-  {id:"canned_salmon",  name:"Salmon (canned)",       em:"🐟", p:25,  c:0,   f:8,   kcal:177, mc:["omega3","vitD","b12","calcium"], diet:{om:1,pe:1,ve:0,vg:0}, cat:"protein", typical:[150,400]},
-  {id:"mussels",        name:"Mussels",               em:"🐚", p:18,  c:3.7, f:2.2, kcal:103, mc:["iron","b12","omega3","zinc"], diet:{om:1,pe:1,ve:0,vg:0}, cat:"protein", typical:[150,400]},
-  {id:"beef_liver",     name:"Beef liver",            em:"🥩", p:27,  c:4,   f:5,   kcal:175, mc:["iron","b12","folate","vitD"], diet:{om:1,pe:0,ve:0,vg:0}, cat:"protein", typical:[100,250]},
+  {id:"lamb",           name:"Lamb (lean)",         em:"🥩", p:26,  c:0,   f:9,   kcal:182, mc:["iron","b12","zinc"],   diet:{om:1,pe:0,ve:0,vg:0}, cat:"protein", typical:[150,400], ptype:"red_meat"},
+  {id:"chicken_thigh",  name:"Chicken thigh",        em:"🍗", p:26,  c:0,   f:8,   kcal:177, mc:["b12"],                diet:{om:1,pe:0,ve:0,vg:0}, cat:"protein", typical:[200,600], ptype:"white_meat"},
+  {id:"sea_bass",       name:"Sea bass fillet",       em:"🐠", p:24,  c:0,   f:3,   kcal:124, mc:["vitD","b12","omega3"],diet:{om:1,pe:1,ve:0,vg:0}, cat:"protein", typical:[200,500], ptype:"fish"},
+  {id:"trout",          name:"Rainbow trout",         em:"🐟", p:22,  c:0,   f:5,   kcal:141, mc:["omega3","vitD","b12"],diet:{om:1,pe:1,ve:0,vg:0}, cat:"protein", typical:[150,400], ptype:"fish"},
+  {id:"canned_salmon",  name:"Salmon (canned)",       em:"🐟", p:25,  c:0,   f:8,   kcal:177, mc:["omega3","vitD","b12","calcium"], diet:{om:1,pe:1,ve:0,vg:0}, cat:"protein", typical:[150,400], ptype:"fish"},
+  {id:"mussels",        name:"Mussels",               em:"🐚", p:18,  c:3.7, f:2.2, kcal:103, mc:["iron","b12","omega3","zinc"], diet:{om:1,pe:1,ve:0,vg:0}, cat:"protein", typical:[150,400], ptype:"shellfish"},
+  {id:"beef_liver",     name:"Beef liver",            em:"🥩", p:27,  c:4,   f:5,   kcal:175, mc:["iron","b12","folate","vitD"], diet:{om:1,pe:0,ve:0,vg:0}, cat:"protein", typical:[100,250], ptype:"red_meat"},
   // ── Additional Plant Proteins ──
-  {id:"seitan",         name:"Seitan (wheat protein)",em:"🍞", p:25,  c:14,  f:1.9, kcal:176, mc:["iron"],              diet:{om:1,pe:1,ve:1,vg:1}, cat:"protein", typical:[150,400]},
-  {id:"white_beans",    name:"White beans",           em:"🫘", p:9,   c:23,  f:0.5, kcal:130, mc:["iron","folate","calcium","fiber"], diet:{om:1,pe:1,ve:1,vg:1}, cat:"legumes", typical:[200,600]},
-  {id:"kidney_beans",   name:"Kidney beans",          em:"🫘", p:9,   c:22,  f:0.5, kcal:127, mc:["iron","folate","fiber"],  diet:{om:1,pe:1,ve:1,vg:1}, cat:"legumes", typical:[200,600]},
+  {id:"seitan",         name:"Seitan (wheat protein)",em:"🍞", p:25,  c:14,  f:1.9, kcal:176, mc:["iron"],              diet:{om:1,pe:1,ve:1,vg:1}, cat:"protein", typical:[150,400], ptype:"plant"},
+  {id:"white_beans",    name:"White beans",           em:"🫘", p:9,   c:23,  f:0.5, kcal:130, mc:["iron","folate","calcium","fiber"], diet:{om:1,pe:1,ve:1,vg:1}, cat:"legumes", typical:[200,600], ptype:"legume"},
+  {id:"kidney_beans",   name:"Kidney beans",          em:"🫘", p:9,   c:22,  f:0.5, kcal:127, mc:["iron","folate","fiber"],  diet:{om:1,pe:1,ve:1,vg:1}, cat:"legumes", typical:[200,600], ptype:"legume"},
   {id:"peas",           name:"Green peas",            em:"🫛", p:5,   c:14,  f:0.4, kcal:81,  mc:["vitC","folate","fiber"],  diet:{om:1,pe:1,ve:1,vg:1}, cat:"legumes", typical:[200,500]},
   {id:"hemp_seeds",     name:"Hemp seeds",            em:"🌱", p:31,  c:8.7, f:49,  kcal:553, mc:["omega3","magnesium","iron"], diet:{om:1,pe:1,ve:1,vg:1}, cat:"fats",    typical:[50,150]},
   {id:"nutritional_yeast",name:"Nutritional yeast",   em:"🟡", p:50,  c:29,  f:6,   kcal:325, mc:["b12","iron","folate","magnesium"], diet:{om:1,pe:1,ve:1,vg:1}, cat:"pantry", typical:[30,100]},
@@ -735,7 +748,7 @@ var FOODS = [
   {id:"grapes",         name:"Grapes",                em:"🍇", p:0.6, c:17,  f:0.2, kcal:67,  mc:["vitC","potassium"],  diet:{om:1,pe:1,ve:1,vg:1}, cat:"produce", typical:[200,500]},
   {id:"pear",           name:"Pear",                  em:"🍐", p:0.4, c:15,  f:0.1, kcal:57,  mc:["vitC","fiber","potassium"],diet:{om:1,pe:1,ve:1,vg:1}, cat:"produce", typical:[200,500]},
   {id:"peach",          name:"Peach",                 em:"🍑", p:0.9, c:10,  f:0.3, kcal:39,  mc:["vitC","potassium"],  diet:{om:1,pe:1,ve:1,vg:1}, cat:"produce", typical:[200,500]},
-  {id:"dates",          name:"Dates (medjool)",       em:"📅", p:1.8, c:75,  f:0.2, kcal:277, mc:["potassium","magnesium","iron","fiber"],diet:{om:1,pe:1,ve:1,vg:1}, cat:"produce", typical:[50,150]},
+  {id:"dates",          name:"Dates (medjool)",       em:"🌴", p:1.8, c:75,  f:0.2, kcal:277, mc:["potassium","magnesium","iron","fiber"],diet:{om:1,pe:1,ve:1,vg:1}, cat:"produce", typical:[50,150]},
   // ── Additional Fats ──
   {id:"cashews",        name:"Cashews",               em:"🥜", p:18,  c:30,  f:44,  kcal:553, mc:["magnesium","iron","zinc"], diet:{om:1,pe:1,ve:1,vg:1}, cat:"fats",    typical:[80,200]},
   {id:"pistachios",     name:"Pistachios",            em:"🫘", p:20,  c:28,  f:45,  kcal:562, mc:["potassium","magnesium","vitB6"],diet:{om:1,pe:1,ve:1,vg:1}, cat:"fats",  typical:[80,200]},
@@ -744,11 +757,11 @@ var FOODS = [
   {id:"avocado_oil",    name:"Avocado oil",           em:"🫒", p:0,   c:0,   f:100, kcal:884, mc:["omega3"],             diet:{om:1,pe:1,ve:1,vg:1}, cat:"fats",    typical:[30,80]},
   {id:"ghee",           name:"Ghee",                  em:"🧈", p:0,   c:0,   f:100, kcal:900, mc:[],                    diet:{om:1,pe:1,ve:1,vg:0}, cat:"fats",    typical:[20,60]},
   // ── Additional Dairy ──
-  {id:"kefir",          name:"Kefir",                 em:"🥛", p:3.8, c:4.5, f:3.5, kcal:64,  mc:["calcium","b12","vitD"],diet:{om:1,pe:1,ve:1,vg:0}, cat:"dairy",   typical:[200,600]},
-  {id:"hard_cheese",    name:"Hard cheese (cheddar)", em:"🧀", p:25,  c:1.3, f:33,  kcal:402, mc:["calcium","b12","vitD"],diet:{om:1,pe:1,ve:1,vg:0}, cat:"dairy",   typical:[100,250]},
-  {id:"ricotta",        name:"Ricotta",               em:"🧀", p:11,  c:3,   f:11,  kcal:155, mc:["calcium","b12"],      diet:{om:1,pe:1,ve:1,vg:0}, cat:"dairy",   typical:[150,400]},
-  {id:"feta",           name:"Feta cheese",           em:"🧀", p:14,  c:4,   f:21,  kcal:264, mc:["calcium","b12"],      diet:{om:1,pe:1,ve:1,vg:0}, cat:"dairy",   typical:[100,250]},
-  {id:"skyr",           name:"Skyr",                  em:"🫙", p:11,  c:4,   f:0.2, kcal:63,  mc:["calcium","b12"],      diet:{om:1,pe:1,ve:1,vg:0}, cat:"dairy",   typical:[300,700]},
+  {id:"kefir",          name:"Kefir",                 em:"🥛", p:3.8, c:4.5, f:3.5, kcal:64,  mc:["calcium","b12","vitD"],diet:{om:1,pe:1,ve:1,vg:0}, cat:"dairy",   typical:[200,600], ptype:"dairy"},
+  {id:"hard_cheese",    name:"Hard cheese (cheddar)", em:"🧀", p:25,  c:1.3, f:33,  kcal:402, mc:["calcium","b12","vitD"],diet:{om:1,pe:1,ve:1,vg:0}, cat:"dairy",   typical:[100,250], ptype:"dairy"},
+  {id:"ricotta",        name:"Ricotta",               em:"🧀", p:11,  c:3,   f:11,  kcal:155, mc:["calcium","b12"],      diet:{om:1,pe:1,ve:1,vg:0}, cat:"dairy",   typical:[150,400], ptype:"dairy"},
+  {id:"feta",           name:"Feta cheese",           em:"🧀", p:14,  c:4,   f:21,  kcal:264, mc:["calcium","b12"],      diet:{om:1,pe:1,ve:1,vg:0}, cat:"dairy",   typical:[100,250], ptype:"dairy"},
+  {id:"skyr",           name:"Skyr",                  em:"🫙", p:11,  c:4,   f:0.2, kcal:63,  mc:["calcium","b12"],      diet:{om:1,pe:1,ve:1,vg:0}, cat:"dairy",   typical:[300,700], ptype:"dairy"},
 ];
 
 // ── Basket categories — aligned to the 5 ingredient tabs ──
@@ -875,6 +888,7 @@ var G = {
   avoid: [],   // food IDs to exclude
   powderMode: 'none', // 'none' | 'include' — set by the protein tab toggle
   basket: null,
+  mealPrepBasketChanged: false, // true when swaps made on prep page
 };
 
 // ── Meal prep wizard state ─────────────────────────
@@ -1585,8 +1599,8 @@ function openSwapModal(originalFid){
   // Render modal
   document.getElementById('swapModalTitle').textContent = 'Swap '+orig.em+' '+orig.name;
   document.getElementById('swapModalSub').textContent =
-    'Select a replacement — quantity is auto-adjusted to match the protein target. '+
-    'Showing '+candidates.length+' '+diet+'-compatible alternatives.';
+    'Showing '+candidates.length+' '+diet+'-compatible alternatives in the same category. '+
+    'Items already in your basket are not shown.';
 
   var listEl = document.getElementById('swapModalList');
   if(!candidates.length){
@@ -1658,10 +1672,29 @@ function doSwap(originalFid, replacementFid){
 
   closeSwapModal();
   renderResults(G.basket);
+  // If meal prep page is active, mark basket as changed and re-render
+  if(document.getElementById('mealPrepPage').classList.contains('active')){
+    G.mealPrepBasketChanged = true;
+    renderMealPrep();
+    showBasketChangedBanner();
+  }
   toast('✓ Swapped '+orig.food.name+' → '+newFood.name);
 }
 
 // ── Generate ───────────────────────────────────────
+function showBasketChangedBanner(){
+  var b = document.getElementById('mpBasketChangedBanner');
+  if(b) b.style.display = 'block';
+}
+
+function acceptBasketChanges(){
+  G.mealPrepBasketChanged = false;
+  var b = document.getElementById('mpBasketChangedBanner');
+  if(b) b.style.display = 'none';
+  // Re-render the basket page with updated items so it reflects all swaps
+  renderResults(G.basket);
+  toast('✓ Shopping list updated with your recipe swaps');
+}
 function computePowderWarning(basket, diet){
   if(diet==='vegetarian'||diet==='vegan'){
     var powderItems = basket.items.filter(function(it){
@@ -2406,21 +2439,25 @@ var SUBCATS = {
   curry: [
     { id:'tikka',    name:'Indian Tikka Masala',  flag:'🇮🇳',
       nameTemplate:  function(p){ return p+' Tikka Masala'; },
+      allowedProteinTypes:['white_meat','red_meat','legume','plant','shellfish'],
       spiceKit:['Garam masala','Cumin','Coriander','Turmeric','Chili powder','Yogurt (marinade)','Fresh ginger'],
       preferredBases:['white_rice','brown_rice'],   excludedBases:['pasta','oats','couscous','quinoa'],
       preferredVeg:  ['spinach','bell_pepper','tomatoes','onion','cauliflower'] },
     { id:'thai',     name:'Thai Green Curry',     flag:'🇹🇭',
       nameTemplate:  function(p){ return 'Thai Green Curry with '+p; },
+      allowedProteinTypes:['white_meat','fish','shellfish','legume','plant'],
       spiceKit:['Green curry paste','Coconut milk','Fish sauce','Kaffir lime leaves','Lemongrass','Thai basil'],
-      preferredBases:['white_rice','jasmine_rice'], excludedBases:['pasta','oats','bread'],
+      preferredBases:['white_rice','brown_rice'],   excludedBases:['pasta','oats','bread'],
       preferredVeg:  ['courgette','bell_pepper','spinach','green_beans','eggplant'] },
     { id:'moroccan', name:'Moroccan Tagine',       flag:'🇲🇦',
       nameTemplate:  function(p){ return 'Moroccan '+p+' Tagine'; },
+      allowedProteinTypes:['white_meat','red_meat','pork','legume'],
       spiceKit:['Ras el hanout','Cumin','Cinnamon','Saffron','Preserved lemon','Harissa'],
       preferredBases:['couscous','bulgur'],         excludedBases:['pasta','oats','rice_cakes'],
       preferredVeg:  ['carrots','pumpkin','tomatoes','onion','beets'] },
     { id:'mexican',  name:'Mexican Chili',         flag:'🇲🇽',
       nameTemplate:  function(p){ return p+' Chili'; },
+      allowedProteinTypes:['red_meat','white_meat','legume','plant'],
       spiceKit:['Chipotle','Cumin','Smoked paprika','Oregano','Chili powder','Lime juice'],
       preferredBases:['white_rice','brown_rice'],   excludedBases:['pasta','oats','couscous'],
       preferredVeg:  ['bell_pepper','tomatoes','onion','corn','avocado'] },
@@ -2428,21 +2465,25 @@ var SUBCATS = {
   sheetpan: [
     { id:'american', name:'American Roast',        flag:'🇺🇸',
       nameTemplate:  function(p){ return 'Roasted '+p+' & Potatoes'; },
+      allowedProteinTypes:['white_meat','red_meat','pork','fish'],
       spiceKit:['Garlic powder','Onion powder','Smoked paprika','Dried thyme','Rosemary'],
       preferredBases:['potato','sweet_potato'],     excludedBases:['pasta','oats','couscous'],
       preferredVeg:  ['broccoli','carrots','green_beans','brussels_sprouts','onion'] },
     { id:'greek',    name:'Greek Souvlaki',         flag:'🇬🇷',
       nameTemplate:  function(p){ return 'Greek '+p+' Souvlaki'; },
+      allowedProteinTypes:['white_meat','red_meat','fish'],
       spiceKit:['Dried oregano','Lemon juice','Garlic','Olive oil','Paprika','Fresh mint'],
       preferredBases:['potato','sweet_potato'],     excludedBases:['pasta','oats','couscous'],
       preferredVeg:  ['bell_pepper','courgette','tomatoes','onion','eggplant'] },
     { id:'teriyaki', name:'Japanese Teriyaki',      flag:'🇯🇵',
       nameTemplate:  function(p){ return 'Teriyaki '+p; },
+      allowedProteinTypes:['white_meat','fish','plant'],
       spiceKit:['Soy sauce','Mirin','Sake (or rice vinegar)','Fresh ginger','Sesame seeds','Sesame oil'],
       preferredBases:['brown_rice','white_rice'],   excludedBases:['pasta','oats','couscous'],
-      preferredVeg:  ['broccoli','green_beans','mushrooms','carrots','bok_choy'] },
+      preferredVeg:  ['broccoli','green_beans','mushrooms','carrots'] },
     { id:'italian',  name:'Italian Herb Roast',     flag:'🇮🇹',
       nameTemplate:  function(p){ return 'Italian Herb-Roasted '+p; },
+      allowedProteinTypes:['white_meat','red_meat','fish','legume'],
       spiceKit:['Dried oregano','Dried basil','Rosemary','Balsamic vinegar','Garlic','Lemon zest'],
       preferredBases:['potato','sweet_potato'],     excludedBases:['oats','couscous'],
       preferredVeg:  ['courgette','bell_pepper','tomatoes','eggplant','asparagus'] },
@@ -2450,21 +2491,25 @@ var SUBCATS = {
   bowl: [
     { id:'donburi',  name:'Japanese Donburi',       flag:'🇯🇵',
       nameTemplate:  function(p){ return p+' Donburi Bowl'; },
+      allowedProteinTypes:['white_meat','fish','plant','legume'],
       spiceKit:['Soy sauce','Dashi stock','Mirin','Sake','Spring onions','Pickled ginger'],
       preferredBases:['white_rice','brown_rice'],   excludedBases:['pasta','oats','couscous'],
       preferredVeg:  ['mushrooms','spinach','carrots','onion','edamame'] },
     { id:'bibimbap', name:'Korean Bibimbap',         flag:'🇰🇷',
       nameTemplate:  function(p){ return p+' Bibimbap'; },
+      allowedProteinTypes:['white_meat','red_meat','plant','legume'],
       spiceKit:['Gochujang','Soy sauce','Sesame oil','Sesame seeds','Rice vinegar','Spring onions'],
       preferredBases:['white_rice','brown_rice'],   excludedBases:['pasta','oats','couscous','bread'],
-      preferredVeg:  ['spinach','carrots','mushrooms','courgette','bean_sprouts'] },
+      preferredVeg:  ['spinach','carrots','mushrooms','courgette'] },
     { id:'burrito',  name:'Mexican Burrito Bowl',   flag:'🇲🇽',
       nameTemplate:  function(p){ return p+' Burrito Bowl'; },
+      allowedProteinTypes:['white_meat','red_meat','legume','plant'],
       spiceKit:['Cumin','Smoked paprika','Lime juice','Coriander','Salsa','Jalapeño'],
       preferredBases:['white_rice','brown_rice'],   excludedBases:['pasta','oats','couscous'],
       preferredVeg:  ['bell_pepper','tomatoes','avocado','onion','corn'] },
     { id:'buddha',   name:'Buddha Bowl',             flag:'🌍',
       nameTemplate:  function(p){ return p+' Buddha Bowl'; },
+      allowedProteinTypes:['white_meat','fish','plant','legume','shellfish'],
       spiceKit:['Tahini','Lemon juice','Garlic','Olive oil','Cumin','Mixed seeds'],
       preferredBases:['quinoa','brown_rice','bulgur'], excludedBases:['pasta','oats'],
       preferredVeg:  ['kale','spinach','beets','carrots','avocado','cucumber'] },
@@ -2472,21 +2517,25 @@ var SUBCATS = {
   stir: [
     { id:'chinese',  name:'Chinese Stir-Fry',       flag:'🇨🇳',
       nameTemplate:  function(p){ return 'Chinese '+p+' & Broccoli'; },
+      allowedProteinTypes:['white_meat','red_meat','fish','shellfish','plant'],
       spiceKit:['Soy sauce','Oyster sauce','Sesame oil','Fresh ginger','Garlic','Cornstarch'],
       preferredBases:['white_rice','brown_rice'],   excludedBases:['pasta','oats','couscous'],
-      preferredVeg:  ['broccoli','bell_pepper','mushrooms','carrots','cabbage','baby_corn'] },
+      preferredVeg:  ['broccoli','bell_pepper','mushrooms','carrots','cabbage'] },
     { id:'padkra',   name:'Thai Pad Kra Pao',        flag:'🇹🇭',
       nameTemplate:  function(p){ return 'Pad Kra Pao with '+p; },
+      allowedProteinTypes:['white_meat','pork','plant','shellfish'],
       spiceKit:['Thai basil','Fish sauce','Oyster sauce','Soy sauce','Chili','Garlic'],
       preferredBases:['white_rice','brown_rice'],   excludedBases:['pasta','oats','couscous'],
       preferredVeg:  ['bell_pepper','onion','green_beans','mushrooms'] },
     { id:'nasi',     name:'Indonesian Nasi Goreng',  flag:'🇮🇩',
       nameTemplate:  function(p){ return 'Nasi Goreng with '+p; },
+      allowedProteinTypes:['white_meat','shellfish','plant'],
       spiceKit:['Kecap manis','Shrimp paste','Garlic','Shallots','Chili','Lime'],
       preferredBases:['white_rice'],               excludedBases:['pasta','oats','couscous','bread'],
       preferredVeg:  ['cabbage','carrots','onion','green_beans','mushrooms'] },
     { id:'yakisoba', name:'Japanese Yakisoba',       flag:'🇯🇵',
       nameTemplate:  function(p){ return p+' Yakisoba'; },
+      allowedProteinTypes:['white_meat','pork','fish','plant'],
       spiceKit:['Yakisoba sauce (or Worcestershire + soy)','Sesame oil','Pickled ginger','Nori flakes'],
       preferredBases:['pasta'],                    excludedBases:['rice','oats','couscous','bread'],
       preferredVeg:  ['cabbage','carrots','onion','green_beans','mushrooms','bell_pepper'] },
@@ -2494,69 +2543,79 @@ var SUBCATS = {
   soup: [
     { id:'minestrone',name:'Italian Minestrone',    flag:'🇮🇹',
       nameTemplate:  function(p){ return 'Minestrone with '+p; },
+      allowedProteinTypes:['legume','white_meat','plant'],
       spiceKit:['Dried oregano','Dried basil','Bay leaves','Tomato purée','Parmesan rind','Olive oil'],
       preferredBases:['pasta','barley'],            excludedBases:['oats','rice_cakes','couscous'],
       preferredVeg:  ['tomatoes','courgette','carrots','celery','onion','spinach'] },
     { id:'miso',     name:'Japanese Miso',           flag:'🇯🇵',
       nameTemplate:  function(p){ return 'Miso Soup with '+p; },
+      allowedProteinTypes:['fish','plant','legume','shellfish'],
       spiceKit:['White miso paste','Dashi stock','Soy sauce','Mirin','Spring onions','Nori'],
       preferredBases:['brown_rice','white_rice'],   excludedBases:['pasta','oats','bread'],
-      preferredVeg:  ['mushrooms','spinach','leek','tofu','seaweed'] },
+      preferredVeg:  ['mushrooms','spinach','leek','seaweed'] },
     { id:'pho',      name:'Vietnamese Pho',          flag:'🇻🇳',
       nameTemplate:  function(p){ return 'Pho with '+p; },
+      allowedProteinTypes:['white_meat','red_meat','fish','shellfish'],
       spiceKit:['Star anise','Cinnamon','Cloves','Fish sauce','Fresh ginger','Bean sprouts','Lime','Thai basil'],
       preferredBases:['white_rice'],               excludedBases:['pasta','oats','couscous'],
       preferredVeg:  ['onion','mushrooms','spinach','carrots','leek'] },
     { id:'chicken_s',name:'Classic Chicken Soup',   flag:'🇺🇸',
       nameTemplate:  function(p){ return 'Classic '+p+' Soup'; },
+      allowedProteinTypes:['white_meat','legume'],
       spiceKit:['Bay leaves','Dried thyme','Celery salt','Black pepper','Fresh parsley'],
       preferredBases:['barley','pasta','white_rice'],excludedBases:['oats','rice_cakes'],
-      preferredVeg:  ['carrots','celery','onion','leek','peas','parsnip'] },
+      preferredVeg:  ['carrots','celery','onion','leek','peas'] },
   ],
   bake: [
     { id:'lasagna',  name:'Italian Lasagna',        flag:'🇮🇹',
       nameTemplate:  function(p){ return p+' Lasagna'; },
+      allowedProteinTypes:['red_meat','white_meat','legume','plant'],
       spiceKit:['Tomato purée','Dried oregano','Dried basil','Nutmeg','Parmesan','Mozzarella','Bay leaves'],
       preferredBases:['pasta'],                    excludedBases:['rice','oats','quinoa','couscous','barley'],
       preferredVeg:  ['eggplant','courgette','spinach','tomatoes','bell_pepper','mushrooms'] },
     { id:'gratin',   name:'French Gratin',          flag:'🇫🇷',
       nameTemplate:  function(p){ return 'Gratin with '+p; },
+      allowedProteinTypes:['white_meat','red_meat','fish'],
       spiceKit:['Gruyère','Heavy cream','Nutmeg','Garlic','Thyme','Dijon mustard'],
       preferredBases:['potato','sweet_potato'],    excludedBases:['pasta','oats','couscous','quinoa'],
       preferredVeg:  ['leek','onion','spinach','mushrooms','asparagus'] },
     { id:'shepherd', name:"Shepherd's Pie",         flag:'🇬🇧',
       nameTemplate:  function(p){ return p+" Shepherd's Pie"; },
+      allowedProteinTypes:['red_meat','white_meat','legume'],
       spiceKit:['Worcestershire sauce','Tomato purée','Rosemary','Thyme','Beef or veg stock','Bay leaves'],
       preferredBases:['potato','sweet_potato'],    excludedBases:['pasta','oats','rice','couscous'],
       preferredVeg:  ['carrots','peas','onion','celery','mushrooms','leek'] },
     { id:'frittata', name:'Italian Frittata',       flag:'🇮🇹',
       nameTemplate:  function(p){ return p+' Frittata'; },
+      allowedProteinTypes:['white_meat','plant','legume'],
       spiceKit:['Parmesan','Dried herbs','Olive oil','Black pepper','Fresh basil'],
       preferredBases:[],                           excludedBases:['pasta','oats','rice','couscous'],
       preferredVeg:  ['spinach','bell_pepper','courgette','tomatoes','mushrooms','onion'] },
   ],
 };
-
 // ── Wizard helper functions ──────────────────────────────────
-// Auto-calculate portions: (meals_per_day × 7 − breakfast_days) ÷ batches
+// Auto-calculate portions: (meals_per_day × 7) ÷ batch_count
+// Quick-prep items (snacks) handle themselves separately — no subtraction needed
 function calcPortions(){
-  var totalMeals = G_MEALS_PER_DAY * 7;
-  var breakfastMeals = G_MEALS_PER_DAY === 3 ? 7 : 0;
-  return Math.round((totalMeals - breakfastMeals) / G_BATCH_COUNT);
+  return Math.max(2, Math.round((G_MEALS_PER_DAY * 7) / G_BATCH_COUNT));
 }
 
 // Collect all spice kits for selected subcategories
 function collectSpiceKit(){
   var allSpices = [];
-  G_STYLES.forEach(function(sid){
-    var subcatId = G_SUBCATS[sid];
-    if(!subcatId) return;
-    var subs = SUBCATS[sid];
-    if(!subs) return;
-    var sub = subs.find(function(s){return s.id===subcatId;});
-    if(!sub) return;
-    sub.spiceKit.forEach(function(sp){
-      if(!allSpices.includes(sp)) allSpices.push(sp);
+  // G_SUBCATS[styleId] is now an array of subcatIds (one per occurrence)
+  Object.keys(G_SUBCATS).forEach(function(sid){
+    var subcatArr = G_SUBCATS[sid];
+    if(!subcatArr) return;
+    subcatArr.forEach(function(subcatId){
+      if(!subcatId) return;
+      var subs = SUBCATS[sid];
+      if(!subs) return;
+      var sub = subs.find(function(s){return s.id===subcatId;});
+      if(!sub) return;
+      sub.spiceKit.forEach(function(sp){
+        if(!allSpices.includes(sp)) allSpices.push(sp);
+      });
     });
   });
   return allSpices;
@@ -2573,52 +2632,90 @@ function getSubcat(styleId){
 
 // ── Affinity-based meal clustering ───────────────────────────
 function clusterByAffinity(proteins, bases, vegetables, fats, styles){
-  var mealCount = Math.min(styles.length, Math.min(4, Math.max(2, Math.max(proteins.length, 1))));
+  var mealCount = Math.min(styles.length, 4); // always honour all selected styles
   var styleSlots = styles.slice(0, mealCount);
 
   var slots = styleSlots.map(function(sid){
     return {styleId:sid, proteins:[], protGrams:{}, bases:[], vegetables:[], fats:[]};
   });
 
-  // ── Step 1: Proteins — gram-split across slots by affinity ──
-  // Each protein's weekly grams are divided proportionally across the slots
-  // that have the highest affinity for it. If a protein has an exclusion from
-  // a subcat's preferredBases logic (not applicable here), it still participates.
-  proteins.forEach(function(it){
-    // Score this protein against every slot
-    var scores = slots.map(function(slot){
-      var aff = styleAffinity(it.food.id, slot.styleId);
-      // Bonus if subcat prefers this protein category
-      var sub = getSubcat(slot.styleId);
-      // No protein exclusions at subcat level — all proteins can appear in all styles
-      return Math.max(aff, 0.5); // floor at 0.5 so no protein is entirely excluded
+  // Helper: get protein type for a food item
+  function getPtype(it){
+    return (it.food && it.food.ptype) ? it.food.ptype : 'plant';
+  }
+
+  // Helper: get allowed protein types for a slot (from subcat, fallback = all)
+  function getAllowedTypes(slot, occIdx){
+    var sub = getSubcat(slot.styleId, occIdx !== undefined ? occIdx : 0);
+    return sub && sub.allowedProteinTypes ? sub.allowedProteinTypes : null; // null = no restriction
+  }
+
+  // ── Step 1: Protein assignment — one protein type anchor per slot ──────
+  // Algorithm:
+  // 1. For each slot, find the best-fitting protein (highest affinity + allowed type)
+  // 2. Assign that protein as the sole anchor — all its grams go to this slot
+  // 3. Any proteins incompatible with all slots flow to the neutral bowl overflow
+  var neutralOverflowProteins = [];
+  var assignedProteinIds = {};
+
+  slots.forEach(function(slot, slotIdx){
+    var occurrencesBefore = styleSlots.slice(0,slotIdx).filter(function(s){return s===slot.styleId;}).length;
+    var allowedTypes = getAllowedTypes(slot, occurrencesBefore);
+
+    // Filter proteins not yet assigned and compatible with this slot's allowed types
+    var eligible = proteins.filter(function(it){
+      if(assignedProteinIds[it.food.id]) return false; // already anchored elsewhere
+      if(!allowedTypes) return true; // no restriction
+      return allowedTypes.includes(getPtype(it));
     });
-    var totalScore = scores.reduce(function(a,b){return a+b;},0);
-    // Distribute grams proportionally
-    slots.forEach(function(slot, si){
-      var fraction = scores[si] / totalScore;
-      var g = Math.round(it.grams * fraction / 50) * 50; // round to 50g
-      g = Math.max(50, g);
-      if(g > 0){
-        slot.proteins.push(it);
-        slot.protGrams[it.food.id] = g;
-      }
+
+    if(!eligible.length) return; // no compatible protein — slot will get overflow later
+
+    // Pick highest affinity + ptype bonus
+    var best = null, bestScore = -1;
+    eligible.forEach(function(it){
+      var s = styleAffinity(it.food.id, slot.styleId);
+      if(s > bestScore){ bestScore=s; best=it; }
     });
+
+    if(best){
+      assignedProteinIds[best.food.id] = slotIdx;
+      slot.proteins.push(best);
+      slot.protGrams[best.food.id] = best.grams; // all grams go to this slot
+    }
   });
 
-  // ── Step 2: Bases — apply subcat hard constraints ──
+  // Any proteins not anchored anywhere → neutral overflow
+  proteins.forEach(function(it){
+    if(!assignedProteinIds.hasOwnProperty(it.food.id)){
+      neutralOverflowProteins.push(it);
+    }
+  });
+
+  // ── Step 1b: Neutral overflow — inject a grain bowl slot if needed ────
+  // If there are leftover proteins with no compatible slot, add a virtual bowl
+  // slot to absorb them (zero waste guarantee).
+  if(neutralOverflowProteins.length > 0){
+    var bowlSlot = {styleId:'bowl', proteins:[], protGrams:{}, bases:[], vegetables:[], fats:[], isOverflow:true};
+    neutralOverflowProteins.forEach(function(it){
+      bowlSlot.proteins.push(it);
+      bowlSlot.protGrams[it.food.id] = it.grams;
+    });
+    slots.push(bowlSlot);
+  }
+
+  // ── Step 2: Bases — apply subcat hard constraints ──────────────
   var unassignedB = bases.slice();
-  slots.forEach(function(slot){
+  slots.forEach(function(slot, slotIdx){
     if(!unassignedB.length) return;
-    var sub = getSubcat(slot.styleId);
+    var occurrencesBefore = styleSlots.slice(0,slotIdx).filter(function(s){return s===slot.styleId;}).length;
+    var sub = getSubcat(slot.styleId, occurrencesBefore);
     var excluded = sub ? sub.excludedBases : [];
     var preferred = sub ? sub.preferredBases : [];
 
-    // Filter out hard-excluded bases for this slot
     var eligible = unassignedB.filter(function(it){ return !excluded.includes(it.food.id); });
-    if(!eligible.length) eligible = unassignedB; // fallback: no valid exclusion
+    if(!eligible.length) eligible = unassignedB;
 
-    // Score: preferred bases get +2 bonus on top of style affinity
     var best = null, bestScore = -1;
     eligible.forEach(function(it){
       var s = styleAffinity(it.food.id, slot.styleId) + (preferred.includes(it.food.id) ? 2 : 0);
@@ -2626,11 +2723,11 @@ function clusterByAffinity(proteins, bases, vegetables, fats, styles){
     });
     if(best){ slot.bases.push(best); unassignedB.splice(unassignedB.indexOf(best),1); }
   });
-  // Remaining bases → best-fit (with exclusion check)
   unassignedB.forEach(function(it){
     var bestSlot = null, bestScore = -1;
-    slots.forEach(function(slot){
-      var sub = getSubcat(slot.styleId);
+    slots.forEach(function(slot, slotIdx){
+      var occurrencesBefore = styleSlots.slice(0,slotIdx).filter(function(s){return s===slot.styleId;}).length;
+      var sub = getSubcat(slot.styleId, occurrencesBefore);
       var excluded = sub ? sub.excludedBases : [];
       if(excluded.includes(it.food.id)) return;
       var preferred = sub ? sub.preferredBases : [];
@@ -2640,37 +2737,64 @@ function clusterByAffinity(proteins, bases, vegetables, fats, styles){
     if(bestSlot) bestSlot.bases.push(it);
   });
 
-  // ── Step 3: Vegetables — subcat preferred veg get bonus ──
-  var unassignedV = vegetables.slice().sort(function(a,b){
-    var aMax = Math.max.apply(null, styleSlots.map(function(sid){ return styleAffinity(a.food.id,sid); }));
-    var bMax = Math.max.apply(null, styleSlots.map(function(sid){ return styleAffinity(b.food.id,sid); }));
-    return bMax - aMax;
-  });
-  // First pass: every slot gets 1 veg (prefer subcat preferred veg)
-  slots.forEach(function(slot){
-    if(!unassignedV.length) return;
-    var sub = getSubcat(slot.styleId);
-    var preferred = sub ? sub.preferredVeg : [];
-    var best = null, bestScore = -1;
-    unassignedV.forEach(function(it){
-      var s = styleAffinity(it.food.id, slot.styleId) + (preferred.includes(it.food.id) ? 1.5 : 0);
-      if(s > bestScore){ bestScore=s; best=it; }
+  // ── Step 3: Vegetables — gravity-based 70/30 distribution ──────
+  // Each veg is pulled toward the slot whose anchor protein has the best
+  // culinary affinity. 70% of its grams go to the best-match slot,
+  // 30% distributed among remaining slots as volume fillers.
+  // Subcat preferredVeg gets a bonus to strengthen the gravity pull.
+  var VEG_GRAVITY = 0.7; // primary slot share
+
+  // Build protein→veg affinity by type pairing
+  // (which veg types pair well with which protein types)
+  var VEG_PTYPE_AFFINITY = {
+    white_meat: ['spinach','broccoli','bell_pepper','courgette','asparagus','green_beans','mushrooms','leek','onion','tomatoes','cauliflower'],
+    red_meat:   ['tomatoes','onion','mushrooms','carrots','eggplant','celery','bell_pepper','leek','pumpkin','beets'],
+    pork:       ['cabbage','mushrooms','onion','bell_pepper','carrots','leek','courgette'],
+    fish:       ['spinach','asparagus','courgette','tomatoes','leek','mushrooms','cucumber','kale','beets'],
+    shellfish:  ['bell_pepper','onion','tomatoes','courgette','leek','spinach','mushrooms'],
+    legume:     ['tomatoes','spinach','onion','carrots','bell_pepper','celery','kale','mushrooms','pumpkin'],
+    plant:      ['spinach','kale','broccoli','mushrooms','onion','bell_pepper','courgette','carrots','beets','cabbage'],
+  };
+
+  vegetables.forEach(function(vegIt){
+    // Score each slot for this veg
+    var scores = slots.map(function(slot, slotIdx){
+      var baseAff = styleAffinity(vegIt.food.id, slot.styleId);
+      // Protein type gravity bonus
+      var gravBonus = 0;
+      slot.proteins.forEach(function(p){
+        var ptype = getPtype(p);
+        var affinityList = VEG_PTYPE_AFFINITY[ptype] || [];
+        if(affinityList.includes(vegIt.food.id)) gravBonus += 1.5;
+      });
+      // Subcat preferredVeg bonus
+      var occurrencesBefore = styleSlots.slice(0,slotIdx).filter(function(s){return s===slot.styleId;}).length;
+      var sub = getSubcat(slot.styleId, occurrencesBefore);
+      var subcatBonus = (sub && sub.preferredVeg && sub.preferredVeg.includes(vegIt.food.id)) ? 1.0 : 0;
+      return Math.max(0.1, baseAff + gravBonus + subcatBonus);
     });
-    if(best){ slot.vegetables.push(best); unassignedV.splice(unassignedV.indexOf(best),1); }
-  });
-  // Second pass: rest → best-fit
-  unassignedV.forEach(function(it){
-    var bestSlot = null, bestScore = -1;
-    slots.forEach(function(slot){
-      var sub = getSubcat(slot.styleId);
-      var preferred = sub ? sub.preferredVeg : [];
-      var s = styleAffinity(it.food.id, slot.styleId) + (preferred.includes(it.food.id) ? 1.5 : 0);
-      if(s > bestScore){ bestScore=s; bestSlot=slot; }
+
+    var totalScore = scores.reduce(function(a,b){return a+b;},0);
+
+    // Find best-match slot (gets 70%)
+    var bestIdx = 0;
+    scores.forEach(function(s,i){ if(s > scores[bestIdx]) bestIdx=i; });
+
+    // Assign veg item to slots with fractional gram splits
+    slots.forEach(function(slot, si){
+      var fraction = si === bestIdx
+        ? VEG_GRAVITY
+        : (1 - VEG_GRAVITY) * (scores[si] / (totalScore - scores[bestIdx]));
+      if(fraction < 0.05) return; // skip negligible shares
+      // Add veg reference to slot (for display we'll use fractional grams)
+      var vegCopy = Object.assign({}, vegIt, {
+        grams: Math.max(50, Math.round(vegIt.grams * fraction / 50) * 50)
+      });
+      slot.vegetables.push(vegCopy);
     });
-    if(bestSlot) bestSlot.vegetables.push(it);
   });
 
-  // ── Step 4: Fats → best-fit slot ──
+  // ── Step 4: Fats → best-fit slot ──────────────────────────────
   fats.forEach(function(it){
     var bestSlot = null, bestScore = -1;
     slots.forEach(function(slot){
@@ -2680,7 +2804,7 @@ function clusterByAffinity(proteins, bases, vegetables, fats, styles){
     if(bestSlot) bestSlot.fats.push(it);
   });
 
-  // ── Step 5: Floor check (≥45%) + single repair swap ──
+  // ── Step 5: Floor check (≥45%) + single repair swap ────────────
   var FLOOR = 45;
   slots.forEach(function(slot, si){
     var score = mealStyleScore(slot.proteins, slot.bases, slot.vegetables, slot.fats, slot.styleId);
@@ -2709,11 +2833,13 @@ function clusterByAffinity(proteins, bases, vegetables, fats, styles){
       var candidate = null, candidateBestScore = styleAffinity(weakest.it.food.id, slot.styleId);
       donorPool.forEach(function(it){
         var fitInSi = styleAffinity(it.food.id, slot.styleId);
-        // Respect subcat base exclusions during repair
         if(weakRole==='base'){
-          var sub = getSubcat(slot.styleId);
+          var occBefore = styleSlots.slice(0,si).filter(function(s){return s===slot.styleId;}).length;
+          var sub = getSubcat(slot.styleId, occBefore);
           if(sub && sub.excludedBases.includes(it.food.id)) return;
         }
+        // Don't swap proteins across slots — that would violate the single-type rule
+        if(weakRole==='protein') return;
         if(fitInSi > candidateBestScore){ candidateBestScore=fitInSi; candidate=it; }
       });
       if(!candidate) continue;
@@ -2730,8 +2856,8 @@ function clusterByAffinity(proteins, bases, vegetables, fats, styles){
 }
 
 function buildMeals(basketItems, portions){
-  // Use auto-calculated portions if available
   var effectivePortions = portions || calcPortions();
+  var activeStyles = G_STYLES.length > 0 ? G_STYLES : ['bowl'];
 
   var shakeItems = basketItems.filter(function(it){return roleOf(it)==='shake';});
   var proteins   = basketItems.filter(function(it){return roleOf(it)==='protein';});
@@ -2740,60 +2866,64 @@ function buildMeals(basketItems, portions){
   var fruits     = basketItems.filter(function(it){return roleOf(it)==='fruit';});
   var fats       = basketItems.filter(function(it){return roleOf(it)==='fat';});
 
-  var activeStyles = G_STYLES.length > 0 ? G_STYLES : ['bowl'];
+  // ── Affinity-based quick-prep detection ──────────────────────
+  // Some ingredients are ALWAYS quick-prep regardless of affinity scores —
+  // they are inherently "fresh daily" foods, not batch-cooking candidates.
+  var ALWAYS_QUICK_PREP = new Set([
+    'eggs','greek_yogurt','cottage_cheese','skyr','kefir','milk',
+    'oats','oat_milk','soy_milk','almond_milk','vegan_yogurt',
+    'banana','berries','apple','orange','mango','pineapple',
+    'kiwi','grapes','pear','peach','dates',
+  ]);
 
-  // Breakfast detection — always exclude these from main clustering
-  var breakfastIds = ['greek_yogurt','cottage_cheese','skyr','kefir'];
-  var oatsItem = bases.find(function(it){ return it.food.id==='oats'; });
-  var effectiveBreakfastIds = oatsItem ? breakfastIds : breakfastIds.concat(['eggs']);
-  var breakfastProteins = proteins.filter(function(it){ return effectiveBreakfastIds.includes(it.food.id); });
-  var hasBreakfast = breakfastProteins.length > 0 || !!oatsItem;
+  // For everything else, use affinity threshold
+  var QUICK_PREP_THRESHOLD = 1.2;
+  function avgAffinity(foodId){
+    if(!activeStyles.length) return 0;
+    var sum = activeStyles.reduce(function(acc,sid){ return acc + styleAffinity(foodId, sid); }, 0);
+    return sum / activeStyles.length;
+  }
+  function isQuickPrepItem(it){
+    return ALWAYS_QUICK_PREP.has(it.food.id) || avgAffinity(it.food.id) < QUICK_PREP_THRESHOLD;
+  }
 
-  var mainProteins = proteins.filter(function(it){ return !effectiveBreakfastIds.includes(it.food.id); });
-  var mainBases    = bases.filter(function(it){ return it.food.id !== 'oats'; });
+  // Classify proteins into batch vs quick-prep
+  var quickProteins = proteins.filter(function(it){ return isQuickPrepItem(it); });
+  var batchProteins = proteins.filter(function(it){ return !isQuickPrepItem(it); });
 
-  var slots = clusterByAffinity(mainProteins, mainBases, vegetables, fats, activeStyles);
+  // Classify bases into batch vs quick-prep (oats always quick)
+  var quickBases = bases.filter(function(it){ return isQuickPrepItem(it); });
+  var batchBases = bases.filter(function(it){ return !isQuickPrepItem(it); });
+
+  // Fruits: always quick-prep (fresh, eaten daily)
+  // Shakes: their own card
+
+  // All quick-prep items in one pool (excluding shakes, handled separately)
+  var quickItems = quickProteins.concat(quickBases).concat(fruits);
+
+  // ── Cluster batch items ───────────────────────────────────────
+  var slots = clusterByAffinity(batchProteins, batchBases, vegetables, fats, activeStyles);
 
   var namedMeals = [];
 
-  // Breakfast card (always "daily prep", not batch)
-  if(hasBreakfast){
-    var bfMeal = { proteins:breakfastProteins, bases:oatsItem?[oatsItem]:[], vegetables:[], fats:[] };
-    var bfIds = bfMeal.proteins.map(function(it){return it.food.id;}).concat(bfMeal.bases.map(function(it){return it.food.id;}));
-    var bfScore  = scoreMeal(bfIds);
-    var bfSpices = getSpiceSuggestions(bfScore.vec, bfIds);
-    var bfItems  = bfMeal.proteins.concat(bfMeal.bases).map(function(it){
-      return Object.assign({},it,{portionGrams:Math.max(10,Math.round(it.grams/7/10)*10)}); // per-day not per-batch
-    });
-    var bfP=0,bfC=0,bfF=0,bfK=0;
-    bfItems.forEach(function(it){bfP+=it.food.p/100*it.portionGrams;bfC+=it.food.c/100*it.portionGrams;bfF+=it.food.f/100*it.portionGrams;bfK+=it.food.kcal/100*it.portionGrams;});
-    namedMeals.push({
-      name:buildBreakfastName(bfMeal), isBreakfast:true, isSnack:false, isShake:false,
-      styleId:null, styleName:'Daily Prep', styleEm:'🌅',
-      proteins:bfMeal.proteins, bases:bfMeal.bases, vegetables:[], fats:[],
-      portionItems:bfItems, score:bfScore, spices:bfSpices,
-      portP:Math.round(bfP), portC:Math.round(bfC), portF:Math.round(bfF), portK:Math.round(bfK),
-      cookMethod:'Prep each morning (~5 min) — not a batch meal',
-      textureDiversity:2, styleAffinityScore:null, combinedScore:null, subcatNote:null,
-    });
-  }
-
-  // Main batch meals from slots
-  slots.forEach(function(slot){
+  // ── Build batch meal cards from slots ─────────────────────────
+  slots.forEach(function(slot, slotIdx){
     if(!slot.proteins.length && !slot.bases.length) return;
+
+    // Look up style + subcat for this specific slot occurrence
     var styleConf = COOK_STYLES[slot.styleId] || COOK_STYLES['bowl'];
-    var sub = getSubcat(slot.styleId);
+    // Count which occurrence of this styleId this slot is
+    var occurrencesBefore = activeStyles.slice(0, slotIdx).filter(function(s){ return s === slot.styleId; }).length;
+    var sub = getSubcat(slot.styleId, occurrencesBefore);
 
     var anchorProtein = slot.proteins[0];
     var anchorBase    = slot.bases[0];
     var anchorVeg     = slot.vegetables[0];
 
-    // Cook method from style + protein
     var cookMethod = anchorProtein
       ? (styleConf.proteinMethod[anchorProtein.food.id] || 'Batch cook ('+styleConf.name+')')
       : styleConf.grainMethod;
 
-    // Meal name: use subcat template if available
     var pNameShort = anchorProtein ? anchorProtein.food.name.split('(')[0].trim() : 'Protein';
     var name = sub
       ? sub.nameTemplate(pNameShort)
@@ -2805,27 +2935,39 @@ function buildMeals(basketItems, portions){
       .concat(slot.vegetables.map(function(it){return it.food.id;}))
       .concat(slot.fats.map(function(it){return it.food.id;}));
 
-    var tasteScore   = scoreMeal(allIds);
-    var spices       = getSpiceSuggestions(tasteScore.vec, allIds);
-    var affScore     = mealStyleScore(slot.proteins, slot.bases, slot.vegetables, slot.fats, slot.styleId);
-    var combinedScore= Math.round(affScore * 0.4 + tasteScore.final * 0.6);
+    var tasteScore    = scoreMeal(allIds);
+    var spices        = getSpiceSuggestions(tasteScore.vec, allIds);
+    var affScore      = mealStyleScore(slot.proteins, slot.bases, slot.vegetables, slot.fats, slot.styleId);
+    var combinedScore = Math.round(affScore * 0.4 + tasteScore.final * 0.6);
 
-    // Per-portion items — proteins use protGrams if available (gram-split)
+    // ── Quantities: show TOTAL BATCH as primary, per-portion as annotation ──
     var allItems = [].concat(slot.proteins, slot.bases, slot.vegetables, slot.fats);
     var portionItems = allItems.map(function(it){
+      // Total grams for this recipe's batch
       var totalG = slot.protGrams && slot.protGrams[it.food.id] ? slot.protGrams[it.food.id] : it.grams;
-      var pp = Math.max(10, Math.round(totalG / effectivePortions / 10) * 10);
+      var batchG  = Math.round(totalG / 50) * 50; // round total to 50g
+      batchG = Math.max(50, batchG);
+      var perPortion = Math.max(10, Math.round(totalG / effectivePortions / 10) * 10);
       var isRaw = styleConf.rawVeg.has(it.food.id);
-      return Object.assign({}, it, {portionGrams:pp, rawVeg:isRaw});
+      return Object.assign({}, it, {
+        batchGrams: batchG,       // total for the whole batch
+        portionGrams: perPortion, // per serving (shown as annotation)
+        rawVeg: isRaw,
+      });
     });
 
     var portP=0,portC=0,portF=0,portK=0;
-    portionItems.forEach(function(it){portP+=it.food.p/100*it.portionGrams;portC+=it.food.c/100*it.portionGrams;portF+=it.food.f/100*it.portionGrams;portK+=it.food.kcal/100*it.portionGrams;});
+    portionItems.forEach(function(it){
+      portP+=it.food.p/100*it.portionGrams;
+      portC+=it.food.c/100*it.portionGrams;
+      portF+=it.food.f/100*it.portionGrams;
+      portK+=it.food.kcal/100*it.portionGrams;
+    });
 
     var textures = new Set(allIds.map(function(id){return TEXTURE[id];}).filter(Boolean));
 
     namedMeals.push({
-      name:name, isBreakfast:false, isSnack:false, isShake:false,
+      name:name, isBreakfast:false, isSnack:false, isShake:false, isQuickSnack:false,
       styleId:slot.styleId, styleName:styleConf.name, styleEm:styleConf.em,
       subcatName: sub ? (sub.flag+' '+sub.name) : null,
       sauceNote:styleConf.sauceNote, batchTip:styleConf.batchTip,
@@ -2834,10 +2976,148 @@ function buildMeals(basketItems, portions){
       portP:Math.round(portP), portC:Math.round(portC), portF:Math.round(portF), portK:Math.round(portK),
       cookMethod:cookMethod, textureDiversity:textures.size,
       styleAffinityScore:affScore, combinedScore:combinedScore,
+      effectivePortions: effectivePortions,
     });
   });
 
-  // Shake card
+  // ── Quick Snack Recipes ───────────────────────────────────────
+  // Template library: each recipe lists required ingredient IDs (at least 1 must
+  // be present in quickFoodItems) and optional extras. Picks 2 per session.
+  var QUICK_RECIPES = [
+    {
+      id:'yogurt_bowl', name:'Yogurt Power Bowl', em:'🫙',
+      requires:['greek_yogurt','skyr','cottage_cheese','kefir','vegan_yogurt'],
+      optionalIds:['berries','banana','apple','mango','peach','pear','grapes','kiwi','oats'],
+      method:'Layer yogurt in a bowl, top with fruit and a drizzle of honey. Ready in 2 min.',
+      ingredients:function(pool){
+        var base = pool.find(function(it){return ['greek_yogurt','skyr','cottage_cheese','kefir','vegan_yogurt'].includes(it.food.id);});
+        var fruit = pool.filter(function(it){return FRUIT_IDS.has(it.food.id);}).slice(0,2);
+        var oats  = pool.find(function(it){return it.food.id==='oats';});
+        return [base].concat(fruit).concat(oats?[oats]:[]).filter(Boolean);
+      },
+    },
+    {
+      id:'overnight_oats', name:'Overnight Oats Jar', em:'🌾',
+      requires:['oats'],
+      optionalIds:['milk','oat_milk','soy_milk','almond_milk','greek_yogurt','banana','berries'],
+      method:'Mix oats with milk/yogurt the night before. Add fruit in the morning. Ready in 0 min.',
+      ingredients:function(pool){
+        var oats = pool.find(function(it){return it.food.id==='oats';});
+        var milk = pool.find(function(it){return ['milk','oat_milk','soy_milk','almond_milk'].includes(it.food.id);});
+        var yog  = pool.find(function(it){return ['greek_yogurt','skyr'].includes(it.food.id);});
+        var fruit= pool.find(function(it){return FRUIT_IDS.has(it.food.id);});
+        return [oats, milk||yog, fruit].filter(Boolean);
+      },
+    },
+    {
+      id:'scrambled_eggs', name:'Scrambled Eggs', em:'🥚',
+      requires:['eggs'],
+      optionalIds:['spinach','tomatoes','bell_pepper','mushrooms','feta','hard_cheese'],
+      method:'Whisk eggs, cook on medium heat with butter or olive oil. Add veg if available. 5 min.',
+      ingredients:function(pool){
+        var eggs = pool.find(function(it){return it.food.id==='eggs';});
+        var veg  = pool.find(function(it){return ['spinach','tomatoes','bell_pepper','mushrooms'].includes(it.food.id);});
+        return [eggs, veg].filter(Boolean);
+      },
+    },
+    {
+      id:'frittata', name:'Mini Frittata', em:'🍳',
+      requires:['eggs'],
+      optionalIds:['spinach','bell_pepper','mushrooms','courgette','feta','onion'],
+      method:'Whisk 2–3 eggs, pour into oven-safe pan with chopped veg. Bake 180°C for 12 min. Keeps 2 days.',
+      ingredients:function(pool){
+        var eggs = pool.find(function(it){return it.food.id==='eggs';});
+        var vegs = pool.filter(function(it){return ['spinach','bell_pepper','mushrooms','courgette','onion'].includes(it.food.id);}).slice(0,2);
+        return [eggs].concat(vegs).filter(Boolean);
+      },
+    },
+    {
+      id:'fruit_nut_bowl', name:'Fruit & Nut Snack', em:'🍎',
+      requires:['banana','berries','apple','orange','mango','pineapple','kiwi','grapes','pear','peach'],
+      optionalIds:['almonds','walnuts','cashews','pistachios','mixed_seeds'],
+      method:'Slice fruit into a bowl, add a small handful of nuts or seeds. No cooking. 2 min.',
+      ingredients:function(pool){
+        var fruits = pool.filter(function(it){return FRUIT_IDS.has(it.food.id);}).slice(0,2);
+        var nuts   = pool.find(function(it){return ['almonds','walnuts','cashews','pistachios','mixed_seeds'].includes(it.food.id);});
+        return fruits.concat(nuts?[nuts]:[]).filter(Boolean);
+      },
+    },
+    {
+      id:'cottage_plate', name:'Cottage Cheese Plate', em:'🧀',
+      requires:['cottage_cheese'],
+      optionalIds:['berries','apple','pear','tomatoes','cucumber','mixed_seeds'],
+      method:'Scoop cottage cheese into a bowl. Pair with fruit or raw veg for a complete snack. 2 min.',
+      ingredients:function(pool){
+        var cc = pool.find(function(it){return it.food.id==='cottage_cheese';});
+        var sides = pool.filter(function(it){return ['berries','apple','tomatoes','cucumber'].includes(it.food.id);}).slice(0,2);
+        return [cc].concat(sides).filter(Boolean);
+      },
+    },
+    {
+      id:'kefir_smoothie', name:'Kefir Smoothie', em:'🥤',
+      requires:['kefir','greek_yogurt'],
+      optionalIds:['banana','berries','mango','oats'],
+      method:'Blend kefir or yogurt with fruit until smooth. Add oats for thickness. 3 min.',
+      ingredients:function(pool){
+        var base  = pool.find(function(it){return ['kefir','greek_yogurt'].includes(it.food.id);});
+        var fruit = pool.filter(function(it){return FRUIT_IDS.has(it.food.id);}).slice(0,2);
+        return [base].concat(fruit).filter(Boolean);
+      },
+    },
+    {
+      id:'oat_energy_balls', name:'No-Bake Oat Balls', em:'🟤',
+      requires:['oats'],
+      optionalIds:['peanut_butter','chia_seeds','mixed_seeds','banana','dates','dark_choc'],
+      method:'Mix oats with nut butter and mashed banana. Roll into balls. Refrigerate 30 min. Keeps 5 days.',
+      ingredients:function(pool){
+        var oats = pool.find(function(it){return it.food.id==='oats';});
+        var pb   = pool.find(function(it){return it.food.id==='peanut_butter'||it.food.id==='tahini';});
+        var fruit= pool.find(function(it){return it.food.id==='banana'||it.food.id==='dates';});
+        return [oats, pb, fruit].filter(Boolean);
+      },
+    },
+  ];
+
+  // Filter to satisfiable recipes given current quick items pool, then pick 2
+  var quickPool = quickItems.concat(fats); // fats available as extras (nuts, nut butter)
+  var satisfiable = QUICK_RECIPES.filter(function(r){
+    return r.requires.some(function(rid){
+      return quickPool.some(function(it){return it.food.id===rid;});
+    });
+  });
+
+  // Date-seeded shuffle so picks are stable all day
+  var dateSeedQS = (new Date().getFullYear()*10000+(new Date().getMonth()+1)*100+new Date().getDate())+42;
+  function qsRand(){ dateSeedQS = (dateSeedQS*1664525+1013904223)&0xffffffff; return (dateSeedQS>>>0)/0xffffffff; }
+  var shuffled = satisfiable.slice().sort(function(){ return qsRand()-0.5; });
+  var pickedRecipes = shuffled.slice(0,2);
+
+  pickedRecipes.forEach(function(recipe){
+    var recipeItems = recipe.ingredients(quickPool);
+    if(!recipeItems.length) return;
+    var rPortionItems = recipeItems.map(function(it){
+      var dailyG  = Math.max(20, Math.round(it.grams/7/10)*10);
+      var perSnack= Math.max(10, Math.round(dailyG/2/10)*10);
+      return Object.assign({},it,{batchGrams:dailyG, portionGrams:perSnack, rawVeg:false});
+    });
+    var rP=0,rC=0,rF=0,rK=0;
+    rPortionItems.forEach(function(it){rP+=it.food.p/100*it.batchGrams;rC+=it.food.c/100*it.batchGrams;rF+=it.food.f/100*it.batchGrams;rK+=it.food.kcal/100*it.batchGrams;});
+    namedMeals.push({
+      name:recipe.name, isBreakfast:false, isSnack:false, isShake:false, isQuickSnack:true,
+      quickRecipeMethod: recipe.method,
+      styleId:null, styleName:null, styleEm:recipe.em, subcatName:'⚡ QUICK SNACK',
+      proteins:rPortionItems.filter(function(it){return roleOf(it)==='protein';}),
+      bases:rPortionItems.filter(function(it){return roleOf(it)==='base';}),
+      vegetables:[], fats:[],
+      portionItems:rPortionItems,
+      score:{coverage:3,balance:85,final:80,vec:[2,1,0,0,1,1]},
+      spices:[], portP:Math.round(rP), portC:Math.round(rC), portF:Math.round(rF), portK:Math.round(rK),
+      cookMethod:recipe.method,
+      textureDiversity:2, styleAffinityScore:null, combinedScore:null,
+    });
+  });
+
+  // ── Shake card ────────────────────────────────────────────────
   if(shakeItems.length > 0){
     var shakeItem = shakeItems[0];
     var isVeganPowder = shakeItem.food.id === 'plant_protein';
@@ -2845,48 +3125,37 @@ function buildMeals(basketItems, portions){
     var shakeFatIds= ['peanut_butter','coconut_oil','tahini','almonds','cashews','walnuts'];
     var milkItem   = basketItems.find(function(it){ return milkIds.includes(it.food.id); });
     var fatItem    = basketItems.find(function(it){ return shakeFatIds.includes(it.food.id); });
-    var powderPerPortion = Math.round(shakeItem.grams / 7 / 10) * 10;
-    var shakePortionItems = [Object.assign({},shakeItem,{portionGrams:powderPerPortion})];
+    var powderDailyG = Math.round(shakeItem.grams / 7 / 10) * 10;
+    var shakePortionItems = [Object.assign({},shakeItem,{batchGrams:powderDailyG, portionGrams:powderDailyG})];
     [[milkItem,250],[fatItem,20]].forEach(function(pair){
       var it=pair[0]; var qty=pair[1];
       if(!it) return;
-      shakePortionItems.push(Object.assign({},it,{portionGrams:Math.max(10,qty)}));
+      shakePortionItems.push(Object.assign({},it,{batchGrams:qty, portionGrams:qty}));
     });
     var sP=0,sC=0,sF=0,sK=0;
-    shakePortionItems.forEach(function(it){sP+=it.food.p/100*it.portionGrams;sC+=it.food.c/100*it.portionGrams;sF+=it.food.f/100*it.portionGrams;sK+=it.food.kcal/100*it.portionGrams;});
+    shakePortionItems.forEach(function(it){sP+=it.food.p/100*it.batchGrams;sC+=it.food.c/100*it.batchGrams;sF+=it.food.f/100*it.batchGrams;sK+=it.food.kcal/100*it.batchGrams;});
     namedMeals.push({
       name:(isVeganPowder?'Vegan':'Whey')+' Protein Shake',
-      isBreakfast:false, isSnack:false, isShake:true,
+      isBreakfast:false, isSnack:false, isShake:true, isQuickSnack:false,
       styleId:null, styleName:null, styleEm:null, subcatName:null,
       proteins:[], bases:[], vegetables:[], fats:[],
-      portionItems:shakePortionItems, score:scoreMeal(shakePortionItems.map(function(it){return it.food.id;})),
+      portionItems:shakePortionItems,
+      score:scoreMeal(shakePortionItems.map(function(it){return it.food.id;})),
       spices:[{em:'🧊',name:'Blend with ice',note:'for thick texture'},{em:'🍫',name:'Cacao powder',note:'adds flavour depth'}],
       portP:Math.round(sP), portC:Math.round(sC), portF:Math.round(sF), portK:Math.round(sK),
-      cookMethod:'Blend all ingredients — 1 per day',
+      cookMethod:'Blend all — 1 per day',
       textureDiversity:2, styleAffinityScore:null, combinedScore:null,
     });
   }
 
-  // Fruit snack card
-  if(fruits.length > 0){
-    namedMeals.push({
-      name:'Daily Fruit & Snacks', isBreakfast:false, isSnack:true, isShake:false,
-      styleId:null, styleName:null, styleEm:null, subcatName:null,
-      proteins:[], bases:[], vegetables:[], fats:[],
-      portionItems:fruits.map(function(it){
-        return Object.assign({},it,{portionGrams:Math.max(30,Math.round(it.grams/7/10)*10)});
-      }),
-      score:{coverage:3,balance:90,final:85,vec:[3,2,0,0,0,0]},
-      spices:[], portP:0, portC:0, portF:0, portK:0,
-      cookMethod:'No cook — eat between meals or after lunch/dinner',
-      textureDiversity:2, styleAffinityScore:null, combinedScore:null,
-    });
-  }
-
-  return namedMeals;
+  return {
+    meals: namedMeals,
+    audit: {
+      batch: batchProteins.concat(batchBases).concat(vegetables).concat(fats),
+      quick: quickItems.concat(shakeItems),
+    },
+  };
 }
-
-  // Resolve active styles — fall back to bowl (most permissive) if none selected
 
 function buildStyleMealName(styleConf, adj, protein, base, veg){
   var pName = protein ? protein.food.name.split('(')[0].trim() : 'Protein';
@@ -3030,20 +3299,24 @@ function wizardStepHeader(step){
 }
 
 function renderWizardStep1(el){
+  var opts = [
+    {n:2, icon:'🍽️',      label:'2 meals/day', sub:'Lunch + Dinner'},
+    {n:3, icon:'🍽️☕',    label:'3 meals/day', sub:'Breakfast + Lunch + Dinner'},
+    {n:4, icon:'🍽️🍽️', label:'4 meals/day', sub:'3 main meals + snack meal'},
+  ];
   el.innerHTML =
     wizardStepHeader(1)+
     "<div class='mp-wizard-title'>🗓 How many meals a day?</div>"+
-    "<div class='mp-wizard-sub'>This determines how many portions each batch recipe needs to cover your full week.</div>"+
-    "<div style='display:flex;gap:10px;margin:14px 0'>"+
-      [2,3].map(function(n){
-        var sel = n===G_MEALS_PER_DAY;
-        return "<div style='flex:1;padding:16px 12px;border:2px solid "+(sel?"var(--amber)":"var(--border)")+";border-radius:10px;cursor:pointer;background:"+(sel?"var(--amber-dim)":"transparent")+";text-align:center;transition:all .2s' onclick='setMealsPerDay("+n+")'>"+
-          "<div style='font-size:24px;margin-bottom:6px'>"+(n===2?'🍽️':'🍽️☕')+  "</div>"+
-          "<div style='font-size:14px;font-weight:700;color:"+(sel?"var(--amber2)":"var(--text)")+  "'>"+(n===2?'2 meals/day':'3 meals/day')+"</div>"+
-          "<div style='font-size:11px;color:var(--text2);margin-top:3px'>"+(n===2?'Lunch + Dinner':'Breakfast + Lunch + Dinner')+"</div>"+
-          "<div style='font-size:10px;color:var(--text3);margin-top:5px'>"+(n===2?'Breakfast handled separately':'Breakfast counted as daily prep (not batched)')+"</div>"+
-        "</div>";
-      }).join('')+
+    "<div class='mp-wizard-sub'>Sets how many portions each recipe batch will cover across the week. Quick-prep items (yogurt, oats, fruit, protein shakes) are always counted separately as daily snacks — no batch cooking needed.</div>"+
+    "<div style='display:flex;gap:8px;margin:14px 0;flex-wrap:wrap'>"+
+    opts.map(function(o){
+      var sel = o.n===G_MEALS_PER_DAY;
+      return "<div style='flex:1;min-width:80px;padding:14px 10px;border:2px solid "+(sel?"var(--amber)":"var(--border)")+";border-radius:10px;cursor:pointer;background:"+(sel?"var(--amber-dim)":"transparent")+";text-align:center;transition:all .2s' onclick='setMealsPerDay("+o.n+")'>"+
+        "<div style='font-size:20px;margin-bottom:6px'>"+o.icon+"</div>"+
+        "<div style='font-size:13px;font-weight:700;color:"+(sel?"var(--amber2)":"var(--text)")+"'>"+o.label+"</div>"+
+        "<div style='font-size:10px;color:var(--text2);margin-top:3px'>"+o.sub+"</div>"+
+      "</div>";
+    }).join('')+
     "</div>"+
     "<button class='mp-wizard-btn' onclick='G_WIZARD_STEP=2;renderWizard()'>Next →</button>";
 }
@@ -3054,27 +3327,20 @@ function setMealsPerDay(n){
 }
 
 function renderWizardStep2(el){
-  var portions = calcPortions();
   el.innerHTML =
     wizardStepHeader(2)+
-    "<div class='mp-wizard-title'>🥘 How many different batch recipes?</div>"+
-    "<div class='mp-wizard-sub'>Each recipe is prepped in bulk and covers several days. More recipes = more variety but more cooking time.</div>"+
+    "<div class='mp-wizard-title'>🥘 How many recipes this week?</div>"+
+    "<div class='mp-wizard-sub'>Each recipe is prepped in bulk once and covers several days. More recipes = more variety, more cooking time.</div>"+
     "<div style='display:flex;gap:8px;margin:14px 0;flex-wrap:wrap'>"+
-      [2,3,4].map(function(n){
-        var sel = n===G_BATCH_COUNT;
-        var p = Math.round(((G_MEALS_PER_DAY===3?14:14))/n); // (7days*(meals-breakfast))/batches
-        var bfSub = G_MEALS_PER_DAY===3?7:0;
-        p = Math.round((G_MEALS_PER_DAY*7 - bfSub)/n);
-        return "<div style='flex:1;min-width:80px;padding:14px 10px;border:2px solid "+(sel?"var(--amber)":"var(--border)")+";border-radius:10px;cursor:pointer;background:"+(sel?"var(--amber-dim)":"transparent")+";text-align:center;transition:all .2s' onclick='setBatchCount("+n+")'>"+
-          "<div style='font-size:22px;font-weight:900;font-family:var(--serif);color:"+(sel?"var(--amber2)":"var(--text)")+"'>"+n+"</div>"+
-          "<div style='font-size:11px;font-weight:600;color:var(--text2);margin-top:2px'>batch recipe"+(n>1?'s':'')+"</div>"+
-          "<div style='font-size:10px;color:var(--teal);margin-top:5px'>~"+p+" portions each</div>"+
-        "</div>";
-      }).join('')+
-    "</div>"+
-    "<div style='padding:10px 12px;background:var(--navy3);border-radius:8px;margin-bottom:14px;font-size:12px;color:var(--text2)'>"+
-      "📐 Auto-calculation: <strong style='color:var(--text)'>"+G_MEALS_PER_DAY+" meals/day × 7 days"+(G_MEALS_PER_DAY===3?' − 7 breakfast':'')+
-      " ÷ "+G_BATCH_COUNT+" recipes = <span style='color:var(--amber2)'>"+calcPortions()+" portions per batch</span></strong>"+
+    [2,3,4].map(function(n){
+      var sel = n===G_BATCH_COUNT;
+      var p = Math.max(2, Math.round((G_MEALS_PER_DAY * 7) / n));
+      return "<div style='flex:1;min-width:80px;padding:14px 10px;border:2px solid "+(sel?"var(--amber)":"var(--border)")+";border-radius:10px;cursor:pointer;background:"+(sel?"var(--amber-dim)":"transparent")+";text-align:center;transition:all .2s' onclick='setBatchCount("+n+")'>"+
+        "<div style='font-size:28px;font-weight:900;font-family:var(--serif);color:"+(sel?"var(--amber2)":"var(--text)")+"'>"+n+"</div>"+
+        "<div style='font-size:11px;font-weight:600;color:var(--text2);margin-top:2px'>recipe"+(n>1?'s':'')+"</div>"+
+        "<div style='font-size:10px;color:var(--teal);margin-top:5px'>~"+p+" portions each</div>"+
+      "</div>";
+    }).join('')+
     "</div>"+
     "<div style='display:flex;gap:8px'>"+
       "<button class='mp-wizard-btn' style='background:var(--navy3);color:var(--text2);border:1px solid var(--border2)' onclick='G_WIZARD_STEP=1;renderWizard()'>← Back</button>"+
@@ -3090,30 +3356,42 @@ function setBatchCount(n){
 }
 
 function renderWizardStep3(el){
-  var styleKeys = Object.keys(COOK_STYLES);
-  var maxStyles = Math.min(G_BATCH_COUNT, 3);
+  var maxStyles = G_BATCH_COUNT; // 1 style selection per recipe slot
+  var needed = maxStyles - G_STYLES.length;
+  var hintText = G_STYLES.length === 0
+    ? "Select "+maxStyles+" style"+(maxStyles>1?'s':'')+' to match your '+G_BATCH_COUNT+' recipes.'
+    : G_STYLES.length < maxStyles
+      ? "⚠ Select "+needed+" more style"+(needed>1?'s':'')+' — you need '+maxStyles+' total for '+G_BATCH_COUNT+' recipes.'
+      : '✓ All '+maxStyles+' recipe styles selected.';
+
   el.innerHTML =
     wizardStepHeader(3)+
-    "<div class='mp-wizard-title'>🍳 Pick up to "+maxStyles+" cooking style"+(maxStyles>1?'s':'')+"</div>"+
-    "<div class='mp-wizard-sub'>Then choose a cultural recipe for each. The engine will match your basket ingredients to your selections and calculate "+calcPortions()+" portions per batch.</div>"+
+    "<div class='mp-wizard-title'>🍳 Choose "+maxStyles+" cooking style"+(maxStyles>1?'s':'')+"</div>"+
+    "<div class='mp-wizard-sub'>Select one style per recipe. You can pick the same style multiple times for variety within it — e.g. 2 curries with different regional recipes. Then choose a cultural recipe for each selection.</div>"+
     "<div class='mp-wizard-grid'>"+
-    styleKeys.map(function(sid){
+    Object.keys(COOK_STYLES).map(function(sid){
       var s = COOK_STYLES[sid];
-      var isSel = G_STYLES.includes(sid);
-      var sub = G_SUBCATS[sid];
-      var subData = SUBCATS[sid] ? SUBCATS[sid].find(function(x){return x.id===sub;}) : null;
+      // Count how many times this style is selected
+      var selCount = G_STYLES.filter(function(x){return x===sid;}).length;
+      var isSel = selCount > 0;
+      // Subcats selected for each occurrence of this style
+      var selSubcats = (G_SUBCATS[sid] || []);
       return "<div class='mp-style-card"+(isSel?' sel':'')+"' onclick='toggleStyle(\""+sid+"\")'>"+
-        "<span class='mp-style-check'>✓</span>"+
+        "<span class='mp-style-check'>"+(selCount>1?selCount+'×':'✓')+"</span>"+
         "<span class='mp-style-icon'>"+s.em+"</span>"+
-        "<div class='mp-style-name'>"+s.name+"</div>"+
+        "<div class='mp-style-name'>"+s.name+(selCount>1?' ×'+selCount:'')+"</div>"+
         "<div class='mp-style-desc'>"+s.desc+"</div>"+
         (isSel
           ? "<div style='margin-top:8px;border-top:1px solid rgba(212,146,10,.3);padding-top:8px'>"+
-              "<div style='font-size:9px;font-family:var(--mono);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--amber2);margin-bottom:5px'>Choose recipe:</div>"+
-              SUBCATS[sid].map(function(sc){
-                var isSelSub = sub===sc.id;
-                return "<div onclick=\"event.stopPropagation();setSubcat('"+sid+"','"+sc.id+"')\" style='padding:5px 8px;border-radius:6px;margin-bottom:4px;cursor:pointer;font-size:11px;font-weight:600;background:"+(isSelSub?"rgba(212,146,10,.2)":"var(--navy3)")+";border:1px solid "+(isSelSub?"var(--amber)":"var(--border2)")+";color:"+(isSelSub?"var(--amber2)":"var(--text2)")+"'>"+
-                  sc.flag+' '+sc.name+
+              selSubcats.map(function(chosenId, idx){
+                return "<div style='margin-bottom:6px'>"+
+                  "<div style='font-size:9px;font-family:var(--mono);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--amber2);margin-bottom:4px'>Recipe "+(idx+1)+":</div>"+
+                  SUBCATS[sid].map(function(sc){
+                    var isSC = chosenId===sc.id;
+                    return "<div onclick=\"event.stopPropagation();setSubcat('"+sid+"',"+idx+",'"+ sc.id+"')\" style='padding:4px 8px;border-radius:6px;margin-bottom:3px;cursor:pointer;font-size:11px;font-weight:600;background:"+(isSC?"rgba(212,146,10,.2)":"var(--navy3)")+";border:1px solid "+(isSC?"var(--amber)":"var(--border2)")+";color:"+(isSC?"var(--amber2)":"var(--text2)")+"'>"+
+                      sc.flag+' '+sc.name+
+                    "</div>";
+                  }).join('')+
                 "</div>";
               }).join('')+
             "</div>"
@@ -3122,32 +3400,44 @@ function renderWizardStep3(el){
       "</div>";
     }).join('')+
     "</div>"+
-    "<div class='mp-wizard-hint'>"+
-      (G_STYLES.length===0
-        ? "Select at least 1 style to continue."
-        : G_STYLES.length+" style"+(G_STYLES.length>1?'s':'')+' selected'+(G_STYLES.length<maxStyles?' — you can add '+(maxStyles-G_STYLES.length)+' more.':'. All set!'))+
-    "</div>"+
+    "<div class='mp-wizard-hint' style='color:"+(needed>0?"var(--rose)":"var(--green)")+"'>"+hintText+"</div>"+
     "<div style='display:flex;gap:8px;margin-top:12px'>"+
       "<button class='mp-wizard-btn' style='background:var(--navy3);color:var(--text2);border:1px solid var(--border2)' onclick='G_WIZARD_STEP=2;renderWizard()'>← Back</button>"+
-      "<button class='mp-wizard-btn' onclick='applyStyles()'>"+
-        (G_STYLES.length===0?"→ Skip (use Grain Bowls)":"→ Build My "+calcPortions()+"-Portion Meal Plan")+
+      "<button class='mp-wizard-btn' "+(G_STYLES.length<maxStyles?"style='opacity:0.6;cursor:not-allowed'":"")+
+        " onclick='"+(G_STYLES.length<maxStyles?"toast('Please select "+maxStyles+" styles first')":"applyStyles()")+"'>"+
+        (G_STYLES.length===0?"→ Select styles first":"→ Build My "+calcPortions()+"-Portion Meal Plan")+
       "</button>"+
     "</div>";
 }
 
-function setSubcat(styleId, subcatId){
-  G_SUBCATS[styleId] = subcatId;
+function setSubcat(styleId, occurrenceIdx, subcatId){
+  if(!G_SUBCATS[styleId]) G_SUBCATS[styleId] = [];
+  G_SUBCATS[styleId][occurrenceIdx] = subcatId;
   renderWizardStep3(document.getElementById('mpWizard'));
 }
 
 function toggleStyle(sid){
-  var maxStyles = Math.min(G_BATCH_COUNT, 3);
-  if(G_STYLES.includes(sid)){
-    G_STYLES = G_STYLES.filter(function(s){return s!==sid;});
-    delete G_SUBCATS[sid];
+  var maxStyles = G_BATCH_COUNT;
+  // Allow adding the same style multiple times (up to maxStyles total)
+  if(G_STYLES.length >= maxStyles){
+    // If this style is already selected, remove one occurrence
+    var idx = G_STYLES.lastIndexOf(sid);
+    if(idx >= 0){
+      G_STYLES.splice(idx, 1);
+      // Remove last subcat occurrence for this style
+      if(G_SUBCATS[sid] && G_SUBCATS[sid].length > 0){
+        G_SUBCATS[sid].pop();
+        if(G_SUBCATS[sid].length === 0) delete G_SUBCATS[sid];
+      }
+    } else {
+      toast('You need '+maxStyles+' styles total. Deselect one first.');
+      return;
+    }
   } else {
-    if(G_STYLES.length >= maxStyles){ toast('Max '+maxStyles+' styles for '+G_BATCH_COUNT+' batch recipes'); return; }
     G_STYLES.push(sid);
+    // Initialise subcats array for this style if needed
+    if(!G_SUBCATS[sid]) G_SUBCATS[sid] = [];
+    G_SUBCATS[sid].push(null); // placeholder for new occurrence
   }
   renderWizardStep3(document.getElementById('mpWizard'));
 }
@@ -3158,12 +3448,26 @@ function applyStyles(){
   renderMealPrep();
 }
 
+// Get subcat config for a style at a specific slot occurrence index
+function getSubcat(styleId, occurrenceIdx){
+  var subcatArr = G_SUBCATS[styleId];
+  if(!subcatArr) return null;
+  var subcatId = subcatArr[occurrenceIdx !== undefined ? occurrenceIdx : 0];
+  if(!subcatId) return null;
+  var subs = SUBCATS[styleId];
+  if(!subs) return null;
+  return subs.find(function(s){return s.id===subcatId;}) || null;
+}
+
 function openMealPrep(){
   if(!G.basket || !G.basket.items.length){
     toast('Generate your basket first!');
     return;
   }
   G_WIZARD_STEP = 1; // always restart wizard
+  G.mealPrepBasketChanged = false;
+  var b = document.getElementById('mpBasketChangedBanner');
+  if(b) b.style.display = 'none';
   renderWizard();
   document.getElementById('mpBody').innerHTML = '';
   document.getElementById('mpPrepOrder').innerHTML = '';
@@ -3188,24 +3492,67 @@ function openMealPrep(){
 function renderMealPrep(){
   var portions = calcPortions();
   G_PORTIONS = portions;
-  var meals = buildMeals(G.basket.items, portions);
+  var result = buildMeals(G.basket.items, portions);
+  var meals  = result.meals;
+  var audit  = result.audit;
 
   document.getElementById('mealPrepSub').textContent =
-    portions+' portions per batch · '+G_BATCH_COUNT+' recipes · '+
+    portions+' portions per recipe · '+G_BATCH_COUNT+' recipes · '+
     G_MEALS_PER_DAY+' meals/day · '+
     (G_STYLES.length?G_STYLES.map(function(s){return COOK_STYLES[s].em;}).join(' '):'🥣');
 
-  // Portions bar — now shows auto-calc info instead of manual picker
   document.getElementById('mpPortionsBar').innerHTML =
-    "<span class='mp-portions-label'>Portions per batch</span>"+
+    "<span class='mp-portions-label'>Portions per recipe</span>"+
     "<span style='font-family:var(--mono);font-size:16px;font-weight:700;color:var(--amber)'>"+portions+"</span>"+
-    "<span class='mp-portions-note'>Auto-calculated from your meal schedule · "+
-      "<button style='background:none;border:none;color:var(--teal);font-size:11px;cursor:pointer;font-family:inherit;text-decoration:underline' onclick='G_WIZARD_STEP=1;renderWizard();document.getElementById(\"mpBody\").innerHTML=\"\";document.getElementById(\"mpPrepOrder\").innerHTML=\"\"'>Adjust schedule</button>"+
+    "<span class='mp-portions-note'>Based on "+G_MEALS_PER_DAY+" meals/day · "+
+      "<button style='background:none;border:none;color:var(--teal);font-size:11px;cursor:pointer;font-family:inherit;text-decoration:underline' onclick='G_WIZARD_STEP=1;renderWizard();document.getElementById(\"mpBody\").innerHTML=\"\";document.getElementById(\"mpPrepOrder\").innerHTML=\"\"'>Adjust</button>"+
     "</span>";
 
-  document.getElementById('mpBody').innerHTML = meals.map(function(meal){ return renderMealCard(meal); }).join('');
+  // ── Basket audit panel ────────────────────────────────────────
+  var auditHtml = "<div style='max-width:800px;margin:14px auto 0;padding:0 16px'>"+
+    "<div style='background:var(--navy2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:4px'>"+
+      "<div style='padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between'>"+
+        "<div style='font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text2)'>📦 Basket allocation</div>"+
+        "<div style='font-size:11px;color:var(--text3)'>How your shopping list is split</div>"+
+      "</div>"+
+      "<div style='display:grid;grid-template-columns:1fr 1fr;gap:0'>"+
+        // Batch column
+        "<div style='padding:12px 16px;border-right:1px solid var(--border)'>"+
+          "<div style='font-size:11px;font-weight:700;color:var(--amber2);margin-bottom:8px'>🍳 Batch cooked</div>"+
+          (audit.batch.length
+            ? audit.batch.map(function(it){
+                return "<div style='display:flex;align-items:center;gap:6px;padding:3px 0;font-size:12px'>"+
+                  "<span>"+it.food.em+"</span>"+
+                  "<span style='color:var(--text2)'>"+it.food.name.split('(')[0].trim()+"</span>"+
+                "</div>";
+              }).join('')
+            : "<div style='font-size:11px;color:var(--text3)'>No batch items</div>"
+          )+
+        "</div>"+
+        // Quick snacks column
+        "<div style='padding:12px 16px'>"+
+          "<div style='font-size:11px;font-weight:700;color:var(--teal);margin-bottom:8px'>⚡ Quick snacks (daily)</div>"+
+          (audit.quick.length
+            ? audit.quick.map(function(it){
+                return "<div style='display:flex;align-items:center;gap:6px;padding:3px 0;font-size:12px'>"+
+                  "<span>"+it.food.em+"</span>"+
+                  "<span style='color:var(--text2)'>"+it.food.name.split('(')[0].trim()+"</span>"+
+                "</div>";
+              }).join('')
+            : "<div style='font-size:11px;color:var(--text3)'>No quick items</div>"
+          )+
+        "</div>"+
+      "</div>"+
+      "<div style='padding:10px 16px;background:var(--navy3);border-top:1px solid var(--border);font-size:11px;color:var(--text3);line-height:1.5'>"+
+        "💡 Quick snacks are best made fresh (under 5 min). "+
+        "To move any item to batch cooking, go back to your basket and swap it for a batch-friendly alternative."+
+      "</div>"+
+    "</div>"+
+  "</div>";
 
-  // Spice kit section — collect from selected subcats
+  document.getElementById('mpBody').innerHTML = auditHtml + meals.map(function(meal){ return renderMealCard(meal); }).join('');
+
+  // Spice kit section
   var spiceKit = collectSpiceKit();
   var spiceKitHtml = '';
   if(spiceKit.length > 0){
@@ -3225,10 +3572,15 @@ function renderMealPrep(){
         "</div>"+
         "<div style='margin-top:10px;font-size:11px;color:var(--text3);padding:8px 10px;background:var(--navy3);border-radius:6px'>"+
           "💡 These items appear because of your selected recipes: "+
-          G_STYLES.filter(function(sid){return G_SUBCATS[sid];}).map(function(sid){
-            var sub = getSubcat(sid);
-            return sub ? (sub.flag+' '+sub.name) : '';
-          }).filter(Boolean).join(', ')+
+          (function(){
+            var names = [];
+            G_STYLES.forEach(function(sid, idx){
+              var occurrencesBefore = G_STYLES.slice(0,idx).filter(function(s){return s===sid;}).length;
+              var sub = getSubcat(sid, occurrencesBefore);
+              if(sub) names.push(sub.flag+' '+sub.name);
+            });
+            return names.join(', ') || 'your selected styles';
+          })()+
         "</div>"+
       "</div></div>";
   }
@@ -3252,7 +3604,8 @@ function renderMealPrep(){
 function copyMealPlan(){
   if(!G.basket) return;
   var portions = calcPortions();
-  var meals = buildMeals(G.basket.items, portions);
+  var result = buildMeals(G.basket.items, portions);
+  var meals = result.meals;
   var lines = ['🍳 WEEKLY MEAL PREP PLAN',
     G_MEALS_PER_DAY+' meals/day · '+G_BATCH_COUNT+' batch recipes · '+portions+' portions per batch', ''];
   meals.forEach(function(meal,i){
@@ -3283,36 +3636,55 @@ function renderMealCard(meal){
   var badgeLabel = sc >= 78 ? '★ Excellent' : sc >= 58 ? '✓ Good' : '~ OK';
 
   var cardClass = meal.isShake ? 'mp-card-shake'
+                : meal.isQuickSnack ? 'mp-card-breakfast'
                 : meal.isBreakfast ? 'mp-card-breakfast'
                 : meal.isSnack ? 'mp-card-breakfast'
                 : 'mp-card-meal';
   var tagColor  = meal.isShake ? 'var(--purple)'
+                : meal.isQuickSnack ? 'var(--teal)'
                 : meal.isBreakfast || meal.isSnack ? 'var(--teal)'
                 : 'var(--blue)';
-  // Show subcat cultural name if available, otherwise style name
   var tagLabel  = meal.isShake ? 'DAILY PROTEIN SHAKE'
+                : meal.isQuickSnack ? '⚡ QUICK SNACKS · DAILY PREP'
                 : meal.isBreakfast ? 'DAILY PREP · BREAKFAST'
                 : meal.isSnack ? 'DAILY · SNACKS & FRUIT'
                 : meal.subcatName ? meal.subcatName.toUpperCase()
                 : (meal.styleEm ? meal.styleEm+' '+meal.styleName.toUpperCase() : 'MAIN MEAL');
 
-  function ingSection(label, items){
+  function ingSection(label, items, showBatch){
     if(!items || !items.length) return '';
     return "<div class='mp-section-label'>"+label+"</div>"+
       items.map(function(it){
-        var qty = it.portionGrams;
+        var qty = showBatch ? it.batchGrams : it.portionGrams;
         var qStr = it.food.id === 'eggs'
           ? Math.max(1,Math.round(qty/50))+' egg'+(Math.round(qty/50)>1?'s':'')
           : (qty>=1000?(qty/1000).toFixed(1)+'kg':qty+'g');
+        // For batch meals: show total batch qty + per-portion annotation
+        var annotation = '';
+        if(showBatch && it.portionGrams && !meal.isQuickSnack){
+          var pStr = it.portionGrams>=1000?(it.portionGrams/1000).toFixed(1)+'kg':it.portionGrams+'g';
+          annotation = "<span style='font-size:10px;color:var(--text3);margin-left:4px'>("+pStr+"/portion)</span>";
+        }
+        // For quick snacks: show daily total + per-snack annotation
+        if(meal.isQuickSnack && it.portionGrams){
+          var pStr2 = it.portionGrams>=1000?(it.portionGrams/1000).toFixed(1)+'kg':it.portionGrams+'g';
+          annotation = "<span style='font-size:10px;color:var(--text3);margin-left:4px'>("+pStr2+"/snack)</span>";
+        }
         var tex = it.rawVeg ? 'raw' : (TEXTURE[it.food.id] || '');
+        var swapBtn = (!meal.isQuickSnack && !meal.isShake && G.basket)
+          ? "<button class='swap-btn' onclick=\"event.stopPropagation();openSwapModal('"+it.food.id+"')\">⇄ swap</button>"
+          : '';
         return "<div class='mp-ing-row'>"+
           "<span class='mp-ing-em'>"+it.food.em+"</span>"+
-          "<span class='mp-ing-name'>"+it.food.name+"</span>"+
+          "<span class='mp-ing-name'>"+it.food.name+swapBtn+"</span>"+
           "<span class='mp-ing-role' style='"+(it.rawVeg?'color:var(--teal)':'')+"'>"+tex+"</span>"+
-          "<span class='mp-ing-qty'>"+qStr+"</span>"+
+          "<span class='mp-ing-qty'>"+qStr+annotation+"</span>"+
         "</div>";
       }).join('');
   }
+
+  // Batch meals use batchGrams as primary; quick snacks use batchGrams (daily total)
+  var useBatch = !meal.isShake;
 
   var tasteBarHtml = "<div class='mp-taste-bar'>"+
     "<div class='mp-taste-title'>Taste profile"+
@@ -3349,10 +3721,25 @@ function renderMealCard(meal){
               : meal.textureDiversity === 2 ? 'Consider adding something crunchy'
               : '⚠ Low texture variety';
 
-  var mainVeg  = meal.portionItems.filter(function(it){ return meal.vegetables.some(function(v){return v.food.id===it.food.id;}); });
-  var mainFats = meal.portionItems.filter(function(it){ return meal.fats.some(function(f){return f.food.id===it.food.id;}); });
-  var mainProt = meal.portionItems.filter(function(it){ return meal.proteins.some(function(p){return p.food.id===it.food.id;}); });
-  var mainBase = meal.portionItems.filter(function(it){ return meal.bases.some(function(b){return b.food.id===it.food.id;}); });
+  var mainVeg  = meal.portionItems.filter(function(it){ return meal.vegetables && meal.vegetables.some(function(v){return v.food.id===it.food.id;}); });
+  var mainFats = meal.portionItems.filter(function(it){ return meal.fats && meal.fats.some(function(f){return f.food.id===it.food.id;}); });
+  var mainProt = meal.portionItems.filter(function(it){ return meal.proteins && meal.proteins.some(function(p){return p.food.id===it.food.id;}); });
+  var mainBase = meal.portionItems.filter(function(it){ return meal.bases && meal.bases.some(function(b){return b.food.id===it.food.id;}); });
+
+  // Header qty label
+  var qtyLabel = meal.isQuickSnack
+    ? "<div style='font-size:11px;color:var(--teal);margin-top:4px'>📅 Daily quantities · split into 2 snacks/day · "+(meal.effectivePortions||'')+"</div>"
+    : !meal.isShake
+      ? "<div style='font-size:11px;color:var(--amber2);margin-top:4px'>📦 Total batch quantities for "+(meal.effectivePortions||calcPortions())+" portions · per-portion shown in (brackets)</div>"
+      : '';
+
+  var quickSnackDisclaimer = meal.isQuickSnack
+    ? "<div style='margin:10px 0 0;padding:10px 12px;border-radius:8px;background:rgba(45,212,191,.07);border:1px solid rgba(45,212,191,.25);font-size:12px;color:var(--text2);line-height:1.6'>"+
+        "<strong style='color:var(--teal)'>⚡ No batch cooking needed.</strong> These items score low on cooking-style compatibility — they're best enjoyed fresh. "+
+        "Pair any 2 per day with your batch meals to hit your macro targets. "+
+        "<span style='color:var(--text3)'>Want to batch-cook them instead? Go back to your basket and swap them for batch-friendly alternatives.</span>"+
+      "</div>"
+    : '';
 
   return "<div class='mp-card "+cardClass+"'>"+
     "<div class='mp-card-header'>"+
@@ -3360,36 +3747,29 @@ function renderMealCard(meal){
         "<span class='mp-score-badge "+badgeClass+"'>"+badgeLabel+"</span>"+
       "</div>"+
       "<div class='mp-card-title'>"+meal.name+"</div>"+
-      "<div class='mp-card-method'>"+
-        "<span>🍳 "+meal.cookMethod+"</span>"+
+      "<div class='mp-card-method'><span>🍳 "+meal.cookMethod+"</span>"+
         "<span style='margin-left:10px;font-size:10px;color:var(--text3)'>"+texNote+"</span>"+
       "</div>"+
+      qtyLabel+
       "<div class='mp-card-macros'>"+
         "<span class='mp-macro-pill mp-macro-p'>"+meal.portP+"g P</span>"+
         "<span class='mp-macro-pill mp-macro-c'>"+meal.portC+"g C</span>"+
         "<span class='mp-macro-pill mp-macro-f'>"+meal.portF+"g F</span>"+
         "<span class='mp-macro-pill mp-macro-k'>"+meal.portK+" kcal</span>"+
-        "<span style='font-size:10px;color:var(--text3);align-self:center'>per portion</span>"+
+        "<span style='font-size:10px;color:var(--text3);align-self:center'>"+(meal.isQuickSnack?'per day':'per portion')+"</span>"+
       "</div>"+
     "</div>"+
     "<div class='mp-card-body'>"+
       (meal.isShake
-        ? ingSection('🥤 Shake ingredients (per shake)', meal.portionItems)+
-          "<div style='margin:8px 0 0;padding:10px 12px;border-radius:8px;background:rgba(46,204,138,0.07);border:1px dashed rgba(46,204,138,0.3);display:flex;align-items:center;gap:8px'>"+
-            "<span style='font-size:18px'>🍓</span>"+
-            "<div>"+
-              "<div style='font-size:12px;font-weight:600;color:var(--green)'>+ 1 fruit of your choice</div>"+
-              "<div style='font-size:11px;color:var(--text3);margin-top:2px'>Pick what you feel like — banana, berries, mango. Blend in or eat alongside.</div>"+
-            "</div>"+
-          "</div>"  
-        : (
-          ingSection('🥩 Proteins', mainProt)+
-          ingSection('🌾 Base', mainBase)+
-          ingSection('🥦 Vegetables', mainVeg)+
-          ingSection('🥑 Fats & Extras', mainFats)+
-          ingSection('🍎 Fruit', meal.isSnack?meal.portionItems:[])+
-          (meal.isSnack?"<div style='margin:10px 0 0;padding:10px 14px;border-radius:8px;background:rgba(74,144,217,0.07);border:1px solid rgba(74,144,217,0.2);font-size:12px;color:var(--text2);line-height:1.6'><strong style='color:var(--blue)'>🍎 How to eat your fruit</strong><br>Have 1 piece after lunch or dinner, or whenever hunger strikes between meals. No need to save them all for one sitting — spread them through the day for steady energy.</div>":"")
-        )
+        ? ingSection('🥤 Shake ingredients (daily)', meal.portionItems, false)
+        : meal.isQuickSnack
+          ? ingSection('⚡ Quick snack items (daily total)', meal.portionItems, true)+quickSnackDisclaimer
+          : (
+            ingSection('🥩 Proteins', mainProt, useBatch)+
+            ingSection('🌾 Base', mainBase, useBatch)+
+            ingSection('🥦 Vegetables', mainVeg, useBatch)+
+            ingSection('🥑 Fats & Extras', mainFats, useBatch)
+          )
       )+
       tasteBarHtml+
       spiceHtml+
