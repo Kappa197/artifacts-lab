@@ -2,6 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-NVPSBWT293"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-NVPSBWT293');
+</script>
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fvgajfiksxmwioxnesry.supabase.co">
 <title>Weekly Grocery Planner · The Artifacts Lab</title>
@@ -20,7 +29,7 @@
   --radius:12px;--radius-sm:8px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
+html{scroll-behavior:auto}
 body{font-family:var(--body);background:var(--navy);color:var(--text);min-height:100vh}
 body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(212,146,10,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(212,146,10,0.025) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0;}
 
@@ -279,32 +288,6 @@ input[type=range]:active::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(212,146
 /* Upgrade nudge */
 .upgrade-nudge{padding:10px 13px;background:var(--amber-dim);border:1.5px solid var(--amber);border-radius:8px;font-size:12px;color:var(--amber2);line-height:1.6;margin-top:8px}
 .upgrade-nudge a{color:var(--amber);font-weight:600;text-decoration:underline;cursor:pointer}
-/* ── Persistent top-page tier banner ─── */
-.tier-banner{display:flex;align-items:center;gap:12px;padding:12px 20px;background:var(--navy2);border-bottom:1.5px solid var(--amber);font-size:12px;color:var(--amber2);position:sticky;top:60px;z-index:90;}
-.tier-banner-lock{font-size:20px;flex-shrink:0;}
-.tier-banner-body{flex:1;line-height:1.5;}
-.tier-banner-body strong{color:var(--text);font-weight:700;}
-.tier-banner-cta{flex-shrink:0;padding:6px 14px;border-radius:20px;border:1.5px solid var(--amber);background:var(--amber-dim);color:var(--amber2);font-size:11px;font-weight:700;cursor:pointer;font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;transition:all .2s;}
-.tier-banner-cta:hover{background:var(--amber);color:#fff;}
-/* ── Style card lock state ─── */
-.mp-style-card.locked{opacity:0.38;cursor:not-allowed;position:relative;}
-.mp-style-card.locked::after{content:'🔒';position:absolute;top:8px;right:8px;font-size:14px;}
-.mp-style-card.locked:hover{border-color:var(--border)!important;}
-
-/* Lock overlay — sits over gated sections */
-.tier-lock-wrap{position:relative;border-radius:12px;overflow:hidden;}
-.tier-lock-overlay{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border-radius:12px;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);background:rgba(11,15,26,0.72);border:1.5px solid var(--border2);cursor:pointer;transition:background .2s;}
-.tier-lock-overlay:hover{background:rgba(11,15,26,0.82);}
-.tier-lock-icon{font-size:28px;line-height:1;}
-.tier-lock-title{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);}
-.tier-lock-badge{padding:4px 12px;border-radius:99px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;}
-.tier-lock-badge.basic{background:var(--blue-dim);color:var(--blue);border:1px solid var(--blue);}
-.tier-lock-badge.premium{background:var(--amber-dim);color:var(--amber2);border:1px solid var(--amber);}
-.tier-lock-sub{font-size:11px;color:var(--text3);text-align:center;padding:0 16px;line-height:1.5;}
-/* Style card locked state */
-.mp-style-card.locked{opacity:0.45;cursor:not-allowed;position:relative;}
-.mp-style-card.locked::after{content:'🔒';position:absolute;top:6px;right:8px;font-size:13px;}
-.mp-style-card.locked:hover{border-color:var(--border);}
 
 /* ── TDEE CALCULATOR ─────────────────────────── */
 .calc-toggle{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:7px 14px;background:var(--navy3);border:1.5px solid var(--border2);border-radius:8px;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;transition:all .2s;font-family:inherit;}
@@ -411,15 +394,6 @@ input[type=range]:active::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(212,146
   </div>
 </header>
 
-<!-- Persistent tier upgrade banner — shown for free/basic users, hidden for premium -->
-<div id="tierUpgradeBanner" style="display:none">
-  <div class="tier-banner">
-    <div class="tier-banner-lock">🔒</div>
-    <div class="tier-banner-body" id="tierBannerBody">Upgrade to unlock more features</div>
-    <button class="tier-banner-cta" id="tierBannerCta" onclick="showUpgradeModal()">Upgrade →</button>
-  </div>
-</div>
-
 <!-- Setup page -->
 <div id="setupPage" class="page active">
   <div class="setup-progress" id="setupProgress">
@@ -452,22 +426,8 @@ input[type=range]:active::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(212,146
       <div class="section-title">Weekly macro targets</div>
       <p class="section-desc">Set your weekly targets in grams, or use the calorie calculator to get a personalised starting point.</p>
 
-      <!-- TDEE Calculator — Basic+ -->
+      <!-- TDEE Calculator -->
       <button class="calc-toggle" id="calcToggle" type="button">🧮 Calculate from calorie target</button>
-      <div id="calcUpgradeNudge" style="display:none">
-        <div class="tier-lock-wrap" style="min-height:64px;">
-          <div style="padding:14px 16px;background:var(--navy3);border-radius:10px;border:1px solid var(--border);">
-            <div style="font-size:13px;font-weight:600;color:var(--text2);">🧮 Calculate from calorie target</div>
-            <div style="font-size:11px;color:var(--text3);margin-top:3px;">Auto-calculates your weekly macro targets from age, weight &amp; goal.</div>
-          </div>
-          <div class="tier-lock-overlay" onclick="showUpgradeHint('basic')">
-            <div class="tier-lock-icon">🔒</div>
-            <div class="tier-lock-title">Calorie estimator</div>
-            <div class="tier-lock-badge basic">Basic Plan</div>
-            <div class="tier-lock-sub">Tap to learn about upgrading</div>
-          </div>
-        </div>
-      </div>
       <div class="calc-panel" id="calcPanel">
         <div class="calc-body">
           <div class="calc-title">Daily Calorie Estimator (Mifflin-St Jeor)</div>
@@ -573,13 +533,8 @@ input[type=range]:active::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(212,146
       <div class="section-label">Step 3 · Optional</div>
       <div class="section-title">Micronutrient priorities</div>
       <p class="section-desc">Select up to 3 micronutrients to prioritise — useful if you have a known deficiency or health goal. The basket will favour foods rich in these.</p>
-      <div id="microPickerWrap">
-        <div class="micro-grid" id="microPicker"></div>
-        <div class="micro-note" id="microNote"></div>
-      </div>
-      <div id="microUpgradeNudge" class="upgrade-nudge" style="display:none">
-        🔒 <strong>Basic plan feature</strong> — Prioritise foods rich in specific micronutrients (Omega-3, Iron, Calcium and more). <a onclick="showUpgradeHint('basic')">Upgrade to Basic</a> to unlock.
-      </div>
+      <div class="micro-grid" id="microPicker"></div>
+      <div class="micro-note" id="microNote"></div>
     </div>
 
     <div class="section" id="sect-prefs">
@@ -897,85 +852,8 @@ try { sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON); } catch(e){ conso
 var TIER = 'free', can = {};
 function buildCan(tier){
   TIER = tier;
-  can = {
-    macroBasket:      true,                          // Free+: manual macro sliders
-    ingredientPrefs:  true,                          // Free+: ingredient preferences
-    tdeeCalc:         TIER !== 'free',               // Basic+: calorie estimator
-    microPriority:    TIER !== 'free',               // Basic+: micronutrient priorities
-    proteinPowder:    TIER !== 'free',               // Basic+: protein powder toggle
-    mealPrep:         TIER !== 'free',               // Basic+: meal prep plan
-    mealsPerDay4:     TIER === 'premium',            // Premium: 4 meals/day option
-    recipes3or4:      TIER === 'premium',            // Premium: 3 or 4 recipes
-    allStyles:        TIER === 'premium',            // Premium: all 6 cooking styles
-    swapBasket:       TIER === 'premium',            // Premium: swap in basket
-    swapMealPrep:     TIER === 'premium',            // Premium: swap in meal prep
-  };
+  can = { macroBasket: true, microPriority: TIER !== 'free' };
 }
-
-// ── Tier gating helpers ────────────────────────────────────────
-function showUpgradeHint(targetTier){
-  var msg = targetTier === 'premium'
-    ? 'Premium feature — upgrade at theartifactslab.com for all cooking styles, 4-meal plans, and ingredient swaps.'
-    : 'Basic feature — upgrade at theartifactslab.com for the calorie estimator, micronutrient priorities, and the Meal Prep Plan.';
-  toast('🔒 '+msg);
-}
-
-// Wraps an element in a lock overlay. el = DOM element, tier = 'basic'|'premium', msg = short description.
-function wrapWithLock(el, tier, msg){
-  if(!el || el.dataset.lockWrapped) return;
-  el.dataset.lockWrapped = '1';
-  var wrapper = document.createElement('div');
-  wrapper.className = 'tier-lock-wrap';
-  el.parentNode.insertBefore(wrapper, el);
-  wrapper.appendChild(el);
-  var overlay = document.createElement('div');
-  overlay.className = 'tier-lock-overlay';
-  overlay.setAttribute('onclick', "showUpgradeHint('"+tier+"')");
-  overlay.innerHTML =
-    "<div class='tier-lock-icon'>🔒</div>"+
-    "<div class='tier-lock-title'>"+msg+"</div>"+
-    "<div class='tier-lock-badge "+tier+"'>"+tier.charAt(0).toUpperCase()+tier.slice(1)+" Plan</div>"+
-    "<div class='tier-lock-sub'>Tap to learn more about upgrading</div>";
-  wrapper.appendChild(overlay);
-}
-
-function applyTierGates(){
-  // ── TDEE Calculator (Basic+) ──
-  var calcSection = document.getElementById('calcToggle');
-  var calcNudge   = document.getElementById('calcUpgradeNudge');
-  if(calcSection && calcNudge){
-    calcSection.style.display = can.tdeeCalc ? '' : 'none';
-    calcNudge.style.display   = can.tdeeCalc ? 'none' : 'block';
-  }
-
-  // ── Micronutrient priorities (Basic+) — lock overlay ──
-  var microWrap = document.getElementById('microPickerWrap');
-  if(microWrap){
-    if(!can.microPriority){
-      wrapWithLock(microWrap, 'basic', 'Micronutrient priorities');
-    }
-  }
-
-  // ── Protein powder toggle (Basic+) — lock overlay ──
-  // powderToggleBox may not exist until basket is generated; gate applied in updatePowderToggle too
-  var ppBox = document.getElementById('powderToggleBox');
-  if(ppBox && !can.proteinPowder){
-    wrapWithLock(ppBox, 'basic', 'Protein powder control');
-  }
-
-  // ── Meal Prep button (Basic+) ──
-  // openMealPrep() already guards with can.mealPrep; just style the button visually
-  var mpBtn = document.getElementById('mealPrepBtn');
-  if(mpBtn){
-    mpBtn.style.opacity = can.mealPrep ? '' : '0.45';
-    mpBtn.style.cursor  = can.mealPrep ? '' : 'not-allowed';
-    mpBtn.title         = can.mealPrep ? '' : 'Upgrade to Basic to unlock Meal Prep';
-  }
-
-  // ── Swap buttons in basket rendered dynamically (can.swapBasket checked in renderResults)
-  // ── Swap buttons in meal prep rendered dynamically (can.swapMealPrep checked in renderMealCard)
-}
-
 
 async function initTier(){
   document.getElementById('appLoader').style.display = 'flex';
@@ -1004,7 +882,6 @@ async function initTier(){
   }
   document.getElementById('appLoader').style.display='none';
   init();
-  applyTierGates();
 }
 
 // ── State ──────────────────────────────────────────
@@ -1652,7 +1529,7 @@ function renderResults(result){
             "<div style='flex:1;min-width:0'>"+
               "<div class='basket-food-name'>"+
                 it.food.em+" "+it.food.name+
-                (can.swapBasket ? "<button class='swap-btn' onclick=\"event.stopPropagation();openSwapModal('"+fid+"')\">⇄ swap</button>" : "<span style='font-size:10px;color:var(--text3);margin-left:6px;cursor:pointer' onclick=\"event.stopPropagation();showUpgradeHint('premium')\" title='Premium feature'>🔒</span>")+
+                "<button class='swap-btn' onclick=\"event.stopPropagation();openSwapModal('"+fid+"')\">⇄ swap</button>"+
               "</div>"+
               "<div class='basket-macro-pills'>"+
                 "<span class='mpill mpill-p'>"+it.pContrib+"g prot</span>"+
@@ -2045,7 +1922,6 @@ function init(){
 
       // Render toggle contents based on current diet
       function updatePowderToggle(){
-        if(!can.proteinPowder) return; // Basic+ feature — don't overwrite lock overlay
         var isVegan = G.diet === 'vegan' || G.diet === 'vegetarian';
         var powderLabel = isVegan ? '🌱 Add vegan powder (1 scoop/day)' : '🥤 Add whey powder (1 scoop/day)';
         var powderNote  = isVegan
@@ -3444,12 +3320,7 @@ function renderWizardStep1(el){
     "<div style='display:flex;gap:8px;margin:14px 0;flex-wrap:wrap'>"+
     opts.map(function(o){
       var sel = o.n===G_MEALS_PER_DAY;
-      var locked = (o.n===4 && !can.mealsPerDay4);
-      var borderCol = locked?"var(--border)":sel?"var(--amber)":"var(--border)";
-      var bgCol = locked?"transparent":sel?"var(--amber-dim)":"transparent";
-      var clickAct = locked ? "showUpgradeHint('premium')" : "setMealsPerDay("+o.n+")";
-      return "<div style='flex:1;min-width:80px;padding:14px 10px;border:2px solid "+borderCol+";border-radius:10px;cursor:"+(locked?"not-allowed":"pointer")+";background:"+bgCol+";text-align:center;transition:all .2s;opacity:"+(locked?"0.45":"1")+"' onclick='"+clickAct+"'>"+
-        (locked?"<div style='font-size:11px;margin-bottom:2px'>🔒</div>":""+"")+
+      return "<div style='flex:1;min-width:80px;padding:14px 10px;border:2px solid "+(sel?"var(--amber)":"var(--border)")+";border-radius:10px;cursor:pointer;background:"+(sel?"var(--amber-dim)":"transparent")+";text-align:center;transition:all .2s' onclick='setMealsPerDay("+o.n+")'>"+
         "<div style='font-size:20px;margin-bottom:6px'>"+o.icon+"</div>"+
         "<div style='font-size:13px;font-weight:700;color:"+(sel?"var(--amber2)":"var(--text)")+"'>"+o.label+"</div>"+
         "<div style='font-size:10px;color:var(--text2);margin-top:3px'>"+o.sub+"</div>"+
@@ -3460,7 +3331,6 @@ function renderWizardStep1(el){
 }
 
 function setMealsPerDay(n){
-  if(n === 4 && !can.mealsPerDay4){ showUpgradeHint('premium'); return; }
   G_MEALS_PER_DAY = n;
   renderWizardStep1(document.getElementById('mpWizard'));
 }
@@ -3473,17 +3343,11 @@ function renderWizardStep2(el){
     "<div style='display:flex;gap:8px;margin:14px 0;flex-wrap:wrap'>"+
     [2,3,4].map(function(n){
       var sel = n===G_BATCH_COUNT;
-      // Free & Basic: only 2. Premium: 2, 3, or 4.
-      var locked = (n >= 3 && !can.recipes3or4);
-      var reqTier = 'premium';
       var p = Math.max(2, Math.round((G_MEALS_PER_DAY * 7) / n));
-      var borderCol = locked?"var(--border)":sel?"var(--amber)":"var(--border)";
-      var bgCol = locked?"transparent":sel?"var(--amber-dim)":"transparent";
-      return "<div style='flex:1;min-width:80px;padding:14px 10px;border:2px solid "+borderCol+";border-radius:10px;cursor:"+(locked?"not-allowed":"pointer")+";background:"+bgCol+";text-align:center;transition:all .2s;opacity:"+(locked?"0.45":"1")+"' onclick='"+(locked?"showUpgradeHint('"+reqTier+"')":"setBatchCount("+n+")")+"'>"+
-        (locked?"<div style='font-size:13px;margin-bottom:3px'>🔒</div>":""+"")+
+      return "<div style='flex:1;min-width:80px;padding:14px 10px;border:2px solid "+(sel?"var(--amber)":"var(--border)")+";border-radius:10px;cursor:pointer;background:"+(sel?"var(--amber-dim)":"transparent")+";text-align:center;transition:all .2s' onclick='setBatchCount("+n+")'>"+
         "<div style='font-size:28px;font-weight:900;font-family:var(--serif);color:"+(sel?"var(--amber2)":"var(--text)")+"'>"+n+"</div>"+
         "<div style='font-size:11px;font-weight:600;color:var(--text2);margin-top:2px'>recipe"+(n>1?'s':'')+"</div>"+
-        (locked?"<div style='font-size:9px;color:var(--amber);font-family:var(--mono);margin-top:4px;text-transform:uppercase;letter-spacing:.05em'>"+reqTier+"</div>":"<div style='font-size:10px;color:var(--teal);margin-top:5px'>~"+p+" portions each</div>")+
+        "<div style='font-size:10px;color:var(--teal);margin-top:5px'>~"+p+" portions each</div>"+
       "</div>";
     }).join('')+
     "</div>"+
@@ -3494,8 +3358,6 @@ function renderWizardStep2(el){
 }
 
 function setBatchCount(n){
-  // Guard locked options
-  if(n >= 3 && !can.recipes3or4){ showUpgradeHint('premium'); return; }
   G_BATCH_COUNT = n;
   // Reset style selection if more styles than batches
   if(G_STYLES.length > n) G_STYLES = G_STYLES.slice(0, n);
@@ -3523,14 +3385,8 @@ function renderWizardStep3(el){
       var isSel = selCount > 0;
       // Subcats selected for each occurrence of this style
       var selSubcats = (G_SUBCATS[sid] || []);
-      // Basic: only curry + bowl unlocked. Premium: all.
-      var freeStyles = ['curry','bowl'];
-      var styleLocked = !can.allStyles && !freeStyles.includes(sid);
-      var cardClick = styleLocked
-        ? "onclick=\"showUpgradeHint('premium')\""
-        : "onclick='toggleStyle(\""+sid+"\")'";
-      return "<div class='mp-style-card"+(isSel?' sel':'')+(styleLocked?' locked':'')+"' "+cardClick+">"+
-        (isSel?"<span class='mp-style-check'>"+(selCount>1?selCount+'×':'✓')+"</span>":""+"")+
+      return "<div class='mp-style-card"+(isSel?' sel':'')+"' onclick='toggleStyle(\""+sid+"\")'>"+
+        "<span class='mp-style-check'>"+(selCount>1?selCount+'×':'✓')+"</span>"+
         "<span class='mp-style-icon'>"+s.em+"</span>"+
         "<div class='mp-style-name'>"+s.name+(selCount>1?' ×'+selCount:'')+"</div>"+
         "<div class='mp-style-desc'>"+s.desc+"</div>"+
@@ -3570,12 +3426,6 @@ function setSubcat(styleId, occurrenceIdx, subcatId){
 }
 
 function toggleStyle(sid){
-  // Prevent selecting locked styles
-  var freeStyles = ['curry','bowl'];
-  if(!can.allStyles && !freeStyles.includes(sid)){
-    showUpgradeHint('premium');
-    return;
-  }
   var maxStyles = G_BATCH_COUNT;
   // Allow adding the same style multiple times (up to maxStyles total)
   if(G_STYLES.length >= maxStyles){
@@ -3619,10 +3469,6 @@ function getSubcat(styleId, occurrenceIdx){
 }
 
 function openMealPrep(){
-  if(!can.mealPrep){
-    showUpgradeHint('basic');
-    return;
-  }
   if(!G.basket || !G.basket.items.length){
     toast('Generate your basket first!');
     return;
@@ -3834,14 +3680,9 @@ function renderMealCard(meal){
           annotation = "<span style='font-size:10px;color:var(--text3);margin-left:4px'>("+pStr2+"/snack)</span>";
         }
         var tex = it.rawVeg ? 'raw' : (TEXTURE[it.food.id] || '');
-        var swapBtn = '';
-        if(!meal.isQuickSnack && !meal.isShake && G.basket){
-          if(can.swapMealPrep){
-            swapBtn = "<button class='swap-btn' onclick=\"event.stopPropagation();openSwapModal('"+it.food.id+"')\">⇄ swap</button>";
-          } else {
-            swapBtn = "<span style='font-size:10px;color:var(--text3);margin-left:6px;cursor:pointer' onclick=\"event.stopPropagation();showUpgradeHint('premium')\" title='Premium: swap ingredients'>🔒</span>";
-          }
-        }
+        var swapBtn = (!meal.isQuickSnack && !meal.isShake && G.basket)
+          ? "<button class='swap-btn' onclick=\"event.stopPropagation();openSwapModal('"+it.food.id+"')\">⇄ swap</button>"
+          : '';
         return "<div class='mp-ing-row'>"+
           "<span class='mp-ing-em'>"+it.food.em+"</span>"+
           "<span class='mp-ing-name'>"+it.food.name+swapBtn+"</span>"+
@@ -4210,6 +4051,9 @@ window.addEventListener('resize', function(){
   }
 });
 
+window.addEventListener('pageshow', (e) => {
+  if (e.persisted) window.location.reload();
+});
 window.addEventListener('load', initTier);
 </script>
 </body>

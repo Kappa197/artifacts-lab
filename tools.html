@@ -118,17 +118,15 @@ nav {
 
 /* ── MOBILE MENU ── */
 .nav-mobile-menu {
-  display: block; position: fixed;
+  display: none; position: fixed;
   top: 64px; left: 0; right: 0;
   background: rgba(11,15,26,0.97); backdrop-filter: blur(24px);
   border-bottom: 2px solid var(--amber); padding: 8px 0 16px;
   z-index: 200; transform: translateY(-8px); opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: transform 0.25s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease, visibility 0.25s;
+  transition: transform 0.25s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease;
   box-shadow: 0 16px 48px rgba(0,0,0,0.5);
 }
-.nav-mobile-menu.open { transform: translateY(0); opacity: 1; visibility: visible; pointer-events: auto; }
+.nav-mobile-menu.open { transform: translateY(0); opacity: 1; }
 .nav-mobile-menu ul { list-style: none; padding: 8px 0; }
 .nav-mobile-menu ul li { border-bottom: 1px solid rgba(42,59,85,0.4); }
 .nav-mobile-menu ul li:last-child { border-bottom: none; }
@@ -154,9 +152,8 @@ nav {
 .nav-backdrop {
   display: none; position: fixed; inset: 0;
   background: rgba(0,0,0,0.4); z-index: 199; backdrop-filter: blur(2px);
-  pointer-events: none;
 }
-.nav-backdrop.open { display: block; pointer-events: auto; }
+.nav-backdrop.open { display: block; }
 
 /* ── PAGE ── */
 .page { position: relative; z-index: 1; max-width: 1140px; margin: 0 auto; padding: 100px 48px 80px; }
@@ -450,12 +447,12 @@ footer {
         </div>
       </div>
 
-      <div class="tool-card tc-expense" data-tier="basic" data-cat="finance">
+      <div class="tool-card tc-expense" data-tier="free" data-cat="finance">
         <div class="tc-head">
           <div class="tc-icon">&#128176;</div>
           <div class="tc-tier-wrap">
             <span class="tc-tier-tag tag-live">&#9679; Live</span>
-            <span class="tc-tier-tag tag-basic">Basic</span>
+            <span class="tc-tier-tag tag-free">Free</span>
           </div>
         </div>
         <div class="tc-name">Expense Tracker</div>
@@ -468,8 +465,7 @@ footer {
           <span class="tc-feat">PDF export</span>
         </div>
         <div class="tc-actions">
-          <a href="login.html" class="btn-try">Get Basic &#8594;</a>
-          <a href="index.html#pricing" class="btn-learn">Pricing</a>
+          <a href="expense-tracker.html" class="btn-try">Try Free &#8594;</a>
         </div>
       </div>
 
@@ -485,12 +481,12 @@ footer {
     </div>
     <div class="tools-grid">
 
-      <div class="tool-card tc-workout" data-tier="basic" data-cat="health">
+      <div class="tool-card tc-workout" data-tier="free" data-cat="health">
         <div class="tc-head">
           <div class="tc-icon">&#128170;</div>
           <div class="tc-tier-wrap">
             <span class="tc-tier-tag tag-live">&#9679; Live</span>
-            <span class="tc-tier-tag tag-basic">Basic</span>
+            <span class="tc-tier-tag tag-free">Free</span>
           </div>
         </div>
         <div class="tc-name">Workout Planner</div>
@@ -503,8 +499,7 @@ footer {
           <span class="tc-feat">Session logging</span>
         </div>
         <div class="tc-actions">
-          <a href="login.html" class="btn-try">Get Basic &#8594;</a>
-          <a href="index.html#pricing" class="btn-learn">Pricing</a>
+          <a href="workout-planner.html" class="btn-try">Try Free &#8594;</a>
         </div>
       </div>
 
@@ -530,7 +525,7 @@ footer {
         </div>
       </div>
 
-      <div class="tool-card tc-meal" data-tier="free" data-cat="health">
+      <div class="tool-card tc-meal" data-tier="basic" data-cat="health">
         <div class="tc-head">
           <div class="tc-icon">&#129367;</div>
           <div class="tc-tier-wrap">
@@ -539,16 +534,16 @@ footer {
           </div>
         </div>
         <div class="tc-name">Grocery & Meal Prepping</div>
-        <div class="tc-desc">Generate your weekly grocery shopping list from your Calories and Macros needs, and dietary preferences. Buil your weekly meal prepping batches with 0 waste (of products and time) </div>
+        <div class="tc-desc">Generate your weekly grocery list from your Macros needs and dietary preferences. Buil your weekly meal prepping with zero waste </div>
         <div class="tc-features">
           <span class="tc-feat">Weekly Marcos needs</span>
           <span class="tc-feat">Grocery list</span>
           <span class="tc-feat">Full week meal prepping</span>
           <span class="tc-feat">32 batch recipes</span>
-          <span class="tc-feat">Preference filters</span>
         </div>
         <div class="tc-actions">
-          <a href="grocery-planner.html" class="btn-try">Try Free &#8594;</a>
+          <a href="login.html" class="btn-try">Get Basic &#8594;</a>
+          <a href="index.html#pricing" class="btn-learn">Pricing</a>
         </div>
       </div>
 
@@ -560,7 +555,7 @@ footer {
     <div class="cat-header">
       <span class="cat-icon">&#127807;</span>
       <span class="cat-title">Life &amp; Wellness</span>
-      <span class="cat-count">3 coming soon</span>
+      <span class="cat-count">4 coming soon</span>
     </div>
     <div class="tools-grid">
 
