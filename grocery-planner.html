@@ -355,6 +355,26 @@ input[type=range]:active::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(212,146
 .ing-tab-hint{font-size:11px;color:var(--text3);font-style:italic;margin-bottom:12px;}
 .chip.chip-disabled{opacity:0.28;cursor:not-allowed;border-style:dashed;}
 .chip.chip-disabled:hover{border-color:var(--border);color:var(--text);}
+
+/* ── INGREDIENT WIZARD ───────────────────────── */
+.ing-wiz{background:var(--navy2);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.ing-wiz-head{padding:14px 16px 10px;border-bottom:1px solid var(--border);}
+.ing-wiz-kicker{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);}
+.ing-wiz-title{margin-top:4px;font-family:var(--serif);font-size:1.05rem;font-weight:800;line-height:1.25;}
+.ing-wiz-sub{margin-top:6px;font-size:12px;color:var(--text2);line-height:1.55;}
+.ing-wiz-body{padding:12px 16px 14px;}
+.ing-wiz-progress{display:flex;gap:6px;align-items:center;margin-top:10px;flex-wrap:wrap;}
+.ing-wiz-dot{width:8px;height:8px;border-radius:999px;background:var(--border2);opacity:.7;}
+.ing-wiz-dot.on{background:var(--amber);opacity:1;}
+.ing-wiz-dot.done{background:var(--green);opacity:1;}
+.ing-wiz-actions{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:12px 16px;border-top:1px solid var(--border);background:rgba(26,34,53,0.35);flex-wrap:wrap;}
+.ing-wiz-btn{padding:9px 14px;border-radius:10px;border:1.5px solid var(--border2);background:var(--navy3);color:var(--text2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s;white-space:nowrap;}
+.ing-wiz-btn:hover{border-color:var(--amber);color:var(--amber2);}
+.ing-wiz-btn.primary{background:var(--green);border-color:var(--green);color:#fff;}
+.ing-wiz-btn.primary:hover{background:#26b578;}
+.ing-wiz-btn:disabled{opacity:.45;cursor:not-allowed;filter:saturate(.6);}
+.ing-wiz-ack{font-size:11px;color:var(--text3);line-height:1.45;flex:1;min-width:220px;}
+.ing-wiz-ack strong{color:var(--amber2);}
 /* ── SWAP MODAL ──────────────────────────────────── */
 .swap-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:200;display:flex;align-items:flex-end;justify-content:center;}
 @media(min-width:600px){.swap-modal-backdrop{align-items:center;}}
@@ -524,7 +544,11 @@ input[type=range]:active::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(212,146
         </div>
       </div>
       <div class="macro-total-row">
-        Est. weekly calories: <strong id="totalKcal">12,100</strong>&nbsp;kcal &nbsp;·&nbsp; Daily avg: <strong id="dailyKcal">1,729</strong>&nbsp;kcal
+        Est. weekly calories: <strong id="totalKcal">12,100</strong>&nbsp;kcal
+        &nbsp;·&nbsp; Daily avg: <strong id="dailyKcal">1,729</strong>&nbsp;kcal
+        &nbsp;·&nbsp; <strong id="dailyProt">100</strong>g P
+        &nbsp;·&nbsp; <strong id="dailyCarb">200</strong>g C
+        &nbsp;·&nbsp; <strong id="dailyFat">57</strong>g F
       </div>
       <div class="warn-box" id="macroWarn"></div>
     </div>
@@ -538,11 +562,10 @@ input[type=range]:active::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(212,146
     </div>
 
     <div class="section" id="sect-prefs">
-      <div class="section-label">Step 4 · Optional</div>
+      <div class="section-label">Step 4 </div>
       <div class="section-title">Ingredient preferences</div>
       <p class="section-desc">Browse by category. Tap once to <span style="color:var(--green);font-weight:600">prioritise</span>, tap again to <span style="color:var(--rose);font-weight:600">avoid</span>, tap again to clear.</p>
-      <div class="ing-tab-nav" id="ingTabNav"></div>
-      <div id="ingPicker"></div>
+      <div id="ingWizard"></div>
     </div>
 
     <div id="sect-generate"></div>
@@ -669,8 +692,7 @@ var FOODS = [
   {id:"lentils",         name:"Lentils",            em:"🫘", p:9,   c:20,  f:0.4, kcal:116, mc:["iron","folate","fiber","magnesium"], diet:{om:1,pe:1,ve:1,vg:1}, cat:"legumes", typical:[300,800], ptype:"legume"},
   {id:"black_beans",     name:"Black beans",        em:"🫘", p:9,   c:24,  f:0.5, kcal:132, mc:["iron","folate","fiber"],  diet:{om:1,pe:1,ve:1,vg:1}, cat:"legumes", typical:[200,600], ptype:"legume"},
   {id:"edamame",         name:"Edamame",            em:"🫛", p:11,  c:8,   f:5,   kcal:122, mc:["folate","iron","calcium"], diet:{om:1,pe:1,ve:1,vg:1}, cat:"legumes", typical:[200,500], ptype:"legume"},
-  {id:"protein_powder",  name:"Protein powder",     em:"🥤", p:75,  c:10,  f:4,   kcal:380, mc:["calcium"],       diet:{om:1,pe:1,ve:1,vg:0}, cat:"protein", typical:[150,400], ptype:"supplement"},
-  {id:"plant_protein",   name:"Plant protein powder",em:"🌱",p:70,  c:12,  f:3,   kcal:355, mc:["iron"],          diet:{om:1,pe:1,ve:1,vg:1}, cat:"protein", typical:[150,400], ptype:"supplement"},
+  {id:"protein_powder",  name:"Protein powder",     em:"🥤", p:70,  c:10,  f:4,   kcal:360, mc:["calcium","iron"],diet:{om:1,pe:1,ve:1,vg:1}, cat:"protein", typical:[150,250], ptype:"supplement"},
   // ── Grains & Carbs ──
   {id:"oats",            name:"Oats",               em:"🌾", p:13,  c:67,  f:7,   kcal:389, mc:["fiber","magnesium","iron"], diet:{om:1,pe:1,ve:1,vg:1}, cat:"grains", typical:[300,700]},
   {id:"brown_rice",      name:"Brown rice",         em:"🍚", p:2.6, c:23,  f:0.9, kcal:111, mc:["magnesium","fiber"],   diet:{om:1,pe:1,ve:1,vg:1}, cat:"grains", typical:[400,900]},
@@ -783,7 +805,7 @@ var BASKET_CATS = {
 };
 
 // Fruit food IDs (live under cat:"produce" in FOODS but display in Fruit bucket)
-var FRUIT_IDS = new Set([
+  var FRUIT_IDS = new Set([
   "banana","berries","apple","orange","mango","pineapple","kiwi",
   "grapes","pear","peach","dates"
 ]);
@@ -813,7 +835,7 @@ var ING_TABS = [
       {label:"Animal Proteins", items:["chicken_breast","chicken_thigh","turkey_breast","lean_beef","beef_steak","lamb","pork_loin","beef_liver"]},
       {label:"Fish & Seafood",  items:["salmon","canned_salmon","tuna_can","cod","sea_bass","trout","mackerel","sardines","prawns","mussels"]},
       {label:"Eggs & Dairy",    items:["eggs","greek_yogurt","cottage_cheese","skyr","kefir","milk","ricotta","feta","hard_cheese"]},
-      {label:"Plant Proteins",  items:["tofu","tempeh","seitan","chickpeas","lentils","black_beans","kidney_beans","white_beans","edamame","peas","nutritional_yeast","protein_powder","plant_protein"]},
+      {label:"Plant Proteins",  items:["tofu","tempeh","seitan","chickpeas","lentils","black_beans","kidney_beans","white_beans","edamame","peas","nutritional_yeast","protein_powder"]},
     ]
   },
   { id:"tab-carbs", label:"🌾 Carbs", icon:"🌾",
@@ -852,7 +874,11 @@ try { sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON); } catch(e){ conso
 var TIER = 'free', can = {};
 function buildCan(tier){
   TIER = tier;
-  can = { macroBasket: true, microPriority: TIER !== 'free' };
+  can = {
+    macroBasket: true,
+    microPriority: TIER !== 'free',
+    advancedReplace: TIER === 'premium',
+  };
 }
 
 async function initTier(){
@@ -915,6 +941,9 @@ function updateMacroTotals(){
   var kcal = G.prot*4 + G.carbs*4 + G.fat*9;
   document.getElementById('totalKcal').textContent = kcal.toLocaleString();
   document.getElementById('dailyKcal').textContent = Math.round(kcal/7).toLocaleString();
+  document.getElementById('dailyProt').textContent = Math.round(G.prot/7).toLocaleString();
+  document.getElementById('dailyCarb').textContent = Math.round(G.carbs/7).toLocaleString();
+  document.getElementById('dailyFat').textContent  = Math.round(G.fat/7).toLocaleString();
   checkConstraints();
 }
 
@@ -1056,13 +1085,8 @@ function buildBasket(){
 
   // ── Powder pre-seed: fixed 1 scoop/day = 20g protein/day = 140g protein/week ──
   // Diet determines which powder is used — the other is removed from pool entirely.
-  var POWDER_PROTEIN_PER_WEEK = 140; // g of protein per week (20g/day × 7)
-  var isVeganOrVeg = (diet === 'vegan' || diet === 'vegetarian');
-  var activePowderId  = isVeganOrVeg ? 'plant_protein' : 'protein_powder';
-  var excludedPowderId = isVeganOrVeg ? 'protein_powder' : 'plant_protein';
-
-  // Always strip the diet-incompatible powder from pool so greedy pass never picks it
-  pool = pool.filter(function(f){ return f.id !== excludedPowderId; });
+  var POWDER_PROTEIN_PER_WEEK = 20 * 7; // g of protein per week (20g/day × 7)
+  var activePowderId  = 'protein_powder';
 
   if(G.powderMode === 'include'){
     var powderFood = pool.find(function(f){ return f.id === activePowderId; });
@@ -1389,6 +1413,77 @@ function buildBasket(){
   });
   items.forEach(function(it){ actualP+=it.pContrib; actualC+=it.cContrib; actualF+=it.fContrib; });
 
+  // ── Tolerance cap (avoid ~120% overshoot) ─────────────────────────────
+  // We cap protein/carbs/fat to an upper tolerance while staying inside
+  // the discrete grams steps used for display (50g/100g/10g).
+  var MACRO_TOL_UP = 0.10; // 10% tolerance upper bound
+  var protHi = G.prot  > 0 ? G.prot  * (1 + MACRO_TOL_UP) : Infinity;
+  var carbHi = G.carbs > 0 ? G.carbs * (1 + MACRO_TOL_UP) : Infinity;
+  var fatHi  = G.fat   > 0 ? G.fat   * (1 + MACRO_TOL_UP) : Infinity;
+
+  function stepForItem(item){
+    var dc = displayCat(item.food);
+    if(dc === 'proteins') return 50;
+    if(dc === 'carbs')    return 100;
+    return 10;
+  }
+
+  function recomputeItem(it){
+    var food = it.food;
+    it.pContrib = Math.round(food.p/100 * it.grams);
+    it.cContrib = Math.round(food.c/100 * it.grams);
+    it.fContrib = Math.round(food.f/100 * it.grams);
+    it.kcalContrib = Math.round(food.kcal/100 * it.grams);
+  }
+
+  function sumTotals(){
+    var p=0,c=0,f=0;
+    items.forEach(function(it){ p+=it.pContrib; c+=it.cContrib; f+=it.fContrib; });
+    actualP=p; actualC=c; actualF=f;
+  }
+
+  var safety = 0;
+  while((actualP > protHi || actualC > carbHi || actualF > fatHi) && safety++ < 220){
+    var didReduce = false;
+
+    // Reduce the most overshot macro first
+    var pEx = actualP > protHi ? (actualP - protHi) / (protHi || 1) : 0;
+    var cEx = actualC > carbHi ? (actualC - carbHi) / (carbHi || 1) : 0;
+    var fEx = actualF > fatHi ? (actualF - fatHi) / (fatHi  || 1) : 0;
+    var which = (pEx >= cEx && pEx >= fEx) ? 'p' : (cEx >= fEx ? 'c' : 'f');
+
+    var bestIdx = -1, bestDelta = 0;
+    items.forEach(function(it, idx){
+      var s = stepForItem(it);
+      if(it.grams <= 50) return; // can't reduce below display minimum
+      var newG = Math.max(50, it.grams - s);
+      if(newG === it.grams) return;
+      var oldP = it.pContrib, oldC = it.cContrib, oldF = it.fContrib;
+      var food = it.food;
+      var newP = Math.round(food.p/100 * newG);
+      var newC = Math.round(food.c/100 * newG);
+      var newF = Math.round(food.f/100 * newG);
+      var delta = which === 'p' ? (oldP - newP) : which === 'c' ? (oldC - newC) : (oldF - newF);
+      if(delta > bestDelta){
+        bestDelta = delta;
+        bestIdx = idx;
+      }
+    });
+
+    if(bestIdx === -1 || bestDelta <= 0){
+      // No more discrete reductions possible
+      break;
+    }
+
+    var targetIt = items[bestIdx];
+    var step = stepForItem(targetIt);
+    targetIt.grams = Math.max(50, targetIt.grams - step);
+    recomputeItem(targetIt);
+    sumTotals();
+    didReduce = true;
+    if(!didReduce) break;
+  }
+
   // Micro coverage: count unique mic tags covered, weighted by quantity
   var microCovMap = {};
   MICROS.forEach(function(m){ microCovMap[m.id]=0; });
@@ -1480,7 +1575,7 @@ function renderResults(result){
   var actualKcal = Math.round(aP*4 + aC*4 + aF*9);
   var targetKcal = Math.round(tP*4 + tC*4 + tF*9);
   var microPriorityHTML = '';
-  if(G.micros.length && can.microPriority){
+  if(G.micros.length){
     microPriorityHTML = "<div class='micro-cov-section'>"+
       "<div class='micro-cov-title'>Micronutrient coverage (priority items)</div>"+
       G.micros.map(function(mid){
@@ -1504,8 +1599,7 @@ function renderResults(result){
     macroBar('Protein', aP, tP, 'g') +
     macroBar('Carbs',   aC, tC, 'g') +
     macroBar('Fat',     aF, tF, 'g') +
-    microPriorityHTML +
-    (!can.microPriority ? "<div class='upgrade-nudge'>&#128274; Micronutrient priority tracking is available on Basic and Premium plans. <a href='/login.html' style='color:var(--amber);font-weight:600;'>Upgrade &rarr;</a></div>" : '');
+    microPriorityHTML;
 
   // Basket by category — use displayCat() to map to the 5 tab-aligned buckets
   var bycat = {};
@@ -1552,9 +1646,144 @@ function renderResults(result){
 
 
 // ── Swap ingredient modal ──────────────────────────
+var SWAP_MODE = 'simple'; // 'simple' | 'combo'
+var SWAP_ORIG_FID = null;
+var SWAP_COMBO = []; // [{food, grams}]
+
+function setSwapMode(mode){
+  SWAP_MODE = mode;
+  if(SWAP_ORIG_FID) openSwapModal(SWAP_ORIG_FID);
+}
+
+function resetSwapState(){
+  SWAP_MODE = 'simple';
+  SWAP_ORIG_FID = null;
+  SWAP_COMBO = [];
+}
+
+function swapStepForFood(food){
+  var dc = displayCat(food);
+  return dc === 'proteins' ? 50 : dc === 'carbs' ? 100 : 10;
+}
+
+function clamp(n, lo, hi){ return Math.max(lo, Math.min(hi, n)); }
+
+function recomputeBasketTotals(){
+  G.basket.actualP=G.basket.items.reduce(function(s,it){return s+it.pContrib;},0);
+  G.basket.actualC=G.basket.items.reduce(function(s,it){return s+it.cContrib;},0);
+  G.basket.actualF=G.basket.items.reduce(function(s,it){return s+it.fContrib;},0);
+  G.basket.powderWarning = computePowderWarning(G.basket, G.diet);
+}
+
+function toggleComboPick(fid){
+  if(!SWAP_ORIG_FID) return;
+  var origItem = G.basket.items.find(function(it){return it.food.id===SWAP_ORIG_FID;});
+  if(!origItem) return;
+  var orig = origItem.food;
+  var origDisplayCat = displayCat(orig);
+  var f = FOODS.find(function(x){ return x.id === fid; });
+  if(!f || displayCat(f)!==origDisplayCat) return;
+
+  var idx = SWAP_COMBO.findIndex(function(x){ return x.food.id === fid; });
+  if(idx >= 0){
+    SWAP_COMBO.splice(idx,1);
+  } else {
+    if(SWAP_COMBO.length >= 3){ toast('Max 3 items'); return; }
+    var startG = Math.round(((f.typical[0]+f.typical[1])/2) / swapStepForFood(f)) * swapStepForFood(f);
+    startG = clamp(startG, f.typical[0], f.typical[1]*2);
+    SWAP_COMBO.push({food:f, grams:startG});
+  }
+  openSwapModal(SWAP_ORIG_FID);
+}
+
+function adjustComboQty(fid, deltaSteps){
+  var idx = SWAP_COMBO.findIndex(function(x){ return x.food.id === fid; });
+  if(idx === -1) return;
+  var it = SWAP_COMBO[idx];
+  var step = swapStepForFood(it.food);
+  var newG = it.grams + (deltaSteps * step);
+  newG = clamp(newG, it.food.typical[0], it.food.typical[1]*2);
+  it.grams = Math.round(newG/step)*step;
+  openSwapModal(SWAP_ORIG_FID);
+}
+
+function autoFixCombo(){
+  if(!SWAP_ORIG_FID) return;
+  var origItem = G.basket.items.find(function(it){return it.food.id===SWAP_ORIG_FID;});
+  if(!origItem || SWAP_COMBO.length===0) return;
+
+  var orig = origItem.food;
+  var origGrams = origItem.grams;
+  var origPkcal = orig.p/100*origGrams*4;
+  var origCkcal = orig.c/100*origGrams*4;
+  var origFkcal = orig.f/100*origGrams*9;
+  var dom = 'p';
+  if(origCkcal>=origPkcal && origCkcal>=origFkcal) dom='c';
+  else if(origFkcal>=origPkcal && origFkcal>=origCkcal) dom='f';
+
+  var origMacroG = (dom==='p'?orig.p:dom==='c'?orig.c:orig.f)/100 * origGrams;
+  var comboMacroG = SWAP_COMBO.reduce(function(s,x){
+    var per100 = dom==='p'?x.food.p:dom==='c'?x.food.c:x.food.f;
+    return s + per100/100 * x.grams;
+  },0);
+  if(comboMacroG <= 0) return;
+
+  var scale = origMacroG / comboMacroG;
+  SWAP_COMBO.forEach(function(x){
+    var step = swapStepForFood(x.food);
+    var g = x.grams * scale;
+    g = clamp(g, x.food.typical[0], x.food.typical[1]*2);
+    x.grams = Math.round(g/step)*step;
+  });
+  openSwapModal(SWAP_ORIG_FID);
+  toast('✓ Auto-fixed combo');
+}
+
+function applyComboSwap(){
+  if(!SWAP_ORIG_FID) return;
+  var origIdx = G.basket.items.findIndex(function(it){return it.food.id===SWAP_ORIG_FID;});
+  if(origIdx===-1) return;
+  if(SWAP_COMBO.length===0){ toast('Pick 1–3 items'); return; }
+
+  // Remove original
+  var orig = G.basket.items[origIdx];
+  G.basket.items.splice(origIdx, 1);
+
+  // Add combo items
+  SWAP_COMBO.forEach(function(x){
+    var g = x.grams;
+    var f = x.food;
+    G.basket.items.push({
+      food:f, grams:g,
+      pContrib:Math.round(f.p/100*g),
+      cContrib:Math.round(f.c/100*g),
+      fContrib:Math.round(f.f/100*g),
+      kcalContrib:Math.round(f.kcal/100*g),
+    });
+  });
+
+  // Keep stable ordering
+  G.basket.items.sort(function(a,b){
+    var catOrder=Object.keys(BASKET_CATS);
+    return catOrder.indexOf(displayCat(a.food)) - catOrder.indexOf(displayCat(b.food));
+  });
+
+  recomputeBasketTotals();
+  closeSwapModal();
+  renderResults(G.basket);
+
+  if(document.getElementById('mealPrepPage').classList.contains('active')){
+    G.mealPrepBasketChanged = true;
+    renderMealPrep();
+    showBasketChangedBanner();
+  }
+  toast('✓ Replaced '+orig.food.name+' with a combo');
+}
+
 function openSwapModal(originalFid){
   var originalItem = G.basket.items.find(function(it){return it.food.id===originalFid;});
   if(!originalItem) return;
+  SWAP_ORIG_FID = originalFid;
 
   var orig = originalItem.food;
   var origGrams = originalItem.grams;
@@ -1609,32 +1838,102 @@ function openSwapModal(originalFid){
   // Render modal
   document.getElementById('swapModalTitle').textContent = 'Swap '+orig.em+' '+orig.name;
   document.getElementById('swapModalSub').textContent =
-    'Showing '+candidates.length+' '+diet+'-compatible alternatives in the same category. '+
-    'Items already in your basket are not shown.';
+    (SWAP_MODE==='combo'
+      ? 'Pick up to 3 replacements in the same category. Adjust quantities if you like, then apply.'
+      : ('Showing '+candidates.length+' '+diet+'-compatible alternatives in the same category. Items already in your basket are not shown.')
+    );
 
   var listEl = document.getElementById('swapModalList');
-  if(!candidates.length){
-    listEl.innerHTML = "<div style='padding:20px;text-align:center;color:var(--text2);font-size:13px'>No alternatives found for this diet and category.</div>";
-  } else {
-    listEl.innerHTML = candidates.map(function(c){
-      var qStr = formatQty(c.food, c.grams);
-      return "<div class='swap-option' onclick='doSwap(\"" +originalFid+ "\",\"" +c.food.id+ "\")'>"+
-        "<div style='font-size:22px;flex-shrink:0'>"+c.food.em+"</div>"+
-        "<div class='swap-option-name'>"+
-          "<div class='swap-option-food'>"+c.food.name+"</div>"+
-          "<div class='swap-option-meta'>"+
-            "<span style='color:var(--blue)'>"+c.pContrib+"g P</span> · "+
-            "<span style='color:var(--amber)'>"+c.cContrib+"g C</span> · "+
-            "<span style='color:var(--rose)'>"+c.fContrib+"g F</span> · "+
-            c.kcalContrib+" kcal"+
+  var tabsHtml =
+    "<div style='display:flex;gap:8px;margin-bottom:10px'>"+
+      "<button class='res-btn res-btn-outline' style='flex:1' onclick=\"setSwapMode('simple')\">⇄ Single</button>"+
+      (can.advancedReplace
+        ? "<button class='res-btn res-btn-amber' style='flex:1' onclick=\"setSwapMode('combo')\">✚ Combo</button>"
+        : "<button class='res-btn res-btn-outline' style='flex:1;opacity:.6' onclick=\"toast('Premium feature')\">✚ Combo</button>"
+      )+
+    "</div>";
+
+  if(SWAP_MODE === 'combo'){
+    if(!can.advancedReplace){
+      listEl.innerHTML = tabsHtml + "<div class='upgrade-nudge'>✚ <strong>Combo replacements</strong> are available on <strong>Premium</strong>. Upgrade to replace one item with up to 3 items and tune quantities.</div>";
+    } else {
+      var pickedIds = new Set(SWAP_COMBO.map(function(x){return x.food.id;}));
+      var pickerHtml = candidates.map(function(c){
+        var isSel = pickedIds.has(c.food.id);
+        return "<div class='swap-option' onclick='toggleComboPick(\""+c.food.id+"\")' style='border-color:"+(isSel?"var(--green)":"var(--border)")+";background:"+(isSel?"rgba(46,204,138,0.08)":"var(--navy)")+"'>"+
+          "<div style='font-size:22px;flex-shrink:0'>"+c.food.em+"</div>"+
+          "<div class='swap-option-name'>"+
+            "<div class='swap-option-food'>"+(isSel?"✓ ":"")+c.food.name+"</div>"+
+            "<div class='swap-option-meta'>"+
+              "<span style='color:var(--blue)'>"+c.pContrib+"g P</span> · "+
+              "<span style='color:var(--amber)'>"+c.cContrib+"g C</span> · "+
+              "<span style='color:var(--rose)'>"+c.fContrib+"g F</span> · "+
+              c.kcalContrib+" kcal"+
+            "</div>"+
           "</div>"+
-        "</div>"+
-        "<div class='swap-option-qty'>"+
-          "<div class='swap-option-qty-val'>"+qStr+"</div>"+
-          "<div class='swap-option-qty-note'>matched</div>"+
-        "</div>"+
-      "</div>";
-    }).join('');
+          "<div class='swap-option-qty'><div class='swap-option-qty-note'>pick</div></div>"+
+        "</div>";
+      }).join('');
+
+      var chosenHtml = SWAP_COMBO.length
+        ? "<div style='margin:12px 0 8px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3)'>Selected ("+SWAP_COMBO.length+"/3)</div>"+
+          SWAP_COMBO.map(function(x){
+            var qStr = formatQty(x.food, x.grams);
+            return "<div class='swap-option' style='cursor:default'>"+
+              "<div style='font-size:22px;flex-shrink:0'>"+x.food.em+"</div>"+
+              "<div class='swap-option-name'>"+
+                "<div class='swap-option-food'>"+x.food.name+"</div>"+
+                "<div class='swap-option-meta'>"+
+                  "<span style='color:var(--blue)'>"+Math.round(x.food.p/100*x.grams)+"g P</span> · "+
+                  "<span style='color:var(--amber)'>"+Math.round(x.food.c/100*x.grams)+"g C</span> · "+
+                  "<span style='color:var(--rose)'>"+Math.round(x.food.f/100*x.grams)+"g F</span> · "+
+                  Math.round(x.food.kcal/100*x.grams)+" kcal"+
+                "</div>"+
+              "</div>"+
+              "<div class='swap-option-qty' style='display:flex;gap:6px;align-items:center'>"+
+                "<button class='swap-btn' onclick=\"event.stopPropagation();adjustComboQty('"+x.food.id+"',-1)\">−</button>"+
+                "<div class='swap-option-qty-val'>"+qStr+"</div>"+
+                "<button class='swap-btn' onclick=\"event.stopPropagation();adjustComboQty('"+x.food.id+"',1)\">+</button>"+
+              "</div>"+
+            "</div>";
+          }).join('')
+        : "<div style='padding:12px;color:var(--text2);font-size:12px'>Pick 1–3 items above to build a combo replacement.</div>";
+
+      var actionsHtml =
+        "<div style='display:flex;gap:8px;margin-top:10px;flex-wrap:wrap'>"+
+          "<button class='res-btn res-btn-outline' onclick='autoFixCombo()'>Auto-fix</button>"+
+          "<button class='res-btn res-btn-amber' onclick='applyComboSwap()' "+(SWAP_COMBO.length? "":"disabled")+
+            " style='"+(SWAP_COMBO.length?"":"opacity:.5;cursor:not-allowed")+"'>Apply combo</button>"+
+        "</div>";
+
+      listEl.innerHTML = tabsHtml + chosenHtml + actionsHtml +
+        "<div style='margin-top:12px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3)'>Options</div>"+
+        pickerHtml;
+    }
+  } else {
+    if(!candidates.length){
+      listEl.innerHTML = tabsHtml + "<div style='padding:20px;text-align:center;color:var(--text2);font-size:13px'>No alternatives found for this diet and category.</div>";
+    } else {
+      listEl.innerHTML = tabsHtml + candidates.map(function(c){
+        var qStr = formatQty(c.food, c.grams);
+        return "<div class='swap-option' onclick='doSwap(\"" +originalFid+ "\",\"" +c.food.id+ "\")'>"+
+          "<div style='font-size:22px;flex-shrink:0'>"+c.food.em+"</div>"+
+          "<div class='swap-option-name'>"+
+            "<div class='swap-option-food'>"+c.food.name+"</div>"+
+            "<div class='swap-option-meta'>"+
+              "<span style='color:var(--blue)'>"+c.pContrib+"g P</span> · "+
+              "<span style='color:var(--amber)'>"+c.cContrib+"g C</span> · "+
+              "<span style='color:var(--rose)'>"+c.fContrib+"g F</span> · "+
+              c.kcalContrib+" kcal"+
+            "</div>"+
+          "</div>"+
+          "<div class='swap-option-qty'>"+
+            "<div class='swap-option-qty-val'>"+qStr+"</div>"+
+            "<div class='swap-option-qty-note'>matched</div>"+
+          "</div>"+
+        "</div>";
+      }).join('');
+    }
   }
 
   document.getElementById('swapModal').style.display='flex';
@@ -1642,6 +1941,7 @@ function openSwapModal(originalFid){
 
 function closeSwapModal(){
   document.getElementById('swapModal').style.display='none';
+  resetSwapState();
 }
 
 function doSwap(originalFid, replacementFid){
@@ -1705,10 +2005,10 @@ function acceptBasketChanges(){
   renderResults(G.basket);
   toast('✓ Shopping list updated with your recipe swaps');
 }
-function computePowderWarning(basket, diet){
+  function computePowderWarning(basket, diet){
   if(diet==='vegetarian'||diet==='vegan'){
     var powderItems = basket.items.filter(function(it){
-      return it.food.id==='protein_powder'||it.food.id==='plant_protein';
+      return it.food.id==='protein_powder';
     });
     var powderProtein = powderItems.reduce(function(s,it){return s+it.pContrib;},0);
     var totalProtein  = basket.actualP;
@@ -1862,8 +2162,7 @@ function init(){
   });
 
   // Ingredient focus/avoid — progressive tab UI
-  var ingNav  = document.getElementById('ingTabNav');
-  var picker  = document.getElementById('ingPicker');
+  var ingWizardRoot  = document.getElementById('ingWizard');
 
   function makeChip(fid){
     if(chipMap[fid]) return chipMap[fid]; // reuse if already made
@@ -1881,29 +2180,102 @@ function init(){
         G.avoid=G.avoid.filter(function(x){return x!==fid;});
         chip.classList.remove('sel-avoid');
       }
+      // Refresh wizard state (enables Next when user makes a choice)
+      renderIngWizard();
     });
     chipMap[fid]=chip;
     return chip;
   }
 
-  var activeTabId = ING_TABS[0].id;
+  var G_ING_STEP = 0;                // 0..4 (Proteins..Fats)
+  var G_ING_ACK  = {};               // { tabId: true } when user explicitly accepts auto-pick
 
-  ING_TABS.forEach(function(tab, ti){
-    // Tab button
-    var btn=document.createElement('button'); btn.className='ing-tab-btn'+(ti===0?' active':'');
-    btn.textContent=tab.label; btn.dataset.tab=tab.id;
-    btn.addEventListener('click',function(){
-      document.querySelectorAll('.ing-tab-btn').forEach(function(b){b.classList.remove('active');});
-      document.querySelectorAll('.ing-tab-pane').forEach(function(p){p.classList.remove('active');});
-      btn.classList.add('active');
-      document.getElementById(tab.id).classList.add('active');
-      activeTabId=tab.id;
+  function tabSelectionCount(tab){
+    var ids = [];
+    tab.cats.forEach(function(cat){ ids = ids.concat(cat.items); });
+    var set = new Set(ids);
+    var n = 0;
+    G.focus.forEach(function(fid){ if(set.has(fid)) n++; });
+    G.avoid.forEach(function(fid){ if(set.has(fid)) n++; });
+    return n;
+  }
+
+  function renderPowderToggle(container){
+    var powderToggleDiv = document.createElement('div');
+    powderToggleDiv.id = 'powderToggleBox';
+    powderToggleDiv.style.cssText = 'margin-top:18px;padding:14px;background:var(--navy3);border:1.5px solid var(--border2);border-radius:10px;';
+    container.appendChild(powderToggleDiv);
+
+    function updatePowderToggle(){
+      var isVegan = G.diet === 'vegan' || G.diet === 'vegetarian';
+      var powderLabel = isVegan ? '🌱 Add powder (1 scoop/day)' : '🥤 Add powder (1 scoop/day)';
+      var powderNote  = "Using <strong style='color:var(--text)'>whey/vegan protein powder</strong>.";
+      powderToggleDiv.innerHTML =
+        "<div style='font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--amber);margin-bottom:6px'>🥤 Protein Powder</div>"+
+        "<div style='font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:12px'>"+
+          "Whole foods are always preferred. If you want to top up with a daily shake, we'll reserve <strong style='color:var(--text)'>1 scoop/day (20g protein)</strong> for powder — freeing up the rest of your target for whole foods. "+powderNote+
+        "</div>"+
+        "<div style='display:flex;gap:8px'>"+
+          "<button id='powderBtnNone' class='powder-opt-btn"+(G.powderMode==='none'?' powder-opt-sel':'')+"' data-val='none'>🥩 Whole foods only</button>"+
+          "<button id='powderBtnInclude' class='powder-opt-btn"+(G.powderMode==='include'?' powder-opt-sel':'')+"' data-val='include'>"+powderLabel+"</button>"+
+        "</div>";
+
+      powderToggleDiv.querySelectorAll('.powder-opt-btn').forEach(function(b){
+        b.addEventListener('click', function(){
+          G.powderMode = b.dataset.val;
+          powderToggleDiv.querySelectorAll('.powder-opt-btn').forEach(function(x){ x.classList.remove('powder-opt-sel'); });
+          b.classList.add('powder-opt-sel');
+        });
+      });
+    }
+
+    updatePowderToggle();
+    document.querySelectorAll('.diet-card').forEach(function(card){
+      card.addEventListener('click', updatePowderToggle);
     });
-    ingNav.appendChild(btn);
+  }
 
-    // Tab pane
-    var pane=document.createElement('div'); pane.id=tab.id; pane.className='ing-tab-pane'+(ti===0?' active':'');
-    pane.innerHTML="<div class='ing-tab-hint'>Tap once to prioritise (green), again to avoid (red), again to clear.</div>";
+  function renderIngWizard(){
+    if(!ingWizardRoot) return;
+    ingWizardRoot.innerHTML = '';
+
+    var tab = ING_TABS[G_ING_STEP];
+    var selN = tabSelectionCount(tab);
+    var isAck = !!G_ING_ACK[tab.id];
+    var canNext = selN > 0 || isAck;
+
+    var wrap = document.createElement('div');
+    wrap.className = 'ing-wiz';
+
+    var head = document.createElement('div');
+    head.className = 'ing-wiz-head';
+    head.innerHTML =
+      "<div class='ing-wiz-kicker'>Category "+(G_ING_STEP+1)+" of "+ING_TABS.length+"</div>"+
+      "<div class='ing-wiz-title'>"+tab.label+"</div>"+
+      "<div class='ing-wiz-sub'>Pick a few favourites (green) and non‑favourites (red), or explicitly confirm you're happy to let the tool decide for this category.</div>";
+
+    var prog = document.createElement('div');
+    prog.className = 'ing-wiz-progress';
+    for(var i=0;i<ING_TABS.length;i++){
+      var dot = document.createElement('div');
+      dot.className = 'ing-wiz-dot'+(i===G_ING_STEP?' on':'')+(i<G_ING_STEP?' done':'');
+      if(i < G_ING_STEP){
+        dot.style.cursor = 'pointer';
+        (function(targetStep){
+          dot.addEventListener('click', function(){
+            G_ING_STEP = targetStep;
+            renderIngWizard();
+          });
+        })(i);
+      }
+      prog.appendChild(dot);
+    }
+    head.appendChild(prog);
+
+    var body = document.createElement('div');
+    body.className = 'ing-wiz-body';
+    body.innerHTML = "<div class='ing-tab-hint'>Tap once to prioritise (green), again to avoid (red), again to clear.</div>";
+
     tab.cats.forEach(function(cat){
       var div=document.createElement('div'); div.className='ing-cat';
       div.innerHTML="<div class='ing-cat-label'>"+cat.label+"</div><div class='chips'></div>";
@@ -1912,50 +2284,72 @@ function init(){
         var chip=makeChip(fid); if(!chip) return;
         ch.appendChild(chip);
       });
-      pane.appendChild(div);
+      body.appendChild(div);
     });
-    // For the proteins tab, append the powder toggle disclaimer
+
     if(tab.id === 'tab-proteins'){
-      var powderToggleDiv = document.createElement('div');
-      powderToggleDiv.id = 'powderToggleBox';
-      powderToggleDiv.style.cssText = 'margin-top:18px;padding:14px;background:var(--navy3);border:1.5px solid var(--border2);border-radius:10px;';
-      pane.appendChild(powderToggleDiv);
-
-      // Render toggle contents based on current diet
-      function updatePowderToggle(){
-        var isVegan = G.diet === 'vegan' || G.diet === 'vegetarian';
-        var powderLabel = isVegan ? '🌱 Add vegan powder (1 scoop/day)' : '🥤 Add whey powder (1 scoop/day)';
-        var powderNote  = isVegan
-          ? "Using <strong style='color:var(--text)'>plant-based protein powder</strong> — suitable for your diet."
-          : "Using <strong style='color:var(--text)'>whey protein powder</strong>.";
-        powderToggleDiv.innerHTML =
-          "<div style='font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--amber);margin-bottom:6px'>🥤 Protein Powder</div>"+
-          "<div style='font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:12px'>"+
-            "Whole foods are always preferred. If you want to top up with a daily shake, we'll reserve <strong style='color:var(--text)'>1 scoop/day (20g protein)</strong> for powder — freeing up the rest of your target for whole foods. "+powderNote+
-          "</div>"+
-          "<div style='display:flex;gap:8px'>"+
-            "<button id='powderBtnNone' class='powder-opt-btn"+(G.powderMode==='none'?' powder-opt-sel':'')+"' data-val='none'>🥩 Whole foods only</button>"+
-            "<button id='powderBtnInclude' class='powder-opt-btn"+(G.powderMode==='include'?' powder-opt-sel':'')+"' data-val='include'>"+powderLabel+"</button>"+
-          "</div>";
-
-        powderToggleDiv.querySelectorAll('.powder-opt-btn').forEach(function(b){
-          b.addEventListener('click', function(){
-            G.powderMode = b.dataset.val;
-            powderToggleDiv.querySelectorAll('.powder-opt-btn').forEach(function(x){ x.classList.remove('powder-opt-sel'); });
-            b.classList.add('powder-opt-sel');
-          });
-        });
-      }
-      updatePowderToggle();
-
-      // Re-render toggle label whenever diet changes
-      document.querySelectorAll('.diet-card').forEach(function(card){
-        card.addEventListener('click', updatePowderToggle);
-      });
+      renderPowderToggle(body);
     }
 
-    picker.appendChild(pane);
-  });
+    var actions = document.createElement('div');
+    actions.className = 'ing-wiz-actions';
+
+    var backBtn = document.createElement('button');
+    backBtn.type = 'button';
+    backBtn.className = 'ing-wiz-btn';
+    backBtn.textContent = '← Back';
+    backBtn.disabled = (G_ING_STEP === 0);
+    backBtn.addEventListener('click', function(){
+      if(G_ING_STEP > 0){ G_ING_STEP--; renderIngWizard(); }
+    });
+
+    var ack = document.createElement('div');
+    ack.className = 'ing-wiz-ack';
+    ack.innerHTML = (selN>0)
+      ? ("<strong>"+selN+"</strong> ingredient choice"+(selN===1?'':'s')+" in this category.")
+      : (isAck ? "Confirmed: you’re OK letting the tool decide for this category." : "To continue, either pick at least one ingredient, or tap <strong>OK — let the tool decide</strong>.");
+
+    var okBtn = document.createElement('button');
+    okBtn.type = 'button';
+    okBtn.className = 'ing-wiz-btn';
+    okBtn.textContent = isAck ? '✓ OK — tool can decide' : 'OK — let the tool decide';
+    okBtn.addEventListener('click', function(){
+      G_ING_ACK[tab.id] = true;
+      if(G_ING_STEP < ING_TABS.length-1){
+        G_ING_STEP++;
+        renderIngWizard();
+      } else {
+        renderIngWizard();
+        toast('✓ Preferences saved');
+      }
+    });
+
+    var nextBtn = document.createElement('button');
+    nextBtn.type = 'button';
+    nextBtn.className = 'ing-wiz-btn primary';
+    nextBtn.textContent = (G_ING_STEP === ING_TABS.length-1) ? 'Done ✓' : 'Next →';
+    nextBtn.disabled = !canNext;
+    nextBtn.addEventListener('click', function(){
+      if(!canNext) return;
+      if(G_ING_STEP < ING_TABS.length-1){ G_ING_STEP++; renderIngWizard(); }
+      else { toast('✓ Preferences saved'); }
+    });
+
+    actions.appendChild(backBtn);
+    actions.appendChild(ack);
+    actions.appendChild(okBtn);
+    actions.appendChild(nextBtn);
+
+    wrap.appendChild(head);
+    wrap.appendChild(body);
+    wrap.appendChild(actions);
+    ingWizardRoot.appendChild(wrap);
+
+    // Keep diet restrictions in sync for currently-rendered chips
+    applyDietRestrictions(G.diet);
+  }
+
+  renderIngWizard();
 
   // Apply initial diet restrictions (omnivore = nothing greyed out by default)
   applyDietRestrictions(G.diet);
@@ -2014,7 +2408,7 @@ var TASTE = {
   kidney_beans:    [0,0,0,1,1,1], edamame:        [1,0,0,1,2,1],
   peas:            [2,0,0,0,1,0], seitan:         [0,0,1,0,2,1],
   nutritional_yeast:[0,0,1,1,3,1],
-  protein_powder:  [1,0,1,0,0,0], plant_protein:  [1,0,0,0,0,0],
+  protein_powder:  [1,0,1,0,0,0],
   // Grains
   oats:            [1,0,0,0,0,1], brown_rice:     [0,0,0,0,0,0],
   white_rice:      [0,0,0,0,0,0], quinoa:         [0,0,0,1,0,0],
@@ -2231,7 +2625,7 @@ function getSpiceSuggestions(vec, existingIds){
 function roleOf(item){
   var dc = displayCat(item.food);
   var id = item.food.id;
-  if(id === 'protein_powder' || id === 'plant_protein') return 'shake';
+  if(id === 'protein_powder') return 'shake';
   if(dc === 'proteins') return 'protein';
   if(dc === 'carbs')    return 'base';
   if(dc === 'vegetables'){
@@ -2706,12 +3100,17 @@ function clusterByAffinity(proteins, bases, vegetables, fats, styles){
   // If there are leftover proteins with no compatible slot, add a virtual bowl
   // slot to absorb them (zero waste guarantee).
   if(neutralOverflowProteins.length > 0){
-    var bowlSlot = {styleId:'bowl', proteins:[], protGrams:{}, bases:[], vegetables:[], fats:[], isOverflow:true};
-    neutralOverflowProteins.forEach(function(it){
-      bowlSlot.proteins.push(it);
-      bowlSlot.protGrams[it.food.id] = it.grams;
+    var bowlCount = neutralOverflowProteins.length > 3 ? 2 : 1;
+    var bowlSlots = [];
+    for(var bi=0; bi<bowlCount; bi++){
+      bowlSlots.push({styleId:'bowl', proteins:[], protGrams:{}, bases:[], vegetables:[], fats:[], isOverflow:true});
+    }
+    neutralOverflowProteins.forEach(function(it, idx){
+      var target = bowlSlots[idx % bowlSlots.length];
+      target.proteins.push(it);
+      target.protGrams[it.food.id] = it.grams;
     });
-    slots.push(bowlSlot);
+    bowlSlots.forEach(function(bs){ slots.push(bs); });
   }
 
   // ── Step 2: Bases — apply subcat hard constraints ──────────────
@@ -2723,7 +3122,12 @@ function clusterByAffinity(proteins, bases, vegetables, fats, styles){
     var excluded = sub ? sub.excludedBases : [];
     var preferred = sub ? sub.preferredBases : [];
 
-    var eligible = unassignedB.filter(function(it){ return !excluded.includes(it.food.id); });
+    var eligible = unassignedB.filter(function(it){
+      if(excluded.includes(it.food.id)) return false;
+      // For non-bowl slots, keep at most one base anchor; extras go to bowl
+      if(!slot.isOverflow && slot.bases && slot.bases.length >= 1) return false;
+      return true;
+    });
     if(!eligible.length) eligible = unassignedB;
 
     var best = null, bestScore = -1;
@@ -2740,11 +3144,15 @@ function clusterByAffinity(proteins, bases, vegetables, fats, styles){
       var sub = getSubcat(slot.styleId, occurrencesBefore);
       var excluded = sub ? sub.excludedBases : [];
       if(excluded.includes(it.food.id)) return;
+      // Only allow multiple bases in overflow bowl slots
+      if(!slot.isOverflow && slot.bases && slot.bases.length >= 1) return;
       var preferred = sub ? sub.preferredBases : [];
       var s = styleAffinity(it.food.id, slot.styleId) + (preferred.includes(it.food.id) ? 2 : 0);
       if(s > bestScore){ bestScore=s; bestSlot=slot; }
     });
-    if(bestSlot) bestSlot.bases.push(it);
+    if(bestSlot){
+      bestSlot.bases.push(it);
+    }
   });
 
   // ── Step 3: Vegetables — gravity-based 70/30 distribution ──────
@@ -3130,7 +3538,7 @@ function buildMeals(basketItems, portions){
   // ── Shake card ────────────────────────────────────────────────
   if(shakeItems.length > 0){
     var shakeItem = shakeItems[0];
-    var isVeganPowder = shakeItem.food.id === 'plant_protein';
+    var isVeganPowder = (G.diet === 'vegan' || G.diet === 'vegetarian');
     var milkIds    = ['milk','oat_milk','soy_milk','almond_milk','greek_yogurt','kefir'];
     var shakeFatIds= ['peanut_butter','coconut_oil','tahini','almonds','cashews','walnuts'];
     var milkItem   = basketItems.find(function(it){ return milkIds.includes(it.food.id); });
@@ -3163,6 +3571,19 @@ function buildMeals(basketItems, portions){
     audit: {
       batch: batchProteins.concat(batchBases).concat(vegetables).concat(fats),
       quick: quickItems.concat(shakeItems),
+      overflow: (function(){
+        var overflowSlots = slots.filter(function(s){ return s.isOverflow; });
+        var pCount = 0, bCount = 0;
+        overflowSlots.forEach(function(s){
+          pCount += (s.proteins || []).length;
+          bCount += (s.bases || []).length;
+        });
+        return {
+          bowlCount: overflowSlots.length,
+          proteinCount: pCount,
+          baseCount: bCount,
+        };
+      })(),
     },
   };
 }
@@ -3519,7 +3940,20 @@ function renderMealPrep(){
     "</span>";
 
   // ── Basket audit panel ────────────────────────────────────────
-  var auditHtml = "<div style='max-width:800px;margin:14px auto 0;padding:0 16px'>"+
+  var overflow = audit && audit.overflow ? audit.overflow : {bowlCount:0, proteinCount:0, baseCount:0};
+  var needsBowlNote = overflow.bowlCount > 0 && (overflow.proteinCount > 0 || overflow.baseCount > 0);
+
+  var bowlNoteHtml = needsBowlNote
+    ? "<div style='margin:8px 16px 0;max-width:800px'>"+
+        "<div style='background:rgba(46,204,138,0.08);border:1px solid rgba(46,204,138,0.4);border-radius:10px;padding:10px 12px;font-size:11px;color:var(--teal);line-height:1.5'>"+
+          "🥣 <strong>Heads up:</strong> you’ve selected quite a few batch-friendly "+ 
+          "proteins and bases. To keep recipes practical, some ingredients will be grouped into one or more <strong>protein bowls</strong> instead of separate cooked dishes."+
+        "</div>"+
+      "</div>"
+    : "";
+
+  var auditHtml = bowlNoteHtml +
+    "<div style='max-width:800px;margin:14px auto 0;padding:0 16px'>"+
     "<div style='background:var(--navy2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:4px'>"+
       "<div style='padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between'>"+
         "<div style='font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text2)'>📦 Basket allocation</div>"+
