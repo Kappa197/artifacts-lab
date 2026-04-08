@@ -964,19 +964,12 @@ function applyTierGates(){
   }
 
   // ── Meal Prep button (Basic+) ──
+  // openMealPrep() already guards with can.mealPrep; just style the button visually
   var mpBtn = document.getElementById('mealPrepBtn');
   if(mpBtn){
-    if(!can.mealPrep){
-      mpBtn.style.opacity = '0.45';
-      mpBtn.style.cursor  = 'not-allowed';
-      mpBtn.title = 'Basic plan feature';
-      mpBtn.onclick = function(e){ e.stopPropagation(); showUpgradeHint('basic'); };
-    } else {
-      mpBtn.style.opacity = '';
-      mpBtn.style.cursor  = '';
-      mpBtn.title = '';
-      // real click handler re-attached in init()
-    }
+    mpBtn.style.opacity = can.mealPrep ? '' : '0.45';
+    mpBtn.style.cursor  = can.mealPrep ? '' : 'not-allowed';
+    mpBtn.title         = can.mealPrep ? '' : 'Upgrade to Basic to unlock Meal Prep';
   }
 
   // ── Swap buttons in basket rendered dynamically (can.swapBasket checked in renderResults)
@@ -2052,6 +2045,7 @@ function init(){
 
       // Render toggle contents based on current diet
       function updatePowderToggle(){
+        if(!can.proteinPowder) return; // Basic+ feature — don't overwrite lock overlay
         var isVegan = G.diet === 'vegan' || G.diet === 'vegetarian';
         var powderLabel = isVegan ? '🌱 Add vegan powder (1 scoop/day)' : '🥤 Add whey powder (1 scoop/day)';
         var powderNote  = isVegan
@@ -3479,9 +3473,9 @@ function renderWizardStep2(el){
     "<div style='display:flex;gap:8px;margin:14px 0;flex-wrap:wrap'>"+
     [2,3,4].map(function(n){
       var sel = n===G_BATCH_COUNT;
-      // Free: only 2. Basic: 2 or 3. Premium: 2, 3, or 4.
-      var locked = (n===4 && !can.recipes3or4) || (n===3 && TIER==='free');
-      var reqTier = (n===3 && TIER==='free') ? 'basic' : 'premium';
+      // Free & Basic: only 2. Premium: 2, 3, or 4.
+      var locked = (n >= 3 && !can.recipes3or4);
+      var reqTier = 'premium';
       var p = Math.max(2, Math.round((G_MEALS_PER_DAY * 7) / n));
       var borderCol = locked?"var(--border)":sel?"var(--amber)":"var(--border)";
       var bgCol = locked?"transparent":sel?"var(--amber-dim)":"transparent";
@@ -3501,8 +3495,7 @@ function renderWizardStep2(el){
 
 function setBatchCount(n){
   // Guard locked options
-  if(n === 4 && !can.recipes3or4){ showUpgradeHint('premium'); return; }
-  if(n === 3 && TIER === 'free'){ showUpgradeHint('basic'); return; }
+  if(n >= 3 && !can.recipes3or4){ showUpgradeHint('premium'); return; }
   G_BATCH_COUNT = n;
   // Reset style selection if more styles than batches
   if(G_STYLES.length > n) G_STYLES = G_STYLES.slice(0, n);
