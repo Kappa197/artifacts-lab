@@ -1480,7 +1480,7 @@ function renderResults(result){
   var actualKcal = Math.round(aP*4 + aC*4 + aF*9);
   var targetKcal = Math.round(tP*4 + tC*4 + tF*9);
   var microPriorityHTML = '';
-  if(G.micros.length){
+  if(G.micros.length && can.microPriority){
     microPriorityHTML = "<div class='micro-cov-section'>"+
       "<div class='micro-cov-title'>Micronutrient coverage (priority items)</div>"+
       G.micros.map(function(mid){
@@ -1504,7 +1504,8 @@ function renderResults(result){
     macroBar('Protein', aP, tP, 'g') +
     macroBar('Carbs',   aC, tC, 'g') +
     macroBar('Fat',     aF, tF, 'g') +
-    microPriorityHTML;
+    microPriorityHTML +
+    (!can.microPriority ? "<div class='upgrade-nudge'>&#128274; Micronutrient priority tracking is available on Basic and Premium plans. <a href='/login.html' style='color:var(--amber);font-weight:600;'>Upgrade &rarr;</a></div>" : '');
 
   // Basket by category — use displayCat() to map to the 5 tab-aligned buckets
   var bycat = {};

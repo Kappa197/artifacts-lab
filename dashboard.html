@@ -458,7 +458,7 @@ main {
         <div class="lock-overlay">&#128274;</div>
         <div class="tc-head">
           <div class="tc-icon">&#128200;</div>
-          <span class="tc-tier-tag tag-free">Free</span>
+          <span class="tc-tier-tag tag-free" id="tagRetire">Free</span>
         </div>
         <div class="tc-name">Retirement Calculator</div>
         <div class="tc-desc">Model your retirement across five life stages. Portfolio survival, withdrawal optimizer, and sequence-of-returns stress tests.</div>
@@ -503,7 +503,7 @@ main {
         <div class="lock-overlay">&#128274;</div>
         <div class="tc-head">
           <div class="tc-icon">&#128722;</div>
-          <span class="tc-tier-tag tag-free">Free</span>
+          <span class="tc-tier-tag tag-free" id="tagGrocery">Free</span>
         </div>
         <div class="tc-name">Grocery &amp; Meal Prep</div>
         <div class="tc-desc">Build smart grocery lists from your meal plan, organise by supermarket section and track what you need each week.</div>
@@ -514,7 +514,7 @@ main {
         <div class="lock-overlay">&#128274;</div>
         <div class="tc-head">
           <div class="tc-icon">&#129367;</div>
-          <span class="tc-tier-tag tag-free">Free</span>
+          <span class="tc-tier-tag tag-free" id="tagMeal">Free</span>
         </div>
         <div class="tc-name">Meal Planner</div>
         <div class="tc-desc">Generate a 1–6 week meal plan from 91 recipes matched to your calorie targets, dietary preferences and allergen exclusions.</div>
@@ -537,7 +537,7 @@ main {
         <div class="lock-overlay">&#128274;</div>
         <div class="tc-head">
           <div class="tc-icon">&#129328;</div>
-          <span class="tc-tier-tag tag-free">Free</span>
+          <span class="tc-tier-tag tag-free" id="tagPregnancy">Free</span>
         </div>
         <div class="tc-name">Pregnancy Roadmap</div>
         <div class="tc-desc">Week-by-week pregnancy tracker with wellness guide, kick counter, contraction timer, appointment log and partner share link.</div>
@@ -755,13 +755,20 @@ async function init() {
   // Tool gating
   const hasBasic = tier === 'basic' || tier === 'premium';
 
-  // Update tier tag labels to show actual plan name
+  // Update ALL tier tags to show the user's actual plan
   const planLabel = tier === 'premium' ? 'Premium' : tier === 'basic' ? 'Basic' : 'Free';
+  const planClass = tier === 'premium' ? 'tag-premium' : tier === 'basic' ? 'tag-basic' : 'tag-free';
+  // Free tools — show plan name (all tiers can use them)
+  ['tagRetire','tagMeal','tagPregnancy','tagGrocery'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = planLabel; el.className = 'tc-tier-tag ' + planClass; }
+  });
+  // Locked tools — show plan name if unlocked, otherwise show required tier
   ['tagExpense','tagWorkout'].forEach(id => {
     const el = document.getElementById(id);
     if (el) {
       el.textContent = hasBasic ? planLabel : 'Basic+';
-      el.className = 'tc-tier-tag ' + (tier === 'premium' ? 'tag-premium' : tier === 'basic' ? 'tag-basic' : 'tag-basic');
+      el.className = 'tc-tier-tag ' + (hasBasic ? planClass : 'tag-basic');
     }
   });
 
