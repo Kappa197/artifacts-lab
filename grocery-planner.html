@@ -890,8 +890,17 @@ var TIER = 'free', can = {};
 function buildCan(tier){
   TIER = tier;
   can = {
-    macroBasket: true,
-    microPriority: TIER !== 'free',
+    macroBasket:     true,
+    ingredientPrefs: true,
+    tdeeCalc:        TIER !== 'free',
+    microPriority:   TIER !== 'free',
+    proteinPowder:   TIER !== 'free',
+    mealPrep:        true,           // open to all tiers — gate is content depth
+    mealsPerDay4:    TIER === 'premium',
+    recipes3or4:     TIER === 'premium',
+    allStyles:       TIER === 'premium',
+    swapBasket:      TIER === 'premium',
+    swapMealPrep:    TIER === 'premium',
     advancedReplace: TIER === 'premium',
   };
 }
@@ -4132,17 +4141,7 @@ function getSubcat(styleId, occurrenceIdx){
 
 function startMealPrep(){
   if(!G.basket || !G.basket.items.length){ toast('Generate your basket first!'); return; }
-  if(!can.mealPrep){
-    // Show prominent upgrade nudge below the FAB
-    var nudge = document.getElementById('fabUpgradeNudge');
-    if(nudge){
-      nudge.style.display = 'block';
-      setTimeout(function(){ nudge.style.display='none'; }, 4000);
-    } else {
-      showUpgradeHint('basic');
-    }
-    return;
-  }
+  // mealPrep open to all tiers — recipe count limited by can.recipes3or4
   openMealPrep();
 }
 
