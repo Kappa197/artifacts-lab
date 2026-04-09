@@ -100,9 +100,9 @@ export default async function handler(req, res) {
 
   // Tier map
   const TIER_MAP = {
-    'price_1TKA8uF7k2b7X0MjLIXfd9Ou': { tier: 'basic',   days: 365   },
-    'price_1TKA9sF7k2b7X0Mj8OR0IxSN': { tier: 'premium', days: 365   },
-    'price_1TKAAFF7k2b7X0MjuLmz8NXC': { tier: 'premium', days: 36500 },
+    'price_1TKGNFF2GMbeYnZO6JsuHYdT': { tier: 'basic',   days: 365   },
+    'price_1TKGNEF2GMbeYnZOMTbvtLye': { tier: 'premium', days: 365   },
+    'price_1TKGNFF2GMbeYnZOBffzdLes': { tier: 'premium', days: 36500 },
   };
 
   try {
