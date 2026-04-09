@@ -4146,22 +4146,27 @@ function startMealPrep(){
 }
 
 function openMealPrep(){
-  // Hide FAB
   var fab = document.getElementById('mealPrepFab');
   if(fab) fab.style.display = 'none';
 
-  // Run matchmaking
   var selected = selectRecipes(G.basket.items);
   if(!selected.length){ toast('Not enough ingredients to match recipes. Add more items to your basket.'); return; }
 
-  var plan = buildMealPrepPlan(G.basket.items, selected);
-  G.mealPlan = plan;
+  // Store candidates for preview
+  G.mpCandidates = selected;
+  G.mpSwapCount  = 0; // track user swaps (max 2)
 
-  renderMealPrepPage(plan);
+  renderPreviewScreen(selected);
 
   document.getElementById('resultsPage').classList.remove('active');
   document.getElementById('mealPrepPage').classList.add('active');
   window.scrollTo(0,0);
+}
+
+function confirmMealPrep(candidates){
+  var plan = buildMealPrepPlan(G.basket.items, candidates);
+  G.mealPlan = plan;
+  renderMealPrepPage(plan);
 }
 
 
@@ -5127,13 +5132,28 @@ function selectRecipes(basketItems, n){
 
   var selected = [];
   var usedCategories = {};
+  // Track runners-up per category (up to 2 alternatives each)
+  var categoryAlts = {};
 
   scored.forEach(function(s){
-    if(selected.length >= n) return;
     if(s.score <= 0) return;
-    if(usedCategories[s.recipe.category]) return; // dedup by category
-    selected.push(s);
-    usedCategories[s.recipe.category] = true;
+    var cat = s.recipe.category;
+    if(!usedCategories[cat]){
+      if(selected.length < n){
+        selected.push(s);
+        usedCategories[cat] = true;
+        categoryAlts[cat] = [];
+      }
+    } else {
+      // Store as alternative for this category
+      if(!categoryAlts[cat]) categoryAlts[cat] = [];
+      if(categoryAlts[cat].length < 2) categoryAlts[cat].push(s);
+    }
+  });
+
+  // Attach alternatives to each winner
+  selected.forEach(function(s){
+    s.alternatives = categoryAlts[s.recipe.category] || [];
   });
 
   return selected;
@@ -5144,6 +5164,9 @@ function selectRecipes(basketItems, n){
 // ═══════════════════════════════════════════════════════════════
 
 // Smooth protein smoothie auto-sweep IDs
+
+// Fruit IDs auto-routed to Quick Fruit Snacks card
+var FRUIT_IDS = new Set(['banana','berries','apple','orange','mango','pineapple','kiwi','grapes','pear','peach','dates']);
 var SMOOTHIE_IDS = ['protein_powder','plant_protein','greek_yogurt','skyr','kefir','berries','banana','almond_milk','oat_milk','soy_milk','milk'];
 
 function buildMealPrepPlan(basketItems, selectedRecipes){
@@ -5214,122 +5237,321 @@ function buildMealPrepPlan(basketItems, selectedRecipes){
     }
   });
 
+  // Auto-sweep: fruit snacks
+  var fruitItems = [];
+  FRUIT_IDS.forEach(function(id){
+    if(inventory[id] && inventory[id] > 0){
+      fruitItems.push({ id:id, grams:Math.round(inventory[id]) });
+      delete inventory[id];
+    }
+  });
+
   // Power bowl: everything remaining
   var powerBowlItems = Object.keys(inventory).map(function(id){
     return { id:id, grams:Math.round(inventory[id]) };
-  }).filter(function(x){ return x.grams > 10; }); // skip trivial amounts
+  }).filter(function(x){ return x.grams > 10; });
 
   return {
     recipes: claimed,
     smoothie: smoothieItems,
+    fruit: fruitItems,
     powerBowl: powerBowlItems,
+    // State for premium bowl-to-recipe moves
+    bowlMoves: [],  // { id, grams, toRecipeIdx }
   };
 }
 
 
 // ─── MEAL PREP RENDER ────────────────────────────────────────
+
+// ─── MEAL PREP RENDER ────────────────────────────────────────────────────
+
 function getFoodName(id){
   var f = FOODS.find(function(x){ return x.id === id; });
   return f ? f.name : id.replace(/_/g,' ');
 }
 
+// ── Preview screen ────────────────────────────────────────────────────────
+function renderPreviewScreen(candidates){
+  // candidates = array of scored recipe objects with .alternatives[]
+  var MAX_SWAPS = 2;
+
+  function buildPreviewHTML(){
+    var swapsLeft = MAX_SWAPS - (window._mpSwapCount || 0);
+    var html = '<div style="padding:12px 16px 8px;max-width:760px;margin:0 auto">' +
+      '<div style="font-family:var(--serif);font-size:18px;font-weight:700;margin-bottom:4px">Your matched recipes</div>' +
+      '<div style="font-size:12px;color:var(--text2);margin-bottom:14px">These recipes best fit your basket. You can swap up to <strong style="color:var(--amber2)">' + MAX_SWAPS + '</strong> before confirming.' +
+        (swapsLeft < MAX_SWAPS ? ' <span style="color:var(--amber2);font-family:var(--mono);font-size:11px">('+swapsLeft+' swap'+(swapsLeft!==1?'s':'')+' remaining)</span>' : '') +
+      '</div>';
+
+    candidates.forEach(function(s, ci){
+      var r = s.recipe;
+      // Main protein from tier1
+      var proteinLabel = r.ingredients.tier1.length ? getFoodName(r.ingredients.tier1[0].id) : '';
+
+      html += '<div style="background:var(--navy2);border:2px solid var(--green);border-radius:12px;padding:14px;margin-bottom:10px">' +
+        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">' +
+          '<span style="font-size:26px">' + r.em + '</span>' +
+          '<div style="flex:1">' +
+            '<div style="font-weight:700;font-size:15px">' + r.name + '</div>' +
+            '<div style="font-family:var(--mono);font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-top:2px">' +
+              r.category + ' · ' + r.cookTime + ' min' +
+              (proteinLabel ? ' · ' + proteinLabel : '') +
+            '</div>' +
+          '</div>' +
+          '<span style="font-size:10px;padding:3px 10px;border-radius:20px;background:var(--green-dim);color:var(--green);font-family:var(--mono);font-weight:700;white-space:nowrap">✓ Best match</span>' +
+        '</div>';
+
+      // Alternatives
+      if(s.alternatives && s.alternatives.length){
+        html += '<div style="font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);margin-bottom:6px">Alternatives for this slot:</div>' +
+          '<div style="display:flex;flex-direction:column;gap:6px">';
+        s.alternatives.forEach(function(alt, ai){
+          var ar = alt.recipe;
+          var altProtein = ar.ingredients.tier1.length ? getFoodName(ar.ingredients.tier1[0].id) : '';
+          var canSwap = swapsLeft > 0;
+          html += '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--navy3);border:1px solid var(--border);border-radius:8px;opacity:' + (canSwap?'1':'0.45') + '">' +
+            '<span style="font-size:16px">' + ar.em + '</span>' +
+            '<div style="flex:1">' +
+              '<div style="font-size:12px;font-weight:600">' + ar.name + '</div>' +
+              (altProtein ? '<div style="font-size:10px;color:var(--text3)">' + altProtein + '</div>' : '') +
+            '</div>' +
+            '<button ' + (canSwap ? 'onclick="swapPreviewRecipe('+ci+','+ai+')"' : 'disabled') + ' style="padding:5px 12px;border-radius:20px;border:1.5px solid ' + (canSwap?'var(--amber)':'var(--border)') + ';background:transparent;color:' + (canSwap?'var(--amber2)':'var(--text3)') + ';font-size:11px;font-weight:600;cursor:' + (canSwap?'pointer':'not-allowed') + ';font-family:inherit;white-space:nowrap">' +
+              (canSwap ? '⇄ Use this' : '🔒 No swaps left') +
+            '</button>' +
+          '</div>';
+        });
+        html += '</div>';
+      }
+      html += '</div>';
+    });
+
+    html += '<button onclick="confirmMealPrep(window._mpCandidates)" style="width:100%;margin-top:8px;padding:16px;background:var(--green);color:#fff;border:none;border-radius:12px;font-family:var(--body);font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(46,204,138,.3)">✓ Confirm &amp; Build Meal Plan</button>' +
+    '</div>';
+
+    return html;
+  }
+
+  window._mpCandidates  = candidates;
+  window._mpSwapCount   = 0;
+  document.getElementById('mpWizard').innerHTML    = buildPreviewHTML();
+  document.getElementById('mpBody').innerHTML      = '';
+  document.getElementById('mpPrepOrder').innerHTML = '';
+  document.getElementById('mealPrepSub').textContent = 'Review your matched recipes';
+}
+
+window.swapPreviewRecipe = function(candidateIdx, altIdx){
+  var candidates = window._mpCandidates;
+  var winner = candidates[candidateIdx];
+  var alt    = winner.alternatives[altIdx];
+  if(!alt) return;
+  if(window._mpSwapCount >= 2){ toast('Maximum 2 swaps reached.'); return; }
+
+  // Swap winner ↔ alt, move winner into alt's alternatives
+  var oldWinner = { recipe: winner.recipe, score: winner.score, matches: winner.matches, alternatives: [] };
+  candidates[candidateIdx] = {
+    recipe:       alt.recipe,
+    score:        alt.score,
+    matches:      alt.matches,
+    alternatives: [oldWinner].concat(winner.alternatives.filter(function(a){ return a.recipe.id !== alt.recipe.id; })).slice(0,2),
+  };
+
+  window._mpSwapCount++;
+  document.getElementById('mpWizard').innerHTML = renderPreviewScreen._buildHTML
+    ? renderPreviewScreen._buildHTML()
+    : (function(){ renderPreviewScreen(candidates); return ''; })();
+  // Re-render preview
+  renderPreviewScreen(candidates);
+};
+
+// ── Full meal prep results page ────────────────────────────────────────────
 function renderMealPrepPage(plan){
-  var sub = plan.recipes.length + ' recipes matched from your basket';
-  document.getElementById('mealPrepSub').textContent = sub;
+  document.getElementById('mealPrepSub').textContent = plan.recipes.length + ' recipes · tap each to expand';
+  document.getElementById('mpWizard').innerHTML = '';
+  document.getElementById('mpPrepOrder').innerHTML = '';
 
   var html = '';
 
-  // ── Recipe cards ──────────────────────────────────────────
-  plan.recipes.forEach(function(entry, i){
+  // Recipe cards
+  plan.recipes.forEach(function(entry, ri){
     var r = entry.recipe;
-    var claimedList = entry.ingredients.map(function(ci){
-      var subNote = ci.isSub ? ' <span style="font-size:10px;color:var(--amber);font-family:var(--mono)">(sub for '+ci.label+')</span>' : '';
-      return '<li style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:baseline">'+
-        '<span>'+getFoodName(ci.id)+subNote+'</span>'+
-        '<span style="font-family:var(--mono);font-size:11px;color:var(--amber2);flex-shrink:0;margin-left:8px">'+ci.qty+'g</span>'+
+
+    var claimedList = entry.ingredients.filter(function(ci){ return ci.qty > 0; }).map(function(ci){
+      var subNote = ci.isSub ? ' <span style="font-size:10px;color:var(--amber);font-family:var(--mono)">(sub for '+getFoodName(ci.label)+')</span>' : '';
+      return '<li style="font-size:12px;padding:5px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">' +
+        '<span>'+getFoodName(ci.id)+subNote+'</span>' +
+        '<span style="font-family:var(--mono);font-size:11px;color:var(--amber2);flex-shrink:0;margin-left:8px">'+ci.qty+'g</span>' +
+      '</li>';
+    }).join('');
+
+    // Premium: added-from-bowl ingredients
+    var addedList = (entry.addedFromBowl || []).map(function(item){
+      return '<li style="font-size:12px;padding:5px 0;border-bottom:1px dashed var(--border);display:flex;justify-content:space-between;align-items:center" id="bowladd-'+ri+'-'+item.id+'">' +
+        '<span style="color:var(--teal)">➕ '+getFoodName(item.id)+'</span>' +
+        '<div style="display:flex;align-items:center;gap:8px">' +
+          '<span style="font-family:var(--mono);font-size:11px;color:var(--teal);flex-shrink:0">'+item.grams+'g</span>' +
+          (can.swapMealPrep ? '<button data-ri="'+ri+'" data-id="'+item.id+'" onclick="moveBowlIngBack(parseInt(this.dataset.ri),this.dataset.id)" style="font-size:10px;padding:2px 8px;border-radius:10px;border:1px solid var(--rose);background:transparent;color:var(--rose);cursor:pointer;font-family:inherit">× remove</button>' : '') +
+        '</div>' +
       '</li>';
     }).join('');
 
     var stepsList = r.steps.map(function(s,si){
-      return '<li style="font-size:12px;color:var(--text2);padding:4px 0;display:flex;gap:8px">'+
-        '<span style="width:18px;height:18px;border-radius:50%;background:var(--amber);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">'+(si+1)+'</span>'+
+      return '<li style="font-size:12px;color:var(--text2);padding:5px 0;display:flex;gap:8px">' +
+        '<span style="width:18px;height:18px;border-radius:50%;background:var(--amber);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">'+(si+1)+'</span>' +
         '<span>'+s+'</span></li>';
     }).join('');
 
     var carbNote = '';
     if(r.carb_modular && r.ingredients.carb){
       var carbId = entry.matches.carb || r.ingredients.carb.id;
-      carbNote = '<div style="font-size:11px;color:var(--text3);margin-top:6px;font-style:italic">Serve with: '+getFoodName(carbId)+' ('+r.ingredients.carb.qty+'g)</div>';
+      carbNote = '<div style="font-size:11px;color:var(--text3);margin:6px 0;font-style:italic">Serve with: '+getFoodName(carbId)+' ('+r.ingredients.carb.qty+'g)</div>';
     }
 
-    html += '<div style="background:var(--navy2);border:1px solid var(--border);border-radius:12px;padding:18px;margin:12px 16px">'+
-      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">'+
-        '<span style="font-size:28px">'+r.em+'</span>'+
-        '<div>'+
-          '<div style="font-family:var(--serif);font-size:17px;font-weight:700">'+r.name+'</div>'+
-          '<div style="font-family:var(--mono);font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-top:2px">'+
-            r.category+' · '+r.cookTime+' min · serves '+r.serves+
-          '</div>'+
-        '</div>'+
-      '</div>'+
-      carbNote+
-      '<details style="margin-top:10px">'+
-        '<summary style="font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--green);cursor:pointer;user-select:none">'+
-          '🛒 Claimed from basket ('+entry.ingredients.length+' items)'+
-        '</summary>'+
-        '<ul style="list-style:none;margin-top:8px">'+claimedList+'</ul>'+
-      '</details>'+
-      '<details style="margin-top:8px">'+
-        '<summary style="font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--amber);cursor:pointer;user-select:none">'+
-          '👨‍🍳 Instructions'+
-        '</summary>'+
-        '<ul style="list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:4px">'+stepsList+'</ul>'+
-        (r.tip ? '<div style="margin-top:10px;padding:10px;background:var(--navy3);border-left:3px solid var(--green);border-radius:0 8px 8px 0;font-size:11px;color:var(--text2);font-style:italic">💡 '+r.tip+'</div>' : '')+
-      '</details>'+
+    var allClaimed = entry.ingredients.filter(function(ci){ return ci.qty>0; }).length
+                   + (entry.addedFromBowl||[]).length;
+
+    html += '<div style="background:var(--navy2);border:1px solid var(--border);border-radius:12px;padding:18px;margin:12px 16px" id="recipe-card-'+ri+'">' +
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">' +
+        '<span style="font-size:28px">'+r.em+'</span>' +
+        '<div>' +
+          '<div style="font-family:var(--serif);font-size:17px;font-weight:700">'+r.name+'</div>' +
+          '<div style="font-family:var(--mono);font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-top:2px">'+r.category+' · '+r.cookTime+' min · serves '+r.serves+'</div>' +
+        '</div>' +
+      '</div>' +
+      carbNote +
+      '<details style="margin-top:10px">' +
+        '<summary style="font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--green);cursor:pointer;user-select:none">🛒 Claimed from basket ('+allClaimed+' items)</summary>' +
+        '<ul style="list-style:none;margin-top:8px">'+claimedList+addedList+'</ul>' +
+      '</details>' +
+      '<details style="margin-top:8px">' +
+        '<summary style="font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--amber);cursor:pointer;user-select:none">👨‍🍳 Instructions</summary>' +
+        '<ul style="list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:4px">'+stepsList+'</ul>' +
+        (r.tip ? '<div style="margin-top:10px;padding:10px;background:var(--navy3);border-left:3px solid var(--green);border-radius:0 8px 8px 0;font-size:11px;color:var(--text2);font-style:italic">💡 '+r.tip+'</div>' : '') +
+      '</details>' +
     '</div>';
   });
 
-  // ── Protein Smoothie ─────────────────────────────────────
+  // Protein Smoothie
   if(plan.smoothie.length){
     var smoothieList = plan.smoothie.map(function(item){
-      return '<li style="font-size:12px;padding:4px 0;display:flex;justify-content:space-between">'+
-        '<span>'+getFoodName(item.id)+'</span>'+
-        '<span style="font-family:var(--mono);font-size:11px;color:var(--teal);flex-shrink:0;margin-left:8px">'+item.grams+'g</span>'+
+      return '<li style="font-size:12px;padding:4px 0;display:flex;justify-content:space-between">' +
+        '<span>'+getFoodName(item.id)+'</span>' +
+        '<span style="font-family:var(--mono);font-size:11px;color:var(--teal);flex-shrink:0;margin-left:8px">'+item.grams+'g</span>' +
       '</li>';
     }).join('');
-    html += '<div style="background:var(--navy2);border:1px solid var(--teal);border-radius:12px;padding:18px;margin:12px 16px">'+
-      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">'+
-        '<span style="font-size:24px">🥤</span>'+
-        '<div style="font-family:var(--serif);font-size:16px;font-weight:700">Protein Smoothie</div>'+
-      '</div>'+
-      '<div style="font-size:11px;color:var(--text3);margin-bottom:10px">Auto-assembled from remaining powder, dairy &amp; fruit in your basket.</div>'+
-      '<ul style="list-style:none">'+smoothieList+'</ul>'+
-      '<div style="font-size:11px;color:var(--text2);margin-top:8px;font-style:italic">Blend all ingredients with ice. Adjust liquid to preferred consistency.</div>'+
+    html += '<div style="background:var(--navy2);border:1px solid var(--teal);border-radius:12px;padding:18px;margin:12px 16px">' +
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">🥤</span><div style="font-family:var(--serif);font-size:16px;font-weight:700">Protein Smoothie</div></div>' +
+      '<div style="font-size:11px;color:var(--text3);margin-bottom:10px">Auto-assembled from remaining powder, dairy &amp; soft fruit.</div>' +
+      '<ul style="list-style:none">'+smoothieList+'</ul>' +
+      '<div style="font-size:11px;color:var(--text2);margin-top:8px;font-style:italic">Blend with ice. Adjust liquid to taste.</div>' +
     '</div>';
   }
 
-  // ── Power Bowl ───────────────────────────────────────────
-  if(plan.powerBowl.length){
-    var bowlList = plan.powerBowl.map(function(item){
-      return '<li style="font-size:12px;padding:4px 0;display:flex;justify-content:space-between">'+
-        '<span>'+getFoodName(item.id)+'</span>'+
-        '<span style="font-family:var(--mono);font-size:11px;color:var(--purple);flex-shrink:0;margin-left:8px">'+item.grams+'g</span>'+
+  // Quick Fruit Snacks
+  if(plan.fruit && plan.fruit.length){
+    var fruitList = plan.fruit.map(function(item){
+      return '<li style="font-size:12px;padding:4px 0;display:flex;justify-content:space-between">' +
+        '<span>'+getFoodName(item.id)+'</span>' +
+        '<span style="font-family:var(--mono);font-size:11px;color:var(--green);flex-shrink:0;margin-left:8px">'+item.grams+'g</span>' +
       '</li>';
     }).join('');
-    html += '<div style="background:var(--navy2);border:1px solid var(--purple);border-radius:12px;padding:18px;margin:12px 16px">'+
-      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">'+
-        '<span style="font-size:24px">🥣</span>'+
-        '<div style="font-family:var(--serif);font-size:16px;font-weight:700">Power Bowl</div>'+
-      '</div>'+
-      '<div style="font-size:11px;color:var(--text3);margin-bottom:10px">Everything remaining in your basket — roast or assemble as a flexible bowl.</div>'+
-      '<ul style="list-style:none">'+bowlList+'</ul>'+
+    html += '<div style="background:var(--navy2);border:1px solid var(--green);border-radius:12px;padding:18px;margin:12px 16px">' +
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">🍎</span><div style="font-family:var(--serif);font-size:16px;font-weight:700">Quick Fruit Snacks</div></div>' +
+      '<div style="font-size:11px;color:var(--text3);margin-bottom:10px">Eat fresh through the week, add to yogurt bowls, or blend into smoothies.</div>' +
+      '<ul style="list-style:none">'+fruitList+'</ul>' +
+    '</div>';
+  }
+
+  // Power Bowl
+  if(plan.powerBowl.length){
+    var bowlItems = plan.powerBowl.filter(function(item){
+      return !(plan.bowlMoves||[]).some(function(m){ return m.id===item.id; });
+    });
+
+    var bowlList = bowlItems.map(function(item){
+      var moveBtn = can.swapMealPrep
+      var moveBtn = can.swapMealPrep
+        ? '<button data-id="'+item.id+'" data-grams="'+item.grams+'" onclick="openBowlMovePicker(this.dataset.id,parseInt(this.dataset.grams))" style="font-size:10px;padding:3px 10px;border-radius:12px;border:1px solid var(--amber);background:transparent;color:var(--amber2);cursor:pointer;font-family:inherit;margin-left:8px;white-space:nowrap">→ add to recipe</button>'
+        : '<span style="font-size:10px;color:var(--text3);margin-left:8px" title="Premium: move to recipe">🔒</span>';
+      return '<li style="font-size:12px;padding:6px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">' +
+        '<span>'+getFoodName(item.id)+'</span>' +
+        '<div style="display:flex;align-items:center;flex-shrink:0">' +
+          '<span style="font-family:var(--mono);font-size:11px;color:var(--purple)">'+item.grams+'g</span>' +
+          moveBtn +
+        '</div>' +
+      '</li>';
+    }).join('');
+
+    html += '<div style="background:var(--navy2);border:1px solid var(--purple);border-radius:12px;padding:18px;margin:12px 16px" id="power-bowl-card">' +
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">🥣</span><div style="font-family:var(--serif);font-size:16px;font-weight:700">Power Bowl</div></div>' +
+      '<div style="font-size:11px;color:var(--text3);margin-bottom:10px">Everything remaining — roast or assemble as a flexible bowl.' +
+        (can.swapMealPrep ? ' <span style="color:var(--amber2)">Tap → to move any item into a recipe.</span>' : ' <span style="color:var(--text3)">Upgrade to Premium to move items into recipes.</span>') +
+      '</div>' +
+      '<ul style="list-style:none" id="power-bowl-list">'+bowlList+'</ul>' +
     '</div>';
   }
 
   document.getElementById('mpBody').innerHTML = html;
-  document.getElementById('mpWizard').innerHTML = '';
-  document.getElementById('mpPrepOrder').innerHTML = '';
+
+  // Bowl move picker modal (created dynamically)
+  if(!document.getElementById('bowlMoveModal')){
+    var modal = document.createElement('div');
+    modal.id = 'bowlMoveModal';
+    modal.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:flex-end;justify-content:center';
+    modal.innerHTML =
+      '<div style="background:var(--navy2);border-radius:16px 16px 0 0;padding:20px;width:100%;max-width:500px;max-height:60vh;overflow-y:auto">' +
+        '<div style="font-family:var(--serif);font-size:16px;font-weight:700;margin-bottom:4px">Add to which recipe?</div>' +
+        '<div style="font-size:12px;color:var(--text2);margin-bottom:16px" id="bowlMoveIngLabel"></div>' +
+        '<div id="bowlMoveRecipeList" style="display:flex;flex-direction:column;gap:8px"></div>' +
+        '<button onclick="closeBowlMoveModal()" style="width:100%;margin-top:14px;padding:12px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:inherit;font-size:13px;cursor:pointer">Cancel</button>' +
+      '</div>';
+    document.body.appendChild(modal);
+  }
 }
+
+// Bowl → Recipe move functions
+window.openBowlMovePicker = function(ingId, grams){
+  if(!can.swapMealPrep){ showUpgradeHint('premium'); return; }
+  var modal = document.getElementById('bowlMoveModal');
+  var plan = G.mealPlan;
+  document.getElementById('bowlMoveIngLabel').textContent = 'Moving: ' + getFoodName(ingId) + ' (' + grams + 'g)';
+  var listEl = document.getElementById('bowlMoveRecipeList');
+  listEl.innerHTML = plan.recipes.map(function(entry, ri){
+    return '<button data-id="'+ingId+'" data-grams="'+grams+'" data-ri="'+ri+'" onclick="moveBowlToRecipe(this.dataset.id,parseInt(this.dataset.grams),parseInt(this.dataset.ri))" style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);background:var(--navy3);cursor:pointer;font-family:inherit;text-align:left;width:100%">' +
+      '<span style="font-size:20px">'+entry.recipe.em+'</span>' +
+      '<span style="font-size:13px;font-weight:600;color:var(--text)">'+entry.recipe.name+'</span>' +
+    '</button>';
+  }).join('');
+  modal.style.display = 'flex';
+};
+
+window.closeBowlMoveModal = function(){
+  document.getElementById('bowlMoveModal').style.display = 'none';
+};
+
+window.moveBowlToRecipe = function(ingId, grams, recipeIdx){
+  var plan = G.mealPlan;
+  // Add to recipe's addedFromBowl array
+  if(!plan.recipes[recipeIdx].addedFromBowl) plan.recipes[recipeIdx].addedFromBowl = [];
+  plan.recipes[recipeIdx].addedFromBowl.push({ id:ingId, grams:grams });
+  // Track in bowlMoves
+  plan.bowlMoves.push({ id:ingId, grams:grams, toRecipeIdx:recipeIdx });
+  closeBowlMoveModal();
+  // Re-render results page
+  renderMealPrepPage(plan);
+  toast('✓ ' + getFoodName(ingId) + ' moved to ' + plan.recipes[recipeIdx].recipe.name);
+};
+
+window.moveBowlIngBack = function(recipeIdx, ingId){
+  var plan = G.mealPlan;
+  // Remove from recipe addedFromBowl
+  plan.recipes[recipeIdx].addedFromBowl = (plan.recipes[recipeIdx].addedFromBowl||[]).filter(function(x){ return x.id!==ingId; });
+  // Remove from bowlMoves
+  plan.bowlMoves = (plan.bowlMoves||[]).filter(function(m){ return !(m.id===ingId && m.toRecipeIdx===recipeIdx); });
+  renderMealPrepPage(plan);
+  toast(getFoodName(ingId) + ' moved back to Power Bowl');
+};
+
 
 window.addEventListener('load', initTier);
 </script>
