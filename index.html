@@ -65,7 +65,7 @@
 }
 
 *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: auto; }
 
 body {
   font-family: var(--body);
@@ -233,7 +233,7 @@ nav {
 /* ═══════════════════════════════════════ HERO */
 .hero {
   position: relative;
-  min-height: 100vh;
+  min-height: 100svh;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   text-align: center;
@@ -1134,7 +1134,7 @@ footer {
   </p>
 
   <div class="hero-actions">
-    <a href="#early-access" class="btn-primary">
+    <a href="login.html" class="btn-primary">
       ✦ Get Free Access
     </a>
     <a href="#tools" class="btn-ghost">
@@ -1287,10 +1287,12 @@ footer {
         <ul class="price-features">
           <li><div class="pf-check pf-yes">✓</div>Retirement Calculator (lite)</li>
           <li><div class="pf-check pf-yes">✓</div>Meal Planner (1-week plan)</li>
+          <li><div class="pf-check pf-yes">✓</div>Expense Tracker</li>
+          <li><div class="pf-check pf-yes">✓</div>Workout Planner</li>
+          <li><div class="pf-check pf-yes">✓</div>Grocery and Meal prepping</li>
+          <li><div class="pf-check pf-yes">✓</div>Pregnancy Roadmap</li>
           <li><div class="pf-check pf-yes">✓</div>Works offline after first load</li>
           <li><div class="pf-check pf-yes">✓</div>Your data stays on your device</li>
-          <li><div class="pf-check pf-no">—</div>Expense Tracker</li>
-          <li><div class="pf-check pf-no">—</div>Workout Planner</li>
           <li><div class="pf-check pf-no">—</div>Multi-week plans &amp; shopping list</li>
           <li><div class="pf-check pf-no">—</div>Advanced retirement modelling</li>
         </ul>
@@ -1337,6 +1339,7 @@ footer {
           <li><div class="pf-check pf-yes">✓</div>Unlimited transaction history</li>
           <li><div class="pf-check pf-yes">✓</div>PDF report export</li>
           <li><div class="pf-check pf-yes">✓</div>Yearly financial summary</li>
+	  <li><div class="pf-check pf-lock">★</div>AI features</li>
           <li><div class="pf-check pf-lock">★</div>Priority access to new tools</li>
         </ul>
         <a href="login.html" class="price-btn price-btn-premium">Get Premium — $49/yr</a>
@@ -1371,7 +1374,7 @@ footer {
 
       <div class="faq-item">
         <button class="faq-question" onclick="toggleFaq(this, event)">Is it really free?<span class="faq-icon">+</span></button>
-        <div class="faq-answer">Yes — the Retirement Calculator and Meal Planner are free forever, no account required. Basic unlocks all tools for $8/year. Premium adds advanced features for $29/year or $49 lifetime.</div>
+        <div class="faq-answer">Yes — the Retirement Calculator and Meal Planner are free forever, no account required. Basic unlocks all tools for $9/year. Premium adds advanced features for $49/year or $99 lifetime.</div>
       </div>
 
       <div class="faq-item">
