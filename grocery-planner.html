@@ -583,7 +583,7 @@ input[type=range]:active::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(212,146
     <div class="results-actions">
       <button class="res-btn res-btn-outline" id="backBtn2">← Adjust</button>
       <button class="res-btn res-btn-outline" id="copyBtn">📋 Copy</button>
-      <button class="res-btn res-btn-outline" id="mealPrepBtn">🍳 Meal Prep</button>
+      
       <button class="res-btn res-btn-amber" id="regenBtn">🔄 Regenerate</button>
     </div>
   </div>
@@ -650,6 +650,20 @@ input[type=range]:active::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(212,146
 <div class="toast" id="toast"></div>
 
 <!-- App loader -->
+<div id="mealPrepFab" style="display:none;position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:130;">
+  <button onclick="startMealPrep()" style="
+    display:flex;align-items:center;gap:10px;
+    padding:14px 24px;border-radius:40px;
+    background:linear-gradient(135deg,var(--green),#1db870);
+    border:none;cursor:pointer;
+    box-shadow:0 6px 28px rgba(46,204,138,.45);
+    font-family:var(--body);font-size:14px;font-weight:700;color:#fff;
+    white-space:nowrap;transition:transform .2s,box-shadow .2s;
+  " onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform=''">
+    🍳 Save grocery &amp; start Meal Prepping
+  </button>
+</div>
+
 <div id="appLoader" style="display:none;position:fixed;inset:0;background:var(--navy);z-index:999;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
   <div style="font-size:40px">🌿</div>
   <div style="font-family:var(--mono);font-size:0.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text3)">Loading…</div>
@@ -933,6 +947,8 @@ var G_MEALS_PER_DAY = 3;  // 2 or 3
 var G_BATCH_COUNT   = 3;  // 2, 3, or 4 distinct batch recipes
 var G_PORTIONS      = 5;  // auto-calculated; updated in applyStyles()
 var G_WIZARD_STEP   = 1;  // 1=meals/day, 2=batch count, 3=style+subcat
+var G_MP_REMOVED = {};    // { mealId: { foodId: true } }
+var G_MP_MOVES   = {};    // { "mealId|foodId": targetMealId }
 
 function toast(msg){ var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(function(){t.classList.remove('show');},2800); }
 
@@ -1625,6 +1641,8 @@ function renderResults(result){
               "<div class='basket-food-name'>"+
                 it.food.em+" "+it.food.name+
                 "<button class='swap-btn' onclick=\"event.stopPropagation();openSwapModal('"+fid+"')\">⇄ swap</button>"+
+                "<button class='swap-btn' onclick=\"event.stopPropagation();removeBasketItem('"+fid+"')\">✕ remove</button>"+
+                "<button class='swap-btn' onclick=\"event.stopPropagation();autoFixBasket('"+fid+"')\">🛠 auto-fix</button>"+
               "</div>"+
               "<div class='basket-macro-pills'>"+
                 "<span class='mpill mpill-p'>"+it.pContrib+"g prot</span>"+
@@ -1633,7 +1651,11 @@ function renderResults(result){
               "</div>"+
             "</div>"+
             "<div class='basket-qty'>"+
-              "<div class='basket-qty-val'>"+qStr+"</div>"+
+              "<div style='display:flex;align-items:center;justify-content:flex-end;gap:6px'>"+
+                "<button class='swap-btn' style='margin-left:0;padding:2px 8px' onclick=\"event.stopPropagation();adjustBasketQty('"+fid+"',-1)\">−</button>"+
+                "<div class='basket-qty-val'>"+qStr+"</div>"+
+                "<button class='swap-btn' style='margin-left:0;padding:2px 8px' onclick=\"event.stopPropagation();adjustBasketQty('"+fid+"',1)\">+</button>"+
+              "</div>"+
               "<div class='basket-qty-unit'>"+Math.round(it.kcalContrib)+' kcal</div>'+
             "</div>"+
           "</div>";
@@ -1642,6 +1664,9 @@ function renderResults(result){
     "</div>";
   });
   document.getElementById('basketSection').innerHTML = basketHTML;
+  // Show meal prep FAB
+  var fab = document.getElementById('mealPrepFab');
+  if(fab) fab.style.display = can.mealPrep ? 'block' : 'none';
 }
 
 
@@ -1673,6 +1698,108 @@ function recomputeBasketTotals(){
   G.basket.actualC=G.basket.items.reduce(function(s,it){return s+it.cContrib;},0);
   G.basket.actualF=G.basket.items.reduce(function(s,it){return s+it.fContrib;},0);
   G.basket.powderWarning = computePowderWarning(G.basket, G.diet);
+}
+
+function basketStepForItem(it){
+  var dc = displayCat(it.food);
+  return dc === 'proteins' ? 50 : dc === 'carbs' ? 100 : 10;
+}
+
+function recalcItem(it){
+  it.pContrib = Math.round(it.food.p/100 * it.grams);
+  it.cContrib = Math.round(it.food.c/100 * it.grams);
+  it.fContrib = Math.round(it.food.f/100 * it.grams);
+  it.kcalContrib = Math.round(it.food.kcal/100 * it.grams);
+}
+
+function rebalanceBasketToTargets(lockFid){
+  if(!G.basket || !G.basket.items || !G.basket.items.length) return;
+  var target = { p:G.prot, c:G.carbs, f:G.fat };
+  var hi = { p:target.p*1.10, c:target.c*1.10, f:target.f*1.10 };
+  var lo = { p:target.p*0.90, c:target.c*0.90, f:target.f*0.90 };
+  var loops = 0;
+
+  function totals(){
+    return {
+      p:G.basket.items.reduce(function(s,it){return s+it.pContrib;},0),
+      c:G.basket.items.reduce(function(s,it){return s+it.cContrib;},0),
+      f:G.basket.items.reduce(function(s,it){return s+it.fContrib;},0),
+    };
+  }
+
+  while(loops++ < 260){
+    var t = totals();
+    var pIn = (t.p>=lo.p && t.p<=hi.p) || target.p<=0;
+    var cIn = (t.c>=lo.c && t.c<=hi.c) || target.c<=0;
+    var fIn = (t.f>=lo.f && t.f<=hi.f) || target.f<=0;
+    if(pIn && cIn && fIn) break;
+
+    var need = null, mode = null; // mode: 'up' | 'down'
+    var pDef = target.p>0 ? (target.p - t.p)/target.p : 0;
+    var cDef = target.c>0 ? (target.c - t.c)/target.c : 0;
+    var fDef = target.f>0 ? (target.f - t.f)/target.f : 0;
+    var pExc = target.p>0 ? (t.p - hi.p)/target.p : 0;
+    var cExc = target.c>0 ? (t.c - hi.c)/target.c : 0;
+    var fExc = target.f>0 ? (t.f - hi.f)/target.f : 0;
+
+    if(pExc>0 || cExc>0 || fExc>0){
+      mode = 'down';
+      need = (pExc>=cExc && pExc>=fExc) ? 'p' : (cExc>=fExc ? 'c' : 'f');
+    } else {
+      mode = 'up';
+      need = (pDef>=cDef && pDef>=fDef) ? 'p' : (cDef>=fDef ? 'c' : 'f');
+    }
+
+    var best = null, bestGain = -1;
+    G.basket.items.forEach(function(it){
+      if(lockFid && it.food.id === lockFid) return;
+      var step = basketStepForItem(it);
+      var typMax = (it.food.typical && it.food.typical[1]) ? it.food.typical[1]*2 : 2000;
+      if(mode==='up' && it.grams + step > typMax) return;
+      if(mode==='down' && it.grams - step < 50) return;
+      var p0=it.pContrib,c0=it.cContrib,f0=it.fContrib;
+      var g1 = it.grams + (mode==='up' ? step : -step);
+      var p1=Math.round(it.food.p/100*g1), c1=Math.round(it.food.c/100*g1), f1=Math.round(it.food.f/100*g1);
+      var gain = need==='p' ? Math.abs(p1-p0) : need==='c' ? Math.abs(c1-c0) : Math.abs(f1-f0);
+      if(gain > bestGain){ bestGain=gain; best={it:it,g:g1}; }
+    });
+    if(!best || bestGain<=0) break;
+    best.it.grams = best.g;
+    recalcItem(best.it);
+  }
+  recomputeBasketTotals();
+}
+
+function autoFixBasket(fid){
+  rebalanceBasketToTargets(fid || null);
+  renderResults(G.basket);
+  toast('✓ Basket rebalanced');
+}
+
+function removeBasketItem(fid){
+  if(!G.basket || !G.basket.items) return;
+  var idx = G.basket.items.findIndex(function(it){ return it.food.id===fid; });
+  if(idx === -1) return;
+  var name = G.basket.items[idx].food.name;
+  G.basket.items.splice(idx,1);
+  rebalanceBasketToTargets(null);
+  renderResults(G.basket);
+  toast('✓ Removed '+name+' and rebalanced');
+}
+
+function adjustBasketQty(fid, dir){
+  if(!G.basket || !G.basket.items) return;
+  var it = G.basket.items.find(function(x){ return x.food.id===fid; });
+  if(!it) return;
+  var step = basketStepForItem(it);
+  var typMax = (it.food.typical && it.food.typical[1]) ? it.food.typical[1]*2 : 2000;
+  var newG = it.grams + (dir>0 ? step : -step);
+  newG = clamp(newG, 50, typMax);
+  if(newG === it.grams) return;
+  it.grams = newG;
+  recalcItem(it);
+  recomputeBasketTotals();
+  renderResults(G.basket);
 }
 
 function toggleComboPick(fid){
@@ -2369,10 +2496,18 @@ function init(){
   document.getElementById('backBtn2').addEventListener('click',function(){
     document.getElementById('resultsPage').classList.remove('active');
     document.getElementById('setupPage').classList.add('active');
+    var fab=document.getElementById('mealPrepFab'); if(fab) fab.style.display='none';
     window.scrollTo(0,0);
   });
   document.getElementById('regenBtn').addEventListener('click', generate);
   document.getElementById('copyBtn').addEventListener('click', copyList);
+  document.getElementById('mealPrepBackBtn').addEventListener('click', function(){
+    document.getElementById('mealPrepPage').classList.remove('active');
+    document.getElementById('resultsPage').classList.add('active');
+    var fab = document.getElementById('mealPrepFab');
+    if(fab) fab.style.display = 'block';
+    window.scrollTo(0,0);
+  });
   document.getElementById('mealPrepBtn').addEventListener('click', openMealPrep);
 }
 
@@ -3385,6 +3520,7 @@ function buildMeals(basketItems, portions){
     var textures = new Set(allIds.map(function(id){return TEXTURE[id];}).filter(Boolean));
 
     namedMeals.push({
+      id:'batch-'+slotIdx+'-'+slot.styleId,
       name:name, isBreakfast:false, isSnack:false, isShake:false, isQuickSnack:false,
       styleId:slot.styleId, styleName:styleConf.name, styleEm:styleConf.em,
       subcatName: sub ? (sub.flag+' '+sub.name) : null,
@@ -3521,6 +3657,7 @@ function buildMeals(basketItems, portions){
     var rP=0,rC=0,rF=0,rK=0;
     rPortionItems.forEach(function(it){rP+=it.food.p/100*it.batchGrams;rC+=it.food.c/100*it.batchGrams;rF+=it.food.f/100*it.batchGrams;rK+=it.food.kcal/100*it.batchGrams;});
     namedMeals.push({
+      id:'quick-'+recipe.id,
       name:recipe.name, isBreakfast:false, isSnack:false, isShake:false, isQuickSnack:true,
       quickRecipeMethod: recipe.method,
       styleId:null, styleName:null, styleEm:recipe.em, subcatName:'⚡ QUICK SNACK',
@@ -3553,6 +3690,7 @@ function buildMeals(basketItems, portions){
     var sP=0,sC=0,sF=0,sK=0;
     shakePortionItems.forEach(function(it){sP+=it.food.p/100*it.batchGrams;sC+=it.food.c/100*it.batchGrams;sF+=it.food.f/100*it.batchGrams;sK+=it.food.kcal/100*it.batchGrams;});
     namedMeals.push({
+      id:'shake-main',
       name:(isVeganPowder?'Vegan':'Whey')+' Protein Shake',
       isBreakfast:false, isSnack:false, isShake:true, isQuickSnack:false,
       styleId:null, styleName:null, styleEm:null, subcatName:null,
@@ -3607,6 +3745,107 @@ function buildStyleMealName(styleConf, adj, protein, base, veg){
     return adj+' '+pName+' Bake'+(bName?' with '+bName:'');
   }
   return adj+' '+pName+(bName?' & '+bName:'')+' Bowl';
+}
+
+function hasMealOverrides(){
+  return Object.keys(G_MP_REMOVED).length>0 || Object.keys(G_MP_MOVES).length>0;
+}
+
+function recomputeMealMacros(meal){
+  var p=0,c=0,f=0,k=0;
+  meal.portionItems.forEach(function(it){
+    var qty = meal.isShake ? (it.portionGrams||it.batchGrams||0) : (it.portionGrams||0);
+    p += it.food.p/100*qty;
+    c += it.food.c/100*qty;
+    f += it.food.f/100*qty;
+    k += it.food.kcal/100*qty;
+  });
+  meal.portP=Math.round(p); meal.portC=Math.round(c); meal.portF=Math.round(f); meal.portK=Math.round(k);
+}
+
+function applyMealPrepOverrides(meals){
+  var out = meals.map(function(m){
+    return Object.assign({}, m, {
+      proteins:(m.proteins||[]).slice(),
+      bases:(m.bases||[]).slice(),
+      vegetables:(m.vegetables||[]).slice(),
+      fats:(m.fats||[]).slice(),
+      portionItems:(m.portionItems||[]).slice(),
+    });
+  });
+
+  // 1) removals
+  out.forEach(function(m){
+    var rem = G_MP_REMOVED[m.id];
+    if(!rem) return;
+    m.portionItems = m.portionItems.filter(function(it){ return !rem[it.food.id]; });
+    m.proteins = m.proteins.filter(function(it){ return !rem[it.food.id]; });
+    m.bases = m.bases.filter(function(it){ return !rem[it.food.id]; });
+    m.vegetables = m.vegetables.filter(function(it){ return !rem[it.food.id]; });
+    m.fats = m.fats.filter(function(it){ return !rem[it.food.id]; });
+    recomputeMealMacros(m);
+  });
+
+  // 2) moves (source|fid -> targetMealId)
+  Object.keys(G_MP_MOVES).forEach(function(key){
+    var parts = key.split('|');
+    if(parts.length !== 2) return;
+    var srcId = parts[0], fid = parts[1];
+    var targetId = G_MP_MOVES[key];
+    var src = out.find(function(m){ return m.id===srcId; });
+    var tgt = out.find(function(m){ return m.id===targetId; });
+    if(!src || !tgt || src.id===tgt.id) return;
+    var idx = src.portionItems.findIndex(function(it){ return it.food.id===fid; });
+    if(idx===-1) return;
+    var moved = src.portionItems.splice(idx,1)[0];
+    tgt.portionItems.push(moved);
+
+    function removeRole(meal, it){
+      var r = roleOf(it);
+      if(r==='protein') meal.proteins = meal.proteins.filter(function(x){return x.food.id!==it.food.id;});
+      if(r==='base') meal.bases = meal.bases.filter(function(x){return x.food.id!==it.food.id;});
+      if(r==='vegetable') meal.vegetables = meal.vegetables.filter(function(x){return x.food.id!==it.food.id;});
+      if(r==='fat') meal.fats = meal.fats.filter(function(x){return x.food.id!==it.food.id;});
+    }
+    function addRole(meal, it){
+      var r = roleOf(it);
+      if(r==='protein') meal.proteins.push(it);
+      if(r==='base') meal.bases.push(it);
+      if(r==='vegetable') meal.vegetables.push(it);
+      if(r==='fat') meal.fats.push(it);
+    }
+    removeRole(src, moved);
+    addRole(tgt, moved);
+    recomputeMealMacros(src);
+    recomputeMealMacros(tgt);
+  });
+
+  return out;
+}
+
+function removeMealItem(mealId, fid){
+  if(!G_MP_REMOVED[mealId]) G_MP_REMOVED[mealId] = {};
+  G_MP_REMOVED[mealId][fid] = true;
+  renderMealPrep();
+  toast('✓ Ingredient removed from recipe');
+}
+
+function moveMealItemPrompt(mealId, fid){
+  if(!G.basket) return;
+  var result = buildMeals(G.basket.items, calcPortions());
+  var meals = applyMealPrepOverrides(result.meals);
+  var source = meals.find(function(m){return m.id===mealId;});
+  if(!source) return;
+  var opts = meals.filter(function(m){ return m.id!==mealId && !m.isShake; });
+  if(!opts.length) return;
+  var promptTxt = 'Move to which recipe?\\n' + opts.map(function(m,i){ return (i+1)+') '+m.name; }).join('\\n');
+  var ans = window.prompt(promptTxt, '1');
+  if(ans===null) return;
+  var idx = parseInt(ans,10)-1;
+  if(idx<0 || idx>=opts.length){ toast('Invalid choice'); return; }
+  G_MP_MOVES[mealId+'|'+fid] = opts[idx].id;
+  renderMealPrep();
+  toast('✓ Ingredient moved');
 }
 function buildMealName(adj, protein, base, veg){
   var pName = protein ? protein.food.name.split('(')[0].trim() : 'Protein';
@@ -3890,41 +4129,39 @@ function getSubcat(styleId, occurrenceIdx){
   return subs.find(function(s){return s.id===subcatId;}) || null;
 }
 
+function startMealPrep(){
+  if(!can.mealPrep){ showUpgradeHint('basic'); return; }
+  if(!G.basket || !G.basket.items.length){ toast('Generate your basket first!'); return; }
+  openMealPrep();
+}
+
 function openMealPrep(){
-  if(!G.basket || !G.basket.items.length){
-    toast('Generate your basket first!');
-    return;
-  }
-  G_WIZARD_STEP = 1; // always restart wizard
-  G.mealPrepBasketChanged = false;
-  var b = document.getElementById('mpBasketChangedBanner');
-  if(b) b.style.display = 'none';
-  renderWizard();
-  document.getElementById('mpBody').innerHTML = '';
-  document.getElementById('mpPrepOrder').innerHTML = '';
-  document.getElementById('mpPortionsBar').innerHTML = '';
+  if(!can.mealPrep){ showUpgradeHint('basic'); return; }
+
+  // Hide FAB
+  var fab = document.getElementById('mealPrepFab');
+  if(fab) fab.style.display = 'none';
+
+  // Run matchmaking
+  var selected = selectRecipes(G.basket.items);
+  if(!selected.length){ toast('Not enough ingredients to match recipes. Add more items to your basket.'); return; }
+
+  var plan = buildMealPrepPlan(G.basket.items, selected);
+  G.mealPlan = plan;
+
+  renderMealPrepPage(plan);
 
   document.getElementById('resultsPage').classList.remove('active');
-  var mp = document.getElementById('mealPrepPage');
-  mp.classList.remove('active');
-  void mp.offsetHeight;
-  mp.classList.add('active');
+  document.getElementById('mealPrepPage').classList.add('active');
   window.scrollTo(0,0);
-
-  document.getElementById('mealPrepBackBtn').onclick = function(){
-    document.getElementById('mealPrepPage').classList.remove('active');
-    void document.getElementById('resultsPage').offsetHeight;
-    document.getElementById('resultsPage').classList.add('active');
-    window.scrollTo(0,0);
-  };
-  document.getElementById('mealPrepCopyBtn').onclick = copyMealPlan;
 }
+
 
 function renderMealPrep(){
   var portions = calcPortions();
   G_PORTIONS = portions;
   var result = buildMeals(G.basket.items, portions);
-  var meals  = result.meals;
+  var meals  = applyMealPrepOverrides(result.meals);
   var audit  = result.audit;
 
   document.getElementById('mealPrepSub').textContent =
@@ -3952,7 +4189,15 @@ function renderMealPrep(){
       "</div>"
     : "";
 
-  var auditHtml = bowlNoteHtml +
+  var overridesNoteHtml = hasMealOverrides()
+    ? "<div style='margin:8px 16px 0;max-width:800px'>"+
+        "<div style='background:rgba(251,113,133,.08);border:1px solid rgba(251,113,133,.35);border-radius:10px;padding:10px 12px;font-size:11px;color:var(--rose);line-height:1.5'>"+
+          "⚠️ <strong>Meal plan edited:</strong> you removed or moved ingredients between recipes. Per-recipe macros have changed from the original auto-balanced split."+
+        "</div>"+
+      "</div>"
+    : "";
+
+  var auditHtml = bowlNoteHtml + overridesNoteHtml +
     "<div style='max-width:800px;margin:14px auto 0;padding:0 16px'>"+
     "<div style='background:var(--navy2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:4px'>"+
       "<div style='padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between'>"+
@@ -4049,7 +4294,7 @@ function copyMealPlan(){
   if(!G.basket) return;
   var portions = calcPortions();
   var result = buildMeals(G.basket.items, portions);
-  var meals = result.meals;
+  var meals = applyMealPrepOverrides(result.meals);
   var lines = ['🍳 WEEKLY MEAL PREP PLAN',
     G_MEALS_PER_DAY+' meals/day · '+G_BATCH_COUNT+' batch recipes · '+portions+' portions per batch', ''];
   meals.forEach(function(meal,i){
@@ -4118,9 +4363,13 @@ function renderMealCard(meal){
         var swapBtn = (!meal.isQuickSnack && !meal.isShake && G.basket)
           ? "<button class='swap-btn' onclick=\"event.stopPropagation();openSwapModal('"+it.food.id+"')\">⇄ swap</button>"
           : '';
+        var mealEditBtns = (!meal.isShake && meal.id)
+          ? "<button class='swap-btn' onclick=\"event.stopPropagation();removeMealItem('"+meal.id+"','"+it.food.id+"')\">✕ remove</button>"+
+            "<button class='swap-btn' onclick=\"event.stopPropagation();moveMealItemPrompt('"+meal.id+"','"+it.food.id+"')\">↔ move</button>"
+          : '';
         return "<div class='mp-ing-row'>"+
           "<span class='mp-ing-em'>"+it.food.em+"</span>"+
-          "<span class='mp-ing-name'>"+it.food.name+swapBtn+"</span>"+
+          "<span class='mp-ing-name'>"+it.food.name+swapBtn+mealEditBtns+"</span>"+
           "<span class='mp-ing-role' style='"+(it.rawVeg?'color:var(--teal)':'')+"'>"+tex+"</span>"+
           "<span class='mp-ing-qty'>"+qStr+annotation+"</span>"+
         "</div>";
@@ -4489,6 +4738,585 @@ window.addEventListener('resize', function(){
 window.addEventListener('pageshow', (e) => {
   if (e.persisted) window.location.reload();
 });
+
+// ═══════════════════════════════════════════════════════════════
+// RECIPE TEMPLATES — 25 dishes across 6 categories
+// ═══════════════════════════════════════════════════════════════
+var RECIPE_TEMPLATES = [
+  // ── CURRY ──────────────────────────────────────────────────
+  {id:"thai_green_curry",name:"Thai Green Curry",category:"curry",em:"🍲",cookTime:35,serves:4,carb_modular:true,
+   ingredients:{
+     pantry:["coconut_milk","green_curry_paste","fish_sauce"],
+     tier1:[{id:"chicken_thigh",qty:500,unit:"g"}],
+     tier2:[{id:"eggplant",qty:300,unit:"g",subs:["courgette","mushrooms","bell_pepper"]}],
+     tier3:[{id:"spinach",qty:80,unit:"g",subs:["kale"]}],
+     carb:{id:"white_rice",qty:300,unit:"g",subs:["brown_rice","quinoa"]},
+     garnish:["fresh_coriander","lime"]
+   },
+   steps:["Cook white rice separately if using.","Heat oil in a large pan and add green curry paste, cook 1–2 min.","Add coconut milk and stir to combine.","Add chicken and simmer 10–12 min.","Add eggplant and cook 8–10 min until tender.","Stir in fish sauce and adjust seasoning.","Serve over rice, topped with coriander and lime."],
+   tip:"Use chicken thighs for better moisture; full-fat coconut milk for creaminess."
+  },
+  {id:"indian_chicken_tikka_masala",name:"Chicken Tikka Masala",category:"curry",em:"🍲",cookTime:40,serves:4,carb_modular:true,
+   ingredients:{
+     pantry:["tomato_sauce","garam_masala","curry_powder"],
+     tier1:[{id:"chicken_breast",qty:500,unit:"g"}],
+     tier2:[{id:"greek_yogurt",qty:150,unit:"g",subs:["skyr","vegan_yogurt"]}],
+     tier3:[{id:"spinach",qty:100,unit:"g",subs:["kale"]},{id:"onion",qty:120,unit:"g",subs:[]}],
+     carb:{id:"white_rice",qty:300,unit:"g",subs:["brown_rice","quinoa"]},
+     garnish:["fresh_coriander"]
+   },
+   steps:["Cook rice separately if using.","Cook chicken pieces until lightly browned, set aside.","Add tomato sauce and spices, simmer 5–7 min.","Stir in yogurt and mix well.","Return chicken and simmer 15–20 min.","Add spinach and cook until wilted.","Serve with rice."],
+   tip:"Marinate chicken in yogurt and spices beforehand for better tenderness."
+  },
+  {id:"mexican_chili_con_carne",name:"Chili Con Carne",category:"curry",em:"🍲",cookTime:45,serves:4,carb_modular:true,
+   ingredients:{
+     pantry:["tomato_sauce","cumin","paprika"],
+     tier1:[{id:"lean_beef",qty:500,unit:"g"}],
+     tier2:[{id:"kidney_beans",qty:250,unit:"g",subs:["black_beans","white_beans"]},{id:"tomatoes",qty:300,unit:"g",subs:[]},{id:"bell_pepper",qty:200,unit:"g",subs:["courgette","carrots"]}],
+     tier3:[{id:"onion",qty:120,unit:"g",subs:[]}],
+     carb:{id:"white_rice",qty:300,unit:"g",subs:["brown_rice","quinoa"]},
+     garnish:["fresh_coriander","lime"]
+   },
+   steps:["Cook rice separately if using.","Brown beef in a large pot, set aside.","Sauté onion and bell pepper until softened.","Add tomatoes, tomato sauce, spices, and beans.","Return beef and simmer 25–30 min.","Adjust seasoning.","Serve with rice."],
+   tip:"Chili improves significantly overnight — make it the day before."
+  },
+  {id:"japanese_chicken_curry",name:"Japanese Chicken Curry",category:"curry",em:"🍛",cookTime:45,serves:4,carb_modular:true,
+   ingredients:{
+     pantry:["curry_block","soy_sauce"],
+     tier1:[{id:"chicken_thigh",qty:500,unit:"g"}],
+     tier2:[{id:"potato",qty:300,unit:"g",subs:["sweet_potato","pumpkin"]},{id:"carrots",qty:200,unit:"g",subs:["pumpkin","sweet_potato"]}],
+     tier3:[{id:"onion",qty:150,unit:"g",subs:[]}],
+     carb:{id:"white_rice",qty:300,unit:"g",subs:["brown_rice"]},
+     garnish:[]
+   },
+   steps:["Cook rice separately if using.","Brown chicken and set aside.","Sauté onion, then add potatoes and carrots.","Add water and simmer until vegetables soften.","Stir in curry block until dissolved.","Return chicken and simmer 10–15 min.","Serve with rice."],
+   tip:"Texture and flavor improve the next day."
+  },
+  {id:"indian_dal_tadka",name:"Dal Tadka",category:"curry",em:"🍲",cookTime:35,serves:4,carb_modular:true,
+   ingredients:{
+     pantry:["curry_powder","cumin"],
+     tier1:[{id:"lentils",qty:500,unit:"g"}],
+     tier2:[{id:"tomatoes",qty:250,unit:"g",subs:[]}],
+     tier3:[{id:"onion",qty:120,unit:"g",subs:[]},{id:"garlic",qty:30,unit:"g",subs:[]}],
+     carb:{id:"white_rice",qty:300,unit:"g",subs:["brown_rice","quinoa"]},
+     garnish:["fresh_coriander","lemon"]
+   },
+   steps:["Cook rice separately if using.","Rinse lentils and boil until soft.","Sauté onion and garlic until fragrant.","Add tomatoes and spices, cook down.","Add cooked lentils and mix well.","Simmer 10 min and adjust seasoning.","Serve with rice and garnish."],
+   tip:"Finish with a hot oil spice tempering for authentic tadka flavor."
+  },
+  // ── SHEETPAN ───────────────────────────────────────────────
+  {id:"mediterranean_roast_chicken",name:"Roast Chicken & Vegetables",category:"sheetpan",em:"🍗",cookTime:50,serves:4,carb_modular:false,
+   ingredients:{
+     pantry:["olive_oil"],
+     tier1:[{id:"chicken_thigh",qty:700,unit:"g"}],
+     tier2:[{id:"potato",qty:400,unit:"g",subs:["sweet_potato","pumpkin"]},{id:"carrots",qty:250,unit:"g",subs:["pumpkin","sweet_potato"]}],
+     tier3:[{id:"onion",qty:150,unit:"g",subs:[]}],
+     garnish:[]
+   },
+   steps:["Preheat oven to 200°C.","Chop potatoes, carrots, and onion.","Place vegetables and chicken on a tray and coat with olive oil.","Season and mix well.","Roast 40–50 min until chicken is cooked through.","Turn once halfway.","Rest 5 min before serving."],
+   tip:"Use bone-in thighs for better moisture retention during reheating."
+  },
+  {id:"greek_souvlaki",name:"Chicken Souvlaki",category:"sheetpan",em:"🍢",cookTime:35,serves:4,carb_modular:false,
+   ingredients:{
+     pantry:["olive_oil"],
+     tier1:[{id:"chicken_breast",qty:600,unit:"g"}],
+     tier2:[{id:"potato",qty:400,unit:"g",subs:["sweet_potato"]},{id:"bell_pepper",qty:250,unit:"g",subs:["courgette"]}],
+     tier3:[{id:"onion",qty:150,unit:"g",subs:[]}],
+     garnish:["lemon"]
+   },
+   steps:["Preheat oven to 200°C.","Cut chicken and vegetables into chunks.","Coat with olive oil and mix well.","Spread on a tray.","Roast 30–35 min.","Turn halfway.","Rest briefly and serve with lemon."],
+   tip:"Cut everything the same size for even roasting."
+  },
+  {id:"japanese_teriyaki_chicken",name:"Teriyaki Chicken",category:"sheetpan",em:"🍗",cookTime:30,serves:4,carb_modular:true,
+   ingredients:{
+     pantry:["soy_sauce"],
+     tier1:[{id:"chicken_thigh",qty:600,unit:"g"}],
+     tier2:[{id:"broccoli",qty:250,unit:"g",subs:["green_beans","asparagus"]}],
+     tier3:[],
+     carb:{id:"white_rice",qty:300,unit:"g",subs:["brown_rice"]},
+     garnish:["sesame_seeds"]
+   },
+   steps:["Cook rice separately if using.","Preheat oven to 200°C.","Place chicken and broccoli on a tray.","Brush with soy sauce.","Roast 25–30 min.","Check chicken is cooked through and rest briefly.","Serve with rice and sesame seeds."],
+   tip:"Thighs caramelise better than breast under high heat."
+  },
+  {id:"italian_roasted_veg",name:"Roasted Vegetables",category:"sheetpan",em:"🍆",cookTime:35,serves:4,carb_modular:true,
+   ingredients:{
+     pantry:["olive_oil"],
+     tier1:[{id:"chickpeas",qty:400,unit:"g"}],
+     tier2:[{id:"courgette",qty:300,unit:"g",subs:["eggplant","bell_pepper"]},{id:"bell_pepper",qty:250,unit:"g",subs:["carrots","courgette"]}],
+     tier3:[{id:"onion",qty:150,unit:"g",subs:[]}],
+     carb:{id:"quinoa",qty:280,unit:"g",subs:["brown_rice"]},
+     garnish:[]
+   },
+   steps:["Cook quinoa separately if using.","Preheat oven to 200°C.","Chop vegetables and mix with chickpeas.","Coat with olive oil and spread on a tray.","Roast 30–35 min, turning once.","Serve with quinoa."],
+   tip:"Roast in a single layer to avoid steaming."
+  },
+  // ── BOWL ───────────────────────────────────────────────────
+  {id:"korean_bibimbap",name:"Bibimbap Bowl",category:"bowl",em:"🍱",cookTime:30,serves:4,carb_modular:true,
+   ingredients:{
+     pantry:["soy_sauce","sesame_oil"],
+     tier1:[{id:"lean_beef",qty:400,unit:"g"}],
+     tier2:[{id:"spinach",qty:150,unit:"g",subs:["kale","cabbage"]},{id:"carrots",qty:150,unit:"g",subs:["courgette"]},{id:"eggplant",qty:200,unit:"g",subs:["courgette","mushrooms"]}],
+     tier3:[{id:"eggs",qty:4,unit:"piece",subs:[]}],
+     carb:{id:"white_rice",qty:300,unit:"g",subs:["brown_rice"]},
+     garnish:["sesame_seeds"]
+   },
+   steps:["Cook rice separately if using.","Cook beef in a hot pan and set aside.","Sauté vegetables separately until tender.","Cook eggs to preference.","Assemble bowls with rice, beef, and vegetables.","Top with egg, soy sauce, and sesame oil."],
+   tip:"Keep components separate during storage and assemble fresh."
+  },
+  {id:"japanese_donburi",name:"Chicken Donburi",category:"bowl",em:"🍚",cookTime:25,serves:4,carb_modular:true,
+   ingredients:{
+     pantry:["soy_sauce"],
+     tier1:[{id:"chicken_thigh",qty:500,unit:"g"}],
+     tier2:[{id:"eggs",qty:4,unit:"piece",subs:[]},{id:"spinach",qty:150,unit:"g",subs:["kale","cabbage"]}],
+     tier3:[{id:"onion",qty:120,unit:"g",subs:[]}],
+     carb:{id:"white_rice",qty:300,unit:"g",subs:["brown_rice"]},
+     garnish:["spring_onion"]
+   },
+   steps:["Cook rice separately if using.","Cook chicken until browned.","Add onion and cook until soft.","Add soy sauce and simmer briefly.","Add beaten eggs and cook gently.","Add spinach and wilt.","Serve over rice topped with spring onion."],
+   tip:"Cook eggs gently for the soft texture typical of donburi."
+  },
+  {id:"mexican_burrito_bowl",name:"Burrito Bowl",category:"bowl",em:"🌯",cookTime:30,serves:4,carb_modular:true,
+   ingredients:{
+     pantry:["cumin","paprika"],
+     tier1:[{id:"chicken_breast",qty:500,unit:"g"}],
+     tier2:[{id:"black_beans",qty:250,unit:"g",subs:["kidney_beans","white_beans"]},{id:"bell_pepper",qty:200,unit:"g",subs:["courgette","carrots"]}],
+     tier3:[{id:"tomatoes",qty:200,unit:"g",subs:[]}],
+     carb:{id:"white_rice",qty:300,unit:"g",subs:["brown_rice","quinoa"]},
+     garnish:["lime"]
+   },
+   steps:["Cook rice separately if using.","Cook chicken with spices.","Add bell pepper and cook until tender.","Warm beans separately.","Assemble bowls with rice, chicken, beans, and vegetables.","Finish with lime."],
+   tip:"Batch components separately to build different variations across the week."
+  },
+  {id:"global_buddha_bowl",name:"Buddha Bowl",category:"bowl",em:"🥗",cookTime:25,serves:4,carb_modular:true,
+   ingredients:{
+     pantry:["olive_oil"],
+     tier1:[{id:"chickpeas",qty:400,unit:"g"}],
+     tier2:[{id:"broccoli",qty:250,unit:"g",subs:["green_beans","asparagus"]},{id:"avocado",qty:2,unit:"piece",subs:[]}],
+     tier3:[{id:"spinach",qty:100,unit:"g",subs:["kale"]}],
+     carb:{id:"quinoa",qty:280,unit:"g",subs:["brown_rice"]},
+     garnish:["sesame_seeds"]
+   },
+   steps:["Cook quinoa separately if using.","Cook or warm chickpeas.","Steam or roast broccoli.","Assemble bowl with quinoa, chickpeas, broccoli, spinach, and avocado.","Drizzle with olive oil and top with seeds."],
+   tip:"Add any protein topping if you need to increase the total protein content."
+  },
+  // ── BAKE ───────────────────────────────────────────────────
+  {id:"italian_lasagna",name:"Lasagna",category:"bake",em:"🍝",cookTime:60,serves:4,carb_modular:false,
+   ingredients:{
+     pantry:["tomato_sauce"],
+     tier1:[{id:"lean_beef",qty:500,unit:"g"}],
+     tier2:[{id:"pasta",qty:320,unit:"g",subs:[]},{id:"ricotta",qty:200,unit:"g",subs:["cottage_cheese"]}],
+     tier3:[{id:"onion",qty:120,unit:"g",subs:[]}],
+     garnish:["fresh_basil"]
+   },
+   steps:["Preheat oven to 180°C.","Cook beef with onion.","Add tomato sauce and simmer.","Layer pasta, meat sauce, and ricotta repeatedly.","Bake 35–40 min.","Rest before slicing.","Serve warm."],
+   tip:"Cool slightly before cutting to keep layers intact."
+  },
+  {id:"french_gratin",name:"Potato Gratin",category:"bake",em:"🥔",cookTime:55,serves:4,carb_modular:false,
+   ingredients:{
+     pantry:[],
+     tier1:[{id:"potato",qty:800,unit:"g"}],
+     tier2:[{id:"hard_cheese",qty:150,unit:"g",subs:["feta","ricotta"]},{id:"milk",qty:300,unit:"g",subs:["almond_milk","oat_milk"]}],
+     tier3:[{id:"garlic",qty:20,unit:"g",subs:[]}],
+     garnish:[]
+   },
+   steps:["Preheat oven to 180°C.","Slice potatoes thinly.","Layer potatoes with cheese.","Add milk and garlic.","Bake 45–50 min until tender.","Rest before serving."],
+   tip:"Slice potatoes evenly for consistent cooking throughout."
+  },
+  {id:"italian_frittata",name:"Vegetable Frittata",category:"bake",em:"🍳",cookTime:25,serves:4,carb_modular:false,
+   ingredients:{
+     pantry:["olive_oil"],
+     tier1:[{id:"eggs",qty:400,unit:"g"}],
+     tier2:[{id:"spinach",qty:150,unit:"g",subs:["kale"]},{id:"feta",qty:120,unit:"g",subs:["ricotta","hard_cheese"]}],
+     tier3:[{id:"onion",qty:100,unit:"g",subs:[]}],
+     garnish:[]
+   },
+   steps:["Preheat oven to 180°C.","Sauté onion, then add spinach and cook down.","Beat eggs and pour over vegetables.","Add feta.","Cook briefly on stove then bake 10–12 min.","Slice and serve."],
+   tip:"Keeps well in the fridge for 3 days — ideal for meal prep."
+  },
+  {id:"british_shepherds_pie",name:"Shepherds Pie",category:"bake",em:"🥧",cookTime:50,serves:4,carb_modular:false,
+   ingredients:{
+     pantry:["stock"],
+     tier1:[{id:"lamb",qty:500,unit:"g"}],
+     tier2:[{id:"potato",qty:500,unit:"g",subs:["sweet_potato"]},{id:"carrots",qty:200,unit:"g",subs:["peas"]}],
+     tier3:[{id:"onion",qty:120,unit:"g",subs:[]}],
+     garnish:[]
+   },
+   steps:["Preheat oven to 180°C.","Cook lamb with onion.","Add carrots and stock, simmer 15 min.","Prepare mashed potatoes separately.","Layer meat filling and top with mash.","Bake 25–30 min until browned on top.","Rest briefly before serving."],
+   tip:"Let it brown on top for better texture — switch to grill for the last 5 min."
+  },
+  // ── STIR ───────────────────────────────────────────────────
+  {id:"chinese_chicken_stir_fry",name:"Chicken Stir Fry",category:"stir",em:"🍜",cookTime:20,serves:4,carb_modular:true,
+   ingredients:{
+     pantry:["soy_sauce"],
+     tier1:[{id:"chicken_breast",qty:500,unit:"g"}],
+     tier2:[{id:"broccoli",qty:250,unit:"g",subs:["green_beans","asparagus"]},{id:"bell_pepper",qty:200,unit:"g",subs:["courgette","carrots"]}],
+     tier3:[{id:"onion",qty:120,unit:"g",subs:[]}],
+     carb:{id:"white_rice",qty:300,unit:"g",subs:["brown_rice"]},
+     garnish:[]
+   },
+   steps:["Cook rice separately if using.","Cook chicken in a hot pan until browned.","Add onion briefly, then vegetables and stir-fry 5–7 min.","Add soy sauce and toss to combine.","Serve with rice immediately."],
+   tip:"High heat and short cooking time preserves crunch and nutrients."
+  },
+  {id:"thai_pad_kra_pao",name:"Pad Kra Pao",category:"stir",em:"🌶️",cookTime:20,serves:4,carb_modular:true,
+   ingredients:{
+     pantry:["soy_sauce"],
+     tier1:[{id:"lean_beef",qty:500,unit:"g"}],
+     tier2:[{id:"green_beans",qty:200,unit:"g",subs:["bell_pepper","courgette"]}],
+     tier3:[{id:"onion",qty:120,unit:"g",subs:[]}],
+     carb:{id:"white_rice",qty:300,unit:"g",subs:["brown_rice"]},
+     garnish:["fresh_basil","chilli"]
+   },
+   steps:["Cook rice separately if using.","Cook beef in a very hot pan.","Add onion briefly, then green beans.","Add soy sauce and toss.","Serve with rice, topped with basil and chilli."],
+   tip:"Cook quickly on the highest heat for authentic wok flavor."
+  },
+  {id:"indonesian_nasi_goreng",name:"Nasi Goreng",category:"stir",em:"🍚",cookTime:20,serves:4,carb_modular:false,
+   ingredients:{
+     pantry:["soy_sauce"],
+     tier1:[{id:"eggs",qty:4,unit:"piece"}],
+     tier2:[{id:"white_rice",qty:300,unit:"g",subs:["brown_rice"]},{id:"chicken_breast",qty:300,unit:"g",subs:["prawns","tofu"]}],
+     tier3:[{id:"onion",qty:120,unit:"g",subs:[]}],
+     garnish:["spring_onion"]
+   },
+   steps:["Cook rice in advance and refrigerate (day-old rice works best).","Cook chicken and set aside.","Scramble eggs in a hot pan.","Add onion, then rice and stir-fry on high heat.","Return chicken, add soy sauce and mix well.","Serve topped with spring onion."],
+   tip:"Day-old refrigerated rice is essential — fresh rice turns mushy."
+  },
+  {id:"japanese_yakisoba",name:"Yakisoba",category:"stir",em:"🍜",cookTime:20,serves:4,carb_modular:false,
+   ingredients:{
+     pantry:["soy_sauce"],
+     tier1:[{id:"chicken_breast",qty:400,unit:"g"}],
+     tier2:[{id:"pasta",qty:320,unit:"g",subs:[]},{id:"cabbage",qty:200,unit:"g",subs:["spinach","kale"]}],
+     tier3:[{id:"carrots",qty:120,unit:"g",subs:[]}],
+     garnish:["spring_onion"]
+   },
+   steps:["Cook pasta separately until just al dente.","Cook chicken in a pan.","Add cabbage and carrots and stir-fry.","Add pasta and toss with soy sauce.","Serve immediately topped with spring onion."],
+   tip:"Pull pasta slightly undercooked — it finishes in the pan."
+  },
+  // ── SOUP ───────────────────────────────────────────────────
+  {id:"italian_minestrone",name:"Minestrone",category:"soup",em:"🍲",cookTime:35,serves:4,carb_modular:true,
+   ingredients:{
+     pantry:["olive_oil","stock"],
+     tier1:[{id:"white_beans",qty:400,unit:"g"}],
+     tier2:[{id:"courgette",qty:200,unit:"g",subs:["eggplant","bell_pepper"]},{id:"carrots",qty:200,unit:"g",subs:["pumpkin","celery"]}],
+     tier3:[{id:"onion",qty:120,unit:"g",subs:[]},{id:"tomatoes",qty:200,unit:"g",subs:[]}],
+     carb:{id:"pasta",qty:320,unit:"g",subs:["couscous","barley"]},
+     garnish:["fresh_parsley"]
+   },
+   steps:["Sauté onion in olive oil until softened.","Add carrots and courgette, cook 5 min.","Add tomatoes, beans, and stock.","Simmer 20 min.","Cook pasta separately if using and add at the end.","Finish with parsley."],
+   tip:"Store pasta separately to prevent it going soft in the fridge."
+  },
+  {id:"japanese_miso_soup",name:"Miso Soup",category:"soup",em:"🍲",cookTime:20,serves:4,carb_modular:true,
+   ingredients:{
+     pantry:["miso_paste","stock"],
+     tier1:[{id:"tofu",qty:400,unit:"g"}],
+     tier2:[{id:"mushrooms",qty:200,unit:"g",subs:["cabbage","spinach"]}],
+     tier3:[{id:"spinach",qty:80,unit:"g",subs:["kale"]}],
+     carb:{id:"white_rice",qty:300,unit:"g",subs:["brown_rice","quinoa"]},
+     garnish:["spring_onion"]
+   },
+   steps:["Cook rice separately if using.","Heat stock without boiling.","Add mushrooms and simmer 5 min.","Add tofu gently.","Stir in miso paste until dissolved — do not boil.","Add spinach briefly.","Serve with rice topped with spring onion."],
+   tip:"Never boil after adding miso — it destroys the flavor compounds."
+  },
+  {id:"vietnamese_pho",name:"Pho",category:"soup",em:"🍜",cookTime:45,serves:4,carb_modular:false,
+   ingredients:{
+     pantry:["stock"],
+     tier1:[{id:"lean_beef",qty:400,unit:"g"}],
+     tier2:[{id:"pasta",qty:320,unit:"g",subs:[]}],
+     tier3:[{id:"onion",qty:120,unit:"g",subs:[]}],
+     garnish:["fresh_coriander","lime"]
+   },
+   steps:["Cook noodles separately until just tender.","Heat stock until simmering.","Slice beef very thinly and cook briefly in the broth.","Add onion.","Combine noodles and broth in bowls.","Add garnish and serve immediately."],
+   tip:"Slice beef paper-thin — it cooks almost instantly in hot broth."
+  },
+  {id:"american_chicken_soup",name:"Chicken Soup",category:"soup",em:"🍲",cookTime:40,serves:4,carb_modular:true,
+   ingredients:{
+     pantry:["stock"],
+     tier1:[{id:"chicken_breast",qty:500,unit:"g"}],
+     tier2:[{id:"carrots",qty:200,unit:"g",subs:["celery","leek"]}],
+     tier3:[{id:"onion",qty:120,unit:"g",subs:[]}],
+     carb:{id:"pasta",qty:320,unit:"g",subs:["white_rice","brown_rice"]},
+     garnish:["fresh_parsley"]
+   },
+   steps:["Heat stock in a large pot.","Add chicken and cook through.","Add carrots and onion.","Simmer 20 min.","Shred chicken with two forks.","Cook pasta separately and serve alongside.","Finish with parsley."],
+   tip:"Shred chicken after cooking for better texture and coverage."
+  }
+];
+
+// ═══════════════════════════════════════════════════════════════
+// MATCHMAKING ENGINE
+// ═══════════════════════════════════════════════════════════════
+
+// Scoring weights
+var SCORE_T1 = 10;  // tier1 match (protein present)
+var SCORE_T2 = 3;   // tier2 match (direct)
+var SCORE_T2S = 1.5;// tier2 match via sub
+var SCORE_T3 = 0.5; // tier3 match
+var SCORE_CARB = 1; // carb match
+
+// Build a fast lookup: basketId -> true
+function buildBasketIndex(basketItems){
+  var idx = {};
+  basketItems.forEach(function(it){ idx[it.food.id] = it.grams; });
+  return idx;
+}
+
+function scoreRecipe(recipe, basketIdx){
+  var score = 0;
+  var usedSubs = {}; // track subs used so they can't double-count
+  var matches = { t1:false, t2:[], t3:[], carb:false, subUsed:{} };
+
+  // Tier 1
+  var t1 = recipe.ingredients.tier1[0];
+  if(t1 && basketIdx[t1.id]){ score += SCORE_T1; matches.t1 = true; }
+  // Heavy penalty if tier1 missing — recipe is barely viable
+  if(t1 && !basketIdx[t1.id]) score -= 5;
+
+  // Tier 2
+  (recipe.ingredients.tier2 || []).forEach(function(ing){
+    if(basketIdx[ing.id]){
+      score += SCORE_T2;
+      matches.t2.push({id:ing.id, matched:'direct'});
+    } else {
+      // Try subs
+      var sub = (ing.subs || []).find(function(s){ return basketIdx[s] && !usedSubs[s]; });
+      if(sub){
+        score += SCORE_T2S;
+        usedSubs[sub] = true;
+        matches.t2.push({id:ing.id, matched:'sub', subId:sub});
+      }
+    }
+  });
+
+  // Tier 3
+  (recipe.ingredients.tier3 || []).forEach(function(ing){
+    if(basketIdx[ing.id]){
+      score += SCORE_T3;
+      matches.t3.push(ing.id);
+    }
+  });
+
+  // Carb
+  var carb = recipe.ingredients.carb;
+  if(carb && recipe.carb_modular){
+    if(basketIdx[carb.id]){
+      score += SCORE_CARB;
+      matches.carb = carb.id;
+    } else {
+      var carbSub = (carb.subs || []).find(function(s){ return basketIdx[s]; });
+      if(carbSub){ score += SCORE_CARB * 0.5; matches.carb = carbSub; }
+    }
+  }
+
+  return { recipe:recipe, score:score, matches:matches };
+}
+
+function selectRecipes(basketItems, n){
+  n = n || 4;
+  var idx = buildBasketIndex(basketItems);
+  var scored = RECIPE_TEMPLATES.map(function(r){ return scoreRecipe(r, idx); });
+  scored.sort(function(a,b){ return b.score - a.score; });
+
+  var selected = [];
+  var usedCategories = {};
+
+  scored.forEach(function(s){
+    if(selected.length >= n) return;
+    if(s.score <= 0) return;
+    if(usedCategories[s.recipe.category]) return; // dedup by category
+    selected.push(s);
+    usedCategories[s.recipe.category] = true;
+  });
+
+  return selected;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INVENTORY CLAIM + POWER BOWL
+// ═══════════════════════════════════════════════════════════════
+
+// Smooth protein smoothie auto-sweep IDs
+var SMOOTHIE_IDS = ['protein_powder','plant_protein','greek_yogurt','skyr','kefir','berries','banana','almond_milk','oat_milk','soy_milk','milk'];
+
+function buildMealPrepPlan(basketItems, selectedRecipes){
+  // Build mutable inventory: id -> grams remaining
+  var inventory = {};
+  basketItems.forEach(function(it){
+    if(it.grams > 0) inventory[it.food.id] = it.grams;
+  });
+
+  var claimed = []; // { recipe, claimedIngredients }
+
+  selectedRecipes.forEach(function(s){
+    var r = s.recipe;
+    var claimedIngs = [];
+
+    function claimIng(id, qty, unit, label, isSub){
+      if(unit === 'piece'){
+        // rough gram estimate for countables
+        var gramsPerPiece = {eggs:60, avocado:150};
+        qty = qty * (gramsPerPiece[id] || 100);
+        unit = 'g';
+      }
+      var available = inventory[id] || 0;
+      var take = Math.min(available, qty);
+      if(take > 0){
+        inventory[id] -= take;
+        if(inventory[id] <= 0) delete inventory[id];
+      }
+      claimedIngs.push({ id:id, qty:Math.round(take), unit:unit, label:label, isSub:!!isSub, requested:qty });
+    }
+
+    // Tier 1
+    var t1 = r.ingredients.tier1[0];
+    if(t1) claimIng(t1.id, t1.qty, t1.unit, t1.id);
+
+    // Tier 2 — use matched id (direct or sub)
+    (r.ingredients.tier2 || []).forEach(function(ing){
+      var m = s.matches.t2.find(function(x){ return x.id === ing.id; });
+      if(m){
+        var useId = m.matched === 'sub' ? m.subId : ing.id;
+        claimIng(useId, ing.qty, ing.unit, ing.id, m.matched === 'sub');
+      }
+    });
+
+    // Tier 3
+    (r.ingredients.tier3 || []).forEach(function(ing){
+      if(s.matches.t3.indexOf(ing.id) >= 0) claimIng(ing.id, ing.qty, ing.unit, ing.id);
+    });
+
+    // Carb
+    var carb = r.ingredients.carb;
+    if(carb && s.matches.carb) claimIng(s.matches.carb, carb.qty, carb.unit, 'carb');
+
+    claimed.push({ recipe:r, matches:s.matches, score:s.score, ingredients:claimedIngs });
+  });
+
+  // Auto-sweep: protein smoothie
+  var smoothieItems = [];
+  SMOOTHIE_IDS.forEach(function(id){
+    if(inventory[id] && inventory[id] > 0){
+      smoothieItems.push({ id:id, grams:Math.round(inventory[id]) });
+      delete inventory[id];
+    }
+  });
+
+  // Power bowl: everything remaining
+  var powerBowlItems = Object.keys(inventory).map(function(id){
+    return { id:id, grams:Math.round(inventory[id]) };
+  }).filter(function(x){ return x.grams > 10; }); // skip trivial amounts
+
+  return {
+    recipes: claimed,
+    smoothie: smoothieItems,
+    powerBowl: powerBowlItems,
+  };
+}
+
+
+// ─── MEAL PREP RENDER ────────────────────────────────────────
+function getFoodName(id){
+  var f = FOODS.find(function(x){ return x.id === id; });
+  return f ? f.name : id.replace(/_/g,' ');
+}
+
+function renderMealPrepPage(plan){
+  var sub = plan.recipes.length + ' recipes matched from your basket';
+  document.getElementById('mealPrepSub').textContent = sub;
+
+  var html = '';
+
+  // ── Recipe cards ──────────────────────────────────────────
+  plan.recipes.forEach(function(entry, i){
+    var r = entry.recipe;
+    var claimedList = entry.ingredients.map(function(ci){
+      var subNote = ci.isSub ? ' <span style="font-size:10px;color:var(--amber);font-family:var(--mono)">(sub for '+ci.label+')</span>' : '';
+      return '<li style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:baseline">'+
+        '<span>'+getFoodName(ci.id)+subNote+'</span>'+
+        '<span style="font-family:var(--mono);font-size:11px;color:var(--amber2);flex-shrink:0;margin-left:8px">'+ci.qty+'g</span>'+
+      '</li>';
+    }).join('');
+
+    var stepsList = r.steps.map(function(s,si){
+      return '<li style="font-size:12px;color:var(--text2);padding:4px 0;display:flex;gap:8px">'+
+        '<span style="width:18px;height:18px;border-radius:50%;background:var(--amber);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">'+(si+1)+'</span>'+
+        '<span>'+s+'</span></li>';
+    }).join('');
+
+    var carbNote = '';
+    if(r.carb_modular && r.ingredients.carb){
+      var carbId = entry.matches.carb || r.ingredients.carb.id;
+      carbNote = '<div style="font-size:11px;color:var(--text3);margin-top:6px;font-style:italic">Serve with: '+getFoodName(carbId)+' ('+r.ingredients.carb.qty+'g)</div>';
+    }
+
+    html += '<div style="background:var(--navy2);border:1px solid var(--border);border-radius:12px;padding:18px;margin:12px 16px">'+
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">'+
+        '<span style="font-size:28px">'+r.em+'</span>'+
+        '<div>'+
+          '<div style="font-family:var(--serif);font-size:17px;font-weight:700">'+r.name+'</div>'+
+          '<div style="font-family:var(--mono);font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-top:2px">'+
+            r.category+' · '+r.cookTime+' min · serves '+r.serves+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+      carbNote+
+      '<details style="margin-top:10px">'+
+        '<summary style="font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--green);cursor:pointer;user-select:none">'+
+          '🛒 Claimed from basket ('+entry.ingredients.length+' items)'+
+        '</summary>'+
+        '<ul style="list-style:none;margin-top:8px">'+claimedList+'</ul>'+
+      '</details>'+
+      '<details style="margin-top:8px">'+
+        '<summary style="font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--amber);cursor:pointer;user-select:none">'+
+          '👨‍🍳 Instructions'+
+        '</summary>'+
+        '<ul style="list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:4px">'+stepsList+'</ul>'+
+        (r.tip ? '<div style="margin-top:10px;padding:10px;background:var(--navy3);border-left:3px solid var(--green);border-radius:0 8px 8px 0;font-size:11px;color:var(--text2);font-style:italic">💡 '+r.tip+'</div>' : '')+
+      '</details>'+
+    '</div>';
+  });
+
+  // ── Protein Smoothie ─────────────────────────────────────
+  if(plan.smoothie.length){
+    var smoothieList = plan.smoothie.map(function(item){
+      return '<li style="font-size:12px;padding:4px 0;display:flex;justify-content:space-between">'+
+        '<span>'+getFoodName(item.id)+'</span>'+
+        '<span style="font-family:var(--mono);font-size:11px;color:var(--teal);flex-shrink:0;margin-left:8px">'+item.grams+'g</span>'+
+      '</li>';
+    }).join('');
+    html += '<div style="background:var(--navy2);border:1px solid var(--teal);border-radius:12px;padding:18px;margin:12px 16px">'+
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">'+
+        '<span style="font-size:24px">🥤</span>'+
+        '<div style="font-family:var(--serif);font-size:16px;font-weight:700">Protein Smoothie</div>'+
+      '</div>'+
+      '<div style="font-size:11px;color:var(--text3);margin-bottom:10px">Auto-assembled from remaining powder, dairy &amp; fruit in your basket.</div>'+
+      '<ul style="list-style:none">'+smoothieList+'</ul>'+
+      '<div style="font-size:11px;color:var(--text2);margin-top:8px;font-style:italic">Blend all ingredients with ice. Adjust liquid to preferred consistency.</div>'+
+    '</div>';
+  }
+
+  // ── Power Bowl ───────────────────────────────────────────
+  if(plan.powerBowl.length){
+    var bowlList = plan.powerBowl.map(function(item){
+      return '<li style="font-size:12px;padding:4px 0;display:flex;justify-content:space-between">'+
+        '<span>'+getFoodName(item.id)+'</span>'+
+        '<span style="font-family:var(--mono);font-size:11px;color:var(--purple);flex-shrink:0;margin-left:8px">'+item.grams+'g</span>'+
+      '</li>';
+    }).join('');
+    html += '<div style="background:var(--navy2);border:1px solid var(--purple);border-radius:12px;padding:18px;margin:12px 16px">'+
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">'+
+        '<span style="font-size:24px">🥣</span>'+
+        '<div style="font-family:var(--serif);font-size:16px;font-weight:700">Power Bowl</div>'+
+      '</div>'+
+      '<div style="font-size:11px;color:var(--text3);margin-bottom:10px">Everything remaining in your basket — roast or assemble as a flexible bowl.</div>'+
+      '<ul style="list-style:none">'+bowlList+'</ul>'+
+    '</div>';
+  }
+
+  document.getElementById('mpBody').innerHTML = html;
+  document.getElementById('mpWizard').innerHTML = '';
+  document.getElementById('mpPrepOrder').innerHTML = '';
+}
+
 window.addEventListener('load', initTier);
 </script>
 </body>
