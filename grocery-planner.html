@@ -890,18 +890,9 @@ var TIER = 'free', can = {};
 function buildCan(tier){
   TIER = tier;
   can = {
-    macroBasket:      true,
-    ingredientPrefs:  true,
-    tdeeCalc:         TIER !== 'free',
-    microPriority:    TIER !== 'free',
-    proteinPowder:    TIER !== 'free',
-    mealPrep:         TIER !== 'free',
-    mealsPerDay4:     TIER === 'premium',
-    recipes3or4:      TIER === 'premium',
-    allStyles:        TIER === 'premium',
-    swapBasket:       TIER === 'premium',
-    swapMealPrep:     TIER === 'premium',
-    advancedReplace:  TIER === 'premium',
+    macroBasket: true,
+    microPriority: TIER !== 'free',
+    advancedReplace: TIER === 'premium',
   };
 }
 
@@ -4778,8 +4769,8 @@ var RECIPE_TEMPLATES = [
    ingredients:{
      pantry:["tomato_sauce","garam_masala","curry_powder"],
      tier1:[{id:"chicken_breast",qty:500,unit:"g"}],
-     tier2:[{id:"greek_yogurt",qty:150,unit:"g",subs:["skyr","vegan_yogurt"]}],
-     tier3:[{id:"spinach",qty:100,unit:"g",subs:["kale"]},{id:"onion",qty:120,unit:"g",subs:[]}],
+     tier2:[{id:"chicken_breast",qty:500,unit:"g",subs:["chicken_thigh","tofu","turkey_breast"]},{id:"greek_yogurt",qty:150,unit:"g",subs:["skyr","vegan_yogurt"]},{id:"tomatoes",qty:200,unit:"g",subs:[]}],
+     tier3:[{id:"spinach",qty:100,unit:"g",subs:["kale"]},{id:"onion",qty:120,unit:"g",subs:[]},{id:"bell_pepper",qty:150,unit:"g",subs:["courgette"]}],
      carb:{id:"white_rice",qty:300,unit:"g",subs:["brown_rice","quinoa"]},
      garnish:["fresh_coriander"]
    },
@@ -4790,8 +4781,8 @@ var RECIPE_TEMPLATES = [
    ingredients:{
      pantry:["tomato_sauce","cumin","paprika"],
      tier1:[{id:"lean_beef",qty:500,unit:"g"}],
-     tier2:[{id:"kidney_beans",qty:250,unit:"g",subs:["black_beans","white_beans"]},{id:"tomatoes",qty:300,unit:"g",subs:[]},{id:"bell_pepper",qty:200,unit:"g",subs:["courgette","carrots"]}],
-     tier3:[{id:"onion",qty:120,unit:"g",subs:[]}],
+     tier2:[{id:"lean_beef",qty:500,unit:"g",subs:["turkey_breast","lentils"]},{id:"kidney_beans",qty:250,unit:"g",subs:["black_beans","white_beans"]},{id:"tomatoes",qty:300,unit:"g",subs:[]},{id:"bell_pepper",qty:200,unit:"g",subs:["courgette","carrots"]}],
+     tier3:[{id:"onion",qty:120,unit:"g",subs:[]},{id:"garlic",qty:20,unit:"g",subs:[]}],
      carb:{id:"white_rice",qty:300,unit:"g",subs:["brown_rice","quinoa"]},
      garnish:["fresh_coriander","lime"]
    },
@@ -4802,8 +4793,8 @@ var RECIPE_TEMPLATES = [
    ingredients:{
      pantry:["curry_block","soy_sauce"],
      tier1:[{id:"chicken_thigh",qty:500,unit:"g"}],
-     tier2:[{id:"potato",qty:300,unit:"g",subs:["sweet_potato","pumpkin"]},{id:"carrots",qty:200,unit:"g",subs:["pumpkin","sweet_potato"]}],
-     tier3:[{id:"onion",qty:150,unit:"g",subs:[]}],
+     tier2:[{id:"potato",qty:300,unit:"g",subs:["sweet_potato","pumpkin"]},{id:"carrots",qty:200,unit:"g",subs:["pumpkin"]},{id:"courgette",qty:150,unit:"g",subs:["eggplant","broccoli"]}],
+     tier3:[{id:"onion",qty:150,unit:"g",subs:[]},{id:"mushrooms",qty:100,unit:"g",subs:[]}],
      carb:{id:"white_rice",qty:300,unit:"g",subs:["brown_rice"]},
      garnish:[]
    },
@@ -4814,7 +4805,7 @@ var RECIPE_TEMPLATES = [
    ingredients:{
      pantry:["curry_powder","cumin"],
      tier1:[{id:"lentils",qty:500,unit:"g"}],
-     tier2:[{id:"tomatoes",qty:250,unit:"g",subs:[]}],
+     tier2:[{id:"tomatoes",qty:250,unit:"g",subs:[]},{id:"spinach",qty:100,unit:"g",subs:["kale"]},{id:"cauliflower",qty:150,unit:"g",subs:["broccoli","peas"]}],
      tier3:[{id:"onion",qty:120,unit:"g",subs:[]},{id:"garlic",qty:30,unit:"g",subs:[]}],
      carb:{id:"white_rice",qty:300,unit:"g",subs:["brown_rice","quinoa"]},
      garnish:["fresh_coriander","lemon"]
@@ -4827,8 +4818,8 @@ var RECIPE_TEMPLATES = [
    ingredients:{
      pantry:["olive_oil"],
      tier1:[{id:"chicken_thigh",qty:700,unit:"g"}],
-     tier2:[{id:"potato",qty:400,unit:"g",subs:["sweet_potato","pumpkin"]},{id:"carrots",qty:250,unit:"g",subs:["pumpkin","sweet_potato"]}],
-     tier3:[{id:"onion",qty:150,unit:"g",subs:[]}],
+     tier2:[{id:"potato",qty:400,unit:"g",subs:["sweet_potato","pumpkin"]},{id:"carrots",qty:250,unit:"g",subs:["pumpkin"]},{id:"bell_pepper",qty:200,unit:"g",subs:["courgette"]},{id:"courgette",qty:200,unit:"g",subs:["eggplant","broccoli"]}],
+     tier3:[{id:"onion",qty:150,unit:"g",subs:[]},{id:"garlic",qty:20,unit:"g",subs:[]},{id:"tomatoes",qty:150,unit:"g",subs:[]}],
      garnish:[]
    },
    steps:["Preheat oven to 200°C.","Chop potatoes, carrots, and onion.","Place vegetables and chicken on a tray and coat with olive oil.","Season and mix well.","Roast 40–50 min until chicken is cooked through.","Turn once halfway.","Rest 5 min before serving."],
@@ -4838,8 +4829,8 @@ var RECIPE_TEMPLATES = [
    ingredients:{
      pantry:["olive_oil"],
      tier1:[{id:"chicken_breast",qty:600,unit:"g"}],
-     tier2:[{id:"potato",qty:400,unit:"g",subs:["sweet_potato"]},{id:"bell_pepper",qty:250,unit:"g",subs:["courgette"]}],
-     tier3:[{id:"onion",qty:150,unit:"g",subs:[]}],
+     tier2:[{id:"potato",qty:400,unit:"g",subs:["sweet_potato"]},{id:"bell_pepper",qty:250,unit:"g",subs:["courgette"]},{id:"courgette",qty:200,unit:"g",subs:["eggplant"]},{id:"tomatoes",qty:150,unit:"g",subs:[]}],
+     tier3:[{id:"onion",qty:150,unit:"g",subs:[]},{id:"garlic",qty:20,unit:"g",subs:[]}],
      garnish:["lemon"]
    },
    steps:["Preheat oven to 200°C.","Cut chicken and vegetables into chunks.","Coat with olive oil and mix well.","Spread on a tray.","Roast 30–35 min.","Turn halfway.","Rest briefly and serve with lemon."],
@@ -4849,8 +4840,8 @@ var RECIPE_TEMPLATES = [
    ingredients:{
      pantry:["soy_sauce"],
      tier1:[{id:"chicken_thigh",qty:600,unit:"g"}],
-     tier2:[{id:"broccoli",qty:250,unit:"g",subs:["green_beans","asparagus"]}],
-     tier3:[],
+     tier2:[{id:"broccoli",qty:250,unit:"g",subs:["green_beans","asparagus"]},{id:"carrots",qty:150,unit:"g",subs:["courgette"]},{id:"mushrooms",qty:150,unit:"g",subs:["eggplant"]}],
+     tier3:[{id:"spinach",qty:80,unit:"g",subs:["kale"]},{id:"garlic",qty:20,unit:"g",subs:[]}],
      carb:{id:"white_rice",qty:300,unit:"g",subs:["brown_rice"]},
      garnish:["sesame_seeds"]
    },
@@ -4861,8 +4852,8 @@ var RECIPE_TEMPLATES = [
    ingredients:{
      pantry:["olive_oil"],
      tier1:[{id:"chickpeas",qty:400,unit:"g"}],
-     tier2:[{id:"courgette",qty:300,unit:"g",subs:["eggplant","bell_pepper"]},{id:"bell_pepper",qty:250,unit:"g",subs:["carrots","courgette"]}],
-     tier3:[{id:"onion",qty:150,unit:"g",subs:[]}],
+     tier2:[{id:"courgette",qty:300,unit:"g",subs:["eggplant","bell_pepper"]},{id:"bell_pepper",qty:250,unit:"g",subs:["carrots"]},{id:"sweet_potato",qty:250,unit:"g",subs:["potato","pumpkin"]},{id:"broccoli",qty:200,unit:"g",subs:["cauliflower","asparagus"]}],
+     tier3:[{id:"onion",qty:150,unit:"g",subs:[]},{id:"garlic",qty:20,unit:"g",subs:[]},{id:"tomatoes",qty:150,unit:"g",subs:[]}],
      carb:{id:"quinoa",qty:280,unit:"g",subs:["brown_rice"]},
      garnish:[]
    },
@@ -4874,8 +4865,8 @@ var RECIPE_TEMPLATES = [
    ingredients:{
      pantry:["soy_sauce","sesame_oil"],
      tier1:[{id:"lean_beef",qty:400,unit:"g"}],
-     tier2:[{id:"spinach",qty:150,unit:"g",subs:["kale","cabbage"]},{id:"carrots",qty:150,unit:"g",subs:["courgette"]},{id:"eggplant",qty:200,unit:"g",subs:["courgette","mushrooms"]}],
-     tier3:[{id:"eggs",qty:4,unit:"piece",subs:[]}],
+     tier2:[{id:"spinach",qty:150,unit:"g",subs:["kale","cabbage"]},{id:"carrots",qty:150,unit:"g",subs:["courgette"]},{id:"mushrooms",qty:200,unit:"g",subs:["eggplant"]},{id:"courgette",qty:150,unit:"g",subs:["bell_pepper"]}],
+     tier3:[{id:"eggs",qty:4,unit:"piece",subs:[]},{id:"garlic",qty:20,unit:"g",subs:[]}],
      carb:{id:"white_rice",qty:300,unit:"g",subs:["brown_rice"]},
      garnish:["sesame_seeds"]
    },
@@ -4886,8 +4877,8 @@ var RECIPE_TEMPLATES = [
    ingredients:{
      pantry:["soy_sauce"],
      tier1:[{id:"chicken_thigh",qty:500,unit:"g"}],
-     tier2:[{id:"eggs",qty:4,unit:"piece",subs:[]},{id:"spinach",qty:150,unit:"g",subs:["kale","cabbage"]}],
-     tier3:[{id:"onion",qty:120,unit:"g",subs:[]}],
+     tier2:[{id:"eggs",qty:4,unit:"piece",subs:[]},{id:"spinach",qty:150,unit:"g",subs:["kale","cabbage"]},{id:"mushrooms",qty:150,unit:"g",subs:["courgette"]}],
+     tier3:[{id:"onion",qty:120,unit:"g",subs:[]},{id:"carrots",qty:100,unit:"g",subs:[]}],
      carb:{id:"white_rice",qty:300,unit:"g",subs:["brown_rice"]},
      garnish:["spring_onion"]
    },
@@ -4898,8 +4889,8 @@ var RECIPE_TEMPLATES = [
    ingredients:{
      pantry:["cumin","paprika"],
      tier1:[{id:"chicken_breast",qty:500,unit:"g"}],
-     tier2:[{id:"black_beans",qty:250,unit:"g",subs:["kidney_beans","white_beans"]},{id:"bell_pepper",qty:200,unit:"g",subs:["courgette","carrots"]}],
-     tier3:[{id:"tomatoes",qty:200,unit:"g",subs:[]}],
+     tier2:[{id:"black_beans",qty:250,unit:"g",subs:["kidney_beans","white_beans"]},{id:"bell_pepper",qty:200,unit:"g",subs:["courgette","carrots"]},{id:"courgette",qty:150,unit:"g",subs:["eggplant"]}],
+     tier3:[{id:"tomatoes",qty:200,unit:"g",subs:[]},{id:"onion",qty:100,unit:"g",subs:[]},{id:"avocado",qty:1,unit:"piece",subs:[]}],
      carb:{id:"white_rice",qty:300,unit:"g",subs:["brown_rice","quinoa"]},
      garnish:["lime"]
    },
@@ -4910,8 +4901,8 @@ var RECIPE_TEMPLATES = [
    ingredients:{
      pantry:["olive_oil"],
      tier1:[{id:"chickpeas",qty:400,unit:"g"}],
-     tier2:[{id:"broccoli",qty:250,unit:"g",subs:["green_beans","asparagus"]},{id:"avocado",qty:2,unit:"piece",subs:[]}],
-     tier3:[{id:"spinach",qty:100,unit:"g",subs:["kale"]}],
+     tier2:[{id:"broccoli",qty:250,unit:"g",subs:["green_beans","asparagus"]},{id:"avocado",qty:2,unit:"piece",subs:[]},{id:"sweet_potato",qty:200,unit:"g",subs:["pumpkin","carrots"]},{id:"beets",qty:150,unit:"g",subs:["carrots","courgette"]}],
+     tier3:[{id:"spinach",qty:100,unit:"g",subs:["kale"]},{id:"cucumber",qty:100,unit:"g",subs:[]},{id:"garlic",qty:20,unit:"g",subs:[]}],
      carb:{id:"quinoa",qty:280,unit:"g",subs:["brown_rice"]},
      garnish:["sesame_seeds"]
    },
@@ -4923,8 +4914,8 @@ var RECIPE_TEMPLATES = [
    ingredients:{
      pantry:["tomato_sauce"],
      tier1:[{id:"lean_beef",qty:500,unit:"g"}],
-     tier2:[{id:"pasta",qty:320,unit:"g",subs:[]},{id:"ricotta",qty:200,unit:"g",subs:["cottage_cheese"]}],
-     tier3:[{id:"onion",qty:120,unit:"g",subs:[]}],
+     tier2:[{id:"pasta",qty:320,unit:"g",subs:[]},{id:"ricotta",qty:200,unit:"g",subs:["cottage_cheese"]},{id:"spinach",qty:150,unit:"g",subs:["kale","courgette"]},{id:"carrots",qty:150,unit:"g",subs:["courgette"]}],
+     tier3:[{id:"onion",qty:120,unit:"g",subs:[]},{id:"garlic",qty:20,unit:"g",subs:[]},{id:"tomatoes",qty:200,unit:"g",subs:[]}],
      garnish:["fresh_basil"]
    },
    steps:["Preheat oven to 180°C.","Cook beef with onion.","Add tomato sauce and simmer.","Layer pasta, meat sauce, and ricotta repeatedly.","Bake 35–40 min.","Rest before slicing.","Serve warm."],
@@ -4934,8 +4925,8 @@ var RECIPE_TEMPLATES = [
    ingredients:{
      pantry:[],
      tier1:[{id:"potato",qty:800,unit:"g"}],
-     tier2:[{id:"hard_cheese",qty:150,unit:"g",subs:["feta","ricotta"]},{id:"milk",qty:300,unit:"g",subs:["almond_milk","oat_milk"]}],
-     tier3:[{id:"garlic",qty:20,unit:"g",subs:[]}],
+     tier2:[{id:"hard_cheese",qty:150,unit:"g",subs:["feta","ricotta"]},{id:"milk",qty:300,unit:"g",subs:["almond_milk","oat_milk"]},{id:"leek",qty:150,unit:"g",subs:["onion","asparagus"]}],
+     tier3:[{id:"garlic",qty:20,unit:"g",subs:[]},{id:"spinach",qty:80,unit:"g",subs:["kale"]}],
      garnish:[]
    },
    steps:["Preheat oven to 180°C.","Slice potatoes thinly.","Layer potatoes with cheese.","Add milk and garlic.","Bake 45–50 min until tender.","Rest before serving."],
@@ -4945,8 +4936,8 @@ var RECIPE_TEMPLATES = [
    ingredients:{
      pantry:["olive_oil"],
      tier1:[{id:"eggs",qty:400,unit:"g"}],
-     tier2:[{id:"spinach",qty:150,unit:"g",subs:["kale"]},{id:"feta",qty:120,unit:"g",subs:["ricotta","hard_cheese"]}],
-     tier3:[{id:"onion",qty:100,unit:"g",subs:[]}],
+     tier2:[{id:"spinach",qty:150,unit:"g",subs:["kale"]},{id:"feta",qty:120,unit:"g",subs:["ricotta","cottage_cheese","hard_cheese"]},{id:"bell_pepper",qty:150,unit:"g",subs:["courgette","asparagus"]},{id:"mushrooms",qty:150,unit:"g",subs:["courgette","eggplant"]}],
+     tier3:[{id:"onion",qty:100,unit:"g",subs:[]},{id:"asparagus",qty:100,unit:"g",subs:["green_beans"]},{id:"tomatoes",qty:100,unit:"g",subs:[]}],
      garnish:[]
    },
    steps:["Preheat oven to 180°C.","Sauté onion, then add spinach and cook down.","Beat eggs and pour over vegetables.","Add feta.","Cook briefly on stove then bake 10–12 min.","Slice and serve."],
@@ -4956,8 +4947,8 @@ var RECIPE_TEMPLATES = [
    ingredients:{
      pantry:["stock"],
      tier1:[{id:"lamb",qty:500,unit:"g"}],
-     tier2:[{id:"potato",qty:500,unit:"g",subs:["sweet_potato"]},{id:"carrots",qty:200,unit:"g",subs:["peas"]}],
-     tier3:[{id:"onion",qty:120,unit:"g",subs:[]}],
+     tier2:[{id:"potato",qty:500,unit:"g",subs:["sweet_potato"]},{id:"carrots",qty:200,unit:"g",subs:["peas"]},{id:"peas",qty:150,unit:"g",subs:["green_beans"]},{id:"leek",qty:150,unit:"g",subs:["onion","celery"]}],
+     tier3:[{id:"onion",qty:120,unit:"g",subs:[]},{id:"garlic",qty:20,unit:"g",subs:[]},{id:"mushrooms",qty:100,unit:"g",subs:[]}],
      garnish:[]
    },
    steps:["Preheat oven to 180°C.","Cook lamb with onion.","Add carrots and stock, simmer 15 min.","Prepare mashed potatoes separately.","Layer meat filling and top with mash.","Bake 25–30 min until browned on top.","Rest briefly before serving."],
@@ -4968,8 +4959,8 @@ var RECIPE_TEMPLATES = [
    ingredients:{
      pantry:["soy_sauce"],
      tier1:[{id:"chicken_breast",qty:500,unit:"g"}],
-     tier2:[{id:"broccoli",qty:250,unit:"g",subs:["green_beans","asparagus"]},{id:"bell_pepper",qty:200,unit:"g",subs:["courgette","carrots"]}],
-     tier3:[{id:"onion",qty:120,unit:"g",subs:[]}],
+     tier2:[{id:"broccoli",qty:250,unit:"g",subs:["green_beans","asparagus"]},{id:"bell_pepper",qty:200,unit:"g",subs:["courgette","carrots"]},{id:"mushrooms",qty:150,unit:"g",subs:["eggplant"]},{id:"courgette",qty:150,unit:"g",subs:["cabbage"]}],
+     tier3:[{id:"onion",qty:120,unit:"g",subs:[]},{id:"garlic",qty:20,unit:"g",subs:[]},{id:"carrots",qty:100,unit:"g",subs:[]}],
      carb:{id:"white_rice",qty:300,unit:"g",subs:["brown_rice"]},
      garnish:[]
    },
@@ -4980,8 +4971,8 @@ var RECIPE_TEMPLATES = [
    ingredients:{
      pantry:["soy_sauce"],
      tier1:[{id:"lean_beef",qty:500,unit:"g"}],
-     tier2:[{id:"green_beans",qty:200,unit:"g",subs:["bell_pepper","courgette"]}],
-     tier3:[{id:"onion",qty:120,unit:"g",subs:[]}],
+     tier2:[{id:"green_beans",qty:200,unit:"g",subs:["bell_pepper","asparagus"]},{id:"bell_pepper",qty:150,unit:"g",subs:["courgette"]},{id:"mushrooms",qty:150,unit:"g",subs:["eggplant"]}],
+     tier3:[{id:"onion",qty:120,unit:"g",subs:[]},{id:"garlic",qty:20,unit:"g",subs:[]},{id:"spinach",qty:80,unit:"g",subs:["kale"]}],
      carb:{id:"white_rice",qty:300,unit:"g",subs:["brown_rice"]},
      garnish:["fresh_basil","chilli"]
    },
@@ -4992,8 +4983,8 @@ var RECIPE_TEMPLATES = [
    ingredients:{
      pantry:["soy_sauce"],
      tier1:[{id:"eggs",qty:4,unit:"piece"}],
-     tier2:[{id:"white_rice",qty:300,unit:"g",subs:["brown_rice"]},{id:"chicken_breast",qty:300,unit:"g",subs:["prawns","tofu"]}],
-     tier3:[{id:"onion",qty:120,unit:"g",subs:[]}],
+     tier2:[{id:"white_rice",qty:300,unit:"g",subs:["brown_rice"]},{id:"chicken_breast",qty:300,unit:"g",subs:["prawns","tofu"]},{id:"cabbage",qty:150,unit:"g",subs:["spinach","kale"]},{id:"carrots",qty:100,unit:"g",subs:["courgette"]}],
+     tier3:[{id:"onion",qty:120,unit:"g",subs:[]},{id:"garlic",qty:20,unit:"g",subs:[]},{id:"bell_pepper",qty:100,unit:"g",subs:[]}],
      garnish:["spring_onion"]
    },
    steps:["Cook rice in advance and refrigerate (day-old rice works best).","Cook chicken and set aside.","Scramble eggs in a hot pan.","Add onion, then rice and stir-fry on high heat.","Return chicken, add soy sauce and mix well.","Serve topped with spring onion."],
@@ -5003,8 +4994,8 @@ var RECIPE_TEMPLATES = [
    ingredients:{
      pantry:["soy_sauce"],
      tier1:[{id:"chicken_breast",qty:400,unit:"g"}],
-     tier2:[{id:"pasta",qty:320,unit:"g",subs:[]},{id:"cabbage",qty:200,unit:"g",subs:["spinach","kale"]}],
-     tier3:[{id:"carrots",qty:120,unit:"g",subs:[]}],
+     tier2:[{id:"pasta",qty:320,unit:"g",subs:[]},{id:"cabbage",qty:200,unit:"g",subs:["spinach","kale"]},{id:"bell_pepper",qty:150,unit:"g",subs:["courgette"]},{id:"mushrooms",qty:150,unit:"g",subs:["eggplant"]}],
+     tier3:[{id:"carrots",qty:120,unit:"g",subs:[]},{id:"garlic",qty:20,unit:"g",subs:[]},{id:"onion",qty:100,unit:"g",subs:[]}],
      garnish:["spring_onion"]
    },
    steps:["Cook pasta separately until just al dente.","Cook chicken in a pan.","Add cabbage and carrots and stir-fry.","Add pasta and toss with soy sauce.","Serve immediately topped with spring onion."],
@@ -5015,8 +5006,8 @@ var RECIPE_TEMPLATES = [
    ingredients:{
      pantry:["olive_oil","stock"],
      tier1:[{id:"white_beans",qty:400,unit:"g"}],
-     tier2:[{id:"courgette",qty:200,unit:"g",subs:["eggplant","bell_pepper"]},{id:"carrots",qty:200,unit:"g",subs:["pumpkin","celery"]}],
-     tier3:[{id:"onion",qty:120,unit:"g",subs:[]},{id:"tomatoes",qty:200,unit:"g",subs:[]}],
+     tier2:[{id:"courgette",qty:200,unit:"g",subs:["eggplant","bell_pepper"]},{id:"carrots",qty:200,unit:"g",subs:["pumpkin","celery"]},{id:"spinach",qty:100,unit:"g",subs:["kale","cabbage"]},{id:"potato",qty:150,unit:"g",subs:["sweet_potato"]}],
+     tier3:[{id:"onion",qty:120,unit:"g",subs:[]},{id:"tomatoes",qty:200,unit:"g",subs:[]},{id:"garlic",qty:20,unit:"g",subs:[]},{id:"celery",qty:80,unit:"g",subs:["leek"]}],
      carb:{id:"pasta",qty:320,unit:"g",subs:["couscous","barley"]},
      garnish:["fresh_parsley"]
    },
@@ -5027,8 +5018,8 @@ var RECIPE_TEMPLATES = [
    ingredients:{
      pantry:["miso_paste","stock"],
      tier1:[{id:"tofu",qty:400,unit:"g"}],
-     tier2:[{id:"mushrooms",qty:200,unit:"g",subs:["cabbage","spinach"]}],
-     tier3:[{id:"spinach",qty:80,unit:"g",subs:["kale"]}],
+     tier2:[{id:"mushrooms",qty:200,unit:"g",subs:["cabbage","courgette"]},{id:"broccoli",qty:150,unit:"g",subs:["green_beans","asparagus"]},{id:"carrots",qty:100,unit:"g",subs:["sweet_potato"]}],
+     tier3:[{id:"spinach",qty:80,unit:"g",subs:["kale"]},{id:"leek",qty:80,unit:"g",subs:["onion"]}],
      carb:{id:"white_rice",qty:300,unit:"g",subs:["brown_rice","quinoa"]},
      garnish:["spring_onion"]
    },
@@ -5039,8 +5030,8 @@ var RECIPE_TEMPLATES = [
    ingredients:{
      pantry:["stock"],
      tier1:[{id:"lean_beef",qty:400,unit:"g"}],
-     tier2:[{id:"pasta",qty:320,unit:"g",subs:[]}],
-     tier3:[{id:"onion",qty:120,unit:"g",subs:[]}],
+     tier2:[{id:"pasta",qty:320,unit:"g",subs:[]},{id:"carrots",qty:150,unit:"g",subs:["courgette"]}],
+     tier3:[{id:"onion",qty:120,unit:"g",subs:[]},{id:"garlic",qty:20,unit:"g",subs:[]},{id:"mushrooms",qty:100,unit:"g",subs:[]}],
      garnish:["fresh_coriander","lime"]
    },
    steps:["Cook noodles separately until just tender.","Heat stock until simmering.","Slice beef very thinly and cook briefly in the broth.","Add onion.","Combine noodles and broth in bowls.","Add garnish and serve immediately."],
@@ -5050,8 +5041,8 @@ var RECIPE_TEMPLATES = [
    ingredients:{
      pantry:["stock"],
      tier1:[{id:"chicken_breast",qty:500,unit:"g"}],
-     tier2:[{id:"carrots",qty:200,unit:"g",subs:["celery","leek"]}],
-     tier3:[{id:"onion",qty:120,unit:"g",subs:[]}],
+     tier2:[{id:"carrots",qty:200,unit:"g",subs:["celery","leek"]},{id:"celery",qty:150,unit:"g",subs:["leek","courgette"]},{id:"potato",qty:150,unit:"g",subs:["sweet_potato"]},{id:"leek",qty:120,unit:"g",subs:["onion"]}],
+     tier3:[{id:"onion",qty:120,unit:"g",subs:[]},{id:"garlic",qty:20,unit:"g",subs:[]},{id:"spinach",qty:80,unit:"g",subs:["kale"]}],
      carb:{id:"pasta",qty:320,unit:"g",subs:["white_rice","brown_rice"]},
      garnish:["fresh_parsley"]
    },
@@ -5165,6 +5156,8 @@ function buildMealPrepPlan(basketItems, selectedRecipes){
 
   var claimed = []; // { recipe, claimedIngredients }
 
+  var claimedTier1Ids = {}; // prevent two recipes claiming the same protein
+
   selectedRecipes.forEach(function(s){
     var r = s.recipe;
     var claimedIngs = [];
@@ -5185,9 +5178,12 @@ function buildMealPrepPlan(basketItems, selectedRecipes){
       claimedIngs.push({ id:id, qty:Math.round(take), unit:unit, label:label, isSub:!!isSub, requested:qty });
     }
 
-    // Tier 1
+    // Tier 1 — skip if already claimed by a previous recipe
     var t1 = r.ingredients.tier1[0];
-    if(t1) claimIng(t1.id, t1.qty, t1.unit, t1.id);
+    if(t1 && !claimedTier1Ids[t1.id]){
+      claimIng(t1.id, t1.qty, t1.unit, t1.id);
+      claimedTier1Ids[t1.id] = true;
+    }
 
     // Tier 2 — use matched id (direct or sub)
     (r.ingredients.tier2 || []).forEach(function(ing){
