@@ -890,9 +890,18 @@ var TIER = 'free', can = {};
 function buildCan(tier){
   TIER = tier;
   can = {
-    macroBasket: true,
-    microPriority: TIER !== 'free',
-    advancedReplace: TIER === 'premium',
+    macroBasket:      true,
+    ingredientPrefs:  true,
+    tdeeCalc:         TIER !== 'free',
+    microPriority:    TIER !== 'free',
+    proteinPowder:    TIER !== 'free',
+    mealPrep:         TIER !== 'free',
+    mealsPerDay4:     TIER === 'premium',
+    recipes3or4:      TIER === 'premium',
+    allStyles:        TIER === 'premium',
+    swapBasket:       TIER === 'premium',
+    swapMealPrep:     TIER === 'premium',
+    advancedReplace:  TIER === 'premium',
   };
 }
 
