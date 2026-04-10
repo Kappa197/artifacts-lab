@@ -5658,7 +5658,7 @@ function buildGeminiPrompt(basket, prefs){
 async function callGemini(prompt){
   var body = {
     contents:[{ parts:[{ text: prompt }] }],
-    generationConfig:{ temperature:0.7, maxOutputTokens:8192, responseMimeType:'application/json' }
+    generationConfig:{ temperature:0.7, maxOutputTokens:8192 }
   };
   var res  = await fetch(GEMINI_URL, {
     method:'POST',
