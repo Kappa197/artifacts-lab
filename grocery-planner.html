@@ -5559,10 +5559,9 @@ window.moveBowlIngBack = function(recipeIdx, ingId){
 // GEMINI MEAL PREP ENGINE
 // ═══════════════════════════════════════════════════════════════
 // ── Claude Haiku API config ──────────────────────────────────
-// Replace ANTHROPIC_KEY with your key — never commit to public repo
-var ANTHROPIC_KEY = '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';
+// API call proxied through Vercel function — key lives in Vercel env vars
 var CLAUDE_MODEL  = 'claude-haiku-4-5-20251001';
-var CLAUDE_URL    = 'https://api.anthropic.com/v1/messages';
+var CLAUDE_URL    = '/api/meal-prep';
 
 // ── History helpers ───────────────────────────────────────────
 function getMealHistory(){
@@ -5669,10 +5668,7 @@ async function callClaude(prompt){
   var res = await fetch(CLAUDE_URL, {
     method:'POST',
     headers:{
-      'Content-Type':      'application/json',
-      'x-api-key':         ANTHROPIC_KEY,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
+      'Content-Type': 'application/json'
     },
     body: JSON.stringify(body)
   });
