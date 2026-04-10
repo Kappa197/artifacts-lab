@@ -5699,6 +5699,7 @@ async function callGemini(prompt){
     try {
       return JSON.parse(cleaned);
     } catch(e2) {
+      console.log('RAW GEMINI TEXT:', text);
       throw new Error('Could not parse Gemini response as JSON. Try regenerating. Detail: ' + e1.message);
     }
   }
