@@ -5558,9 +5558,11 @@ window.moveBowlIngBack = function(recipeIdx, ingId){
 // ═══════════════════════════════════════════════════════════════
 // GEMINI MEAL PREP ENGINE
 // ═══════════════════════════════════════════════════════════════
-var GEMINI_KEY   = 'AIzaSyA_mfF1VNgV0YICPZw6mxDQAx7DLGge8no';
-var MODEL_NAME   = 'gemini-3-flash-preview';
-var GEMINI_URL   = 'https://generativelanguage.googleapis.com/v1beta/models/' + MODEL_NAME + ':generateContent?key=' + GEMINI_KEY;
+// ── Claude Haiku API config ──────────────────────────────────
+// Replace ANTHROPIC_KEY with your key — never commit to public repo
+var ANTHROPIC_KEY = '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';
+var CLAUDE_MODEL  = 'claude-haiku-4-5-20251001';
+var CLAUDE_URL    = 'https://api.anthropic.com/v1/messages';
 
 // ── History helpers ───────────────────────────────────────────
 function getMealHistory(){
@@ -5658,52 +5660,47 @@ function buildGeminiPrompt(basket, prefs){
 }
 
 // ── Call Gemini API ───────────────────────────────────────────
-async function callGemini(prompt){
+async function callClaude(prompt){
   var body = {
-    contents:[{ parts:[{ text: prompt }] }],
-    generationConfig:{ temperature:0.7, maxOutputTokens:8192 }
+    model:      CLAUDE_MODEL,
+    max_tokens: 4096,
+    messages:[{ role:'user', content: prompt }]
   };
-  var res  = await fetch(GEMINI_URL, {
+  var res = await fetch(CLAUDE_URL, {
     method:'POST',
-    headers:{'Content-Type':'application/json'},
+    headers:{
+      'Content-Type':      'application/json',
+      'x-api-key':         ANTHROPIC_KEY,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
     body: JSON.stringify(body)
   });
   if(!res.ok){
     var err = await res.text();
-    throw new Error('Gemini API error '+res.status+': '+err.slice(0,200));
+    throw new Error('Claude API error '+res.status+': '+err.slice(0,200));
   }
   var data = await res.json();
-  var text = data.candidates[0].content.parts[0].text;
-  // Strip all markdown fences globally
+  var text = data.content[0].text;
+  // Strip markdown fences if present
   text = text.replace(/```json/g,'').replace(/```/g,'').trim();
-  // Find outermost JSON object boundaries
+  // Find outermost JSON object
   var start = text.indexOf('{');
-  var end   = text.lastIndexOf('}');
-  if(start >= 0 && end > start) text = text.slice(start, end+1);
-  // Sanitise common LLM JSON mistakes:
-  // 1. Remove control characters
-  text = text.replace(/[\x00-\x1F\x7F]/g, function(ch){
-    // Keep legitimate whitespace
-    return (ch === '\n' || ch === '\r' || ch === '\t') ? ch : '';
-  });
-  // 2. Fix unescaped double quotes inside string values — naive but effective
-  // Replace " that is not a JSON structural character with escaped version
-  // We do this by parsing step by step if JSON.parse fails
+  var end2  = text.lastIndexOf('}');
+  if(start >= 0 && end2 > start) text = text.slice(start, end2+1);
   try {
     return JSON.parse(text);
-  } catch(e1) {
-    // Second attempt: aggressively clean newlines inside strings
-    var cleaned = text.replace(/"([^"]*)"/g, function(match, inner){
-      return '"' + inner.replace(/\n/g,'').replace(/\r/g,'').replace(/\t/g,' ') + '"';
-    });
+  } catch(e1){
+    // Second attempt: strip control characters then retry
+    var cleaned = text.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g,'');
     try {
       return JSON.parse(cleaned);
-    } catch(e2) {
-      console.log('RAW GEMINI TEXT:', text);
-      throw new Error('Could not parse Gemini response as JSON. Try regenerating. Detail: ' + e1.message);
+    } catch(e2){
+      throw new Error('Could not parse Claude response as JSON. Try regenerating. Detail: '+e1.message);
     }
   }
 }
+
 
 // ── Setup page → AI flow ──────────────────────────────────────
 function openMealPrepSetup(){
@@ -5855,7 +5852,7 @@ async function runGeminiMealPrep(){
 
   try {
     var prompt  = buildGeminiPrompt(G.basket, prefs);
-    var aiPlan  = await callGemini(prompt);
+    var aiPlan  = await callClaude(prompt);
 
     clearInterval(msgInterval);
 
