@@ -5558,9 +5558,9 @@ window.moveBowlIngBack = function(recipeIdx, ingId){
 // ═══════════════════════════════════════════════════════════════
 // GEMINI MEAL PREP ENGINE
 // ═══════════════════════════════════════════════════════════════
-var GEMINI_KEY   = 'AIzaSyCIzS07Lu9meXWhRZhplcBRcjj3CxFhTCw';
+var GEMINI_KEY   = 'AIzaSyD5QUvveFHOkol1oowZC9iIfN9Be1qvwiw';
 var MODEL_NAME   = 'gemini-3-flash-preview';
-var GEMINI_URL   = 'https://generativelanguage.googleapis.com/v1beta/models/' + MODEL_NAME + ':generateContent?key=' + GEMINI_KEY;
+var GEMINI_URL   = 'https://generativelanguage.googleapis.com/v1/models/' + MODEL_NAME + ':generateContent?key=' + GEMINI_KEY;
 
 // ── History helpers ───────────────────────────────────────────
 function getMealHistory(){
@@ -5630,6 +5630,9 @@ function buildGeminiPrompt(basket, prefs){
     '7. Anything not claimed by recipes goes into powerBowl',
     '8. Include 5-7 practical preparation steps per recipe',
     '9. Return ONLY valid JSON with no markdown fences, no explanation',
+    '10. Output raw JSON only — no backticks, no code blocks, no text before or after the JSON',
+    '11. Ensure ALL strings are properly escaped for JSON.parse() — no unescaped double quotes inside strings',
+    '12. Keep recipe steps concise (max 15 words each) to avoid hitting output limits',
     '',
     'RETURN THIS EXACT JSON SCHEMA:',
     '{',
@@ -5671,13 +5674,34 @@ async function callGemini(prompt){
   }
   var data = await res.json();
   var text = data.candidates[0].content.parts[0].text;
-  // Strip markdown fences if present
-  text = text.replace(/^```json[\r\n]*/,'').replace(/^```[\r\n]*/,'').replace(/[\r\n]*```\s*$/,'').trim();
-  // Find the JSON object boundaries in case there's extra text
+  // Strip all markdown fences globally
+  text = text.replace(/```json/g,'').replace(/```/g,'').trim();
+  // Find outermost JSON object boundaries
   var start = text.indexOf('{');
   var end   = text.lastIndexOf('}');
   if(start >= 0 && end > start) text = text.slice(start, end+1);
-  return JSON.parse(text);
+  // Sanitise common LLM JSON mistakes:
+  // 1. Remove control characters
+  text = text.replace(/[\x00-\x1F\x7F]/g, function(ch){
+    // Keep legitimate whitespace
+    return (ch === '\n' || ch === '\r' || ch === '\t') ? ch : '';
+  });
+  // 2. Fix unescaped double quotes inside string values — naive but effective
+  // Replace " that is not a JSON structural character with escaped version
+  // We do this by parsing step by step if JSON.parse fails
+  try {
+    return JSON.parse(text);
+  } catch(e1) {
+    // Second attempt: aggressively clean newlines inside strings
+    var cleaned = text.replace(/"([^"]*)"/g, function(match, inner){
+      return '"' + inner.replace(/\n/g,'').replace(/\r/g,'').replace(/\t/g,' ') + '"';
+    });
+    try {
+      return JSON.parse(cleaned);
+    } catch(e2) {
+      throw new Error('Could not parse Gemini response as JSON. Try regenerating. Detail: ' + e1.message);
+    }
+  }
 }
 
 // ── Setup page → AI flow ──────────────────────────────────────
