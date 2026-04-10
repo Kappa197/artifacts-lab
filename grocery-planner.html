@@ -399,6 +399,9 @@ input[type=range]:active::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(212,146
 
 
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+.basket-add-btn{width:100%;margin-top:8px;padding:8px;border-radius:8px;border:1.5px dashed var(--border2);background:transparent;color:var(--text3);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;}
+.basket-add-btn:hover{border-color:var(--green);color:var(--green);}
 </style>
 </head>
 <body>
@@ -696,7 +699,8 @@ var FOODS = [
   {id:"cod",             name:"Cod fillet",         em:"🐠", p:23,  c:0,   f:1,   kcal:105, mc:["vitD","b12"],    diet:{om:1,pe:1,ve:0,vg:0}, cat:"protein", typical:[200,500], ptype:"fish"},
   {id:"mackerel",        name:"Mackerel",           em:"🐟", p:19,  c:0,   f:14,  kcal:205, mc:["omega3","vitD","b12"], diet:{om:1,pe:1,ve:0,vg:0}, cat:"protein", typical:[150,400], ptype:"fish"},
   {id:"prawns",          name:"Prawns",             em:"🦐", p:24,  c:0,   f:1.7, kcal:119, mc:["b12"],           diet:{om:1,pe:1,ve:0,vg:0}, cat:"protein", typical:[150,400], ptype:"shellfish"},
-  {id:"sardines",        name:"Sardines (canned)",  em:"🐟", p:25,  c:0,   f:11,  kcal:208, mc:["omega3","calcium","vitD","b12"], diet:{om:1,pe:1,ve:0,vg:0}, cat:"protein", typical:[100,300], ptype:"fish"},
+  {id:"sardines",        name:"Sardines (canned)",  em:"🐟", p:25,  c:0,   f:11,  kcal:208, mc:["omega3","calcium","vitD","b12"], diet:{om:1,pe:1,ve:0,vg:0, common:false},
+ cat:"protein", typical:[100,300], ptype:"fish"},
   // ── Proteins: Eggs & Dairy (always quick-prep) ──
   {id:"eggs",            name:"Eggs",               em:"🥚", p:13,  c:1.1, f:11,  kcal:155, mc:["vitD","b12"],    diet:{om:1,pe:1,ve:1,vg:0}, cat:"protein", typical:[200,700], ptype:"egg"},
   {id:"greek_yogurt",    name:"Greek yogurt (0%)",  em:"🫙", p:10,  c:3.6, f:0.4, kcal:59,  mc:["calcium","b12"], diet:{om:1,pe:1,ve:1,vg:0}, cat:"dairy",   typical:[400,1000], ptype:"dairy"},
@@ -704,12 +708,13 @@ var FOODS = [
   {id:"milk",            name:"Milk (semi-skimmed)",em:"🥛", p:3.4, c:4.8, f:1.6, kcal:46,  mc:["calcium","b12","vitD"], diet:{om:1,pe:1,ve:1,vg:0}, cat:"dairy",   typical:[300,1000], ptype:"dairy"},
   // ── Proteins: Plant ──
   {id:"tofu",            name:"Tofu (firm)",        em:"🧊", p:17,  c:2,   f:9,   kcal:144, mc:["calcium","iron"],diet:{om:1,pe:1,ve:1,vg:1}, cat:"protein", typical:[200,700], ptype:"plant"},
-  {id:"tempeh",          name:"Tempeh",             em:"🟤", p:19,  c:9,   f:11,  kcal:195, mc:["calcium","iron"],diet:{om:1,pe:1,ve:1,vg:1}, cat:"protein", typical:[150,400], ptype:"plant"},
+  {id:"tempeh",          name:"Tempeh",             em:"🟤", p:19,  c:9,   f:11,  kcal:195, mc:["calcium","iron"],diet:{om:1,pe:1,ve:1,vg:1, common:false},
+ cat:"protein", typical:[150,400], ptype:"plant"},
   {id:"chickpeas",       name:"Chickpeas",          em:"🫘", p:9,   c:27,  f:2.6, kcal:164, mc:["iron","folate","fiber","magnesium"], diet:{om:1,pe:1,ve:1,vg:1}, cat:"legumes", typical:[300,800], ptype:"legume"},
   {id:"lentils",         name:"Lentils",            em:"🫘", p:9,   c:20,  f:0.4, kcal:116, mc:["iron","folate","fiber","magnesium"], diet:{om:1,pe:1,ve:1,vg:1}, cat:"legumes", typical:[300,800], ptype:"legume"},
   {id:"black_beans",     name:"Black beans",        em:"🫘", p:9,   c:24,  f:0.5, kcal:132, mc:["iron","folate","fiber"],  diet:{om:1,pe:1,ve:1,vg:1}, cat:"legumes", typical:[200,600], ptype:"legume"},
   {id:"edamame",         name:"Edamame",            em:"🫛", p:11,  c:8,   f:5,   kcal:122, mc:["folate","iron","calcium"], diet:{om:1,pe:1,ve:1,vg:1}, cat:"legumes", typical:[200,500], ptype:"legume"},
-  {id:"protein_powder",  name:"Protein powder",     em:"🥤", p:70,  c:10,  f:4,   kcal:360, mc:["calcium","iron"],diet:{om:1,pe:1,ve:1,vg:1}, cat:"protein", typical:[150,250], ptype:"supplement"},
+  {id:"protein_powder",  name:"Protein powder",     em:"🥤", p:70,  c:10,  f:4,   kcal:360, mc:["calcium","iron"],diet:{om:1,pe:1,ve:1,vg:1}, cat:"protein", typical:[245,245], ptype:"supplement"},
   // ── Grains & Carbs ──
   {id:"oats",            name:"Oats",               em:"🌾", p:13,  c:67,  f:7,   kcal:389, mc:["fiber","magnesium","iron"], diet:{om:1,pe:1,ve:1,vg:1}, cat:"grains", typical:[300,700]},
   {id:"brown_rice",      name:"Brown rice",         em:"🍚", p:2.6, c:23,  f:0.9, kcal:111, mc:["magnesium","fiber"],   diet:{om:1,pe:1,ve:1,vg:1}, cat:"grains", typical:[400,900]},
@@ -741,7 +746,8 @@ var FOODS = [
   {id:"walnuts",         name:"Walnuts",            em:"🌰", p:15,  c:14,  f:65,  kcal:654, mc:["omega3","magnesium"], diet:{om:1,pe:1,ve:1,vg:1}, cat:"fats",    typical:[80,200]},
   {id:"peanut_butter",   name:"Peanut butter",      em:"🥜", p:25,  c:20,  f:50,  kcal:588, mc:["magnesium"],     diet:{om:1,pe:1,ve:1,vg:1}, cat:"fats",    typical:[100,250]},
   {id:"mixed_seeds",     name:"Mixed seeds",        em:"🌻", p:18,  c:15,  f:45,  kcal:555, mc:["magnesium","iron","omega3","calcium"], diet:{om:1,pe:1,ve:1,vg:1}, cat:"fats", typical:[80,200]},
-  {id:"chia_seeds",      name:"Chia seeds",         em:"⚫", p:17,  c:42,  f:31,  kcal:486, mc:["omega3","calcium","fiber","magnesium"], diet:{om:1,pe:1,ve:1,vg:1}, cat:"fats", typical:[50,150]},
+  {id:"chia_seeds",      name:"Chia seeds",         em:"⚫", p:17,  c:42,  f:31,  kcal:486, mc:["omega3","calcium","fiber","magnesium"], diet:{om:1,pe:1,ve:1,vg:1, common:false},
+ cat:"fats", typical:[50,150]},
   {id:"coconut_oil",     name:"Coconut oil",        em:"🥥", p:0,   c:0,   f:100, kcal:892, mc:[],                diet:{om:1,pe:1,ve:1,vg:1}, cat:"fats",    typical:[30,80]},
   // ── Pantry ──
   {id:"oat_milk",        name:"Oat milk",           em:"🥛", p:1,   c:7,   f:1.5, kcal:45,  mc:["calcium"],       diet:{om:1,pe:1,ve:1,vg:1}, cat:"pantry",  typical:[300,1000]},
@@ -758,23 +764,32 @@ var FOODS = [
   {id:"sea_bass",       name:"Sea bass fillet",       em:"🐠", p:24,  c:0,   f:3,   kcal:124, mc:["vitD","b12","omega3"],diet:{om:1,pe:1,ve:0,vg:0}, cat:"protein", typical:[200,500], ptype:"fish"},
   {id:"trout",          name:"Rainbow trout",         em:"🐟", p:22,  c:0,   f:5,   kcal:141, mc:["omega3","vitD","b12"],diet:{om:1,pe:1,ve:0,vg:0}, cat:"protein", typical:[150,400], ptype:"fish"},
   {id:"canned_salmon",  name:"Salmon (canned)",       em:"🐟", p:25,  c:0,   f:8,   kcal:177, mc:["omega3","vitD","b12","calcium"], diet:{om:1,pe:1,ve:0,vg:0}, cat:"protein", typical:[150,400], ptype:"fish"},
-  {id:"mussels",        name:"Mussels",               em:"🐚", p:18,  c:3.7, f:2.2, kcal:103, mc:["iron","b12","omega3","zinc"], diet:{om:1,pe:1,ve:0,vg:0}, cat:"protein", typical:[150,400], ptype:"shellfish"},
-  {id:"beef_liver",     name:"Beef liver",            em:"🥩", p:27,  c:4,   f:5,   kcal:175, mc:["iron","b12","folate","vitD"], diet:{om:1,pe:0,ve:0,vg:0}, cat:"protein", typical:[100,250], ptype:"red_meat"},
+  {id:"mussels",        name:"Mussels",               em:"🐚", p:18,  c:3.7, f:2.2, kcal:103, mc:["iron","b12","omega3","zinc"], diet:{om:1,pe:1,ve:0,vg:0, common:false},
+ cat:"protein", typical:[150,400], ptype:"shellfish"},
+  {id:"beef_liver",     name:"Beef liver",            em:"🥩", p:27,  c:4,   f:5,   kcal:175, mc:["iron","b12","folate","vitD"], diet:{om:1,pe:0,ve:0,vg:0, common:false},
+ cat:"protein", typical:[100,250], ptype:"red_meat"},
   // ── Additional Plant Proteins ──
-  {id:"seitan",         name:"Seitan (wheat protein)",em:"🍞", p:25,  c:14,  f:1.9, kcal:176, mc:["iron"],              diet:{om:1,pe:1,ve:1,vg:1}, cat:"protein", typical:[150,400], ptype:"plant"},
+  {id:"seitan",         name:"Seitan (wheat protein)",em:"🍞", p:25,  c:14,  f:1.9, kcal:176, mc:["iron"],              diet:{om:1,pe:1,ve:1,vg:1, common:false},
+ cat:"protein", typical:[150,400], ptype:"plant"},
   {id:"white_beans",    name:"White beans",           em:"🫘", p:9,   c:23,  f:0.5, kcal:130, mc:["iron","folate","calcium","fiber"], diet:{om:1,pe:1,ve:1,vg:1}, cat:"legumes", typical:[200,600], ptype:"legume"},
   {id:"kidney_beans",   name:"Kidney beans",          em:"🫘", p:9,   c:22,  f:0.5, kcal:127, mc:["iron","folate","fiber"],  diet:{om:1,pe:1,ve:1,vg:1}, cat:"legumes", typical:[200,600], ptype:"legume"},
   {id:"peas",           name:"Green peas",            em:"🫛", p:5,   c:14,  f:0.4, kcal:81,  mc:["vitC","folate","fiber"],  diet:{om:1,pe:1,ve:1,vg:1}, cat:"legumes", typical:[200,500]},
-  {id:"hemp_seeds",     name:"Hemp seeds",            em:"🌱", p:31,  c:8.7, f:49,  kcal:553, mc:["omega3","magnesium","iron"], diet:{om:1,pe:1,ve:1,vg:1}, cat:"fats",    typical:[50,150]},
-  {id:"nutritional_yeast",name:"Nutritional yeast",   em:"🟡", p:50,  c:29,  f:6,   kcal:325, mc:["b12","iron","folate","magnesium"], diet:{om:1,pe:1,ve:1,vg:1}, cat:"pantry", typical:[30,100]},
+  {id:"hemp_seeds",     name:"Hemp seeds",            em:"🌱", p:31,  c:8.7, f:49,  kcal:553, mc:["omega3","magnesium","iron"], diet:{om:1,pe:1,ve:1,vg:1, common:false},
+ cat:"fats",    typical:[50,150]},
+  {id:"nutritional_yeast",name:"Nutritional yeast",   em:"🟡", p:50,  c:29,  f:6,   kcal:325, mc:["b12","iron","folate","magnesium"], diet:{om:1,pe:1,ve:1,vg:1, common:false},
+ cat:"pantry", typical:[30,140]},
   // ── Additional Grains & Carbs ──
   {id:"couscous",       name:"Couscous",              em:"🌾", p:3.8, c:23,  f:0.2, kcal:112, mc:["magnesium"],          diet:{om:1,pe:1,ve:1,vg:1}, cat:"grains",  typical:[200,500]},
   {id:"bulgur",         name:"Bulgur wheat",          em:"🌾", p:4,   c:19,  f:0.6, kcal:101, mc:["fiber","magnesium"],  diet:{om:1,pe:1,ve:1,vg:1}, cat:"grains",  typical:[200,500]},
   {id:"barley",         name:"Barley",                em:"🌾", p:2.3, c:19,  f:0.4, kcal:96,  mc:["fiber","magnesium"],  diet:{om:1,pe:1,ve:1,vg:1}, cat:"grains",  typical:[200,500]},
-  {id:"buckwheat",      name:"Buckwheat",             em:"🌾", p:3.4, c:20,  f:0.6, kcal:102, mc:["magnesium","fiber"],  diet:{om:1,pe:1,ve:1,vg:1}, cat:"grains",  typical:[150,400]},
-  {id:"rice_cakes",     name:"Rice cakes",            em:"🍚", p:7.3, c:82,  f:1.9, kcal:387, mc:[],                    diet:{om:1,pe:1,ve:1,vg:1}, cat:"grains",  typical:[100,300]},
-  {id:"polenta",        name:"Polenta (cornmeal)",    em:"🌽", p:2,   c:18,  f:0.6, kcal:90,  mc:[],                    diet:{om:1,pe:1,ve:1,vg:1}, cat:"grains",  typical:[200,500]},
-  {id:"plantain",       name:"Plantain",              em:"🍌", p:1.3, c:32,  f:0.4, kcal:122, mc:["potassium","vitC"],  diet:{om:1,pe:1,ve:1,vg:1}, cat:"grains",  typical:[200,500]},
+  {id:"buckwheat",      name:"Buckwheat",             em:"🌾", p:3.4, c:20,  f:0.6, kcal:102, mc:["magnesium","fiber"],  diet:{om:1,pe:1,ve:1,vg:1, common:false},
+ cat:"grains",  typical:[150,400]},
+  {id:"rice_cakes",     name:"Rice cakes",            em:"🍚", p:7.3, c:82,  f:1.9, kcal:387, mc:[],                    diet:{om:1,pe:1,ve:1,vg:1, common:false},
+ cat:"grains",  typical:[100,300]},
+  {id:"polenta",        name:"Polenta (cornmeal)",    em:"🌽", p:2,   c:18,  f:0.6, kcal:90,  mc:[],                    diet:{om:1,pe:1,ve:1,vg:1, common:false},
+ cat:"grains",  typical:[200,500]},
+  {id:"plantain",       name:"Plantain",              em:"🍌", p:1.3, c:32,  f:0.4, kcal:122, mc:["potassium","vitC"],  diet:{om:1,pe:1,ve:1,vg:1, common:false},
+ cat:"grains",  typical:[200,500]},
   // ── Additional Vegetables ──
   {id:"asparagus",      name:"Asparagus",             em:"🌿", p:2.2, c:3.9, f:0.1, kcal:20,  mc:["folate","vitC","iron"],diet:{om:1,pe:1,ve:1,vg:1}, cat:"produce", typical:[150,400]},
   {id:"cauliflower",    name:"Cauliflower",           em:"🥦", p:1.9, c:5,   f:0.3, kcal:25,  mc:["vitC","folate","fiber"],diet:{om:1,pe:1,ve:1,vg:1}, cat:"produce", typical:[200,600]},
@@ -801,7 +816,8 @@ var FOODS = [
   {id:"cashews",        name:"Cashews",               em:"🥜", p:18,  c:30,  f:44,  kcal:553, mc:["magnesium","iron","zinc"], diet:{om:1,pe:1,ve:1,vg:1}, cat:"fats",    typical:[80,200]},
   {id:"pistachios",     name:"Pistachios",            em:"🫘", p:20,  c:28,  f:45,  kcal:562, mc:["potassium","magnesium","vitB6"],diet:{om:1,pe:1,ve:1,vg:1}, cat:"fats",  typical:[80,200]},
   {id:"tahini",         name:"Tahini",                em:"🫙", p:17,  c:23,  f:54,  kcal:595, mc:["calcium","magnesium","iron"],diet:{om:1,pe:1,ve:1,vg:1}, cat:"fats",    typical:[50,150]},
-  {id:"flaxseed",       name:"Ground flaxseed",       em:"🌾", p:18,  c:29,  f:42,  kcal:534, mc:["omega3","fiber","magnesium"],diet:{om:1,pe:1,ve:1,vg:1}, cat:"fats",    typical:[50,150]},
+  {id:"flaxseed",       name:"Ground flaxseed",       em:"🌾", p:18,  c:29,  f:42,  kcal:534, mc:["omega3","fiber","magnesium"],diet:{om:1,pe:1,ve:1,vg:1, common:false},
+ cat:"fats",    typical:[50,150]},
   {id:"avocado_oil",    name:"Avocado oil",           em:"🫒", p:0,   c:0,   f:100, kcal:884, mc:["omega3"],             diet:{om:1,pe:1,ve:1,vg:1}, cat:"fats",    typical:[30,80]},
   {id:"ghee",           name:"Ghee",                  em:"🧈", p:0,   c:0,   f:100, kcal:900, mc:[],                    diet:{om:1,pe:1,ve:1,vg:0}, cat:"fats",    typical:[20,60]},
   // ── Additional Dairy ──
@@ -1061,6 +1077,8 @@ function buildBasket(){
   var pool = FOODS.filter(function(f){
     if(!f.diet[dietKey]) return false;
     if(G.avoid.includes(f.id)) return false;
+    // Exclude protein powder unless user explicitly opted in
+    if((f.id==='protein_powder') && G.powderMode !== 'include') return false;
     return true;
   });
 
@@ -1293,6 +1311,11 @@ function buildBasket(){
       }
 
       // ── User preference signals ──
+      // Niche ingredient penalty — only appear if user selected matching micro priority
+      if(food.common === false){
+        var nicheHasMicro = G.micros.some(function(m){ return food.mc.includes(m); });
+        if(!nicheHasMicro && !G.focus.includes(food.id)) score *= 0.1;
+      }
       if(G.micros.some(function(m){return food.mc.includes(m);})) score *= 1.4;
       if(G.focus.includes(food.id)) score *= 1.4;
       if(food._implicitFocus) score *= 1.3;
@@ -1339,6 +1362,21 @@ function buildBasket(){
   }).sort(function(a,b){
     var catOrder = Object.keys(BASKET_CATS);
     return catOrder.indexOf(displayCat(a.food)) - catOrder.indexOf(displayCat(b.food));
+  });
+
+  // ── Pass 2b: category balance — cap any food at 60% of its category total ──
+  var catTotals = {};
+  Object.keys(basket).forEach(function(fid){
+    var food = FOODS.find(function(f){ return f.id===fid; });
+    if(!food) return;
+    catTotals[food.cat] = (catTotals[food.cat]||0) + basket[fid];
+  });
+  Object.keys(basket).forEach(function(fid){
+    var food = FOODS.find(function(f){ return f.id===fid; });
+    if(!food) return;
+    var catTotal = catTotals[food.cat]||1;
+    var maxAllowed = catTotal * 0.60;
+    if(basket[fid] > maxAllowed) basket[fid] = Math.round(maxAllowed/10)*10;
   });
 
   // ── Pass 3: proportional scale-up to close large gaps ──────────────
@@ -1529,9 +1567,9 @@ function buildBasket(){
 // All other proteins: nearest 50g. Carbs: nearest 100g. Rest: 10g.
 function formatQty(food, grams){
   if(food.id === 'eggs'){
-    // 1 egg ≈ 50g (medium egg). 1 box = 6 eggs = 300g.
-    var boxes = Math.max(1, Math.round(grams / 300));
-    return boxes + ' box' + (boxes > 1 ? 'es' : '') + ' of 6';
+    // 1 egg ≈ 60g (medium egg)
+    var count = Math.max(1, Math.round(grams / 60));
+    return count + ' egg' + (count > 1 ? 's' : '') + ' (~'+grams+'g)';
   }
   return grams >= 1000 ? (grams/1000).toFixed(1)+'kg' : grams+'g';
 }
@@ -1673,6 +1711,7 @@ function renderResults(result){
           "</div>";
         }).join('')+
       "</div>"+
+      "<button class='basket-add-btn' data-cat='"+catId+"' onclick='openAddModal(this.dataset.cat)'>➕ Add ingredient</button>"+
     "</div>";
   });
   document.getElementById('basketSection').innerHTML = basketHTML;
@@ -1937,30 +1976,20 @@ function openSwapModal(originalFid){
     if(f.id===originalFid) return false;           // not itself
     if(!f.diet[dietKey]) return false;             // diet restriction
     if(G.avoid.includes(f.id)) return false;       // user avoided
-    if(basketIds.has(f.id)) return false;          // already in basket
+    // don't exclude foods not in basket — user can swap to anything in category
     if(displayCat(f)!==origDisplayCat) return false; // same display category
     return true;
   });
 
-  // For each candidate compute macro-matched quantity:
-  // We want to match the dominant macro of the original.
-  // Dominant macro = whichever of p/c/f contributes most kcal for this item.
-  var origPkcal = orig.p/100*origGrams*4;
-  var origCkcal = orig.c/100*origGrams*4;
-  var origFkcal = orig.f/100*origGrams*9;
-  var domMacro = 'p';
-  if(origCkcal>=origPkcal && origCkcal>=origFkcal) domMacro='c';
-  else if(origFkcal>=origPkcal && origFkcal>=origCkcal) domMacro='f';
+  // Calorie-equivalent quantity: match total kcal of original item
+  var origKcal = orig.kcal/100*origGrams;
 
-  // Score candidates by how similar their macro profile is
   candidates = candidates.map(function(f){
-    // Compute matched grams to hit same dominant-macro amount
-    var origMacroG = (domMacro==='p'?orig.p:domMacro==='c'?orig.c:orig.f)/100*origGrams;
-    var candMacroPerG = (domMacro==='p'?f.p:domMacro==='c'?f.c:f.f)/100;
-    var matchedG = candMacroPerG>0 ? Math.round(origMacroG/candMacroPerG/10)*10 : 0;
+    // Compute grams to match same total kcal
+    var matchedG = f.kcal > 0 ? Math.round(origKcal/(f.kcal/100)/10)*10 : origGrams;
     matchedG = Math.max(f.typical[0], Math.min(f.typical[1]*2, matchedG));
 
-    // Similarity score: penalise large gram difference from typical
+    // Score: prefer foods whose typical range fits the matched quantity
     var typMid = (f.typical[0]+f.typical[1])/2;
     var score = 1 - Math.abs(matchedG-typMid)/(typMid+1);
 
@@ -5579,9 +5608,9 @@ function saveMealHistory(recipeNames){
   } catch(e){}
 }
 function historyPromptText(){
-  var hist = getMealHistory();
+  var hist = getMealHistory().slice(0, 2); // last 2 weeks only
   if(!hist.length) return '';
-  return '\nRECENT MEAL HISTORY (avoid repeating these):\n' +
+  return '\nRECENT MEAL HISTORY (do NOT repeat any of these recipes):\n' +
     hist.map(function(week, i){
       return '  Week -'+(i+1)+': '+week.join(', ');
     }).join('\n');
@@ -5817,18 +5846,34 @@ function getSetupSelections(group){
     .map(function(el){ return el.dataset.val; });
 }
 
-async function runGeminiMealPrep(){
-  var cuisines    = getSetupSelections('cuisine');
-  var styles      = getSetupSelections('style');
-  var servesArr   = getSetupSelections('serves');
-  var numRecArr   = getSetupSelections('numRecipes');
+async function runGeminiMealPrep(savedPrefs){
+  // Check weekly limit
+  var limitObj = getMealPlanCount();
+  var limit    = getMealPlanLimit();
+  if(limitObj.count >= limit){
+    toast('🔒 You\'ve used all '+limit+' AI meal plan'+(limit>1?'s':'')+' for this week. Resets Monday.');
+    return;
+  }
 
-  if(!cuisines.length)  cuisines  = ['International'];
-  if(!styles.length)    styles    = ['Mixed'];
-  var serves     = servesArr.length    ? parseInt(servesArr[0])    : 4;
-  var numRecipes = numRecArr.length    ? parseInt(numRecArr[0])    : (can.recipes3or4 ? 4 : 2);
+  var cuisines, styles, serves, numRecipes;
+  if(savedPrefs){
+    cuisines   = savedPrefs.cuisines;
+    styles     = savedPrefs.styles;
+    serves     = savedPrefs.serves;
+    numRecipes = savedPrefs.numRecipes;
+  } else {
+    cuisines    = getSetupSelections('cuisine');
+    styles      = getSetupSelections('style');
+    var servesArr   = getSetupSelections('serves');
+    var numRecArr   = getSetupSelections('numRecipes');
+    if(!cuisines.length)  cuisines  = ['International'];
+    if(!styles.length)    styles    = ['Mixed'];
+    serves     = servesArr.length  ? parseInt(servesArr[0])  : 4;
+    numRecipes = numRecArr.length  ? parseInt(numRecArr[0])  : (can.recipes3or4 ? 4 : 2);
+  }
 
   var prefs = { cuisines:cuisines, styles:styles, serves:serves, numRecipes:numRecipes };
+  G.lastMealPrepPrefs = prefs; // store for regen
 
   // Show loading
   document.getElementById('mpWizard').innerHTML =
@@ -5852,6 +5897,10 @@ async function runGeminiMealPrep(){
 
     clearInterval(msgInterval);
 
+    // Increment weekly count
+    incrementMealPlanCount();
+    var attemptsLeft = getMealPlanLimit() - getMealPlanCount().count;
+
     // Save recipe names to history
     if(aiPlan.recipes){
       saveMealHistory(aiPlan.recipes.map(function(r){ return r.name; }));
@@ -5862,6 +5911,7 @@ async function runGeminiMealPrep(){
     aiPlan.recipes.forEach(function(r){ r.addedFromBowl = r.addedFromBowl || []; });
 
     renderAiMealPrepPage(aiPlan);
+    showMealPlanConfirmBar(attemptsLeft);
 
   } catch(err){
     clearInterval(msgInterval);
@@ -6044,6 +6094,184 @@ window.moveBowlIngBackAi = function(ri, id){
   plan.bowlMoves = (plan.bowlMoves||[]).filter(function(m){ return !(m.id===id && m.toRecipeIdx===ri); });
   renderAiMealPrepPage(plan);
   toast(getFoodName(id)+' moved back to Power Bowl');
+};
+
+
+
+// ── Add ingredient modal ──────────────────────────────────────────────────
+window.closeAddModal = function(){ var m=document.getElementById('addIngModal'); if(m) m.style.display='none'; };
+
+window.openAddModal = function(catId){
+  var basketIds = new Set(G.basket.items.map(function(it){ return it.food.id; }));
+  var diet = G.diet;
+  var dietKey = diet==='omnivore'?'om':diet==='pescatarian'?'pe':diet==='vegetarian'?'ve':'vg';
+
+  // Foods in same cat, diet-compatible, not already in basket
+  var candidates = FOODS.filter(function(f){
+    if(!f.diet[dietKey]) return false;
+    if(f.cat !== catId) return false;
+    if(basketIds.has(f.id)) return false;
+    return true;
+  });
+
+  if(!candidates.length){
+    toast('No more items to add in this category for your diet.');
+    return;
+  }
+
+  var modal = document.getElementById('addIngModal');
+  if(!modal){
+    modal = document.createElement('div');
+    modal.id = 'addIngModal';
+    modal.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:flex-end;justify-content:center';
+    modal.innerHTML =
+      '<div style="background:var(--navy2);border-radius:16px 16px 0 0;padding:20px;width:100%;max-width:500px;max-height:70vh;overflow-y:auto">'+
+        '<div style="font-family:var(--serif);font-size:16px;font-weight:700;margin-bottom:4px" id="addIngTitle">Add ingredient</div>'+
+        '<div style="font-size:12px;color:var(--text2);margin-bottom:14px">Tap to add to your basket</div>'+
+        '<div id="addIngList" style="display:flex;flex-direction:column;gap:6px"></div>'+
+        '<button onclick="closeAddModal()" style="width:100%;margin-top:14px;padding:12px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:inherit;font-size:13px;cursor:pointer">Cancel</button>'+
+      '</div>';
+    document.body.appendChild(modal);
+  }
+
+  document.getElementById('addIngTitle').textContent = 'Add to ' + (BASKET_CATS[catId]||catId);
+  document.getElementById('addIngList').innerHTML = candidates.map(function(f){
+    var defG = f.typical[0];
+    var qStr = formatQty(f, defG);
+    var div = document.createElement('div');
+    div.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px;background:var(--navy3);border-radius:8px;cursor:pointer';
+    div.innerHTML =
+      '<span style="font-size:20px">'+f.em+'</span>'+
+      '<div style="flex:1">'+
+        '<div style="font-size:13px;font-weight:600">'+f.name+'</div>'+
+        '<div style="font-size:11px;color:var(--text3)">'+Math.round(f.p/100*defG)+'g P · '+Math.round(f.c/100*defG)+'g C · '+Math.round(f.f/100*defG)+'g F</div>'+
+      '</div>'+
+      '<div style="font-family:var(--mono);font-size:12px;color:var(--amber2)">'+qStr+'</div>';
+    div.addEventListener('click', function(){ doAddIngredient(f.id, defG); });
+    return div.outerHTML;
+  }).join('');
+
+  modal.style.display = 'flex';
+};
+
+window.doAddIngredient = function(fid, grams){
+  var food = FOODS.find(function(f){ return f.id===fid; });
+  if(!food) return;
+  var newItem = {
+    food: food, grams: grams,
+    pContrib: Math.round(food.p/100*grams),
+    cContrib: Math.round(food.c/100*grams),
+    fContrib: Math.round(food.f/100*grams),
+    kcalContrib: Math.round(food.kcal/100*grams),
+  };
+  G.basket.items.push(newItem);
+  document.getElementById('addIngModal').style.display = 'none';
+  renderResults(G.basket);
+  toast('✓ '+food.name+' added to basket');
+};
+
+// ── AI meal plan weekly limit ─────────────────────────────────────────────
+function getMealPlanCount(){
+  try {
+    var raw = localStorage.getItem('mpWeekCount');
+    if(!raw) return { count:0, week: getCurrentWeekNum() };
+    var obj = JSON.parse(raw);
+    if(obj.week !== getCurrentWeekNum()) return { count:0, week: getCurrentWeekNum() };
+    return obj;
+  } catch(e){ return { count:0, week: getCurrentWeekNum() }; }
+}
+function incrementMealPlanCount(){
+  var obj = getMealPlanCount();
+  obj.count++;
+  obj.week = getCurrentWeekNum();
+  try { localStorage.setItem('mpWeekCount', JSON.stringify(obj)); } catch(e){}
+}
+function getMealPlanLimit(){
+  return can.recipes3or4 ? 3 : (TIER==='basic' ? 2 : 1);
+}
+function getCurrentWeekNum(){
+  var now = new Date();
+  var start = new Date(now.getFullYear(), 0, 1);
+  return Math.ceil(((now - start) / 86400000 + start.getDay() + 1) / 7);
+}
+
+// ── Meal plan confirmation bar (shown after AI plan generated) ────────────
+function showMealPlanConfirmBar(attemptsLeft){
+  var existing = document.getElementById('mpConfirmBar');
+  if(existing) existing.remove();
+
+  var bar = document.createElement('div');
+  bar.id = 'mpConfirmBar';
+  bar.style.cssText = 'background:var(--navy3);border-bottom:2px solid var(--amber);padding:12px 16px;position:sticky;top:60px;z-index:80';
+  bar.innerHTML =
+    '<div style="max-width:760px;margin:0 auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap">'+
+      '<div style="flex:1;min-width:180px">'+
+        '<div style="font-size:13px;font-weight:700;color:var(--text)">Happy with this plan?</div>'+
+        '<div style="font-size:11px;color:var(--text3);margin-top:2px">'+
+          (attemptsLeft > 0
+            ? attemptsLeft+' regeneration'+(attemptsLeft>1?'s':'')+' left this week'
+            : 'No regenerations left this week')+
+        '</div>'+
+      '</div>'+
+      '<button onclick="confirmMealPlan()" style="padding:8px 18px;background:var(--green);color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer">✓ Looks good</button>'+
+      (attemptsLeft > 0
+        ? '<button onclick="showRegenerateOptions()" style="padding:8px 18px;background:transparent;border:1.5px solid var(--amber);color:var(--amber2);border-radius:8px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer">↩ Try again</button>'
+        : '')+
+    '</div>';
+
+  document.getElementById('mpBody').insertAdjacentElement('beforebegin', bar);
+}
+
+function confirmMealPlan(){
+  var bar = document.getElementById('mpConfirmBar');
+  if(bar) bar.remove();
+  toast('✓ Meal plan saved!');
+}
+
+function showRegenerateOptions(){
+  var modal = document.getElementById('regenModal');
+  if(!modal){
+    modal = document.createElement('div');
+    modal.id = 'regenModal';
+    modal.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:center;justify-content:center';
+    var inner = document.createElement('div');
+    inner.style.cssText = 'background:var(--navy2);border-radius:16px;padding:24px;width:90%;max-width:360px';
+    inner.innerHTML =
+      '<div style="font-family:var(--serif);font-size:17px;font-weight:700;margin-bottom:8px">Try again?</div>'+
+      '<div style="font-size:12px;color:var(--text2);margin-bottom:20px">Choose an option below:</div>'+
+      '<div style="display:flex;flex-direction:column;gap:10px">'+
+        '<button id="regenSameBtn" style="padding:14px;background:var(--amber);color:#fff;border:none;border-radius:10px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;text-align:left">'+
+          '&#128260; Regenerate with same preferences'+
+        '</button>'+
+        '<button id="regenChangeBtn" style="padding:14px;background:var(--navy3);color:var(--text);border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;text-align:left">'+
+          '&#127907; Change cuisine &amp; style preferences'+
+        '</button>'+
+      '</div>'+
+      '<button id="regenCancelBtn" style="width:100%;margin-top:14px;padding:10px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:inherit;font-size:12px;cursor:pointer">Cancel</button>';
+    modal.appendChild(inner);
+    document.body.appendChild(modal);
+    document.getElementById('regenSameBtn').addEventListener('click', regenSamePrefs);
+    document.getElementById('regenChangeBtn').addEventListener('click', regenChangePrefs);
+    document.getElementById('regenCancelBtn').addEventListener('click', function(){ modal.style.display='none'; });
+  }
+  modal.style.display = 'flex';
+}
+
+
+window.regenSamePrefs = function(){
+  document.getElementById('regenModal').style.display = 'none';
+  var bar = document.getElementById('mpConfirmBar');
+  if(bar) bar.remove();
+  // Re-run with same prefs stored on G
+  if(G.lastMealPrepPrefs) runGeminiMealPrep(G.lastMealPrepPrefs);
+  else runGeminiMealPrep();
+};
+
+window.regenChangePrefs = function(){
+  document.getElementById('regenModal').style.display = 'none';
+  var bar = document.getElementById('mpConfirmBar');
+  if(bar) bar.remove();
+  renderMealPrepSetup(); // back to setup page with selections intact
 };
 
 
