@@ -5558,9 +5558,9 @@ window.moveBowlIngBack = function(recipeIdx, ingId){
 // ═══════════════════════════════════════════════════════════════
 // GEMINI MEAL PREP ENGINE
 // ═══════════════════════════════════════════════════════════════
-var GEMINI_KEY   = 'AIzaSyAiZijI4eQrjFy6aVtev3BODU1XQPZGw6s';
+var GEMINI_KEY   = 'AIzaSyD5QUvveFHOkol1oowZC9iIfN9Be1qvwiw';
 var MODEL_NAME   = 'gemini-3-flash-preview';
-var GEMINI_URL   = 'https://generativelanguage.googleapis.com/v1beta/models/' + MODEL_NAME + ':generateContent?key=' + GEMINI_KEY;
+var GEMINI_URL   = 'https://generativelanguage.googleapis.com/v1/models/' + MODEL_NAME + ':generateContent?key=' + GEMINI_KEY;
 
 // ── History helpers ───────────────────────────────────────────
 function getMealHistory(){
@@ -5658,7 +5658,7 @@ function buildGeminiPrompt(basket, prefs){
 async function callGemini(prompt){
   var body = {
     contents:[{ parts:[{ text: prompt }] }],
-    generationConfig:{ temperature:0.7, maxOutputTokens:2048 }
+    generationConfig:{ temperature:0.7, maxOutputTokens:8192, responseMimeType:'application/json' }
   };
   var res  = await fetch(GEMINI_URL, {
     method:'POST',
@@ -5672,7 +5672,11 @@ async function callGemini(prompt){
   var data = await res.json();
   var text = data.candidates[0].content.parts[0].text;
   // Strip markdown fences if present
-  text = text.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/```\s*$/,'').trim();
+  text = text.replace(/^```json[\r\n]*/,'').replace(/^```[\r\n]*/,'').replace(/[\r\n]*```\s*$/,'').trim();
+  // Find the JSON object boundaries in case there's extra text
+  var start = text.indexOf('{');
+  var end   = text.lastIndexOf('}');
+  if(start >= 0 && end > start) text = text.slice(start, end+1);
   return JSON.parse(text);
 }
 
