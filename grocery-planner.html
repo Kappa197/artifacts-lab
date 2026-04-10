@@ -397,6 +397,8 @@ input[type=range]:active::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(212,146
 .swap-btn:hover{border-color:var(--amber);color:var(--amber2);}
 
 
+
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -4141,8 +4143,7 @@ function getSubcat(styleId, occurrenceIdx){
 
 function startMealPrep(){
   if(!G.basket || !G.basket.items.length){ toast('Generate your basket first!'); return; }
-  // mealPrep open to all tiers — recipe count limited by can.recipes3or4
-  openMealPrep();
+  openMealPrepSetup();
 }
 
 function openMealPrep(){
@@ -5550,6 +5551,476 @@ window.moveBowlIngBack = function(recipeIdx, ingId){
   plan.bowlMoves = (plan.bowlMoves||[]).filter(function(m){ return !(m.id===ingId && m.toRecipeIdx===recipeIdx); });
   renderMealPrepPage(plan);
   toast(getFoodName(ingId) + ' moved back to Power Bowl');
+};
+
+
+
+// ═══════════════════════════════════════════════════════════════
+// GEMINI MEAL PREP ENGINE
+// ═══════════════════════════════════════════════════════════════
+var GEMINI_KEY  = 'AIzaSyD5QUvveFHOkol1oowZC9iIfN9Be1qvwiw';
+var GEMINI_URL  = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + GEMINI_KEY;
+
+// ── History helpers ───────────────────────────────────────────
+function getMealHistory(){
+  try {
+    var raw = localStorage.getItem('mpHistory');
+    return raw ? JSON.parse(raw) : [];
+  } catch(e){ return []; }
+}
+function saveMealHistory(recipeNames){
+  try {
+    var hist = getMealHistory();
+    hist.unshift(recipeNames); // newest first
+    hist = hist.slice(0, 3);  // keep last 3 weeks
+    localStorage.setItem('mpHistory', JSON.stringify(hist));
+  } catch(e){}
+}
+function historyPromptText(){
+  var hist = getMealHistory();
+  if(!hist.length) return '';
+  return '\nRECENT MEAL HISTORY (avoid repeating these):\n' +
+    hist.map(function(week, i){
+      return '  Week -'+(i+1)+': '+week.join(', ');
+    }).join('\n');
+}
+
+// ── Build Gemini prompt ───────────────────────────────────────
+function buildGeminiPrompt(basket, prefs){
+  var basketLines = basket.items.map(function(it){
+    return it.food.id + ': ' + it.grams + 'g';
+  }).join(' | ');
+
+  var foodIds = FOODS.map(function(f){ return f.id; }).join(' ');
+
+  var dietLabel = {omnivore:'omnivore',pescatarian:'pescatarian',
+                   vegetarian:'vegetarian',vegan:'vegan'}[G.diet] || 'omnivore';
+
+  var proteinIds = basket.items
+    .filter(function(it){ return it.food.cat === 'protein' || it.food.cat === 'dairy'; })
+    .map(function(it){ return it.food.id+'('+it.grams+'g)'; }).join(', ');
+
+  var prompt = [
+    'You are a professional meal prep chef. Generate a weekly meal prep plan as JSON.',
+    '',
+    'BASKET (confirmed weekly quantities):',
+    basketLines,
+    '',
+    'PROTEINS AVAILABLE: ' + proteinIds,
+    '',
+    'USER SETTINGS:',
+    '- Diet: ' + dietLabel,
+    '- Cuisine preferences: ' + prefs.cuisines.join(', '),
+    '- Cooking styles: ' + prefs.styles.join(', '),
+    '- Recipes to generate: ' + prefs.numRecipes,
+    '- Serves per recipe: ' + prefs.serves,
+    historyPromptText(),
+    '',
+    'VALID INGREDIENT IDs (use ONLY these):',
+    foodIds,
+    '',
+    'RULES (follow strictly):',
+    '1. Every recipe MUST claim at least one protein ingredient from PROTEINS AVAILABLE',
+    '2. Distribute proteins across all recipes — no two recipes should use the same main protein',
+    '3. The power bowl must also contain at least one remaining protein',
+    '4. Apportion basket quantities realistically — claimed grams must not exceed basket grams',
+    '5. Auto-sweep protein_powder, greek_yogurt, skyr, kefir, berries, banana, almond_milk, oat_milk, soy_milk, milk into smoothie',
+    '6. Auto-sweep banana, berries, apple, orange, mango, pineapple, kiwi, grapes, pear, peach, dates into fruitSnacks',
+    '7. Anything not claimed by recipes goes into powerBowl',
+    '8. Include 5-7 practical preparation steps per recipe',
+    '9. Return ONLY valid JSON with no markdown fences, no explanation',
+    '',
+    'RETURN THIS EXACT JSON SCHEMA:',
+    '{',
+    '  "recipes": [',
+    '    {',
+    '      "name": "string",',
+    '      "cuisine": "string",',
+    '      "style": "string",',
+    '      "em": "single emoji",',
+    '      "cookTime": number,',
+    '      "serves": number,',
+    '      "claimed": [{"id": "food_id", "qty": number, "unit": "g"}],',
+    '      "steps": ["step 1", "step 2"],',
+    '      "tip": "one practical tip"',
+    '    }',
+    '  ],',
+    '  "smoothie": [{"id": "food_id", "qty": number}],',
+    '  "fruitSnacks": [{"id": "food_id", "qty": number}],',
+    '  "powerBowl": [{"id": "food_id", "qty": number}]',
+    '}'
+  ].join('\n')
+  return prompt;
+}
+
+// ── Call Gemini API ───────────────────────────────────────────
+async function callGemini(prompt){
+  var body = {
+    contents:[{ parts:[{ text: prompt }] }],
+    generationConfig:{ temperature:0.7, maxOutputTokens:2048 }
+  };
+  var res  = await fetch(GEMINI_URL, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(body)
+  });
+  if(!res.ok){
+    var err = await res.text();
+    throw new Error('Gemini API error '+res.status+': '+err.slice(0,200));
+  }
+  var data = await res.json();
+  var text = data.candidates[0].content.parts[0].text;
+  // Strip markdown fences if present
+  text = text.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/```\s*$/,'').trim();
+  return JSON.parse(text);
+}
+
+// ── Setup page → AI flow ──────────────────────────────────────
+function openMealPrepSetup(){
+  var fab = document.getElementById('mealPrepFab');
+  if(fab) fab.style.display = 'none';
+
+  document.getElementById('resultsPage').classList.remove('active');
+  document.getElementById('mealPrepPage').classList.add('active');
+  renderMealPrepSetup();
+  window.scrollTo(0,0);
+}
+
+function renderMealPrepSetup(){
+  document.getElementById('mealPrepSub').textContent = 'Customise your meal plan';
+  document.getElementById('mpBody').innerHTML = '';
+  document.getElementById('mpPrepOrder').innerHTML = '';
+
+  var cuisines = ['Italian','Japanese','Thai','Mediterranean','Mexican',
+                  'Indian','Korean','Middle Eastern','International','Mixed'];
+  var styles   = ['Stews & Curries','Bowls','Sheet Pan','Bakes',
+                  'Stir-Fries','Soups','Salads','Pasta'];
+
+  var numOpts  = can.recipes3or4
+    ? [2,3,4]
+    : [2];
+
+  var html =
+'<div style="padding:16px;max-width:640px;margin:0 auto">'+
+
+// Cuisine
+'<div style="margin-bottom:20px">'+
+  '<div style="font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--amber);margin-bottom:8px">🌍 Cuisine preference</div>'+
+  '<div style="font-size:12px;color:var(--text2);margin-bottom:10px">Pick up to 3</div>'+
+  '<div style="display:flex;flex-wrap:wrap;gap:6px" id="cuisineChips">'+
+    cuisines.map(function(cu){
+      return '<div class="setup-chip" data-group="cuisine" data-val="'+cu+'" onclick="toggleSetupChip(this,this.dataset.group,3)" style="padding:7px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--navy2);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;user-select:none">'+cu+'</div>';
+    }).join('')+
+  '</div>'+
+'</div>'+
+
+// Style
+'<div style="margin-bottom:20px">'+
+  '<div style="font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--amber);margin-bottom:8px">🍳 Cooking style</div>'+
+  '<div style="font-size:12px;color:var(--text2);margin-bottom:10px">Pick up to 3</div>'+
+  '<div style="display:flex;flex-wrap:wrap;gap:6px" id="styleChips">'+
+    styles.map(function(st){
+      return '<div class="setup-chip" data-group="style" data-val="'+st+'" onclick="toggleSetupChip(this,this.dataset.group,3)" style="padding:7px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--navy2);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;user-select:none">'+st+'</div>';
+    }).join('')+
+  '</div>'+
+'</div>'+
+
+// Serves
+'<div style="margin-bottom:20px">'+
+  '<div style="font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--amber);margin-bottom:8px">🍽️ Serves per recipe</div>'+
+  '<div style="display:flex;gap:8px">'+
+    [1,2,3,4].map(function(n){
+      return '<div class="setup-chip" data-group="serves" data-val="'+n+'" onclick="toggleSetupChip(this,this.dataset.group,1)" style="width:48px;text-align:center;padding:10px 0;border-radius:10px;border:1.5px solid var(--border);background:var(--navy2);font-size:15px;font-weight:700;cursor:pointer;transition:all .15s;user-select:none'+(n===4?';border-color:var(--amber);background:var(--amber-dim);color:var(--amber2)':'')+'" '+(n===4?'data-sel="1"':'')+'>'+n+'</div>';
+    }).join('')+
+  '</div>'+
+'</div>'+
+
+// Number of recipes
+'<div style="margin-bottom:28px">'+
+  '<div style="font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--amber);margin-bottom:8px">📋 Number of recipes</div>'+
+  '<div style="display:flex;gap:8px">'+
+    numOpts.map(function(n){
+      var def = n === (can.recipes3or4 ? 4 : 2);
+      return '<div class="setup-chip" data-group="numRecipes" data-val="'+n+'" onclick="toggleSetupChip(this,this.dataset.group,1)" style="width:48px;text-align:center;padding:10px 0;border-radius:10px;border:1.5px solid var(--border);background:var(--navy2);font-size:15px;font-weight:700;cursor:pointer;transition:all .15s;user-select:none'+(def?';border-color:var(--amber);background:var(--amber-dim);color:var(--amber2)':'')+'" '+(def?'data-sel="1"':'')+'>'+n+'</div>';
+    }).join('')+
+  '</div>'+
+  (!can.recipes3or4 ? '<div style="font-size:11px;color:var(--text3);margin-top:8px">🔒 Upgrade to Premium for 3–4 recipes</div>' : '')+
+'</div>'+
+
+// Generate button
+'<button id="generateAiBtn" onclick="runGeminiMealPrep()" style="width:100%;padding:18px;background:linear-gradient(135deg,var(--green),#1db870);color:#fff;border:none;border-radius:12px;font-family:var(--body);font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(46,204,138,.3)">'+
+  '🧠 Generate my meal plan'+
+'</button>'+
+
+'</div>';
+
+  document.getElementById('mpWizard').innerHTML = html;
+}
+
+window.toggleSetupChip = function(el, group, maxSel){
+  var isSel = el.dataset.sel === '1';
+  if(maxSel === 1){
+    // Radio mode — deselect all in group first
+    document.querySelectorAll('[data-group="'+group+'"]').forEach(function(x){
+      x.dataset.sel = '';
+      x.style.borderColor = 'var(--border)';
+      x.style.background  = 'var(--navy2)';
+      x.style.color       = '';
+    });
+    el.dataset.sel    = '1';
+    el.style.borderColor = 'var(--amber)';
+    el.style.background  = 'var(--amber-dim)';
+    el.style.color       = 'var(--amber2)';
+  } else {
+    // Multi-select with cap
+    if(isSel){
+      el.dataset.sel    = '';
+      el.style.borderColor = 'var(--border)';
+      el.style.background  = 'var(--navy2)';
+      el.style.color       = '';
+    } else {
+      var selCount = document.querySelectorAll('[data-group="'+group+'"][data-sel="1"]').length;
+      if(selCount >= maxSel){ toast('Max '+maxSel+' selections'); return; }
+      el.dataset.sel    = '1';
+      el.style.borderColor = 'var(--green)';
+      el.style.background  = 'var(--green-dim)';
+      el.style.color       = 'var(--green)';
+    }
+  }
+};
+
+function getSetupSelections(group){
+  return Array.from(document.querySelectorAll('[data-group="'+group+'"][data-sel="1"]'))
+    .map(function(el){ return el.dataset.val; });
+}
+
+async function runGeminiMealPrep(){
+  var cuisines    = getSetupSelections('cuisine');
+  var styles      = getSetupSelections('style');
+  var servesArr   = getSetupSelections('serves');
+  var numRecArr   = getSetupSelections('numRecipes');
+
+  if(!cuisines.length)  cuisines  = ['International'];
+  if(!styles.length)    styles    = ['Mixed'];
+  var serves     = servesArr.length    ? parseInt(servesArr[0])    : 4;
+  var numRecipes = numRecArr.length    ? parseInt(numRecArr[0])    : (can.recipes3or4 ? 4 : 2);
+
+  var prefs = { cuisines:cuisines, styles:styles, serves:serves, numRecipes:numRecipes };
+
+  // Show loading
+  document.getElementById('mpWizard').innerHTML =
+    '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:300px;gap:20px">'+
+      '<div style="font-size:48px;animation:spin 2s linear infinite">🧠</div>'+
+      '<div style="font-family:var(--serif);font-size:18px;font-weight:700">Building your meal plan…</div>'+
+      '<div style="font-size:13px;color:var(--text2)" id="loadingSubtext">Analysing your basket</div>'+
+    '</div>';
+
+  // Rotate loading messages
+  var msgs = ['Matching proteins to recipes…','Checking your taste preferences…','Balancing macros across meals…','Almost there…'];
+  var mi = 0;
+  var msgInterval = setInterval(function(){
+    var el = document.getElementById('loadingSubtext');
+    if(el && mi < msgs.length){ el.textContent = msgs[mi++]; }
+  }, 1800);
+
+  try {
+    var prompt  = buildGeminiPrompt(G.basket, prefs);
+    var aiPlan  = await callGemini(prompt);
+
+    clearInterval(msgInterval);
+
+    // Save recipe names to history
+    if(aiPlan.recipes){
+      saveMealHistory(aiPlan.recipes.map(function(r){ return r.name; }));
+    }
+
+    G.mealPlan = aiPlan;
+    G.mealPlan.bowlMoves = G.mealPlan.bowlMoves || [];
+    aiPlan.recipes.forEach(function(r){ r.addedFromBowl = r.addedFromBowl || []; });
+
+    renderAiMealPrepPage(aiPlan);
+
+  } catch(err){
+    clearInterval(msgInterval);
+    document.getElementById('mpWizard').innerHTML =
+      '<div style="padding:24px;text-align:center">'+
+        '<div style="font-size:36px;margin-bottom:12px">⚠️</div>'+
+        '<div style="font-family:var(--serif);font-size:16px;font-weight:700;margin-bottom:8px">Something went wrong</div>'+
+        '<div style="font-size:13px;color:var(--text2);margin-bottom:20px">'+err.message+'</div>'+
+        '<button onclick="renderMealPrepSetup()" style="padding:12px 24px;background:var(--amber);color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">← Try again</button>'+
+      '</div>';
+  }
+}
+
+// ── Render AI meal prep results ────────────────────────────────
+function renderAiMealPrepPage(plan){
+  document.getElementById('mealPrepSub').textContent =
+    (plan.recipes ? plan.recipes.length : 0) + ' recipes · tap each to expand';
+  document.getElementById('mpWizard').innerHTML = '';
+  document.getElementById('mpPrepOrder').innerHTML = '';
+
+  var html = '';
+
+  // Recipe cards
+  (plan.recipes || []).forEach(function(r, ri){
+    var claimedList = (r.claimed || []).map(function(ci){
+      return '<li style="font-size:12px;padding:5px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">'+
+        '<span>'+getFoodName(ci.id)+'</span>'+
+        '<span style="font-family:var(--mono);font-size:11px;color:var(--amber2);flex-shrink:0;margin-left:8px">'+ci.qty+'g</span>'+
+      '</li>';
+    }).join('');
+
+    var addedList = (r.addedFromBowl || []).map(function(item){
+      return '<li style="font-size:12px;padding:5px 0;border-bottom:1px dashed var(--border);display:flex;justify-content:space-between;align-items:center">'+
+        '<span style="color:var(--teal)">➕ '+getFoodName(item.id)+'</span>'+
+        '<div style="display:flex;align-items:center;gap:8px">'+
+          '<span style="font-family:var(--mono);font-size:11px;color:var(--teal);flex-shrink:0">'+item.grams+'g</span>'+
+          (can.swapMealPrep ? '<button data-ri="'+ri+'" data-id="'+item.id+'" onclick="moveBowlIngBackAi(parseInt(this.dataset.ri),this.dataset.id)" style="font-size:10px;padding:2px 8px;border-radius:10px;border:1px solid var(--rose);background:transparent;color:var(--rose);cursor:pointer;font-family:inherit">× remove</button>' : '')+
+        '</div>'+
+      '</li>';
+    }).join('');
+
+    var stepsList = (r.steps || []).map(function(s, si){
+      return '<li style="font-size:12px;color:var(--text2);padding:5px 0;display:flex;gap:8px">'+
+        '<span style="width:18px;height:18px;border-radius:50%;background:var(--amber);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">'+(si+1)+'</span>'+
+        '<span>'+s+'</span></li>';
+    }).join('');
+
+    var allCount = (r.claimed||[]).length + (r.addedFromBowl||[]).length;
+
+    html +=
+      '<div style="background:var(--navy2);border:1px solid var(--border);border-radius:12px;padding:18px;margin:12px 16px" id="ai-recipe-card-'+ri+'">'+
+        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">'+
+          '<span style="font-size:28px">'+(r.em||'🍽️')+'</span>'+
+          '<div>'+
+            '<div style="font-family:var(--serif);font-size:17px;font-weight:700">'+r.name+'</div>'+
+            '<div style="font-family:var(--mono);font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-top:2px">'+
+              (r.cuisine||'')+(r.style?' · '+r.style:'')+' · '+(r.cookTime||'?')+' min · serves '+(r.serves||4)+
+            '</div>'+
+          '</div>'+
+        '</div>'+
+        '<details style="margin-top:10px">'+
+          '<summary style="font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--green);cursor:pointer;user-select:none">🛒 Ingredients ('+allCount+' items)</summary>'+
+          '<ul style="list-style:none;margin-top:8px">'+claimedList+addedList+'</ul>'+
+        '</details>'+
+        '<details style="margin-top:8px">'+
+          '<summary style="font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--amber);cursor:pointer;user-select:none">👨‍🍳 Preparation steps</summary>'+
+          '<ul style="list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:4px">'+stepsList+'</ul>'+
+          (r.tip ? '<div style="margin-top:10px;padding:10px;background:var(--navy3);border-left:3px solid var(--green);border-radius:0 8px 8px 0;font-size:11px;color:var(--text2);font-style:italic">💡 '+r.tip+'</div>' : '')+
+        '</details>'+
+      '</div>';
+  });
+
+  // Smoothie
+  if(plan.smoothie && plan.smoothie.length){
+    html +=
+      '<div style="background:var(--navy2);border:1px solid var(--teal);border-radius:12px;padding:18px;margin:12px 16px">'+
+        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">🥤</span><div style="font-family:var(--serif);font-size:16px;font-weight:700">Protein Smoothie</div></div>'+
+        '<div style="font-size:11px;color:var(--text3);margin-bottom:10px">Blend daily for a quick protein hit.</div>'+
+        '<ul style="list-style:none">'+
+          plan.smoothie.map(function(item){
+            return '<li style="font-size:12px;padding:4px 0;display:flex;justify-content:space-between"><span>'+getFoodName(item.id)+'</span><span style="font-family:var(--mono);font-size:11px;color:var(--teal)">'+item.qty+'g</span></li>';
+          }).join('')+
+        '</ul>'+
+        '<div style="font-size:11px;color:var(--text2);margin-top:8px;font-style:italic">Blend with ice. Adjust liquid to taste.</div>'+
+      '</div>';
+  }
+
+  // Fruit Snacks
+  if(plan.fruitSnacks && plan.fruitSnacks.length){
+    html +=
+      '<div style="background:var(--navy2);border:1px solid var(--green);border-radius:12px;padding:18px;margin:12px 16px">'+
+        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">🍎</span><div style="font-family:var(--serif);font-size:16px;font-weight:700">Quick Fruit Snacks</div></div>'+
+        '<div style="font-size:11px;color:var(--text3);margin-bottom:10px">Eat fresh through the week or blend into smoothies.</div>'+
+        '<ul style="list-style:none">'+
+          plan.fruitSnacks.map(function(item){
+            return '<li style="font-size:12px;padding:4px 0;display:flex;justify-content:space-between"><span>'+getFoodName(item.id)+'</span><span style="font-family:var(--mono);font-size:11px;color:var(--green)">'+item.qty+'g</span></li>';
+          }).join('')+
+        '</ul>'+
+      '</div>';
+  }
+
+  // Power Bowl
+  if(plan.powerBowl && plan.powerBowl.length){
+    var bowlItems = plan.powerBowl.filter(function(item){
+      return !(plan.bowlMoves||[]).some(function(m){ return m.id===item.id; });
+    });
+    if(bowlItems.length){
+      html +=
+        '<div style="background:var(--navy2);border:1px solid var(--purple);border-radius:12px;padding:18px;margin:12px 16px" id="ai-power-bowl">'+
+          '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">🥣</span><div style="font-family:var(--serif);font-size:16px;font-weight:700">Power Bowl</div></div>'+
+          '<div style="font-size:11px;color:var(--text3);margin-bottom:10px">Remaining basket items — roast or assemble freely.'+
+            (can.swapMealPrep ? ' <span style="color:var(--amber2)">Tap → to move into a recipe.</span>' : '')+
+          '</div>'+
+          '<ul style="list-style:none">'+
+            bowlItems.map(function(item){
+              var moveBtn = can.swapMealPrep
+                ? '<button data-id="'+item.id+'" data-qty="'+(item.qty||item.grams)+'" onclick="openAiBowlPicker(this.dataset.id,parseInt(this.dataset.qty))" style="font-size:10px;padding:3px 10px;border-radius:12px;border:1px solid var(--amber);background:transparent;color:var(--amber2);cursor:pointer;font-family:inherit;margin-left:8px">→ add to recipe</button>'
+                : '<span style="font-size:10px;color:var(--text3);margin-left:8px">🔒</span>';
+              return '<li style="font-size:12px;padding:6px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">'+
+                '<span>'+getFoodName(item.id)+'</span>'+
+                '<div style="display:flex;align-items:center;flex-shrink:0">'+
+                  '<span style="font-family:var(--mono);font-size:11px;color:var(--purple)">'+(item.qty||item.grams)+'g</span>'+
+                  moveBtn+
+                '</div>'+
+              '</li>';
+            }).join('')+
+          '</ul>'+
+        '</div>';
+    }
+  }
+
+  document.getElementById('mpBody').innerHTML = html;
+
+  // Bowl move modal for AI plan
+  if(!document.getElementById('aiBowlMoveModal')){
+    var modal = document.createElement('div');
+    modal.id = 'aiBowlMoveModal';
+    modal.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:flex-end;justify-content:center';
+    modal.innerHTML =
+      '<div style="background:var(--navy2);border-radius:16px 16px 0 0;padding:20px;width:100%;max-width:500px">'+
+        '<div style="font-family:var(--serif);font-size:16px;font-weight:700;margin-bottom:4px">Add to which recipe?</div>'+
+        '<div style="font-size:12px;color:var(--text2);margin-bottom:16px" id="aiBowlIngLabel"></div>'+
+        '<div id="aiBowlRecipeList" style="display:flex;flex-direction:column;gap:8px"></div>'+
+        '<button onclick="closeAiBowlModal()" style="width:100%;margin-top:14px;padding:12px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:inherit;font-size:13px;cursor:pointer">Cancel</button>'+
+      '</div>';
+    document.body.appendChild(modal);
+  }
+}
+
+window.closeAiBowlModal = function(){ document.getElementById('aiBowlMoveModal').style.display='none'; };
+
+window.openAiBowlPicker = function(id, qty){
+  if(!can.swapMealPrep){ showUpgradeHint('premium'); return; }
+  var plan = G.mealPlan;
+  document.getElementById('aiBowlIngLabel').textContent = 'Moving: '+getFoodName(id)+' ('+qty+'g)';
+  document.getElementById('aiBowlRecipeList').innerHTML =
+    (plan.recipes||[]).map(function(r, ri){
+      return '<button data-id="'+id+'" data-qty="'+qty+'" data-ri="'+ri+'" onclick="moveToAiRecipe(this.dataset.id,parseInt(this.dataset.qty),parseInt(this.dataset.ri))" style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);background:var(--navy3);cursor:pointer;font-family:inherit;text-align:left;width:100%">'+
+        '<span style="font-size:20px">'+(r.em||'🍽️')+'</span>'+
+        '<span style="font-size:13px;font-weight:600;color:var(--text)">'+r.name+'</span>'+
+      '</button>';
+    }).join('');
+  document.getElementById('aiBowlMoveModal').style.display = 'flex';
+};
+
+window.moveToAiRecipe = function(id, qty, ri){
+  var plan = G.mealPlan;
+  if(!plan.recipes[ri].addedFromBowl) plan.recipes[ri].addedFromBowl = [];
+  plan.recipes[ri].addedFromBowl.push({ id:id, grams:qty });
+  plan.bowlMoves = plan.bowlMoves||[];
+  plan.bowlMoves.push({ id:id, qty:qty, toRecipeIdx:ri });
+  document.getElementById('aiBowlMoveModal').style.display = 'none';
+  renderAiMealPrepPage(plan);
+  toast('✓ '+getFoodName(id)+' added to '+plan.recipes[ri].name);
+};
+
+window.moveBowlIngBackAi = function(ri, id){
+  var plan = G.mealPlan;
+  plan.recipes[ri].addedFromBowl = (plan.recipes[ri].addedFromBowl||[]).filter(function(x){ return x.id!==id; });
+  plan.bowlMoves = (plan.bowlMoves||[]).filter(function(m){ return !(m.id===id && m.toRecipeIdx===ri); });
+  renderAiMealPrepPage(plan);
+  toast(getFoodName(id)+' moved back to Power Bowl');
 };
 
 
