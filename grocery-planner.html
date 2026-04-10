@@ -776,8 +776,7 @@ var FOODS = [
   {id:"peas",           name:"Green peas",            em:"🫛", p:5,   c:14,  f:0.4, kcal:81,  mc:["vitC","folate","fiber"],  diet:{om:1,pe:1,ve:1,vg:1}, cat:"legumes", typical:[200,500]},
   {id:"hemp_seeds",     name:"Hemp seeds",            em:"🌱", p:31,  c:8.7, f:49,  kcal:553, mc:["omega3","magnesium","iron"], diet:{om:1,pe:1,ve:1,vg:1, common:false},
  cat:"fats",    typical:[50,150]},
-  {id:"nutritional_yeast",name:"Nutritional yeast",   em:"🟡", p:50,  c:29,  f:6,   kcal:325, mc:["b12","iron","folate","magnesium"], diet:{om:1,pe:1,ve:1,vg:1, common:false},
- cat:"pantry", typical:[30,140]},
+  {id:"nutritional_yeast",name:"Nutritional yeast",   em:"🟡", p:50,  c:29,  f:6,   kcal:325, mc:["b12","iron","folate","magnesium"], diet:{om:1,pe:1,ve:1,vg:1}, cat:"pantry", typical:[30,140], common:false},
   // ── Additional Grains & Carbs ──
   {id:"couscous",       name:"Couscous",              em:"🌾", p:3.8, c:23,  f:0.2, kcal:112, mc:["magnesium"],          diet:{om:1,pe:1,ve:1,vg:1}, cat:"grains",  typical:[200,500]},
   {id:"bulgur",         name:"Bulgur wheat",          em:"🌾", p:4,   c:19,  f:0.6, kcal:101, mc:["fiber","magnesium"],  diet:{om:1,pe:1,ve:1,vg:1}, cat:"grains",  typical:[200,500]},
@@ -1374,9 +1373,22 @@ function buildBasket(){
   Object.keys(basket).forEach(function(fid){
     var food = FOODS.find(function(f){ return f.id===fid; });
     if(!food) return;
+    // Hard cap: pantry and niche items never exceed typical[1]
+    if((food.cat === 'pantry' || food.common === false) && basket[fid] > food.typical[1]){
+      basket[fid] = food.typical[1];
+    }
     var catTotal = catTotals[food.cat]||1;
     var maxAllowed = catTotal * 0.60;
     if(basket[fid] > maxAllowed) basket[fid] = Math.round(maxAllowed/10)*10;
+  });
+
+  // ── Hard cap: pantry + niche foods never exceed typical[1] ──────────
+  Object.keys(basket).forEach(function(fid){
+    var food = FOODS.find(function(f){ return f.id===fid; });
+    if(!food) return;
+    if((food.cat === 'pantry' || food.common === false) && food.typical && food.typical[1]){
+      if(basket[fid] > food.typical[1]) basket[fid] = food.typical[1];
+    }
   });
 
   // ── Pass 3: proportional scale-up to close large gaps ──────────────
@@ -1417,7 +1429,11 @@ function buildBasket(){
     var remaining = shortfall;
     top.forEach(function(t){
       if(remaining<=0) return;
-      var maxAdd = t.food.typical[1]*3.0 - basket[t.fid]; // allow up to 3× typical max to close gaps
+      // Pantry and niche items: never scale beyond typical[1]. Others: up to 3×
+    var hardMax = (t.food.cat === 'pantry' || t.food.common === false)
+      ? t.food.typical[1]
+      : t.food.typical[1] * 3.0;
+    var maxAdd = hardMax - basket[t.fid];
       var addToClose = Math.min(remaining/t.macroPerG, maxAdd);
       if(addToClose<=0) return;
       basket[t.fid] = (basket[t.fid]||0) + addToClose;
@@ -1477,6 +1493,20 @@ function buildBasket(){
     var catOrder=Object.keys(BASKET_CATS);
     return catOrder.indexOf(displayCat(a.food))-catOrder.indexOf(displayCat(b.food));
   });
+  // ── Hard cap: pantry + niche foods hard capped at typical[1] regardless of rounding ──
+  items.forEach(function(it){
+    var food = it.food;
+    if((food.cat === 'pantry' || food.common === false) && food.typical && food.typical[1]){
+      if(it.grams > food.typical[1]){
+        it.grams = food.typical[1];
+        it.pContrib    = Math.round(food.p/100 * it.grams);
+        it.cContrib    = Math.round(food.c/100 * it.grams);
+        it.fContrib    = Math.round(food.f/100 * it.grams);
+        it.kcalContrib = Math.round(food.kcal/100 * it.grams);
+      }
+    }
+  });
+
   items.forEach(function(it){ actualP+=it.pContrib; actualC+=it.cContrib; actualF+=it.fContrib; });
 
   // ── Tolerance cap (avoid ~120% overshoot) ─────────────────────────────
@@ -1711,7 +1741,7 @@ function renderResults(result){
           "</div>";
         }).join('')+
       "</div>"+
-      "<button class='basket-add-btn' data-cat='"+catId+"' onclick='openAddModal(this.dataset.cat)'>➕ Add ingredient</button>"+
+      "<button class='basket-add-btn' onclick='openAddModal(\"" + catId + "\")'><span style='pointer-events:none'>➕ Add ingredient</span></button>"+
     "</div>";
   });
   document.getElementById('basketSection').innerHTML = basketHTML;
@@ -5659,7 +5689,8 @@ function buildGeminiPrompt(basket, prefs){
     '6. Auto-sweep banana, berries, apple, orange, mango, pineapple, kiwi, grapes, pear, peach, dates into fruitSnacks',
     '7. Anything not claimed by recipes goes into powerBowl',
     '8. Include 5-7 practical preparation steps per recipe',
-    '9. Return ONLY valid JSON with no markdown fences, no explanation',
+    '9. For each recipe, include a "pantry" array listing any staples needed (e.g. coconut_milk, soy_sauce, curry_paste, olive_oil, stock, spices) that the user should have or buy — these are NOT in the basket',
+    '10. Return ONLY valid JSON with no markdown fences, no explanation',
     '10. Output raw JSON only — no backticks, no code blocks, no text before or after the JSON',
     '11. Ensure ALL strings are properly escaped for JSON.parse() — no unescaped double quotes inside strings',
     '12. Keep recipe steps concise (max 15 words each) to avoid hitting output limits',
@@ -5675,6 +5706,7 @@ function buildGeminiPrompt(basket, prefs){
     '      "cookTime": number,',
     '      "serves": number,',
     '      "claimed": [{"id": "food_id", "qty": number, "unit": "g"}],',
+    '      "pantry": ["coconut_milk", "soy_sauce"],',
     '      "steps": ["step 1", "step 2"],',
     '      "tip": "one practical tip"',
     '    }',
@@ -5972,6 +6004,12 @@ function renderAiMealPrepPage(plan){
             '</div>'+
           '</div>'+
         '</div>'+
+        (r.pantry && r.pantry.length
+          ? '<div style="margin:6px 0 10px;padding:8px 12px;background:var(--navy3);border-radius:8px;font-size:11px;color:var(--text2)">'+
+              '<span style="font-weight:700;color:var(--amber2)">🧂 Pantry needed: </span>'+
+              r.pantry.join(', ').replace(/_/g,' ')+
+            '</div>'
+          : '')+
         '<details style="margin-top:10px">'+
           '<summary style="font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--green);cursor:pointer;user-select:none">🛒 Ingredients ('+allCount+' items)</summary>'+
           '<ul style="list-style:none;margin-top:8px">'+claimedList+addedList+'</ul>'+
@@ -6109,7 +6147,7 @@ window.openAddModal = function(catId){
   // Foods in same cat, diet-compatible, not already in basket
   var candidates = FOODS.filter(function(f){
     if(!f.diet[dietKey]) return false;
-    if(f.cat !== catId) return false;
+    if(displayCat(f) !== catId) return false;  // match display category, not raw cat
     if(basketIds.has(f.id)) return false;
     return true;
   });
