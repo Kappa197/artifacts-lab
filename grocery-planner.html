@@ -6176,17 +6176,14 @@ window.openAddModal = function(catId){
   document.getElementById('addIngList').innerHTML = candidates.map(function(f){
     var defG = f.typical[0];
     var qStr = formatQty(f, defG);
-    var div = document.createElement('div');
-    div.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px;background:var(--navy3);border-radius:8px;cursor:pointer';
-    div.innerHTML =
+    return '<div onclick="doAddIngredient(\''+f.id+'\','+defG+')" style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--navy3);border-radius:8px;cursor:pointer">'+
       '<span style="font-size:20px">'+f.em+'</span>'+
       '<div style="flex:1">'+
         '<div style="font-size:13px;font-weight:600">'+f.name+'</div>'+
         '<div style="font-size:11px;color:var(--text3)">'+Math.round(f.p/100*defG)+'g P · '+Math.round(f.c/100*defG)+'g C · '+Math.round(f.f/100*defG)+'g F</div>'+
       '</div>'+
-      '<div style="font-family:var(--mono);font-size:12px;color:var(--amber2)">'+qStr+'</div>';
-    div.addEventListener('click', function(){ doAddIngredient(f.id, defG); });
-    return div.outerHTML;
+      '<div style="font-family:var(--mono);font-size:12px;color:var(--amber2)">'+qStr+'</div>'+
+    '</div>';
   }).join('');
 
   modal.style.display = 'flex';
