@@ -278,8 +278,47 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 .vol-cell{display:inline-block;min-width:1.8rem;padding:.1rem .3rem;border-radius:4px;font-weight:700;font-size:.72rem}
 .vol-0{color:#cbd5e1;font-weight:400}
 .vol-card{background:var(--navy2);border-radius:var(--r);padding:1rem 1.2rem;box-shadow:var(--sh);border:1px solid var(--border);margin-bottom:1rem}
-.vol-title{font-family:var(--fd);font-size:1rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.15rem;color:var(--text)}
-.vol-sub{font-size:.72rem;color:var(--muted);margin-bottom:.8rem;line-height:1.5}
+.vol-card-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;gap:.5rem}
+.vol-card-header:hover .vol-chevron{color:var(--amber2)}
+.vol-title{font-family:var(--fd);font-size:1rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:0;color:var(--text)}
+.vol-chevron{font-size:.8rem;color:var(--muted);transition:transform .25s cubic-bezier(.4,0,.2,1);flex-shrink:0;line-height:1}
+.vol-chevron.collapsed{transform:rotate(-90deg)}
+.vol-body{overflow:hidden;transition:opacity .2s}
+.vol-body.collapsed{display:none}
+.vol-sub{font-size:.72rem;color:var(--muted);margin-top:.45rem;margin-bottom:.8rem;line-height:1.5}
+
+/* ── PREMIUM FEATURE CARD (Basic tier — Tracker tab) ─────────────── */
+.premium-feature-card{
+  background:linear-gradient(135deg,#0f172a 0%,#1a1040 60%,#0f1f1a 100%);
+  border:1.5px solid var(--amber);
+  border-radius:14px;
+  padding:2rem 1.8rem 1.8rem;
+  margin:1.2rem 0;
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 0 40px rgba(212,146,10,0.08),var(--sh-md);
+}
+.premium-feature-card::before{
+  content:'';position:absolute;top:-60px;right:-60px;width:220px;height:220px;
+  background:radial-gradient(circle,rgba(212,146,10,0.07) 0%,transparent 70%);
+  pointer-events:none;
+}
+.pfc-lock{font-size:2rem;margin-bottom:.85rem;display:block;filter:drop-shadow(0 0 8px rgba(212,146,10,.3))}
+.pfc-title{font-family:var(--fd);font-size:1.2rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em;color:var(--amber2);margin-bottom:.35rem}
+.pfc-sub{font-size:.84rem;color:var(--text2);line-height:1.6;margin-bottom:1.2rem}
+.pfc-benefits{list-style:none;padding:0;margin:0 0 1.5rem;display:flex;flex-direction:column;gap:.5rem}
+.pfc-benefit{display:flex;align-items:flex-start;gap:.6rem;font-size:.82rem;color:var(--text);line-height:1.5}
+.pfc-benefit::before{content:'✦';color:var(--amber2);font-size:.62rem;margin-top:.2rem;flex-shrink:0}
+.pfc-upgrade-btn{
+  display:inline-flex;align-items:center;gap:.5rem;
+  background:linear-gradient(135deg,var(--amber) 0%,var(--amber2) 100%);
+  color:#1a0f00;font-family:var(--fb);font-size:.92rem;font-weight:800;
+  padding:.78rem 1.8rem;border-radius:9px;border:none;cursor:pointer;
+  transition:all .18s cubic-bezier(.4,0,.2,1);
+  box-shadow:0 4px 18px rgba(212,146,10,0.35);
+  text-transform:uppercase;letter-spacing:.04em;
+}
+.pfc-upgrade-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(212,146,10,0.45);}
 .vol-legend{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:.75rem;align-items:center;font-size:.7rem;color:var(--muted)}
 .vol-legend-item{display:flex;align-items:center;gap:.3rem}
 .vol-legend-swatch{width:16px;height:12px;border-radius:3px}
@@ -3226,12 +3265,28 @@ function volColor(sets, maxSets){
   return              {bg:'#1d4ed8', txt:'#fff'};
 }
 
+function volCardIsCollapsed(){
+  try{ return localStorage.getItem('wpt_volcollapsed') === '1'; }catch{ return false; }
+}
+function toggleVolCard(){
+  try{
+    const c = volCardIsCollapsed();
+    localStorage.setItem('wpt_volcollapsed', c ? '0' : '1');
+  }catch{}
+  renderPlan();
+}
+
 function renderVolumeTable(matrix, weeks){
   const allSets = MUSCLE_ROWS.map(m=> weeks.map(w=>matrix[w][m]||0)).flat();
   const maxSets = Math.max(...allSets, 1);
+  const collapsed = volCardIsCollapsed();
 
   let h=`<div class="vol-card">
-    <div class="vol-title">📊 Weekly Volume</div>
+    <div class="vol-card-header" onclick="toggleVolCard()" title="${collapsed?'Expand':'Collapse'} volume table">
+      <div class="vol-title">📊 Weekly Volume</div>
+      <span class="vol-chevron${collapsed?' collapsed':''}">▼</span>
+    </div>
+    <div class="vol-body${collapsed?' collapsed':''}">
     <div class="vol-sub">Sets per muscle group per week. Primary muscles: full sets · Secondary muscles: 30% of sets (rounded up). Completed weeks are ticked.</div>
     <div class="vol-legend">
       <span>Volume:</span>
@@ -3262,7 +3317,7 @@ function renderVolumeTable(matrix, weeks){
     });
     h+=`</tr>`;
   });
-  h+=`</tbody></table></div></div>`;
+  h+=`</tbody></table></div></div></div>`;
   return h;
 }
 
@@ -4216,6 +4271,24 @@ function renderTrkLog(plan){
   const logs = trkGetLogs();
   const el = document.getElementById('trk-view-log');
   if(!plan||!plan.weeks||!plan.weeks.length){ el.innerHTML=''; return; }
+
+  // ── Basic tier: show premium feature card instead of empty tracker ──
+  if(!can.sessionLogging){
+    el.innerHTML = `<div class="premium-feature-card">
+      <span class="pfc-lock">🔒</span>
+      <div class="pfc-title">Session Tracking</div>
+      <div class="pfc-sub">Log every set, weight, and rep — and watch your progress unfold over time. Session Tracking is a Premium feature.</div>
+      <ul class="pfc-benefits">
+        <li class="pfc-benefit">Log actual weights &amp; reps for every exercise, every set</li>
+        <li class="pfc-benefit">Rate each session and exercise with RPE for smarter auto-regulation</li>
+        <li class="pfc-benefit">Track progress over time with Top Weight, Volume, and Est. 1RM charts</li>
+        <li class="pfc-benefit">Full session history with CSV &amp; JSON export</li>
+        <li class="pfc-benefit">Pre-filled weights from your previous session to speed up logging</li>
+      </ul>
+      <button class="pfc-upgrade-btn" onclick="showNudgeModal('premium')">⚡ Upgrade to Premium</button>
+    </div>`;
+    return;
+  }
 
   // Week nav
   let html = '<div class="trk-week-nav">';
