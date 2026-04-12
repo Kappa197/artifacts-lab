@@ -533,6 +533,64 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 .replace-modal-count{font-weight:700;color:var(--text)}
 .replace-modal-actions{display:flex;flex-direction:column;gap:.42rem;margin-top:1rem}
 
+/* ── MULTI-PLAN SLOT GRID ─────────────────────────────────────────── */
+.trk-slots-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.85rem;margin-bottom:1.2rem}
+@media(max-width:640px){.trk-slots-grid{grid-template-columns:1fr}}
+.trk-slot-card{background:var(--card);border:2px solid var(--border);border-radius:14px;padding:1rem 1.1rem;cursor:pointer;transition:all .18s;position:relative;min-height:140px;display:flex;flex-direction:column;gap:.5rem}
+.trk-slot-card:hover{border-color:var(--amber);box-shadow:0 0 18px rgba(212,146,10,.12)}
+.trk-slot-card.active-slot{border-color:var(--amber);background:var(--amber-dim)}
+.trk-slot-card.filled-slot{border-color:var(--border2)}
+.trk-slot-card.filled-slot:hover{border-color:var(--green)}
+.trk-slot-num{font-family:var(--mono);font-size:.56rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:.1rem}
+.trk-slot-title{font-family:var(--fd);font-size:.88rem;font-weight:800;text-transform:uppercase;letter-spacing:.02em;color:var(--text);line-height:1.2}
+.trk-slot-meta{font-size:.7rem;color:var(--muted);line-height:1.5}
+.trk-slot-badge{display:inline-flex;align-items:center;gap:.3rem;font-size:.63rem;font-weight:700;padding:.18rem .5rem;border-radius:999px;margin-top:auto}
+.trk-slot-badge.badge-active{background:rgba(212,146,10,.15);color:var(--amber2);border:1px solid var(--amber)}
+.trk-slot-badge.badge-logged{background:var(--green-dim);color:var(--green);border:1px solid var(--green)}
+.trk-slot-badge.badge-empty{background:var(--navy3);color:var(--text3);border:1px solid var(--border)}
+.trk-slot-view-btn{margin-top:auto;width:100%;padding:.48rem;border-radius:8px;border:2px solid var(--amber);background:var(--amber-dim);color:var(--amber2);font-weight:800;font-size:.78rem;cursor:pointer;font-family:var(--jb);letter-spacing:.02em;transition:all .15s;text-align:center}
+.trk-slot-view-btn:hover{background:var(--amber);color:#1c1100}
+/* Empty slot disclaimer overlay */
+.trk-slot-empty-overlay{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:.45rem;height:100%;flex:1}
+.trk-slot-empty-icon{font-size:1.8rem;margin-bottom:.1rem}
+.trk-slot-empty-label{font-size:.8rem;font-weight:700;color:var(--text2)}
+.trk-slot-empty-hint{font-size:.68rem;color:var(--text3);line-height:1.4}
+/* Empty slot full-area disclaimer */
+.trk-empty-disclaimer{background:var(--card);border:2px dashed var(--border);border-radius:16px;padding:2.2rem 1.5rem;text-align:center;margin-bottom:1rem}
+.trk-empty-disc-icon{font-size:2.8rem;margin-bottom:.75rem}
+.trk-empty-disc-title{font-family:var(--fd);font-size:1.05rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em;color:var(--text);margin-bottom:.4rem}
+.trk-empty-disc-body{font-size:.82rem;color:var(--muted);line-height:1.65;max-width:340px;margin:0 auto .8rem;margin-bottom:1.3rem}
+.trk-empty-disc-btns{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap}
+/* Plan-in-slot header */
+.trk-slot-detail-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.7rem;margin-bottom:.85rem}
+.trk-slot-detail-label{font-family:var(--mono);font-size:.58rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text3)}
+.trk-slot-detail-actions{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.trk-view-plan-btn{background:var(--amber);color:#1c1100;border:none;border-radius:9px;font-weight:900;font-size:.85rem;padding:.58rem 1.3rem;cursor:pointer;font-family:var(--jb);letter-spacing:.04em;transition:all .15s;box-shadow:0 3px 12px rgba(212,146,10,.35);text-transform:uppercase}
+.trk-view-plan-btn:hover{background:var(--amber2);transform:translateY(-1px);box-shadow:0 6px 20px rgba(212,146,10,.45)}
+/* Back-to-slots link */
+.trk-back-slots{display:inline-flex;align-items:center;gap:.4rem;font-size:.73rem;font-weight:700;color:var(--muted);cursor:pointer;margin-bottom:.7rem;background:none;border:none;padding:0;font-family:var(--body);transition:color .12s}
+.trk-back-slots:hover{color:var(--amber2)}
+/* Workout evaluator tab */
+.eval-section-title{font-family:var(--fd);font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:1.2rem 0 .6rem}
+.eval-muscle-grid{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.75rem}
+.eval-muscle-pill{display:inline-flex;align-items:center;gap:.3rem;padding:.25rem .6rem;border-radius:999px;font-size:.72rem;font-weight:700}
+.eval-muscle-pill.present{background:var(--green-dim);color:var(--green);border:1px solid rgba(46,204,138,.35)}
+.eval-muscle-pill.missing{background:var(--rose-dim);color:var(--rose);border:1px solid rgba(251,113,133,.3)}
+.eval-style-bars{display:flex;flex-direction:column;gap:.45rem;margin-bottom:.75rem}
+.eval-style-row{display:flex;align-items:center;gap:.5rem}
+.eval-style-label{font-size:.72rem;font-weight:600;min-width:90px;color:var(--text2)}
+.eval-style-bar-bg{flex:1;height:7px;background:var(--border);border-radius:4px;overflow:hidden}
+.eval-style-bar-fill{height:100%;border-radius:4px;transition:width .4s}
+.eval-style-pct{font-family:var(--jb);font-size:.62rem;color:var(--muted);min-width:2.5rem;text-align:right}
+
+/* ── MOBILE NAV GHOST-TAP FIX ─────────────────────────────────────── */
+/* tool-inner-nav stays display:flex always; mobile overflow handled via scroll */
+.tool-inner-nav{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.tool-inner-nav::-webkit-scrollbar{display:none}
+/* Any platform mobile menu overlay: use visibility NOT display for ghost-tap safety */
+.mobile-nav-menu{display:block;visibility:hidden;pointer-events:none;transition:visibility 0s .2s,opacity .2s}
+.mobile-nav-menu.open{visibility:visible;pointer-events:auto;transition:visibility 0s,opacity .2s}
+
 /* RESPONSIVE */
 @media(max-width:640px){
   .hero-title{font-size:2.1rem}
@@ -930,23 +988,43 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 
 <!-- ==================== TRACKER ==================== -->
 <div class="view" id="view-tracker">
-  <div id="trk-empty" class="empty-state card hidden">
-    <div class="eicon">📊</div>
-    <h3>No saved plan yet</h3>
-    <p>Generate a plan, review it, then click <strong>Save &amp; Start Tracking</strong> to lock it in and begin logging your sessions.</p>
-    <button class="btn btn-primary" onclick="showView('wizard')">Go to Setup →</button>
+
+  <!-- SLOT SELECTOR (always shown as entry point) -->
+  <div id="trk-slot-selector">
+    <div id="trk-slots-grid" class="trk-slots-grid"></div>
+    <!-- Empty-slot disclaimer (shown when a slot is clicked while empty) -->
+    <div id="trk-empty-disclaimer" class="hidden"></div>
   </div>
-  <div id="trk-main" class="hidden">
-    <div id="trk-header"></div>
-    <div class="trk-tabs">
-      <button id="trk-tab-log"      class="trk-tab active" onclick="switchTrkTab('log')">📝 Log Session</button>
-      <button id="trk-tab-history"  class="trk-tab"        onclick="switchTrkTab('history')">📋 History</button>
-      <button id="trk-tab-progress" class="trk-tab"        onclick="switchTrkTab('progress')">📈 Progress</button>
+
+  <!-- SLOT DETAIL (shown after selecting a filled or newly-assigned slot) -->
+  <div id="trk-slot-detail" class="hidden">
+    <button class="trk-back-slots" onclick="trkShowSlotSelector()">← All Plans</button>
+    <div class="trk-slot-detail-label" id="trk-slot-label" style="margin-bottom:.65rem"></div>
+
+    <!-- Filled plan tracker UI -->
+    <div id="trk-main" class="hidden">
+      <div class="trk-slot-detail-header">
+        <div id="trk-header"></div>
+        <div class="trk-slot-detail-actions">
+          <button class="trk-view-plan-btn" onclick="trkViewCurrentSlotPlan()">📋 View This Plan</button>
+        </div>
+      </div>
+      <div class="trk-tabs">
+        <button id="trk-tab-log"      class="trk-tab active" onclick="switchTrkTab('log')">📝 Log Session</button>
+        <button id="trk-tab-history"  class="trk-tab"        onclick="switchTrkTab('history')">📋 History</button>
+        <button id="trk-tab-progress" class="trk-tab"        onclick="switchTrkTab('progress')">📈 Progress</button>
+      </div>
+      <div id="trk-view-log"></div>
+      <div id="trk-view-history" class="hidden"></div>
+      <div id="trk-view-progress" class="hidden"></div>
     </div>
-    <div id="trk-view-log"></div>
-    <div id="trk-view-history" class="hidden"></div>
-    <div id="trk-view-progress" class="hidden"></div>
+
+    <!-- Manual plan editor UI -->
+    <div id="trk-manual-editor" class="hidden">
+      <div id="trk-manual-editor-body"></div>
+    </div>
   </div>
+
 </div>
 
 <!-- ==================== REPLACE-PLAN MODAL ==================== -->
@@ -4175,47 +4253,163 @@ function applySwap(newExId){
 }
 
 // =====================================================================
-// TRACKER — localStorage helpers
+// TRACKER — localStorage helpers (3-slot multi-plan)
 // =====================================================================
-const WPT_PLAN     = 'wpt_plan';
-const WPT_LOGS     = 'wpt_logs';
+const WPT_PLAN     = 'wpt_plan';      // legacy key (slot 0) — kept for backward compat
+const WPT_LOGS     = 'wpt_logs';      // legacy key (slot 0)
 const WPT_SETTINGS = 'wpt_settings';
 
-function trkGetPlan()    { try{return JSON.parse(localStorage.getItem(WPT_PLAN))||null;}catch{return null;} }
-function trkSetPlan(p)   { localStorage.setItem(WPT_PLAN, JSON.stringify(p)); }
-function trkGetLogs()    { try{return JSON.parse(localStorage.getItem(WPT_LOGS))||[];}catch{return[];} }
-function trkSetLogs(l)   { localStorage.setItem(WPT_LOGS, JSON.stringify(l)); }
+// Slot index: 0, 1, 2
+function _slotPlanKey(slot)  { return slot === 0 ? WPT_PLAN     : `wpt_plan_${slot}`; }
+function _slotLogsKey(slot)  { return slot === 0 ? WPT_LOGS     : `wpt_logs_${slot}`; }
+function _slotManualKey(slot){ return `wpt_manual_${slot}`; }
+
+function trkGetPlan(slot=0)    { try{return JSON.parse(localStorage.getItem(_slotPlanKey(slot)))||null;}catch{return null;} }
+function trkSetPlan(p,slot=0)  { localStorage.setItem(_slotPlanKey(slot), JSON.stringify(p)); }
+function trkGetLogs(slot=0)    { try{return JSON.parse(localStorage.getItem(_slotLogsKey(slot)))||[];}catch{return[];} }
+function trkSetLogs(l,slot=0)  { localStorage.setItem(_slotLogsKey(slot), JSON.stringify(l)); }
 function trkGetSettings(){ try{return JSON.parse(localStorage.getItem(WPT_SETTINGS))||{weightUnit:'kg'};}catch{return{weightUnit:'kg'};} }
 function trkSaveSettings(s){ localStorage.setItem(WPT_SETTINGS, JSON.stringify(s)); }
-function trkGetPartial(w,d){ try{return JSON.parse(localStorage.getItem(`wpt_p_w${w}_d${d}`))||null;}catch{return null;} }
-function trkSetPartial(w,d,data){ if(data) localStorage.setItem(`wpt_p_w${w}_d${d}`,JSON.stringify(data)); else localStorage.removeItem(`wpt_p_w${w}_d${d}`); }
+function trkGetPartial(w,d,slot=0){ try{return JSON.parse(localStorage.getItem(`wpt_p_w${w}_d${d}_s${slot}`))||null;}catch{return null;} }
+function trkSetPartial(w,d,data,slot=0){ const k=`wpt_p_w${w}_d${d}_s${slot}`; if(data) localStorage.setItem(k,JSON.stringify(data)); else localStorage.removeItem(k); }
+
+// Manual plan helpers
+function trkGetManual(slot)  { try{return JSON.parse(localStorage.getItem(_slotManualKey(slot)))||null;}catch{return null;} }
+function trkSetManual(m,slot){ localStorage.setItem(_slotManualKey(slot), JSON.stringify(m)); }
+
+// Returns true if slot has a plan (auto-generated or manual)
+function trkSlotHasPlan(slot){ return !!(trkGetPlan(slot) || trkGetManual(slot)); }
+function trkSlotIsManual(slot){ return !trkGetPlan(slot) && !!trkGetManual(slot); }
 
 // =====================================================================
 // TRACKER — state
 // =====================================================================
-const trkState = { week:1, subView:'log', openDay:null, unit:'kg' };
+const trkState = { week:1, subView:'log', openDay:null, unit:'kg', activeSlot:null };
+
+// =====================================================================
+// TRACKER — Slot selector
+// =====================================================================
+const TRK_SLOT_LABELS = ['Plan 1', 'Plan 2', 'Plan 3'];
 
 function initTracker(){
-  const plan = trkGetPlan();
   const settings = trkGetSettings();
   trkState.unit = settings.weightUnit||'kg';
-  if(!plan){
-    document.getElementById('trk-empty').classList.remove('hidden');
-    document.getElementById('trk-main').classList.add('hidden');
-    return;
+  // Always start at the slot selector
+  trkShowSlotSelector();
+}
+
+function trkShowSlotSelector(){
+  document.getElementById('trk-slot-selector').classList.remove('hidden');
+  document.getElementById('trk-slot-detail').classList.add('hidden');
+  document.getElementById('trk-empty-disclaimer').classList.add('hidden');
+  trkState.activeSlot = null;
+  renderSlotGrid();
+}
+
+function renderSlotGrid(){
+  const grid = document.getElementById('trk-slots-grid');
+  let html = '';
+  for(let slot=0; slot<3; slot++){
+    const plan    = trkGetPlan(slot);
+    const manual  = !plan ? trkGetManual(slot) : null;
+    const hasPlan = !!(plan || manual);
+    const logs    = hasPlan ? trkGetLogs(slot) : [];
+    const isManual = !!manual;
+
+    if(hasPlan){
+      const meta = plan ? plan.meta : manual.meta;
+      const title = isManual ? (manual.name || 'Custom Plan') : `${meta.weeks}-Week Plan`;
+      const sub   = isManual
+        ? `${(manual.days||[]).length} day${(manual.days||[]).length!==1?'s':''}/wk · Manual`
+        : `${(meta.level||'').charAt(0).toUpperCase()+(meta.level||'').slice(1)} · ${meta.wpw} days/wk · ${meta.duration} min`;
+      const logBadge = logs.length
+        ? `<span class="trk-slot-badge badge-logged">✓ ${logs.length} session${logs.length!==1?'s':''} logged</span>`
+        : `<span class="trk-slot-badge badge-empty">0 sessions</span>`;
+      html += `<div class="trk-slot-card filled-slot" onclick="trkOpenSlot(${slot})">
+        <div class="trk-slot-num">${TRK_SLOT_LABELS[slot]}</div>
+        <div class="trk-slot-title">${title}</div>
+        <div class="trk-slot-meta">${sub}</div>
+        ${logBadge}
+        <button class="trk-slot-view-btn" onclick="event.stopPropagation();trkOpenSlot(${slot})">📋 View This Plan</button>
+      </div>`;
+    } else {
+      html += `<div class="trk-slot-card" onclick="trkShowEmptyDisclaimer(${slot})">
+        <div class="trk-slot-num">${TRK_SLOT_LABELS[slot]}</div>
+        <div class="trk-slot-empty-overlay">
+          <div class="trk-slot-empty-icon">＋</div>
+          <div class="trk-slot-empty-label">Empty Slot</div>
+          <div class="trk-slot-empty-hint">Tap to set up a plan or create your own</div>
+        </div>
+      </div>`;
+    }
   }
-  document.getElementById('trk-empty').classList.add('hidden');
-  document.getElementById('trk-main').classList.remove('hidden');
-  // Clamp week to plan length
-  if(trkState.week > plan.weeks.length) trkState.week = 1;
-  renderTrkHeader(plan);
-  if(trkState.subView==='log') renderTrkLog(plan);
-  else renderTrkHistory(plan);
+  grid.innerHTML = html;
+}
+
+function trkShowEmptyDisclaimer(slot){
+  const disc = document.getElementById('trk-empty-disclaimer');
+  disc.innerHTML = `
+    <div class="trk-empty-disc-icon">🏋️</div>
+    <div class="trk-empty-disc-title">No Plan in ${TRK_SLOT_LABELS[slot]}</div>
+    <div class="trk-empty-disc-body">You haven't set up a plan for this slot yet. Use the Setup wizard to generate a science-backed programme, or build your own template manually.</div>
+    <div class="trk-empty-disc-btns">
+      <button class="btn btn-primary btn-lg" onclick="trkGoSetup(${slot})">🚀 Go to Setup &amp; Start Your Journey</button>
+      <button class="btn btn-outline btn-lg" onclick="trkOpenManualEditor(${slot})">✏️ Create Your Own Plan</button>
+    </div>`;
+  disc.classList.remove('hidden');
+  disc.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function trkGoSetup(slot){
+  // Store the intended slot so doSaveAndTrack can use it
+  trkState._pendingSlot = slot;
+  showView('wizard');
+}
+
+function trkOpenSlot(slot){
+  trkState.activeSlot = slot;
+  document.getElementById('trk-slot-selector').classList.add('hidden');
+  document.getElementById('trk-empty-disclaimer').classList.add('hidden');
+  document.getElementById('trk-slot-detail').classList.remove('hidden');
+  document.getElementById('trk-slot-label').textContent = TRK_SLOT_LABELS[slot];
+
+  const isManual = trkSlotIsManual(slot);
+  document.getElementById('trk-main').classList.toggle('hidden', isManual);
+  document.getElementById('trk-manual-editor').classList.toggle('hidden', !isManual);
+
+  if(isManual){
+    renderManualPlanView(slot);
+  } else {
+    // Existing plan tracker
+    const plan = trkGetPlan(slot);
+    if(!plan){ trkShowSlotSelector(); return; }
+    if(trkState.week > plan.weeks.length) trkState.week = 1;
+    trkState.subView = 'log';
+    document.getElementById('trk-tab-log').classList.add('active');
+    document.getElementById('trk-tab-history').classList.remove('active');
+    document.getElementById('trk-tab-progress').classList.remove('active');
+    document.getElementById('trk-view-log').classList.remove('hidden');
+    document.getElementById('trk-view-history').classList.add('hidden');
+    document.getElementById('trk-view-progress').classList.add('hidden');
+    renderTrkHeader(plan);
+    renderTrkLog(plan);
+  }
+}
+
+function trkViewCurrentSlotPlan(){
+  const slot = trkState.activeSlot;
+  if(slot === null) return;
+  if(trkSlotIsManual(slot)){
+    trkViewManualPlan();
+  } else {
+    viewSavedPlan(slot);
+  }
 }
 
 // ─── Header ───────────────────────────────────────────────────────────
 function renderTrkHeader(plan){
-  const logs = trkGetLogs();
+  const slot = trkState.activeSlot || 0;
+  const logs = trkGetLogs(slot);
   const m = plan.meta;
   document.getElementById('trk-header').innerHTML = `
     <div class="trk-plan-info">
@@ -4224,7 +4418,6 @@ function renderTrkHeader(plan){
         <div class="trk-plan-sub">${(m.level||'').charAt(0).toUpperCase()+(m.level||'').slice(1)} · ${m.wpw} days/wk · ${m.duration} min · <strong>${logs.length}</strong> session${logs.length!==1?'s':''} logged · Saved ${formatLogDate(plan.savedAt)}</div>
       </div>
       <div style="display:flex;align-items:center;gap:.65rem;flex-wrap:wrap">
-        <button class="btn btn-outline btn-sm" onclick="viewSavedPlan()" style="font-size:.72rem;padding:.28rem .7rem">📋 View Plan</button>
         <div class="trk-unit-toggle">
           <button class="trk-unit-btn ${trkState.unit==='kg'?'active':''}"  onclick="setTrkUnit('kg')">kg</button>
           <button class="trk-unit-btn ${trkState.unit==='lbs'?'active':''}" onclick="setTrkUnit('lbs')">lbs</button>
@@ -4236,7 +4429,8 @@ function renderTrkHeader(plan){
 function setTrkUnit(unit){
   trkState.unit = unit;
   const s = trkGetSettings(); s.weightUnit=unit; trkSaveSettings(s);
-  const plan = trkGetPlan();
+  const slot = trkState.activeSlot || 0;
+  const plan = trkGetPlan(slot);
   if(!plan) return;
   renderTrkHeader(plan);
   if(trkState.subView==='log') renderTrkLog(plan);
@@ -4253,7 +4447,8 @@ function switchTrkTab(tab){
   document.getElementById('trk-view-log').classList.toggle('hidden', tab!=='log');
   document.getElementById('trk-view-history').classList.toggle('hidden', tab!=='history');
   document.getElementById('trk-view-progress').classList.toggle('hidden', tab!=='progress');
-  const plan = trkGetPlan(); if(!plan) return;
+  const slot = trkState.activeSlot || 0;
+  const plan = trkGetPlan(slot); if(!plan) return;
   if(tab==='log') renderTrkLog(plan);
   else if(tab==='history') renderTrkHistory(plan);
   else if(tab==='progress') renderTrkProgress(plan);
@@ -4261,14 +4456,15 @@ function switchTrkTab(tab){
 
 function switchTrkWeek(w){
   trkState.week = w; trkState.openDay = null;
-  renderTrkLog(trkGetPlan());
+  renderTrkLog(trkGetPlan(trkState.activeSlot || 0));
 }
 
 // =====================================================================
 // TRACKER — Log Session sub-view
 // =====================================================================
 function renderTrkLog(plan){
-  const logs = trkGetLogs();
+  const slot = trkState.activeSlot || 0;
+  const logs = trkGetLogs(slot);
   const el = document.getElementById('trk-view-log');
   if(!plan||!plan.weeks||!plan.weeks.length){ el.innerHTML=''; return; }
 
@@ -4309,7 +4505,7 @@ function renderTrkLog(plan){
 
   (wk.days||[]).filter(Boolean).forEach(day=>{
     const log     = logs.find(l=>l.weekNum===trkState.week&&l.dayIdx===day.dayIdx);
-    const partial = trkGetPartial(trkState.week, day.dayIdx);
+    const partial = trkGetPartial(trkState.week, day.dayIdx, slot);
     const isLogged  = !!log;
     const isPartial = !isLogged && !!partial;
     const cardCls   = isLogged?'logged':isPartial?'partial':'';
@@ -4337,7 +4533,7 @@ function renderTrkLog(plan){
 
 function toggleLogSession(dayIdx){
   trkState.openDay = trkState.openDay===dayIdx ? null : dayIdx;
-  renderTrkLog(trkGetPlan());
+  renderTrkLog(trkGetPlan(trkState.activeSlot||0));
   if(trkState.openDay!==null){
     setTimeout(()=>{ const e=document.getElementById(`trk-day-${dayIdx}`); if(e) e.scrollIntoView({behavior:'smooth',block:'nearest'}); },60);
   }
@@ -4668,13 +4864,15 @@ function trkAutoSavePartial(weekNum, dayIdx){
   clearTimeout(_autoSaveTimer);
   _autoSaveTimer = setTimeout(()=>{
     const data = collectFormData(weekNum, dayIdx);
-    if(data) trkSetPartial(weekNum, dayIdx, data);
+    const slot = trkState.activeSlot || 0;
+    if(data) trkSetPartial(weekNum, dayIdx, data, slot);
   }, 700);
 }
 
 // ─── Collect form data ────────────────────────────────────────────────
 function collectFormData(weekNum, dayIdx){
-  const plan = trkGetPlan();
+  const slot = trkState.activeSlot || 0;
+  const plan = trkGetPlan(slot);
   const wk = plan?.weeks?.find(w=>w.weekNum===weekNum);
   const day = wk?.days?.find(d=>d&&d.dayIdx===dayIdx);
   if(!day) return null;
@@ -4750,23 +4948,25 @@ function collectFormData(weekNum, dayIdx){
 function saveSessionLog(weekNum, dayIdx){
   const data = collectFormData(weekNum, dayIdx);
   if(!data) return;
+  const slot = trkState.activeSlot || 0;
   data.loggedAt = new Date().toISOString();
   data.id = `log_${Date.now()}_w${weekNum}d${dayIdx}`;
-  let logs = trkGetLogs().filter(l=>!(l.weekNum===weekNum&&l.dayIdx===dayIdx));
+  let logs = trkGetLogs(slot).filter(l=>!(l.weekNum===weekNum&&l.dayIdx===dayIdx));
   logs.push(data);
-  trkSetLogs(logs);
-  trkSetPartial(weekNum, dayIdx, null);
+  trkSetLogs(logs, slot);
+  trkSetPartial(weekNum, dayIdx, null, slot);
   trkState.openDay = null;
-  const plan = trkGetPlan();
+  const plan = trkGetPlan(slot);
   renderTrkHeader(plan);
   renderTrkLog(plan);
 }
 
-function cancelLogSession(){ trkState.openDay=null; renderTrkLog(trkGetPlan()); }
+function cancelLogSession(){ trkState.openDay=null; renderTrkLog(trkGetPlan(trkState.activeSlot||0)); }
 
 // ─── Pre-fill helpers ─────────────────────────────────────────────────
 function getLastWeightForEx(exId, dayIdx, weekNum){
-  const prev = trkGetLogs()
+  const slot = trkState.activeSlot || 0;
+  const prev = trkGetLogs(slot)
     .filter(l=>l.weekNum<weekNum && l.dayIdx===dayIdx && l.type==='gym')
     .sort((a,b)=>b.weekNum-a.weekNum);
   if(!prev.length) return null;
@@ -4776,14 +4976,16 @@ function getLastWeightForEx(exId, dayIdx, weekNum){
 }
 
 function getLastWeightForDay(dayIdx, weekNum){
-  return trkGetLogs().some(l=>l.weekNum<weekNum && l.dayIdx===dayIdx);
+  const slot = trkState.activeSlot || 0;
+  return trkGetLogs(slot).some(l=>l.weekNum<weekNum && l.dayIdx===dayIdx);
 }
 
 // =====================================================================
 // TRACKER — History sub-view
 // =====================================================================
 function renderTrkHistory(plan){
-  const logs = trkGetLogs();
+  const slot = trkState.activeSlot || 0;
+  const logs = trkGetLogs(slot);
   const el = document.getElementById('trk-view-history');
   let html = `<div class="trk-download-bar">
     <button class="btn btn-outline btn-sm" onclick="downloadBackupJSON()">📄 JSON Backup</button>
@@ -4868,12 +5070,21 @@ function promptSaveAndTrack(){
     showNudgeModal('premium');
     return;
   }
-  const existing = trkGetPlan();
-  if(!existing){ doSaveAndTrack(); return; }
-  const logCount = trkGetLogs().length;
+  // Find the target slot (use pending slot from trkGoSetup, or find first empty slot)
+  let targetSlot = (trkState._pendingSlot != null) ? trkState._pendingSlot : null;
+  if(targetSlot === null){
+    for(let i=0;i<3;i++){ if(!trkSlotHasPlan(i)){targetSlot=i;break;} }
+    if(targetSlot===null) targetSlot=0; // all full — overwrite slot 0 with confirm
+  }
+  trkState._pendingSlot = null;
+  const existing = trkGetPlan(targetSlot);
+  if(!existing){ doSaveAndTrack(targetSlot); return; }
+  const logCount = trkGetLogs(targetSlot).length;
   document.getElementById('replace-plan-body').innerHTML = `
-    <p class="replace-modal-body">You have an active plan with <span class="replace-modal-count">${logCount} logged session${logCount!==1?'s':''}</span> across ${existing.meta?.weeks||'?'} weeks.</p>
+    <p class="replace-modal-body">You have an active plan in <strong>${TRK_SLOT_LABELS[targetSlot]}</strong> with <span class="replace-modal-count">${logCount} logged session${logCount!==1?'s':''}</span> across ${existing.meta?.weeks||'?'} weeks.</p>
     <p class="replace-modal-body">Replacing it will permanently delete all tracked data. Download a backup first if you want to keep it.</p>`;
+  // Store target slot for confirmReplace
+  document.getElementById('replace-plan-modal').dataset.targetSlot = targetSlot;
   document.getElementById('replace-plan-modal').classList.remove('hidden');
   document.body.style.overflow='hidden';
 }
@@ -4884,8 +5095,11 @@ function closeReplacePlanModal(e){
   document.body.style.overflow='';
 }
 
-function doSaveAndTrack(){
+function doSaveAndTrack(slotArg){
   if(!currentPlan) return;
+  // Determine slot
+  const slot = (slotArg != null) ? slotArg
+    : parseInt(document.getElementById('replace-plan-modal').dataset.targetSlot||'0');
   const snapshot = {
     savedAt: new Date().toISOString(),
     meta: { weeks:S.weeks, wpw:S.wpw, level:S.level, duration:S.duration, split:getActiveSplit().name },
@@ -4895,27 +5109,26 @@ function doSaveAndTrack(){
       days:(w.days||[]).map((d,di)=>d?{...d,dayIdx:di}:null).filter(Boolean)
     }))
   };
-  trkSetPlan(snapshot);
-  trkSetLogs([]);
-  // Clear any lingering partials
-  for(let wk=1;wk<=S.weeks;wk++) for(let d=0;d<S.wpw;d++) trkSetPartial(wk,d,null);
+  trkSetPlan(snapshot, slot);
+  trkSetLogs([], slot);
+  // Clear any lingering partials for this slot
+  for(let wk=1;wk<=S.weeks;wk++) for(let d=0;d<S.wpw;d++) trkSetPartial(wk,d,null,slot);
   document.getElementById('replace-plan-modal').classList.add('hidden');
   document.body.style.overflow='';
+  // Navigate to the tracker and open this slot
+  trkState.activeSlot = slot;
   trkState.week=1; trkState.openDay=null; trkState.subView='log';
-  document.getElementById('trk-tab-log').classList.add('active');
-  document.getElementById('trk-tab-history').classList.remove('active');
-  document.getElementById('trk-tab-progress').classList.remove('active');
-  document.getElementById('trk-view-log').classList.remove('hidden');
-  document.getElementById('trk-view-history').classList.add('hidden');
-  document.getElementById('trk-view-progress').classList.add('hidden');
   showView('tracker');
+  // After showView calls initTracker (which shows slot selector), open the slot directly
+  setTimeout(()=>{ trkOpenSlot(slot); },0);
 }
 
 // =====================================================================
 // TRACKER — Export
 // =====================================================================
 function downloadBackupCSV(){
-  const logs = trkGetLogs();
+  const slot = trkState.activeSlot || 0;
+  const logs = trkGetLogs(slot);
   if(!logs.length){ alert('No sessions logged yet.'); return; }
   const rows = [['Date','Week','Day_Num','Session','Type','Exercise','Set_Num','Weight_kg','Reps','RPE','Session_RPE','Notes','Duration_min','Pace_min_km','Easy_Pace_min_km','Surge_Pace_min_km']];
   logs.forEach(log=>{
@@ -4942,7 +5155,8 @@ function downloadBackupCSV(){
 }
 
 function downloadBackupJSON(){
-  const data = {plan:trkGetPlan(), logs:trkGetLogs(), exportedAt:new Date().toISOString()};
+  const slot = trkState.activeSlot || 0;
+  const data = {plan:trkGetPlan(slot), logs:trkGetLogs(slot), exportedAt:new Date().toISOString()};
   trkDownloadFile(JSON.stringify(data,null,2), `workout-backup-${new Date().toISOString().slice(0,10)}.json`, 'application/json');
 }
 
@@ -4957,8 +5171,9 @@ function trkDownloadFile(content, filename, mime){
 }
 
 // ─── View saved plan from tracker ────────────────────────────────────
-function viewSavedPlan(){
-  const saved = trkGetPlan();
+function viewSavedPlan(slotArg){
+  const slot = (slotArg != null) ? slotArg : (trkState.activeSlot || 0);
+  const saved = trkGetPlan(slot);
   if(!saved){ alert('No saved plan found. Generate and save a plan first.'); return; }
   // Load saved weeks into currentPlan (display-only — wpt_plan in localStorage is untouched)
   currentPlan = saved.weeks;
@@ -5313,7 +5528,8 @@ function renderTrkProgress(plan){
     return;
   }
 
-  const logs = trkGetLogs();
+  const slot = trkState.activeSlot || 0;
+  const logs = trkGetLogs(slot);
 
   if(!logs.length){
     el.innerHTML = `<div class="prog-empty">📊<br><strong>No sessions logged yet</strong><br>Log your first gym session to start tracking progress.</div>`;
@@ -5377,18 +5593,18 @@ function renderTrkProgress(plan){
 // ── Interactivity ─────────────────────────────────────────────────
 function progSetKpi(exId, kpi, anchorId){
   _progKpi[exId] = kpi;
-  renderTrkProgress(trkGetPlan());
+  renderTrkProgress(trkGetPlan(trkState.activeSlot||0));
 }
 
 function progOpenPicker(anchorId){
   _progPickerOpen = (_progPickerOpen === anchorId) ? null : anchorId;
-  renderTrkProgress(trkGetPlan());
+  renderTrkProgress(trkGetPlan(trkState.activeSlot||0));
 }
 
 function progPinExercise(anchorId, exId, exName){
   _progPinned[anchorId] = exId;
   _progPickerOpen = null;
-  renderTrkProgress(trkGetPlan());
+  renderTrkProgress(trkGetPlan(trkState.activeSlot||0));
 }
 
 function closeSwapModal(e){
@@ -5397,6 +5613,354 @@ function closeSwapModal(e){
   document.body.style.overflow = '';
   _swapCtx = null;
 }
+
+// =====================================================================
+// MANUAL PLAN BUILDER
+// =====================================================================
+
+// Muscle groups & training style maps derived from the EX database
+const MANUAL_MUSCLES = ['chest','back','shoulders','quads','hamstrings','glutes','biceps','triceps','core','calves'];
+const MANUAL_MUSCLE_LABELS = {chest:'Chest',back:'Back',shoulders:'Shoulders',quads:'Quads',hamstrings:'Hamstrings',glutes:'Glutes',biceps:'Biceps',triceps:'Triceps',core:'Core',calves:'Calves'};
+
+// Manual plan state per slot (ephemeral — persisted via trkSetManual)
+let _manualPlan = { name:'', days:[] };
+
+const MANUAL_STYLES = [
+  {val:'hypertrophy', label:'Hypertrophy', icon:'📈', desc:'6–12 reps · Moderate load · 60–120s rest'},
+  {val:'strength',    label:'Strength',    icon:'🏆', desc:'2–6 reps · Heavy load · 3–5 min rest'},
+  {val:'endurance',   label:'Endurance',   icon:'🏃', desc:'15–25+ reps · Light load · 30–60s rest'},
+  {val:'power_speed', label:'Power/Speed', icon:'⚡', desc:'1–5 reps · Max intent · 3–5 min rest'}
+];
+
+function trkOpenManualEditor(slot){
+  trkState.activeSlot = slot;
+  document.getElementById('trk-slot-selector').classList.add('hidden');
+  document.getElementById('trk-empty-disclaimer').classList.add('hidden');
+  document.getElementById('trk-slot-detail').classList.remove('hidden');
+  document.getElementById('trk-main').classList.add('hidden');
+  document.getElementById('trk-manual-editor').classList.remove('hidden');
+  document.getElementById('trk-slot-label').textContent = TRK_SLOT_LABELS[slot];
+
+  // Load existing manual plan for this slot or start fresh
+  const existing = trkGetManual(slot);
+  _manualPlan = existing ? JSON.parse(JSON.stringify(existing)) : { name:'', days:[] };
+  renderManualEditor();
+}
+
+function renderManualEditor(){
+  const body = document.getElementById('trk-manual-editor-body');
+  const days = _manualPlan.days || [];
+
+  let html = `
+  <div class="card" style="margin-bottom:.8rem">
+    <label class="fl">Plan Name</label>
+    <input type="text" class="trk-input" style="width:100%;max-width:320px;padding:.5rem .75rem;font-size:.88rem"
+      placeholder="e.g. My Push/Pull Plan"
+      value="${(_manualPlan.name||'').replace(/"/g,'&quot;')}"
+      oninput="_manualPlan.name=this.value">
+  </div>
+  <div class="card" style="margin-bottom:.8rem">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;flex-wrap:wrap;gap:.5rem">
+      <div class="vol-title">Training Days</div>
+      <button class="btn btn-primary btn-sm" onclick="addManualDay()">+ Add Day</button>
+    </div>`;
+
+  if(!days.length){
+    html += `<div style="color:var(--muted);font-size:.82rem;text-align:center;padding:.8rem 0">No days yet — click <strong>Add Day</strong> to build your plan.</div>`;
+  } else {
+    days.forEach((day, di) => {
+      html += buildManualDayHTML(day, di);
+    });
+  }
+
+  html += `</div>
+  <div style="display:flex;gap:.6rem;justify-content:flex-end;margin-bottom:1rem">
+    <button class="btn btn-outline btn-sm" onclick="trkShowSlotSelector()">Cancel</button>
+    <button class="btn btn-primary" onclick="saveManualPlan()">💾 Save Plan</button>
+  </div>`;
+
+  body.innerHTML = html;
+}
+
+function buildManualDayHTML(day, di){
+  const exercises = day.exercises || [];
+  return `<div class="trk-day-card" style="margin-bottom:.7rem;padding:.9rem 1rem">
+    <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.65rem;flex-wrap:wrap">
+      <input type="text" class="trk-input" style="flex:1;min-width:120px;padding:.35rem .6rem"
+        placeholder="Day name (e.g. Push A)"
+        value="${(day.label||'').replace(/"/g,'&quot;')}"
+        oninput="_manualPlan.days[${di}].label=this.value">
+      <select class="trk-input" style="padding:.32rem .55rem" onchange="_manualPlan.days[${di}].style=this.value">
+        ${MANUAL_STYLES.map(s=>`<option value="${s.val}" ${(day.style||'hypertrophy')===s.val?'selected':''}>${s.icon} ${s.label}</option>`).join('')}
+      </select>
+      <button class="btn btn-sm" style="background:#ef444420;border:1px solid #ef4444;color:#ef4444;padding:.3rem .6rem" onclick="removeManualDay(${di})">✕ Remove</button>
+    </div>
+    <div style="margin-bottom:.45rem">
+      ${exercises.map((ex,ei) => buildManualExRow(ex, di, ei)).join('')}
+    </div>
+    <button class="trk-add-set" onclick="addManualExercise(${di})" style="width:100%;margin-top:.3rem">+ Add Exercise</button>
+  </div>`;
+}
+
+function buildManualExRow(ex, di, ei){
+  const catOptions = ['compound','isolation','explosive','core','accessory'];
+  return `<div class="trk-set-row" style="gap:.4rem;margin-bottom:.3rem;flex-wrap:nowrap;align-items:center" id="manual-ex-${di}-${ei}">
+    <input type="text" class="trk-input" style="flex:2;min-width:110px;padding:.28rem .45rem;font-size:.78rem"
+      placeholder="Exercise name"
+      value="${(ex.name||'').replace(/"/g,'&quot;')}"
+      oninput="_manualPlan.days[${di}].exercises[${ei}].name=this.value">
+    <input type="text" class="trk-input" style="width:5.5rem;padding:.28rem .38rem;font-size:.74rem"
+      placeholder="Muscles"
+      title="Primary muscles (comma-separated)"
+      value="${(ex.muscles||'').replace(/"/g,'&quot;')}"
+      oninput="_manualPlan.days[${di}].exercises[${ei}].muscles=this.value">
+    <select class="trk-input" style="padding:.25rem .35rem;font-size:.73rem" onchange="_manualPlan.days[${di}].exercises[${ei}].cat=this.value">
+      ${catOptions.map(c=>`<option value="${c}" ${(ex.cat||'compound')===c?'selected':''}>${c.charAt(0).toUpperCase()+c.slice(1)}</option>`).join('')}
+    </select>
+    <input type="text" class="trk-input" style="width:3.8rem;padding:.28rem .3rem;text-align:center;font-size:.74rem"
+      placeholder="3×8"
+      title="Sets × Reps"
+      value="${(ex.setsReps||'').replace(/"/g,'&quot;')}"
+      oninput="_manualPlan.days[${di}].exercises[${ei}].setsReps=this.value">
+    <button class="trk-del-set" onclick="removeManualExercise(${di},${ei})" title="Remove">×</button>
+  </div>`;
+}
+
+function addManualDay(){
+  if(!_manualPlan.days) _manualPlan.days = [];
+  _manualPlan.days.push({ label:'Day '+((_manualPlan.days.length||0)+1), style:'hypertrophy', exercises:[] });
+  renderManualEditor();
+}
+
+function removeManualDay(di){
+  _manualPlan.days.splice(di, 1);
+  renderManualEditor();
+}
+
+function addManualExercise(di){
+  if(!_manualPlan.days[di].exercises) _manualPlan.days[di].exercises = [];
+  _manualPlan.days[di].exercises.push({ name:'', muscles:'', cat:'compound', setsReps:'' });
+  renderManualEditor();
+}
+
+function removeManualExercise(di, ei){
+  _manualPlan.days[di].exercises.splice(ei, 1);
+  renderManualEditor();
+}
+
+function saveManualPlan(){
+  const slot = trkState.activeSlot || 0;
+  _manualPlan.savedAt = new Date().toISOString();
+  if(!_manualPlan.name) _manualPlan.name = 'Custom Plan';
+  trkSetManual(_manualPlan, slot);
+  renderManualPlanView(slot);
+}
+
+// ── Manual plan "My Plan" view ─────────────────────────────────────────
+function renderManualPlanView(slot){
+  const manual = trkGetManual(slot);
+  if(!manual){ renderManualEditor(); return; }
+  const body = document.getElementById('trk-manual-editor-body');
+  const days = manual.days || [];
+
+  let html = ``;
+
+  // Weekly Volume collapsible card
+  const volData = computeManualVolume(days);
+  const evalData = computeManualEvaluator(days);
+
+  // — Days —
+  html += days.map(day => {
+    const exRows = (day.exercises||[]).map((ex,ei) => {
+      const catCls = {compound:'cat-compound',explosive:'cat-explosive',isolation:'cat-isolation',core:'cat-core',accessory:'cat-accessory'}[ex.cat]||'cat-compound';
+      const catLbl = ex.cat ? ex.cat.charAt(0).toUpperCase()+ex.cat.slice(1) : 'Compound';
+      const styleObj = MANUAL_STYLES.find(s=>s.val===(day.style||'hypertrophy'))||MANUAL_STYLES[0];
+      return `<div class="ex-row">
+        <div>
+          <div class="ex-name"><span class="ex-num">${ei+1}</span>${ex.name||'Exercise'}<span class="ex-cat ${catCls}">${catLbl}</span></div>
+          ${ex.muscles ? `<div class="ex-muscles">${ex.muscles}</div>` : ''}
+        </div>
+        <div class="ex-params">
+          <div class="sets-reps">${ex.setsReps||'—'}</div>
+          <div class="rest-time">${styleObj.desc.split('·').slice(-1)[0].trim()}</div>
+        </div>
+      </div>`;
+    }).join('');
+    const styleObj = MANUAL_STYLES.find(s=>s.val===(day.style||'hypertrophy'))||MANUAL_STYLES[0];
+    const styleColor = {hypertrophy:'#4a90d9',strength:'#d4920a',endurance:'#2ecc8a',power_speed:'#9b72cf'}[day.style||'hypertrophy']||'#4a90d9';
+    return `<div class="day-card">
+      <div class="day-hdr" style="background:${styleColor}">
+        <h3>${day.label||'Training Day'} <span class="day-focus-tag">${styleObj.icon} ${styleObj.label}</span></h3>
+        <div class="day-meta">${(day.exercises||[]).length} exercise${(day.exercises||[]).length!==1?'s':''}</div>
+      </div>
+      ${(day.exercises||[]).length ? exRows : '<div style="padding:.9rem 1.1rem;color:var(--muted);font-size:.83rem;font-style:italic">No exercises added.</div>'}
+    </div>`;
+  }).join('');
+
+  // — Weekly Volume collapsible —
+  html += buildManualVolCard(volData, evalData);
+
+  // — Edit button —
+  html += `<div style="display:flex;gap:.6rem;margin-top:.5rem">
+    <button class="btn btn-outline btn-sm" onclick="trkOpenManualEditor(${slot})">✏️ Edit Plan</button>
+  </div>`;
+
+  body.innerHTML = html;
+
+  // Show manual plan header (hide the trk-main header)
+  document.getElementById('trk-manual-editor').classList.remove('hidden');
+  document.getElementById('trk-main').classList.add('hidden');
+}
+
+// ── Volume computation for manual plan ────────────────────────────────
+function computeManualVolume(days){
+  // Returns { muscle: totalSets } across all days
+  const vol = {};
+  MANUAL_MUSCLES.forEach(m => vol[m] = 0);
+  days.forEach(day => {
+    (day.exercises||[]).forEach(ex => {
+      if(!ex.name || !ex.muscles) return;
+      const setsMatch = (ex.setsReps||'').match(/^(\d+)/);
+      const sets = setsMatch ? parseInt(setsMatch[1]) : 3;
+      // Parse muscles field — comma separated
+      ex.muscles.split(',').forEach(m => {
+        const key = m.trim().toLowerCase().replace(/\s+/g,'_');
+        // Map common aliases
+        const aliases = {
+          'lower_back':'back', 'upper_back':'back', 'lats':'back',
+          'traps':'back', 'forearms':'biceps', 'hip_flexors':'quads',
+          'abs':'core', 'obliques':'core'
+        };
+        const mapped = aliases[key] || key;
+        if(vol[mapped] !== undefined) vol[mapped] += sets;
+      });
+    });
+  });
+  return vol;
+}
+
+// ── Evaluator computation ─────────────────────────────────────────────
+function computeManualEvaluator(days){
+  // Returns { muscles: {present:[...], missing:[...]}, styles: [{val, label, icon, pct}] }
+  const allMuscleSets = computeManualVolume(days);
+  const present = [], missing = [];
+  MANUAL_MUSCLES.forEach(m => {
+    if(allMuscleSets[m] > 0) present.push(m);
+    else missing.push(m);
+  });
+
+  // Training styles from day.style
+  const styleCounts = {};
+  let total = 0;
+  days.forEach(day => {
+    const s = day.style || 'hypertrophy';
+    styleCounts[s] = (styleCounts[s]||0) + 1;
+    total++;
+  });
+  const styles = MANUAL_STYLES.map(s => ({
+    ...s,
+    count: styleCounts[s.val]||0,
+    pct: total > 0 ? Math.round((styleCounts[s.val]||0)/total*100) : 0
+  })).filter(s => s.count > 0);
+
+  return { muscles:{present, missing}, styles };
+}
+
+// ── Volume + evaluator card builder ───────────────────────────────────
+function buildManualVolCard(volData, evalData){
+  // Volume table
+  const muscles = MANUAL_MUSCLES.filter(m => volData[m] > 0 || evalData.muscles.missing.includes(m));
+  const maxSets = Math.max(...Object.values(volData), 1);
+
+  let volRows = '';
+  if(muscles.length){
+    const allMusc = [...MANUAL_MUSCLES];
+    allMusc.forEach(m => {
+      const sets = volData[m]||0;
+      if(sets === 0 && !evalData.muscles.missing.includes(m)) return; // skip zero but only show all for completeness
+      const pct = Math.round(sets/maxSets*100);
+      const color = sets === 0 ? 'var(--border)' : sets < 6 ? '#f59e0b' : sets < 12 ? '#4a90d9' : '#2ecc8a';
+      volRows += `<tr>
+        <td class="muscle-name">${MANUAL_MUSCLE_LABELS[m]||m}</td>
+        <td><span class="vol-cell" style="background:${color}22;color:${color}">${sets}</span></td>
+        <td style="font-size:.68rem;color:var(--muted)">${sets===0?'—':sets<6?'Low':sets<12?'Moderate':'High'}</td>
+      </tr>`;
+    });
+  }
+
+  // Evaluator section
+  const presentPills = evalData.muscles.present.map(m =>
+    `<span class="eval-muscle-pill present">✓ ${MANUAL_MUSCLE_LABELS[m]||m}</span>`).join('');
+  const missingPills = evalData.muscles.missing.map(m =>
+    `<span class="eval-muscle-pill missing">✕ ${MANUAL_MUSCLE_LABELS[m]||m}</span>`).join('');
+
+  const styleBars = evalData.styles.map(s => {
+    const barColor = {hypertrophy:'#4a90d9',strength:'#d4920a',endurance:'#2ecc8a',power_speed:'#9b72cf'}[s.val]||'#4a90d9';
+    return `<div class="eval-style-row">
+      <span class="eval-style-label">${s.icon} ${s.label}</span>
+      <div class="eval-style-bar-bg"><div class="eval-style-bar-fill" style="width:${s.pct}%;background:${barColor}"></div></div>
+      <span class="eval-style-pct">${s.pct}%</span>
+    </div>`;
+  }).join('');
+
+  return `<div class="vol-card" id="manual-vol-card">
+    <div class="vol-card-header" onclick="toggleManualVolCard()">
+      <div class="vol-title">📊 Weekly Volume</div>
+      <span class="vol-chevron collapsed" id="manual-vol-chevron">▾</span>
+    </div>
+    <div class="vol-body collapsed" id="manual-vol-body">
+      ${volRows ? `<div class="vol-wrap" style="margin-top:.7rem">
+        <table class="vol-table">
+          <thead><tr><th class="muscle-h">Muscle</th><th>Sets/wk</th><th>Level</th></tr></thead>
+          <tbody>${volRows}</tbody>
+        </table>
+      </div>` : '<div style="color:var(--muted);font-size:.82rem;padding:.5rem 0">Add exercises with muscle groups to see volume.</div>'}
+
+      <div id="manual-evaluator-card" style="margin-top:1rem">
+        <div class="vol-card-header" onclick="toggleManualEvalCard()" style="margin-bottom:.5rem;cursor:pointer">
+          <div class="vol-title" style="font-size:.82rem">🔬 Workout Evaluator</div>
+          <span class="vol-chevron" id="manual-eval-chevron">▾</span>
+        </div>
+        <div id="manual-eval-body">
+          <div class="eval-section-title">Muscles Covered</div>
+          <div class="eval-muscle-grid">${presentPills||'<span style="color:var(--muted);font-size:.78rem">No muscles mapped yet — add muscle fields to your exercises.</span>'}</div>
+          ${missingPills ? `<div class="eval-section-title" style="margin-top:.6rem">Muscles Not Covered</div>
+          <div class="eval-muscle-grid">${missingPills}</div>` : ''}
+          ${evalData.styles.length ? `<div class="eval-section-title" style="margin-top:.85rem">Training Style Focus</div>
+          <div class="eval-style-bars">${styleBars}</div>` : ''}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function toggleManualVolCard(){
+  const body = document.getElementById('manual-vol-body');
+  const chev = document.getElementById('manual-vol-chevron');
+  if(!body) return;
+  body.classList.toggle('collapsed');
+  if(chev) chev.classList.toggle('collapsed');
+}
+
+function toggleManualEvalCard(){
+  const body = document.getElementById('manual-eval-body');
+  const chev = document.getElementById('manual-eval-chevron');
+  if(!body) return;
+  body.classList.toggle('collapsed');
+  if(chev) chev.classList.toggle('collapsed');
+}
+
+function trkViewManualPlan(){
+  const slot = trkState.activeSlot || 0;
+  // If unsaved edits exist, prompt to save first
+  const manual = trkGetManual(slot);
+  if(!manual){
+    saveManualPlan();
+  } else {
+    renderManualPlanView(slot);
+  }
+}
+
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </body>
