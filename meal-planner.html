@@ -128,6 +128,38 @@ input[type=range]::-moz-range-track{height:4px;background:var(--navy4);border-ra
 .excl-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .excl-tag{display:flex;align-items:center;gap:5px;padding:5px 10px;background:#FEE2E2;border:1.5px solid #FECACA;border-radius:16px;font-size:12px;font-weight:500;color:#B91C1C}
 .excl-tag button{background:none;border:none;color:#B91C1C;font-size:15px;cursor:pointer;padding:0;line-height:1;font-weight:700}
+/* Custom Meals */
+.custom-meal-input-row{display:flex;gap:8px;margin-bottom:10px}
+.custom-meal-card{background:var(--navy3);border:2px solid var(--amber);border-radius:var(--radius);padding:14px;margin-bottom:12px;animation:fadeIn .25s ease}
+.cmc-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.cmc-name{font-weight:700;font-size:14px;flex:1;color:var(--text)}
+.cmc-dismiss{background:none;border:none;color:var(--text2);font-size:16px;cursor:pointer;padding:0;line-height:1}
+.cmc-spinner{display:flex;align-items:center;gap:8px;color:var(--text2);font-size:13px;padding:8px 0}
+.cmc-spin-dot{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--amber);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+.cmc-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.cmc-field{display:flex;flex-direction:column;gap:4px}
+.cmc-field label{font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+.cmc-input{padding:8px 10px;border:2px solid var(--border);border-radius:8px;background:var(--navy);color:var(--amber);font-family:var(--serif);font-size:16px;font-weight:700;width:100%;outline:none;text-align:center;-moz-appearance:textfield}
+.cmc-input::-webkit-inner-spin-button,.cmc-input::-webkit-outer-spin-button{-webkit-appearance:none}
+.cmc-input:focus{border-color:var(--amber)}
+.cmc-slot-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.cmc-slot-label{font-size:12px;color:var(--text2);font-weight:600;white-space:nowrap}
+.cmc-slot-chips{display:flex;gap:6px;flex-wrap:wrap}
+.cmc-slot-chip{padding:5px 11px;border-radius:16px;border:1.5px solid var(--border);background:var(--navy2);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;color:var(--text2)}
+.cmc-slot-chip.sel{background:var(--amber);border-color:var(--amber);color:#fff}
+.cmc-save-btn{width:100%;padding:11px;background:var(--green);color:#fff;border:none;border-radius:8px;font-family:var(--body);font-size:14px;font-weight:700;cursor:pointer;transition:background .2s;margin-bottom:6px}
+.cmc-save-btn:hover{background:var(--accent-light)}
+.cmc-ai-note{font-size:11px;color:var(--text3);text-align:center}
+.custom-meals-list{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.custom-meal-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--navy2);border:1.5px solid var(--border);border-radius:10px}
+.cmi-emoji{font-size:18px;flex-shrink:0}
+.cmi-info{flex:1;min-width:0}
+.cmi-name{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cmi-macros{font-size:11px;color:var(--text2);margin-top:1px}
+.cmi-slots{display:flex;gap:4px;flex-shrink:0}
+.cmi-slot-badge{font-size:10px;padding:2px 7px;border-radius:10px;background:var(--amber-dim);color:var(--amber);font-weight:600;border:1px solid var(--amber)}
+.cmi-del{background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer;padding:0;line-height:1;flex-shrink:0}
+.cmi-del:hover{color:var(--rose)}
 .setup-footer{position:fixed;bottom:0;left:0;right:0;padding:16px 24px;background:linear-gradient(transparent,var(--bg) 30%);z-index:100}
 .gen-btn{width:100%;max-width:680px;margin:0 auto;display:block;padding:18px;background:var(--green);color:#fff;border:none;border-radius:var(--radius);font-family:var(--body);font-size:16px;font-weight:600;cursor:pointer;transition:all .2s;box-shadow:0 4px 20px rgba(196,98,45,.35)}
 .gen-btn:hover{background:var(--amber2);transform:translateY(-1px)}
@@ -508,6 +540,95 @@ body.shop-open .shop-fab{display:none!important;}
 .flavor-locked-inner{padding:14px;background:var(--navy3);border-radius:8px;margin-bottom:8px;}
 
 
+/* ── MY MEALS TAB ───────────────────────────── */
+.app-tabs{display:flex;background:var(--navy2);border-bottom:2px solid var(--border);position:sticky;top:0;z-index:60;}
+.app-tab{flex:1;padding:13px 8px;font-size:13px;font-weight:600;color:var(--text2);border:none;background:none;cursor:pointer;font-family:inherit;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s;}
+.app-tab.active{color:var(--amber);border-bottom-color:var(--amber);}
+/* My Meals page */
+#myMealsPage{padding:16px 16px 120px;max-width:680px;margin:0 auto;}
+.mm-title{font-family:var(--serif);font-size:22px;font-weight:700;margin-bottom:4px;}
+.mm-desc{font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.5;}
+/* Meal name input */
+.mm-name-row{display:flex;gap:8px;margin-bottom:16px;}
+.mm-name-input{flex:1;padding:11px 14px;border:2px solid var(--border);border-radius:var(--radius-sm);font-family:var(--body);font-size:14px;background:var(--navy2);color:var(--text);outline:none;}
+.mm-name-input:focus{border-color:var(--amber);}
+/* Ingredient builder */
+.ing-builder{background:var(--navy2);border:1.5px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:14px;}
+.ing-builder-title{font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px;}
+.ing-search-row{display:flex;gap:8px;margin-bottom:10px;}
+.ing-search{flex:1;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:var(--body);font-size:13px;background:var(--navy);color:var(--text);outline:none;}
+.ing-search:focus{border-color:var(--amber);}
+.ing-cat-tabs{display:flex;gap:4px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px;scrollbar-width:none;}
+.ing-cat-tabs::-webkit-scrollbar{display:none;}
+.ing-cat-tab{padding:5px 12px;border-radius:16px;border:1.5px solid var(--border);background:var(--navy);font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;color:var(--text2);transition:all .15s;}
+.ing-cat-tab.active{background:var(--amber);border-color:var(--amber);color:#fff;}
+.ing-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;max-height:240px;overflow-y:auto;padding-right:4px;}
+.ing-item-btn{display:flex;align-items:center;gap:7px;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;background:var(--navy);cursor:pointer;transition:all .15s;text-align:left;}
+.ing-item-btn:hover{border-color:var(--amber);}
+.ing-item-em{font-size:16px;flex-shrink:0;}
+.ing-item-name{font-size:11px;font-weight:600;color:var(--text);line-height:1.3;}
+.ing-item-meta{font-size:10px;color:var(--text2);}
+/* Added ingredients list */
+.added-ings{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;min-height:0;}
+.added-ing-row{display:flex;align-items:center;gap:8px;background:var(--navy2);border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;}
+.air-em{font-size:16px;flex-shrink:0;}
+.air-name{flex:1;font-size:12px;font-weight:600;color:var(--text);}
+.air-qty-wrap{display:flex;align-items:center;gap:4px;}
+.air-qty{width:62px;padding:5px 6px;border:1.5px solid var(--border);border-radius:6px;background:var(--navy);color:var(--amber);font-family:var(--serif);font-size:14px;font-weight:700;text-align:center;outline:none;-moz-appearance:textfield;}
+.air-qty::-webkit-inner-spin-button{-webkit-appearance:none;}
+.air-qty:focus{border-color:var(--amber);}
+.air-unit{font-size:11px;color:var(--text2);}
+.air-del{background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer;padding:0 2px;line-height:1;}
+.air-del:hover{color:var(--rose);}
+/* Macro preview */
+.mm-macro-preview{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px;}
+.mmp-box{background:var(--navy);border-radius:8px;padding:9px;text-align:center;}
+.mmp-val{font-family:var(--serif);font-size:17px;font-weight:700;color:var(--amber);}
+.mmp-lbl{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.3px;margin-top:2px;}
+/* Slot selector */
+.mm-slot-row{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.mm-slot-label{font-size:12px;color:var(--text2);font-weight:600;}
+.mm-slot-chip{padding:6px 13px;border-radius:16px;border:1.5px solid var(--border);background:var(--navy2);font-size:12px;font-weight:600;cursor:pointer;color:var(--text2);transition:all .15s;}
+.mm-slot-chip.sel{background:var(--amber);border-color:var(--amber);color:#fff;}
+/* Save button */
+.mm-save-btn{width:100%;padding:13px;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);font-family:var(--body);font-size:15px;font-weight:700;cursor:pointer;transition:background .2s;margin-bottom:20px;}
+.mm-save-btn:hover{background:var(--accent-light);}
+.mm-save-btn:disabled{background:var(--border);color:var(--text3);cursor:not-allowed;}
+/* Saved meals list */
+.mm-saved-title{font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px;}
+.mm-empty{font-size:13px;color:var(--text3);text-align:center;padding:20px;border:1.5px dashed var(--border);border-radius:var(--radius);margin-bottom:12px;}
+.saved-meal-card{background:var(--navy2);border:1.5px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:10px;}
+.smc-em{font-size:22px;flex-shrink:0;margin-top:2px;}
+.smc-info{flex:1;min-width:0;}
+.smc-name{font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px;}
+.smc-macros{font-size:11px;color:var(--text2);margin-bottom:4px;}
+.smc-ings{font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.smc-slots{display:flex;gap:4px;margin-top:5px;flex-wrap:wrap;}
+.smc-slot-badge{font-size:10px;padding:2px 7px;border-radius:8px;background:var(--amber-dim);color:var(--amber);font-weight:600;border:1px solid var(--amber);}
+.smc-del{background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:0;line-height:1;flex-shrink:0;}
+.smc-del:hover{color:var(--rose);}
+/* ── PIN MODAL ───────────────────────────────── */
+.pin-ov{position:fixed;inset:0;background:rgba(11,15,26,.85);z-index:300;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(6px);}
+.pin-ov.open{opacity:1;pointer-events:all;}
+.pin-panel{background:var(--navy2);border-radius:20px 20px 0 0;width:100%;max-width:600px;max-height:85vh;overflow-y:auto;transform:translateY(100%);transition:transform .35s cubic-bezier(.34,1.2,.64,1);padding:0 0 32px;}
+.pin-ov.open .pin-panel{transform:translateY(0);}
+.pin-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 0;}
+.pin-header{padding:14px 20px 0;}
+.pin-title{font-family:var(--serif);font-size:20px;font-weight:700;margin-bottom:4px;}
+.pin-desc{font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.5;}
+.pin-list{padding:0 20px;}
+.pin-meal-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+.pin-meal-row:last-child{border-bottom:none;}
+.pin-em{font-size:22px;flex-shrink:0;}
+.pin-info{flex:1;min-width:0;}
+.pin-name{font-size:14px;font-weight:600;color:var(--text);}
+.pin-macros{font-size:11px;color:var(--text2);margin-top:2px;}
+.pin-check{width:26px;height:26px;border-radius:50%;border:2px solid var(--border);background:var(--navy);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;transition:all .2s;}
+.pin-check.sel{background:var(--amber);border-color:var(--amber);}
+.pin-footer{padding:16px 20px 0;display:flex;gap:8px;}
+.pin-skip{flex:1;padding:12px;border:2px solid var(--border);border-radius:var(--radius-sm);background:transparent;color:var(--text2);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;}
+.pin-go{flex:2;padding:12px;border:none;border-radius:var(--radius-sm);background:var(--green);color:#fff;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;}
+.pin-go:hover{background:var(--accent-light);}
 /* ── AUTO-ADJUSTMENT BADGE ───────────────────── */
 .mc-adj-badge{display:inline-block;background:var(--teal-dim);border:1px solid var(--teal);color:var(--teal);font-size:8px;font-weight:700;letter-spacing:.04em;padding:1px 5px;border-radius:6px;margin-left:5px;vertical-align:middle;font-family:var(--mono);}
 /* Scale bar — auto version (no toggle) */
@@ -534,7 +655,70 @@ body.shop-open .shop-fab{display:none!important;}
   </div>
 </header>
 
-<div id="setupPage" class="page active">
+<!-- App-level tabs -->
+<div class="app-tabs" id="appTabs">
+  <button class="app-tab active" data-tab="setupPage">⚙️ Plan Setup</button>
+  <button class="app-tab" data-tab="myMealsPage">🍽️ My Meals</button>
+</div>
+
+<!-- MY MEALS PAGE -->
+<div id="myMealsPage" class="page" style="display:none;">
+  <div class="mm-title">My Meals</div>
+  <p class="mm-desc">Build your own meals from ingredients. They'll be available to include in your weekly plan, and all ingredients will appear in your shopping list.</p>
+
+  <div class="section-label" style="margin-bottom:8px">Meal Name</div>
+  <div class="mm-name-row">
+    <input type="text" id="mmNameInput" class="mm-name-input" placeholder="e.g. My Chicken Bowl, Protein Shake…" maxlength="60">
+  </div>
+
+  <div class="ing-builder">
+    <div class="ing-builder-title">Add Ingredients</div>
+    <input type="text" id="ingSearch" class="ing-search" placeholder="Search ingredient…">
+    <div class="ing-cat-tabs" id="ingCatTabs"></div>
+    <div class="ing-grid" id="ingGrid"></div>
+  </div>
+
+  <div id="addedIngs" class="added-ings"></div>
+
+  <div class="mm-macro-preview" id="mmMacroPreview">
+    <div class="mmp-box"><div class="mmp-val" id="mmpKcal">0</div><div class="mmp-lbl">Kcal</div></div>
+    <div class="mmp-box"><div class="mmp-val" id="mmpProt">0g</div><div class="mmp-lbl">Protein</div></div>
+    <div class="mmp-box"><div class="mmp-val" id="mmpCarbs">0g</div><div class="mmp-lbl">Carbs</div></div>
+    <div class="mmp-box"><div class="mmp-val" id="mmpFat">0g</div><div class="mmp-lbl">Fat</div></div>
+  </div>
+
+  <div class="mm-slot-row">
+    <span class="mm-slot-label">Use as:</span>
+    <div id="mmSlotChips">
+      <span class="mm-slot-chip" data-slots="breakfast">🌅 Breakfast</span>
+      <span class="mm-slot-chip sel" data-slots="lunch,dinner">🍽️ Lunch / Dinner</span>
+      <span class="mm-slot-chip" data-slots="snack1,snack2">🍎 Snack</span>
+    </div>
+  </div>
+
+  <button class="mm-save-btn" id="mmSaveBtn" disabled>+ Save Meal</button>
+
+  <div class="mm-saved-title">Saved Meals</div>
+  <div id="mmSavedList"></div>
+</div>
+
+<!-- PIN MODAL -->
+<div class="pin-ov" id="pinOv">
+  <div class="pin-panel">
+    <div class="pin-handle"></div>
+    <div class="pin-header">
+      <div class="pin-title">📌 Pin meals this week?</div>
+      <p class="pin-desc">Select any of your saved meals to guarantee they appear in this week's plan. Unselected meals may still appear randomly.</p>
+    </div>
+    <div class="pin-list" id="pinList"></div>
+    <div class="pin-footer">
+      <button class="pin-skip" id="pinSkip">Skip</button>
+      <button class="pin-go" id="pinGo">✨ Generate Plan</button>
+    </div>
+  </div>
+</div>
+
+<div id="setupPage" class="page active" style="display:block">
   <div class="setup-body">
   <div class="setup-progress" id="setupProgress">
     <div class="sp-steps">
@@ -878,7 +1062,142 @@ const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 var sb = null;
 try { sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON); } catch(e){ console.warn('Supabase SDK not loaded, running in offline/free mode'); }
 
-// ─── TIER ────────────────────────────────────────────
+// ─── INGREDIENT LIBRARY ──────────────────────────────
+// Values per 'per' amount (100g or 1 unit). Starred items (*) pre-filled from standard food databases.
+const ING_LIB = [
+  // 🥩 Meat & Poultry
+  {id:"chicken_breast", name:"Chicken Breast",       em:"🍗", per:100, unit:"g",    kcal:165, prot:31,   carbs:0,    fat:3.6,  shopCat:"protein", shopKey:"chicken",       defaultQty:150, defaultUnit:"g"},
+  {id:"chicken_thigh",  name:"Chicken Thigh",        em:"🍗", per:100, unit:"g",    kcal:209, prot:26,   carbs:0,    fat:11,   shopCat:"protein", shopKey:"chicken",       defaultQty:150, defaultUnit:"g"},
+  {id:"turkey_breast",  name:"Turkey Breast",        em:"🦃", per:100, unit:"g",    kcal:135, prot:30,   carbs:0,    fat:1,    shopCat:"protein", shopKey:"turkey",        defaultQty:150, defaultUnit:"g"},
+  {id:"lean_beef_mince",name:"Lean Beef Mince",      em:"🥩", per:100, unit:"g",    kcal:250, prot:26,   carbs:0,    fat:15,   shopCat:"protein", shopKey:"beef",          defaultQty:150, defaultUnit:"g"},
+  {id:"beef_steak",     name:"Beef Steak (sirloin)", em:"🥩", per:100, unit:"g",    kcal:244, prot:27,   carbs:0,    fat:15,   shopCat:"protein", shopKey:"beef",          defaultQty:180, defaultUnit:"g"},
+  {id:"pork_loin",      name:"Pork Loin",            em:"🥩", per:100, unit:"g",    kcal:242, prot:27,   carbs:0,    fat:14,   shopCat:"protein", shopKey:"pork",          defaultQty:150, defaultUnit:"g"},
+  // 🐟 Fish & Seafood
+  {id:"salmon_fillet",  name:"Salmon Fillet",        em:"🐟", per:100, unit:"g",    kcal:208, prot:22,   carbs:0,    fat:13,   shopCat:"protein", shopKey:"salmon",        defaultQty:150, defaultUnit:"g"},
+  {id:"tuna_in_water",  name:"Tuna (in water)",      em:"🐟", per:100, unit:"g",    kcal:116, prot:26,   carbs:0,    fat:1,    shopCat:"protein", shopKey:"tuna",          defaultQty:120, defaultUnit:"g"},
+  {id:"cod_fillet",     name:"Cod Fillet",           em:"🐟", per:100, unit:"g",    kcal:82,  prot:18,   carbs:0,    fat:0.7,  shopCat:"protein", shopKey:"cod",           defaultQty:150, defaultUnit:"g"},
+  {id:"prawns",         name:"Prawns",               em:"🦐", per:100, unit:"g",    kcal:99,  prot:24,   carbs:0,    fat:0.3,  shopCat:"protein", shopKey:"prawn",         defaultQty:150, defaultUnit:"g"},
+  {id:"mackerel_fillet",name:"Mackerel Fillet",      em:"🐟", per:100, unit:"g",    kcal:262, prot:19,   carbs:0,    fat:20,   shopCat:"protein", shopKey:"mackerel",      defaultQty:130, defaultUnit:"g"},
+  {id:"smoked_salmon",  name:"Smoked Salmon",        em:"🍣", per:100, unit:"g",    kcal:117, prot:18,   carbs:0,    fat:4.3,  shopCat:"protein", shopKey:"salmon",        defaultQty:80,  defaultUnit:"g"},
+  // 🥚 Eggs & Dairy
+  {id:"egg_whole",      name:"Egg (whole)",          em:"🥚", per:1,   unit:"unit", kcal:78,  prot:6.3,  carbs:0.6,  fat:5.3,  shopCat:"protein", shopKey:"egg",           defaultQty:2,   defaultUnit:"piece"},
+  {id:"greek_yogurt_0", name:"Greek Yogurt (0%)",    em:"🥣", per:100, unit:"g",    kcal:59,  prot:10,   carbs:3.6,  fat:0.4,  shopCat:"dairy",   shopKey:"yogurt",        defaultQty:150, defaultUnit:"g"},
+  {id:"cottage_cheese", name:"Cottage Cheese",       em:"🧀", per:100, unit:"g",    kcal:98,  prot:11,   carbs:3.4,  fat:4.3,  shopCat:"dairy",   shopKey:"cottage",       defaultQty:150, defaultUnit:"g"},
+  {id:"milk_whole",     name:"Whole Milk",           em:"🥛", per:100, unit:"ml",   kcal:61,  prot:3.2,  carbs:4.8,  fat:3.3,  shopCat:"dairy",   shopKey:"milk",          defaultQty:200, defaultUnit:"ml"},
+  {id:"milk_skimmed",   name:"Skimmed Milk",         em:"🥛", per:100, unit:"ml",   kcal:34,  prot:3.4,  carbs:5,    fat:0.1,  shopCat:"dairy",   shopKey:"milk",          defaultQty:200, defaultUnit:"ml"},
+  {id:"feta_cheese",    name:"Feta Cheese",          em:"🧀", per:100, unit:"g",    kcal:264, prot:14,   carbs:4.1,  fat:21,   shopCat:"dairy",   shopKey:"feta",          defaultQty:40,  defaultUnit:"g"},
+  {id:"mozzarella",     name:"Mozzarella",           em:"🧀", per:100, unit:"g",    kcal:280, prot:28,   carbs:2.2,  fat:17,   shopCat:"dairy",   shopKey:"mozzarella",    defaultQty:60,  defaultUnit:"g"},
+  {id:"parmesan",       name:"Parmesan",             em:"🧀", per:100, unit:"g",    kcal:431, prot:38,   carbs:4.1,  fat:29,   shopCat:"dairy",   shopKey:"parmesan",      defaultQty:20,  defaultUnit:"g"},
+  {id:"butter",         name:"Butter",               em:"🧈", per:100, unit:"g",    kcal:717, prot:0.9,  carbs:0.1,  fat:81,   shopCat:"dairy",   shopKey:"butter",        defaultQty:10,  defaultUnit:"g"},
+  {id:"protein_powder", name:"Protein Powder (whey)",em:"💪", per:100, unit:"g",    kcal:381, prot:80,   carbs:8,    fat:3,    shopCat:"pantry",  shopKey:"protein powder",defaultQty:30,  defaultUnit:"g"},
+  // 🌱 Plant Proteins *
+  {id:"tofu_firm",      name:"Tofu (firm)",          em:"🟡", per:100, unit:"g",    kcal:76,  prot:8,    carbs:1.9,  fat:4.8,  shopCat:"protein", shopKey:"tofu",          defaultQty:150, defaultUnit:"g"},
+  {id:"tempeh",         name:"Tempeh",               em:"🟤", per:100, unit:"g",    kcal:193, prot:19,   carbs:9,    fat:11,   shopCat:"protein", shopKey:"tempeh",        defaultQty:100, defaultUnit:"g"},
+  {id:"chickpeas",      name:"Chickpeas (cooked)",   em:"🫘", per:100, unit:"g",    kcal:164, prot:8.9,  carbs:27,   fat:2.6,  shopCat:"pantry",  shopKey:"chickpea",      defaultQty:120, defaultUnit:"g"},
+  {id:"lentils",        name:"Lentils (cooked)",     em:"🫘", per:100, unit:"g",    kcal:116, prot:9,    carbs:20,   fat:0.4,  shopCat:"pantry",  shopKey:"lentil",        defaultQty:120, defaultUnit:"g"},
+  {id:"black_beans",    name:"Black Beans (cooked)", em:"🫘", per:100, unit:"g",    kcal:132, prot:8.9,  carbs:24,   fat:0.5,  shopCat:"pantry",  shopKey:"bean",          defaultQty:120, defaultUnit:"g"},
+  {id:"edamame",        name:"Edamame",              em:"🟢", per:100, unit:"g",    kcal:121, prot:11,   carbs:9,    fat:5.2,  shopCat:"frozen",  shopKey:"edamame",       defaultQty:100, defaultUnit:"g"},
+  // 🌾 Grains & Carbs
+  {id:"oats_rolled",    name:"Rolled Oats",          em:"🌾", per:100, unit:"g",    kcal:389, prot:16.9, carbs:66,   fat:6.9,  shopCat:"grains",  shopKey:"oats",          defaultQty:60,  defaultUnit:"g"},
+  {id:"white_rice",     name:"White Rice (cooked)",  em:"🍚", per:100, unit:"g",    kcal:130, prot:2.7,  carbs:28,   fat:0.3,  shopCat:"grains",  shopKey:"rice",          defaultQty:150, defaultUnit:"g"},
+  {id:"brown_rice",     name:"Brown Rice (cooked)*", em:"🍚", per:100, unit:"g",    kcal:123, prot:2.7,  carbs:25.5, fat:1,    shopCat:"grains",  shopKey:"rice",          defaultQty:150, defaultUnit:"g"},
+  {id:"pasta_cooked",   name:"Pasta (cooked)*",      em:"🍝", per:100, unit:"g",    kcal:158, prot:5.8,  carbs:31,   fat:0.9,  shopCat:"grains",  shopKey:"pasta",         defaultQty:180, defaultUnit:"g"},
+  {id:"quinoa_cooked",  name:"Quinoa (cooked)*",     em:"🌾", per:100, unit:"g",    kcal:120, prot:4.4,  carbs:22,   fat:1.9,  shopCat:"grains",  shopKey:"quinoa",        defaultQty:150, defaultUnit:"g"},
+  {id:"couscous_cooked",name:"Couscous (cooked)*",   em:"🌾", per:100, unit:"g",    kcal:112, prot:3.8,  carbs:23,   fat:0.2,  shopCat:"grains",  shopKey:"couscous",      defaultQty:150, defaultUnit:"g"},
+  {id:"wholegrain_bread",name:"Wholegrain Bread",    em:"🍞", per:1,   unit:"unit", kcal:71,  prot:3.6,  carbs:12,   fat:0.9,  shopCat:"grains",  shopKey:"bread",         defaultQty:2,   defaultUnit:"slice"},
+  {id:"wrap_tortilla",  name:"Wrap / Tortilla",      em:"🌯", per:1,   unit:"unit", kcal:198, prot:5,    carbs:33,   fat:4.4,  shopCat:"grains",  shopKey:"tortilla",      defaultQty:1,   defaultUnit:"piece"},
+  {id:"pitta_bread",    name:"Pitta Bread",          em:"🫓", per:1,   unit:"unit", kcal:165, prot:5.5,  carbs:33,   fat:1,    shopCat:"grains",  shopKey:"pitta",         defaultQty:1,   defaultUnit:"piece"},
+  {id:"sweet_potato",   name:"Sweet Potato*",        em:"🍠", per:100, unit:"g",    kcal:86,  prot:1.6,  carbs:20,   fat:0.1,  shopCat:"produce", shopKey:"sweet potato",  defaultQty:200, defaultUnit:"g"},
+  {id:"potato_white",   name:"White Potato*",        em:"🥔", per:100, unit:"g",    kcal:77,  prot:2,    carbs:17,   fat:0.1,  shopCat:"produce", shopKey:"potato",        defaultQty:200, defaultUnit:"g"},
+  {id:"banana",         name:"Banana",               em:"🍌", per:1,   unit:"unit", kcal:110, prot:1,    carbs:28,   fat:0,    shopCat:"produce", shopKey:"banana",        defaultQty:1,   defaultUnit:"piece"},
+  // 🥦 Vegetables *
+  {id:"spinach",        name:"Spinach*",             em:"🍃", per:100, unit:"g",    kcal:23,  prot:2.9,  carbs:3.6,  fat:0.4,  shopCat:"produce", shopKey:"spinach",       defaultQty:80,  defaultUnit:"g"},
+  {id:"broccoli",       name:"Broccoli*",            em:"🥦", per:100, unit:"g",    kcal:34,  prot:2.8,  carbs:7,    fat:0.4,  shopCat:"produce", shopKey:"broccoli",      defaultQty:150, defaultUnit:"g"},
+  {id:"cherry_tomatoes",name:"Cherry Tomatoes*",     em:"🍅", per:100, unit:"g",    kcal:18,  prot:0.9,  carbs:3.9,  fat:0.2,  shopCat:"produce", shopKey:"tomato",        defaultQty:100, defaultUnit:"g"},
+  {id:"bell_pepper",    name:"Bell Pepper*",         em:"🫑", per:100, unit:"g",    kcal:31,  prot:1,    carbs:6,    fat:0.3,  shopCat:"produce", shopKey:"pepper",        defaultQty:120, defaultUnit:"g"},
+  {id:"onion",          name:"Onion*",               em:"🧅", per:100, unit:"g",    kcal:40,  prot:1.1,  carbs:9.3,  fat:0.1,  shopCat:"produce", shopKey:"onion",         defaultQty:80,  defaultUnit:"g"},
+  {id:"garlic",         name:"Garlic",               em:"🧄", per:1,   unit:"unit", kcal:4,   prot:0.2,  carbs:1,    fat:0,    shopCat:"produce", shopKey:"garlic",        defaultQty:2,   defaultUnit:"clove"},
+  {id:"carrot",         name:"Carrot*",              em:"🥕", per:100, unit:"g",    kcal:41,  prot:0.9,  carbs:10,   fat:0.2,  shopCat:"produce", shopKey:"carrot",        defaultQty:100, defaultUnit:"g"},
+  {id:"cucumber",       name:"Cucumber*",            em:"🥒", per:100, unit:"g",    kcal:15,  prot:0.7,  carbs:3.6,  fat:0.1,  shopCat:"produce", shopKey:"cucumber",      defaultQty:100, defaultUnit:"g"},
+  {id:"courgette",      name:"Courgette*",           em:"🥒", per:100, unit:"g",    kcal:17,  prot:1.2,  carbs:3.1,  fat:0.3,  shopCat:"produce", shopKey:"zucchini",      defaultQty:150, defaultUnit:"g"},
+  {id:"avocado",        name:"Avocado*",             em:"🥑", per:100, unit:"g",    kcal:160, prot:2,    carbs:9,    fat:15,   shopCat:"produce", shopKey:"avocado",       defaultQty:80,  defaultUnit:"g"},
+  {id:"kale",           name:"Kale*",                em:"🥬", per:100, unit:"g",    kcal:49,  prot:4.3,  carbs:9,    fat:0.9,  shopCat:"produce", shopKey:"kale",          defaultQty:80,  defaultUnit:"g"},
+  {id:"mushrooms",      name:"Mushrooms*",           em:"🍄", per:100, unit:"g",    kcal:22,  prot:3.1,  carbs:3.3,  fat:0.3,  shopCat:"produce", shopKey:"mushroom",      defaultQty:100, defaultUnit:"g"},
+  {id:"mixed_leaves",   name:"Mixed Salad Leaves*",  em:"🥗", per:100, unit:"g",    kcal:20,  prot:1.5,  carbs:3,    fat:0.3,  shopCat:"produce", shopKey:"lettuce",       defaultQty:60,  defaultUnit:"g"},
+  {id:"frozen_peas",    name:"Frozen Peas*",         em:"🟢", per:100, unit:"g",    kcal:81,  prot:5.4,  carbs:14,   fat:0.4,  shopCat:"frozen",  shopKey:"frozen",        defaultQty:80,  defaultUnit:"g"},
+  // 🫐 Fruits
+  {id:"mixed_berries",  name:"Mixed Berries*",       em:"🫐", per:100, unit:"g",    kcal:57,  prot:0.7,  carbs:14,   fat:0.3,  shopCat:"produce", shopKey:"berry",         defaultQty:100, defaultUnit:"g"},
+  {id:"apple",          name:"Apple",                em:"🍎", per:1,   unit:"unit", kcal:104, prot:0.5,  carbs:27.6, fat:0.3,  shopCat:"produce", shopKey:"apple",         defaultQty:1,   defaultUnit:"piece"},
+  {id:"mango",          name:"Mango*",               em:"🥭", per:100, unit:"g",    kcal:60,  prot:0.8,  carbs:15,   fat:0.4,  shopCat:"produce", shopKey:"mango",         defaultQty:120, defaultUnit:"g"},
+  {id:"orange",         name:"Orange",               em:"🍊", per:1,   unit:"unit", kcal:62,  prot:1.2,  carbs:15.4, fat:0.2,  shopCat:"produce", shopKey:"apple",         defaultQty:1,   defaultUnit:"piece"},
+  // 🫙 Fats & Oils
+  {id:"olive_oil",      name:"Olive Oil*",           em:"🫒", per:100, unit:"ml",   kcal:884, prot:0,    carbs:0,    fat:100,  shopCat:"pantry",  shopKey:"olive oil",     defaultQty:10,  defaultUnit:"ml"},
+  {id:"peanut_butter",  name:"Peanut Butter*",       em:"🥜", per:100, unit:"g",    kcal:588, prot:25,   carbs:20,   fat:50,   shopCat:"pantry",  shopKey:"peanut butter", defaultQty:20,  defaultUnit:"g"},
+  {id:"almonds",        name:"Almonds",              em:"🌰", per:100, unit:"g",    kcal:579, prot:21,   carbs:22,   fat:50,   shopCat:"pantry",  shopKey:"almond",        defaultQty:30,  defaultUnit:"g"},
+  {id:"almond_butter",  name:"Almond Butter",        em:"🥜", per:100, unit:"g",    kcal:630, prot:26,   carbs:6,    fat:53,   shopCat:"pantry",  shopKey:"almond butter", defaultQty:20,  defaultUnit:"g"},
+  {id:"walnuts",        name:"Walnuts*",             em:"🌰", per:100, unit:"g",    kcal:654, prot:15,   carbs:14,   fat:65,   shopCat:"pantry",  shopKey:"walnut",        defaultQty:30,  defaultUnit:"g"},
+  {id:"chia_seeds",     name:"Chia Seeds*",          em:"🌱", per:100, unit:"g",    kcal:486, prot:17,   carbs:42,   fat:31,   shopCat:"pantry",  shopKey:"seed",          defaultQty:20,  defaultUnit:"g"},
+  {id:"tahini",         name:"Tahini*",              em:"🫙", per:100, unit:"g",    kcal:595, prot:17,   carbs:26,   fat:54,   shopCat:"pantry",  shopKey:"tahini",        defaultQty:15,  defaultUnit:"g"},
+  {id:"coconut_milk",   name:"Coconut Milk*",        em:"🥥", per:100, unit:"ml",   kcal:230, prot:2.3,  carbs:5.5,  fat:24,   shopCat:"pantry",  shopKey:"coconut milk",  defaultQty:100, defaultUnit:"ml"},
+  // 🍯 Sauces & Condiments *
+  {id:"soy_sauce",      name:"Soy Sauce*",           em:"🫙", per:100, unit:"ml",   kcal:53,  prot:8.1,  carbs:4.9,  fat:0.1,  shopCat:"pantry",  shopKey:"soy sauce",     defaultQty:15,  defaultUnit:"ml"},
+  {id:"honey",          name:"Honey*",               em:"🍯", per:100, unit:"g",    kcal:304, prot:0.3,  carbs:82,   fat:0,    shopCat:"pantry",  shopKey:"honey",         defaultQty:15,  defaultUnit:"g"},
+  {id:"maple_syrup",    name:"Maple Syrup*",         em:"🍁", per:100, unit:"ml",   kcal:260, prot:0,    carbs:67,   fat:0.1,  shopCat:"pantry",  shopKey:"maple",         defaultQty:15,  defaultUnit:"ml"},
+  {id:"tomato_passata", name:"Tomato Passata*",      em:"🍅", per:100, unit:"g",    kcal:29,  prot:1.6,  carbs:5.5,  fat:0.2,  shopCat:"pantry",  shopKey:"tomato paste",  defaultQty:150, defaultUnit:"g"},
+  {id:"veg_stock",      name:"Vegetable Stock*",     em:"🫙", per:100, unit:"ml",   kcal:6,   prot:0.3,  carbs:1.2,  fat:0.1,  shopCat:"pantry",  shopKey:"stock",         defaultQty:200, defaultUnit:"ml"},
+  // 🌿 Spices & Herbs (negligible macros — for shopping list)
+  {id:"cumin",          name:"Cumin",                em:"🌿", per:1,   unit:"unit", kcal:0,   prot:0,    carbs:0,    fat:0,    shopCat:"pantry",  shopKey:"cumin",         defaultQty:1,   defaultUnit:"tsp"},
+  {id:"smoked_paprika", name:"Smoked Paprika",       em:"🌶️", per:1,   unit:"unit", kcal:0,   prot:0,    carbs:0,    fat:0,    shopCat:"pantry",  shopKey:"paprika",       defaultQty:1,   defaultUnit:"tsp"},
+  {id:"turmeric",       name:"Turmeric",             em:"🟡", per:1,   unit:"unit", kcal:0,   prot:0,    carbs:0,    fat:0,    shopCat:"pantry",  shopKey:"turmeric",      defaultQty:1,   defaultUnit:"tsp"},
+  {id:"cinnamon",       name:"Cinnamon",             em:"🟤", per:1,   unit:"unit", kcal:0,   prot:0,    carbs:0,    fat:0,    shopCat:"pantry",  shopKey:"cinnamon",      defaultQty:1,   defaultUnit:"tsp"},
+  {id:"fresh_coriander",name:"Fresh Coriander",      em:"🌿", per:1,   unit:"unit", kcal:0,   prot:0,    carbs:0,    fat:0,    shopCat:"produce", shopKey:"coriander",     defaultQty:1,   defaultUnit:"handful"},
+  {id:"fresh_parsley",  name:"Fresh Parsley",        em:"🌿", per:1,   unit:"unit", kcal:0,   prot:0,    carbs:0,    fat:0,    shopCat:"produce", shopKey:"parsley",       defaultQty:1,   defaultUnit:"handful"},
+  {id:"fresh_basil",    name:"Fresh Basil",          em:"🌿", per:1,   unit:"unit", kcal:0,   prot:0,    carbs:0,    fat:0,    shopCat:"produce", shopKey:"basil",         defaultQty:1,   defaultUnit:"handful"},
+];
+
+// Category grouping for the UI picker
+const ING_LIB_CATS = [
+  {id:"all",     label:"All"},
+  {id:"protein", label:"🥩 Meat & Fish"},
+  {id:"eggs",    label:"🥚 Eggs & Dairy"},
+  {id:"plant",   label:"🌱 Plant Protein"},
+  {id:"grains",  label:"🌾 Grains"},
+  {id:"veg",     label:"🥦 Veg"},
+  {id:"fruit",   label:"🫐 Fruit"},
+  {id:"fats",    label:"🫙 Fats & Oils"},
+  {id:"sauces",  label:"🍯 Sauces"},
+  {id:"spices",  label:"🌿 Spices"},
+];
+const ING_LIB_CAT_MAP = {
+  protein:["chicken_breast","chicken_thigh","turkey_breast","lean_beef_mince","beef_steak","pork_loin","salmon_fillet","tuna_in_water","cod_fillet","prawns","mackerel_fillet","smoked_salmon"],
+  eggs:   ["egg_whole","greek_yogurt_0","cottage_cheese","milk_whole","milk_skimmed","feta_cheese","mozzarella","parmesan","butter","protein_powder"],
+  plant:  ["tofu_firm","tempeh","chickpeas","lentils","black_beans","edamame"],
+  grains: ["oats_rolled","white_rice","brown_rice","pasta_cooked","quinoa_cooked","couscous_cooked","wholegrain_bread","wrap_tortilla","pitta_bread","sweet_potato","potato_white","banana"],
+  veg:    ["spinach","broccoli","cherry_tomatoes","bell_pepper","onion","garlic","carrot","cucumber","courgette","avocado","kale","mushrooms","mixed_leaves","frozen_peas"],
+  fruit:  ["mixed_berries","apple","mango","orange"],
+  fats:   ["olive_oil","peanut_butter","almonds","almond_butter","walnuts","chia_seeds","tahini","coconut_milk"],
+  sauces: ["soy_sauce","honey","maple_syrup","tomato_passata","veg_stock"],
+  spices: ["cumin","smoked_paprika","turmeric","cinnamon","fresh_coriander","fresh_parsley","fresh_basil"],
+};
+
+// Helper: compute macros for a quantity of an ingredient
+function ingMacros(ing, qty){
+  var factor = qty / ing.per;
+  return {
+    kcal: Math.round(ing.kcal * factor * 10) / 10,
+    prot: Math.round(ing.prot * factor * 10) / 10,
+    carbs: Math.round(ing.carbs * factor * 10) / 10,
+    fat: Math.round(ing.fat * factor * 10) / 10,
+  };
+}
+
+// Helper: format an ingredient line for shopping list compatibility
+function ingToShopLine(ing, qty){
+  if(ing.unit === "unit"){
+    return qty + " " + ing.defaultUnit + " " + ing.name.replace(/\*/g,"");
+  }
+  return qty + ing.unit + " " + ing.name.replace(/\*/g,"");
+}
 // Resolved at runtime from Supabase. Falls back to 'free'.
 var TIER = 'free';
 var can  = {};
@@ -1031,16 +1350,20 @@ var S = {
   cuisines:["all"],
   prepTimeMax:999,
   plan:null, week:0, portions:1,
-  dayScales:[],     // [week][day] float multiplier for kcal
-  dayProtSlot:[],   // [week][day] slot key that got auto-protein-scaled
+  dayScales:[],
+  daySlotScales:[],
+  dayProtSlot:[],
   swapWeek:-1, swapDay:-1, swapSlot:"",
   favourites: JSON.parse(localStorage.getItem('mp_favourites')||'[]'),
+  customMeals: JSON.parse(localStorage.getItem('mp_custom_meals')||'[]'),
+  pinnedMeals: [], // IDs of custom meals pinned for this generation
 };
 
 var dayViewActive = false; // view toggle state — global scope
 
 // ─── HELPERS ─────────────────────────────────────────
 function saveFavourites(){ localStorage.setItem('mp_favourites', JSON.stringify(S.favourites)); }
+function saveCustomMeals(){ localStorage.setItem('mp_custom_meals', JSON.stringify(S.customMeals)); }
 
 function isExcluded(r){
   var allExcl = S.allergens.concat(S.excl);
@@ -1083,7 +1406,7 @@ function nudge(msg){
 }
 
 // ─── GENERATE ────────────────────────────────────────
-function generate(){
+function doGenerate(){
   var en=Object.keys(S.slots).filter(function(k){return S.slots[k];});
   if(!en.length){toast("Please enable at least one meal slot");return;}
   var tot=en.reduce(function(s,k){return s+SLOT_PROP[k];},0);
@@ -1093,8 +1416,24 @@ function generate(){
     sProt[k]=S.protUnk?0:Math.round(S.prot*SLOT_PROP[k]/tot*0.9);
   });
 
-  // Build recipe pool based on tier
-  var pool = !can.multiWeekPlan ? R.filter(function(r){return FREE_IDS.has(r.id);}) : R;
+  // Build recipe pool based on tier — include user custom meals
+  var customPool = S.customMeals.map(function(cm){
+    return {
+      id: cm.id, name: cm.name, sl: cm.slots,
+      diff:1, tags:{vg:true,ve:true,pe:true,gf:true,df:true},
+      kcal:[cm.kcal*0.95, cm.kcal*1.05],
+      prot:[cm.prot*0.95, cm.prot*1.05],
+      carbs:[cm.carbs*0.95, cm.carbs*1.05],
+      fat:[cm.fat*0.95, cm.fat*1.05],
+      pri:[], mc:[], em: cm.em||"🍽️",
+      ing: cm.ingredients
+        ? cm.ingredients.map(function(i){ return ingToShopLine(ING_LIB.find(function(x){return x.id===i.id;})||{name:i.id,unit:"g",defaultUnit:"g"}, i.qty); })
+        : [cm.kcal+" kcal · "+cm.prot+"g protein · "+cm.carbs+"g carbs · "+cm.fat+"g fat"],
+      steps:[], tip:"", cuisine:"global", prepTime:15, tv:[1,1,1,1,1],
+      isCustom:true,
+    };
+  });
+  var pool = (!can.multiWeekPlan ? R.filter(function(r){return FREE_IDS.has(r.id);}) : R).concat(customPool);
 
   var base=pool.filter(function(r){
     if(S.diet==="vegan"&&!r.tags.vg) return false;
@@ -1127,12 +1466,30 @@ function generate(){
 
   var used={};
   var plan=[];
+
+  // Build pinned recipe objects (one per pinned meal, placed once in week 0)
+  var pinnedRecipes = S.pinnedMeals.map(function(pid){
+    return customPool.find(function(r){return r.id===pid;});
+  }).filter(Boolean);
+
   for(var w=0;w<S.weeks;w++){
     var week=[];
     for(var d=0;d<7;d++){
       var day={};
       en.forEach(function(slot){
-        var r=pick(slots[slot],sKcal[slot],sProt[slot],used);
+        // If this is week 0 and we have a pinned meal for this slot not yet placed, hard-place it
+        var pinned = null;
+        if(w===0){
+          var dayIdx = d;
+          pinnedRecipes.forEach(function(pr, pi){
+            if(pinned) return;
+            // Place pinned meal pi on day pi (spread across the week)
+            if(dayIdx === pi && pr.sl.includes(SLOT_TYPE[slot])){
+              pinned = pr;
+            }
+          });
+        }
+        var r = pinned || pick(slots[slot], sKcal[slot], sProt[slot], used);
         day[slot]=r;
         used[r.id]=(used[r.id]||0)+1;
       });
@@ -1141,20 +1498,47 @@ function generate(){
     plan.push(week);
   }
 
-  // ── AUTO-ADJUST: protein scaling + calorie normalisation ──────────────
-  var dayScales=[], dayProtSlot=[];
+  // ── AUTO-ADJUST: precise per-slot calorie + protein scaling ──────────
+  // Strategy: distribute the daily kcal target proportionally across slots,
+  // then compute a per-recipe scale factor so totals exactly hit the target.
+  // Protein is distributed the same way and applied by scaling protein ingredients.
+  var dayScales=[], dayProtSlot=[], daySlotScales=[];
   for(var aw=0;aw<plan.length;aw++){
-    dayScales.push([]); dayProtSlot.push([]);
+    dayScales.push([]); dayProtSlot.push([]); daySlotScales.push([]);
     for(var ad=0;ad<plan[aw].length;ad++){
       var aDay=plan[aw][ad];
       var protSlotKey=null;
 
-      // Step 1: protein auto-scale if user set a target
+      // Step 1: compute actual day kcal & prot from chosen recipes
+      var dayKcalAct=en.reduce(function(s,sl){return s+(aDay[sl].kcal[0]+aDay[sl].kcal[1])/2;},0);
+      var dayProtAct=en.reduce(function(s,sl){return s+(aDay[sl].prot[0]+aDay[sl].prot[1])/2;},0);
+
+      // Step 2: per-slot scale to match calorie target precisely
+      var slotScaleMap={};
+      if(S.kcal>0 && !S.kcalUnk && dayKcalAct>0){
+        // Proportional share of target for each slot based on its base kcal contribution
+        var tot2=en.reduce(function(s,sl){return s+(aDay[sl].kcal[0]+aDay[sl].kcal[1])/2;},0);
+        en.forEach(function(sl){
+          var baseK=(aDay[sl].kcal[0]+aDay[sl].kcal[1])/2;
+          var share=baseK/tot2; // e.g. dinner is 35% of today's natural kcal
+          var targetK=S.kcal*share; // give it same proportion of user's goal
+          var rawScale=targetK/baseK;
+          // Clamp to realistic recipe scaling bounds (0.6–2.0×)
+          slotScaleMap[sl]=Math.max(0.6, Math.min(2.0, Math.round(rawScale*100)/100));
+        });
+      } else {
+        en.forEach(function(sl){slotScaleMap[sl]=1;});
+      }
+      daySlotScales[aw].push(slotScaleMap);
+
+      // Step 3: protein auto-scale — find highest-protein slot and scale it further
       if(!S.protUnk && S.prot>0){
-        var dayProtAct=en.reduce(function(s,sl){return s+(aDay[sl].prot[0]+aDay[sl].prot[1])/2;},0);
-        var dayProtGap=S.prot - dayProtAct;
-        if(dayProtGap/S.prot > 0.18){ // gap >18% → auto-scale
-          // Find the slot with the most scalable protein ingredients (highest base protein)
+        // Estimate prot after kcal scaling
+        var scaledProtAct=en.reduce(function(s,sl){
+          return s+(aDay[sl].prot[0]+aDay[sl].prot[1])/2*(slotScaleMap[sl]||1);
+        },0);
+        var protGapPct=(S.prot-scaledProtAct)/S.prot;
+        if(protGapPct > 0.12){ // gap >12% → boost protein slot
           var bestSlot=null, bestProt=0;
           en.forEach(function(sl){
             var r=aDay[sl];
@@ -1167,29 +1551,13 @@ function generate(){
       }
       dayProtSlot[aw].push(protSlotKey);
 
-      // Step 2: calorie day-scale
-      // Compute actual day kcal (with protein scaling applied if any)
-      var dayKcalAct=en.reduce(function(s,sl){
-        var r=aDay[sl];
-        var base=(r.kcal[0]+r.kcal[1])/2;
-        // If this slot got protein-scaled, add ~40% to kcal for that recipe
-        if(sl===protSlotKey) base*=1.4;
-        return s+base;
-      },0);
-      var scale=1;
-      if(S.kcal>0 && !S.kcalUnk){
-        var gap=(S.kcal-dayKcalAct)/S.kcal;
-        if(Math.abs(gap)>0.08){ // gap >8% → apply day scale
-          scale=S.kcal/dayKcalAct;
-          scale=Math.max(0.75, Math.min(1.5, scale)); // clamp safety
-          scale=Math.round(scale*100)/100; // 2dp
-        }
-      }
-      dayScales[aw].push(scale);
+      // Step 4: keep a single dayScale for backward-compat (average of slot scales)
+      var avgScale=en.reduce(function(s,sl){return s+(slotScaleMap[sl]||1);},0)/en.length;
+      dayScales[aw].push(Math.round(avgScale*100)/100);
     }
   }
   S.plan=plan; S.week=0; S.portions=1;
-  S.dayScales=dayScales; S.dayProtSlot=dayProtSlot;
+  S.dayScales=dayScales; S.dayProtSlot=dayProtSlot; S.daySlotScales=daySlotScales;
   // reset portion UI
   document.querySelectorAll(".portion-btn").forEach(function(b){
     b.classList.toggle("sel",b.dataset.p==="1");
@@ -1233,8 +1601,16 @@ function showPlan(){
     })(w);
   }
   renderWeek(0); renderNutrition(0);
-  document.getElementById("setupPage").classList.remove("active");
+  // Switch to plan tab
+  ["setupPage","myMealsPage"].forEach(function(pid){
+    var el=document.getElementById(pid);
+    if(el){el.style.display="none"; el.classList.remove("active");}
+  });
+  document.getElementById("planPage").style.display="block";
   document.getElementById("planPage").classList.add("active");
+  document.querySelectorAll(".app-tab").forEach(function(t){t.classList.remove("active");});
+  // No plan tab in app-tabs — just hide tabs while on plan view
+  document.getElementById("appTabs").style.display="none";
 }
 
 // ─── RENDER WEEK ─────────────────────────────────────
@@ -1242,7 +1618,9 @@ function showPlan(){
 // ─── EFFECTIVE MACRO HELPERS ─────────────────────────
 // Returns {mk, mp, mc, mf, protScaled, dayScale} for a recipe in context
 function effectiveMacros(r, wi, di, slot){
-  var ds = (S.dayScales && S.dayScales[wi] && S.dayScales[wi][di]) || 1;
+  // Use per-slot scale if available, fall back to day-average scale
+  var slotScaleMap = (S.daySlotScales && S.daySlotScales[wi] && S.daySlotScales[wi][di]) || null;
+  var ds = slotScaleMap ? (slotScaleMap[slot] || 1) : ((S.dayScales && S.dayScales[wi] && S.dayScales[wi][di]) || 1);
   var ps = (S.dayProtSlot && S.dayProtSlot[wi] && S.dayProtSlot[wi][di]) === slot;
   var protFactor = ps ? 1.8 : 1;
   var kcalFactor = ps ? 1.4 : 1;
@@ -1543,11 +1921,13 @@ function renderModalBody(r,wi,di,slot){
     macroBreakdownHTML(r,mk,mp,mc,mf)+
     "<div class='m-sec'>🛒 Ingredients</div>"+
     "<ul class='ing-list'>"+ingHTML+"</ul>"+
-    "<div class='m-sec'>👨‍🍳 Instructions</div>"+
-    "<ol class='steps-list'>"+r.steps.map(function(s,i){return "<li class='step-item'><span class='step-num'>"+(i+1)+"</span><span class='step-txt'>"+s+"</span></li>";}).join("")+"</ol>"+
-    (r.tip?"<div class='tip-box'><div class='tip-lbl'>💡 Nutritionist Tip</div><div class='tip-txt'>"+r.tip+"</div></div>":"")+
-    "<div class='m-sec-flavor'>🌶️ Flavour Analysis</div>"+
-    buildFlavorHTML(r);
+    (r.isCustom ? "" :
+      "<div class='m-sec'>👨‍🍳 Instructions</div>"+
+      "<ol class='steps-list'>"+r.steps.map(function(s,i){return "<li class='step-item'><span class='step-num'>"+(i+1)+"</span><span class='step-txt'>"+s+"</span></li>";}).join("")+"</ol>"+
+      (r.tip?"<div class='tip-box'><div class='tip-lbl'>💡 Nutritionist Tip</div><div class='tip-txt'>"+r.tip+"</div></div>":"")+
+      "<div class='m-sec-flavor'>🌶️ Flavour Analysis</div>"+
+      buildFlavorHTML(r)
+    );
   // Auto-scaling: no manual toggle needed
   document.getElementById("modalHeart").addEventListener("click",function(){
     if(!can.savedFavourites){nudge("Save favourites — available on Premium");return;}
@@ -1944,18 +2324,22 @@ function init(){
     });
   }
 
-  // Generate
-  document.getElementById("genBtn").addEventListener("click",generate);
+  // Generate — opens pin modal first (re-wired at end of init after openPinModal is defined)
+  // The actual binding happens at the bottom of init() once openPinModal exists
 
   // Back buttons
-  // backBtn is now the platform nav — no setup toggle needed
   document.getElementById("backBtn2").addEventListener("click",function(){
+    document.getElementById("planPage").style.display="none";
     document.getElementById("planPage").classList.remove("active");
+    document.getElementById("setupPage").style.display="block";
     document.getElementById("setupPage").classList.add("active");
+    document.getElementById("appTabs").style.display="flex";
+    document.querySelectorAll(".app-tab").forEach(function(t){t.classList.remove("active");});
+    document.querySelector(".app-tab[data-tab='setupPage']").classList.add("active");
   });
 
   // Regen + print
-  document.getElementById("regenBtn").addEventListener("click",function(){S.plan=null;generate();});
+  document.getElementById("regenBtn").addEventListener("click",function(){S.plan=null;openPinModal();});
   document.getElementById("printBtn").addEventListener("click",function(){window.print();});
 
   // Shopping list
@@ -1994,6 +2378,297 @@ function init(){
   if(!can.multiWeekPlan){
     document.querySelector(".tool-nav-title").textContent="Meal Planner — Free";
   }
+
+  // ── APP TABS ────────────────────────────────────────
+  document.querySelectorAll(".app-tab").forEach(function(tab){
+    tab.addEventListener("click", function(){
+      var target = tab.dataset.tab;
+      document.querySelectorAll(".app-tab").forEach(function(t){t.classList.remove("active");});
+      tab.classList.add("active");
+      // Show/hide pages
+      ["setupPage","myMealsPage","planPage"].forEach(function(pid){
+        var el = document.getElementById(pid);
+        if(el) el.style.display = (pid===target) ? "block" : "none";
+      });
+      if(target==="myMealsPage") renderSavedMeals();
+    });
+  });
+
+  // ── MY MEALS PAGE ───────────────────────────────────
+  var mmAddedIngredients = []; // [{id, qty}]
+  var mmSelectedSlots = ["lunch","dinner"];
+
+  // Category tabs
+  var activeCat = "all";
+  var ingCatTabsEl = document.getElementById("ingCatTabs");
+  ING_LIB_CATS.forEach(function(cat){
+    var btn = document.createElement("button");
+    btn.className = "ing-cat-tab" + (cat.id==="all"?" active":"");
+    btn.textContent = cat.label;
+    btn.addEventListener("click", function(){
+      activeCat = cat.id;
+      document.querySelectorAll(".ing-cat-tab").forEach(function(b){b.classList.remove("active");});
+      btn.classList.add("active");
+      renderIngGrid();
+    });
+    ingCatTabsEl.appendChild(btn);
+  });
+
+  // Search
+  document.getElementById("ingSearch").addEventListener("input", function(){
+    renderIngGrid();
+  });
+
+  function getFilteredIngs(){
+    var q = document.getElementById("ingSearch").value.trim().toLowerCase();
+    return ING_LIB.filter(function(ing){
+      var catMatch = activeCat==="all" || (ING_LIB_CAT_MAP[activeCat]||[]).includes(ing.id);
+      var searchMatch = !q || ing.name.toLowerCase().includes(q);
+      return catMatch && searchMatch;
+    });
+  }
+
+  function renderIngGrid(){
+    var grid = document.getElementById("ingGrid");
+    grid.innerHTML = "";
+    getFilteredIngs().forEach(function(ing){
+      var already = mmAddedIngredients.some(function(a){return a.id===ing.id;});
+      var btn = document.createElement("button");
+      btn.className = "ing-item-btn";
+      btn.style.opacity = already ? "0.45" : "1";
+      var perLabel = ing.unit==="unit" ? "per "+ing.defaultUnit : "per 100"+ing.unit;
+      btn.innerHTML = "<span class='ing-item-em'>"+ing.em+"</span>"+
+        "<div><div class='ing-item-name'>"+ing.name.replace(/\*/g,"")+"</div>"+
+        "<div class='ing-item-meta'>"+ing.kcal+" kcal · "+ing.prot+"g P · "+perLabel+"</div></div>";
+      btn.addEventListener("click", function(){
+        if(already) return;
+        mmAddedIngredients.push({id:ing.id, qty:ing.defaultQty});
+        renderAddedIngredients();
+        renderIngGrid();
+        updateMacroPreview();
+        updateSaveBtn();
+      });
+      grid.appendChild(btn);
+    });
+    if(!getFilteredIngs().length){
+      grid.innerHTML = "<div style='color:var(--text3);font-size:12px;grid-column:1/-1;padding:12px 0'>No ingredients found</div>";
+    }
+  }
+
+  function renderAddedIngredients(){
+    var el = document.getElementById("addedIngs");
+    el.innerHTML = "";
+    if(!mmAddedIngredients.length){
+      el.innerHTML = "<div style='font-size:12px;color:var(--text3);text-align:center;padding:8px'>No ingredients added yet</div>";
+      return;
+    }
+    mmAddedIngredients.forEach(function(entry, idx){
+      var ing = ING_LIB.find(function(x){return x.id===entry.id;});
+      if(!ing) return;
+      var row = document.createElement("div");
+      row.className = "added-ing-row";
+      row.innerHTML =
+        "<span class='air-em'>"+ing.em+"</span>"+
+        "<span class='air-name'>"+ing.name.replace(/\*/g,"")+"</span>"+
+        "<div class='air-qty-wrap'>"+
+          "<input type='number' class='air-qty' value='"+entry.qty+"' min='1' max='5000' data-idx='"+idx+"'>"+
+          "<span class='air-unit'>"+ing.defaultUnit+"</span>"+
+        "</div>"+
+        "<button class='air-del' data-idx='"+idx+"'>✕</button>";
+      el.appendChild(row);
+    });
+    // qty change
+    el.querySelectorAll(".air-qty").forEach(function(inp){
+      inp.addEventListener("input", function(){
+        var i = parseInt(inp.dataset.idx);
+        mmAddedIngredients[i].qty = parseFloat(inp.value)||0;
+        updateMacroPreview();
+      });
+    });
+    // delete
+    el.querySelectorAll(".air-del").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var i = parseInt(btn.dataset.idx);
+        mmAddedIngredients.splice(i,1);
+        renderAddedIngredients();
+        renderIngGrid();
+        updateMacroPreview();
+        updateSaveBtn();
+      });
+    });
+  }
+
+  function updateMacroPreview(){
+    var totals = {kcal:0, prot:0, carbs:0, fat:0};
+    mmAddedIngredients.forEach(function(entry){
+      var ing = ING_LIB.find(function(x){return x.id===entry.id;});
+      if(!ing) return;
+      var m = ingMacros(ing, entry.qty);
+      totals.kcal += m.kcal; totals.prot += m.prot;
+      totals.carbs += m.carbs; totals.fat += m.fat;
+    });
+    document.getElementById("mmpKcal").textContent  = Math.round(totals.kcal);
+    document.getElementById("mmpProt").textContent  = Math.round(totals.prot)+"g";
+    document.getElementById("mmpCarbs").textContent = Math.round(totals.carbs)+"g";
+    document.getElementById("mmpFat").textContent   = Math.round(totals.fat)+"g";
+    return totals;
+  }
+
+  function updateSaveBtn(){
+    var name = document.getElementById("mmNameInput").value.trim();
+    document.getElementById("mmSaveBtn").disabled = !(name && mmAddedIngredients.length > 0);
+  }
+
+  document.getElementById("mmNameInput").addEventListener("input", updateSaveBtn);
+
+  // Slot chips
+  document.querySelectorAll("#mmSlotChips .mm-slot-chip").forEach(function(chip){
+    chip.addEventListener("click", function(){
+      document.querySelectorAll("#mmSlotChips .mm-slot-chip").forEach(function(c){c.classList.remove("sel");});
+      chip.classList.add("sel");
+      mmSelectedSlots = chip.dataset.slots.split(",");
+    });
+  });
+
+  // Save meal
+  document.getElementById("mmSaveBtn").addEventListener("click", function(){
+    var name = document.getElementById("mmNameInput").value.trim();
+    if(!name || !mmAddedIngredients.length) return;
+    var totals = updateMacroPreview();
+    // Pick an emoji from the first protein ingredient, or default
+    var firstIng = ING_LIB.find(function(x){return x.id===mmAddedIngredients[0].id;});
+    var em = firstIng ? firstIng.em : "🍽️";
+    var meal = {
+      id: "custom_"+Date.now(),
+      name: name,
+      em: em,
+      slots: mmSelectedSlots,
+      kcal: Math.round(totals.kcal),
+      prot: Math.round(totals.prot),
+      carbs: Math.round(totals.carbs),
+      fat: Math.round(totals.fat),
+      ingredients: mmAddedIngredients.map(function(e){ return {id:e.id, qty:e.qty}; }),
+    };
+    S.customMeals.push(meal);
+    saveCustomMeals();
+    // Reset form
+    document.getElementById("mmNameInput").value = "";
+    mmAddedIngredients = [];
+    renderAddedIngredients();
+    renderIngGrid();
+    updateMacroPreview();
+    updateSaveBtn();
+    renderSavedMeals();
+    toast("✓ "+meal.name+" saved!");
+  });
+
+  function renderSavedMeals(){
+    var el = document.getElementById("mmSavedList");
+    el.innerHTML = "";
+    if(!S.customMeals.length){
+      el.innerHTML = "<div class='mm-empty'>No saved meals yet. Build your first meal above!</div>";
+      return;
+    }
+    S.customMeals.forEach(function(cm, idx){
+      var slotLabels = {breakfast:"🌅 Breakfast", lunch:"🍽️ Lunch", dinner:"🍽️ Dinner", snack1:"🍎 Snack", snack2:"🍎 Snack"};
+      var uniqueSlots = cm.slots.filter(function(v,i,a){
+        // dedupe lunch/dinner label
+        var lbl = slotLabels[v];
+        return a.findIndex(function(s){return slotLabels[s]===lbl;})===i;
+      });
+      var ingNames = cm.ingredients
+        ? cm.ingredients.map(function(e){
+            var ing = ING_LIB.find(function(x){return x.id===e.id;});
+            return ing ? ing.name.replace(/\*/g,"") : e.id;
+          }).join(", ")
+        : "";
+      var card = document.createElement("div");
+      card.className = "saved-meal-card";
+      card.innerHTML =
+        "<div class='smc-em'>"+cm.em+"</div>"+
+        "<div class='smc-info'>"+
+          "<div class='smc-name'>"+cm.name+"</div>"+
+          "<div class='smc-macros'>"+cm.kcal+" kcal · "+cm.prot+"g protein · "+cm.carbs+"g carbs · "+cm.fat+"g fat</div>"+
+          (ingNames?"<div class='smc-ings'>"+ingNames+"</div>":"")+
+          "<div class='smc-slots'>"+uniqueSlots.map(function(s){return "<span class='smc-slot-badge'>"+slotLabels[s]+"</span>";}).join("")+"</div>"+
+        "</div>"+
+        "<button class='smc-del' data-idx='"+idx+"' title='Delete'>✕</button>";
+      el.appendChild(card);
+    });
+    el.querySelectorAll(".smc-del").forEach(function(btn){
+      btn.addEventListener("click",function(){
+        var i = parseInt(btn.dataset.idx);
+        S.customMeals.splice(i,1);
+        saveCustomMeals();
+        renderSavedMeals();
+      });
+    });
+  }
+
+  renderIngGrid();
+  renderAddedIngredients();
+  renderSavedMeals();
+
+  // ── PIN MODAL ───────────────────────────────────────
+  var pinSelected = [];
+
+  function openPinModal(){
+    if(!S.customMeals.length){ doGenerate(); return; }
+    pinSelected = [];
+    var list = document.getElementById("pinList");
+    list.innerHTML = "";
+    S.customMeals.forEach(function(cm){
+      var row = document.createElement("div");
+      row.className = "pin-meal-row";
+      row.innerHTML =
+        "<span class='pin-em'>"+cm.em+"</span>"+
+        "<div class='pin-info'>"+
+          "<div class='pin-name'>"+cm.name+"</div>"+
+          "<div class='pin-macros'>"+cm.kcal+" kcal · "+cm.prot+"g prot · "+cm.carbs+"g carbs · "+cm.fat+"g fat</div>"+
+        "</div>"+
+        "<div class='pin-check' data-id='"+cm.id+"'></div>";
+      list.appendChild(row);
+    });
+    list.querySelectorAll(".pin-check").forEach(function(chk){
+      chk.addEventListener("click", function(){
+        var id = chk.dataset.id;
+        var idx = pinSelected.indexOf(id);
+        if(idx>=0){ pinSelected.splice(idx,1); chk.classList.remove("sel"); chk.textContent=""; }
+        else { pinSelected.push(id); chk.classList.add("sel"); chk.textContent="✓"; }
+      });
+    });
+    document.getElementById("pinOv").classList.add("open");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closePinModal(){
+    document.getElementById("pinOv").classList.remove("open");
+    document.body.style.overflow = "";
+  }
+
+  document.getElementById("pinSkip").addEventListener("click", function(){
+    S.pinnedMeals = [];
+    closePinModal();
+    doGenerate();
+  });
+
+  document.getElementById("pinGo").addEventListener("click", function(){
+    S.pinnedMeals = pinSelected.slice();
+    closePinModal();
+    doGenerate();
+  });
+
+  document.getElementById("pinOv").addEventListener("click", function(e){
+    if(e.target===this) closePinModal();
+  });
+
+  // Wire Generate button to open pin modal first
+  document.getElementById("genBtn").removeEventListener("click", generate);
+  document.getElementById("genBtn").addEventListener("click", function(){
+    var en=Object.keys(S.slots).filter(function(k){return S.slots[k];});
+    if(!en.length){toast("Please enable at least one meal slot");return;}
+    openPinModal();
+  });
 }
 
 // ─── MOBILE DAY VIEW ─────────────────────────────
