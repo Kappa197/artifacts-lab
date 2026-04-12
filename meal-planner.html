@@ -613,7 +613,54 @@ body.shop-open .shop-fab{display:none!important;}
 .mm-edit-banner{display:flex;align-items:center;justify-content:space-between;background:var(--amber-dim);border:1.5px solid var(--amber);border-radius:8px;padding:9px 13px;margin-bottom:14px;}
 .mm-edit-banner-txt{font-size:13px;font-weight:600;color:var(--amber);}
 .mm-edit-cancel{background:none;border:none;color:var(--amber);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;text-decoration:underline;}
-/* ── PIN MODAL ───────────────────────────────── */
+/* ── CUSTOM INGREDIENT MODAL ─────────────────── */
+.ci-ov{position:fixed;inset:0;background:rgba(11,15,26,.85);z-index:400;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(6px);}
+.ci-ov.open{opacity:1;pointer-events:all;}
+.ci-panel{background:var(--navy2);border-radius:20px 20px 0 0;width:100%;max-width:600px;max-height:88vh;overflow-y:auto;transform:translateY(100%);transition:transform .35s cubic-bezier(.34,1.2,.64,1);padding:0 0 32px;}
+.ci-ov.open .ci-panel{transform:translateY(0);}
+.ci-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 8px;}
+.ci-header{padding:10px 20px 14px;border-bottom:1px solid var(--border);}
+.ci-title{font-family:var(--serif);font-size:19px;font-weight:700;margin-bottom:2px;}
+.ci-sub{font-size:12px;color:var(--text2);}
+.ci-body{padding:16px 20px;}
+.ci-field{margin-bottom:12px;}
+.ci-field label{display:block;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px;}
+.ci-field input{width:100%;padding:10px 12px;border:2px solid var(--border);border-radius:8px;background:var(--navy);color:var(--text);font-family:var(--body);font-size:14px;outline:none;}
+.ci-field input:focus{border-color:var(--amber);}
+/* Path chooser */
+.ci-paths{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+.ci-path-btn{padding:12px 8px;border:2px solid var(--border);border-radius:10px;background:var(--navy);cursor:pointer;text-align:center;transition:all .2s;}
+.ci-path-btn:hover{border-color:var(--amber);}
+.ci-path-btn.active{border-color:var(--amber);background:var(--amber-dim);}
+.ci-path-icon{font-size:22px;margin-bottom:4px;}
+.ci-path-label{font-size:12px;font-weight:700;color:var(--text);}
+.ci-path-desc{font-size:10px;color:var(--text2);margin-top:2px;}
+/* Manual entry grid */
+.ci-macro-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px;}
+.ci-macro-field{display:flex;flex-direction:column;gap:4px;}
+.ci-macro-field label{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.3px;}
+.ci-macro-input{padding:9px 10px;border:2px solid var(--border);border-radius:8px;background:var(--navy);color:var(--amber);font-family:var(--serif);font-size:16px;font-weight:700;text-align:center;outline:none;-moz-appearance:textfield;}
+.ci-macro-input::-webkit-inner-spin-button{-webkit-appearance:none;}
+.ci-macro-input:focus{border-color:var(--amber);}
+.ci-per-note{font-size:11px;color:var(--text3);text-align:center;margin-bottom:14px;}
+/* Similar ingredient picker */
+.ci-similar-search{width:100%;padding:9px 12px;border:2px solid var(--border);border-radius:8px;background:var(--navy);color:var(--text);font-family:var(--body);font-size:13px;outline:none;margin-bottom:8px;}
+.ci-similar-search:focus{border-color:var(--amber);}
+.ci-similar-list{max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;margin-bottom:14px;}
+.ci-similar-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--navy);cursor:pointer;transition:all .15s;}
+.ci-similar-item:hover{border-color:var(--amber);}
+.ci-similar-item.sel{border-color:var(--amber);background:var(--amber-dim);}
+.ci-similar-em{font-size:16px;flex-shrink:0;}
+.ci-similar-info{flex:1;}
+.ci-similar-name{font-size:13px;font-weight:600;color:var(--text);}
+.ci-similar-macros{font-size:11px;color:var(--text2);}
+/* Save bar */
+.ci-save-btn{width:100%;padding:13px;background:var(--green);color:#fff;border:none;border-radius:8px;font-family:var(--body);font-size:14px;font-weight:700;cursor:pointer;transition:background .2s;}
+.ci-save-btn:hover{background:var(--accent-light);}
+.ci-save-btn:disabled{background:var(--border);color:var(--text3);cursor:not-allowed;}
+/* Add custom ing trigger button */
+.add-custom-ing-btn{width:100%;padding:9px;border:1.5px dashed var(--border);border-radius:8px;background:transparent;color:var(--text2);font-family:var(--body);font-size:12px;font-weight:600;cursor:pointer;margin-top:8px;transition:all .2s;}
+.add-custom-ing-btn:hover{border-color:var(--amber);color:var(--amber);}
 .pin-ov{position:fixed;inset:0;background:rgba(11,15,26,.85);z-index:300;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(6px);}
 .pin-ov.open{opacity:1;pointer-events:all;}
 .pin-panel{background:var(--navy2);border-radius:20px 20px 0 0;width:100%;max-width:600px;max-height:85vh;overflow-y:auto;transform:translateY(100%);transition:transform .35s cubic-bezier(.34,1.2,.64,1);padding:0 0 32px;}
@@ -682,6 +729,7 @@ body.shop-open .shop-fab{display:none!important;}
     <input type="text" id="ingSearch" class="ing-search" placeholder="Search ingredient…">
     <div class="ing-cat-tabs" id="ingCatTabs"></div>
     <div class="ing-grid" id="ingGrid"></div>
+    <button class="add-custom-ing-btn" id="addCustomIngBtn">+ Can't find your ingredient? Add a custom one</button>
   </div>
 
   <div id="addedIngs" class="added-ings"></div>
@@ -706,6 +754,61 @@ body.shop-open .shop-fab{display:none!important;}
 
   <div class="mm-saved-title">Saved Meals</div>
   <div id="mmSavedList"></div>
+</div>
+
+<!-- CUSTOM INGREDIENT MODAL -->
+<div class="ci-ov" id="ciOv">
+  <div class="ci-panel">
+    <div class="ci-handle"></div>
+    <div class="ci-header">
+      <div class="ci-title">➕ Add Custom Ingredient</div>
+      <div class="ci-sub">It will appear in your ingredient list and shopping list.</div>
+    </div>
+    <div class="ci-body">
+      <div class="ci-field">
+        <label>Ingredient Name</label>
+        <input type="text" id="ciName" placeholder="e.g. Tempeh strips, Oat milk…" maxlength="50">
+      </div>
+      <div class="ci-field">
+        <label>Emoji</label>
+        <input type="text" id="ciEmoji" placeholder="🥦" maxlength="2" style="width:64px;text-align:center;font-size:20px;">
+      </div>
+
+      <label style="display:block;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.3px;margin-bottom:8px;">Nutrition values — how do you want to enter them?</label>
+      <div class="ci-paths">
+        <div class="ci-path-btn active" id="ciPathManual">
+          <div class="ci-path-icon">✏️</div>
+          <div class="ci-path-label">Enter manually</div>
+          <div class="ci-path-desc">I know the values per 100g</div>
+        </div>
+        <div class="ci-path-btn" id="ciPathSimilar">
+          <div class="ci-path-icon">🔍</div>
+          <div class="ci-path-label">Pick a similar one</div>
+          <div class="ci-path-desc">Copy values from an existing ingredient</div>
+        </div>
+      </div>
+
+      <!-- Manual entry -->
+      <div id="ciManualSection">
+        <div class="ci-macro-grid">
+          <div class="ci-macro-field"><label>Kcal</label><input type="number" class="ci-macro-input" id="ciKcal" min="0" max="900" placeholder="0"></div>
+          <div class="ci-macro-field"><label>Protein (g)</label><input type="number" class="ci-macro-input" id="ciProt" min="0" max="100" placeholder="0"></div>
+          <div class="ci-macro-field"><label>Carbs (g)</label><input type="number" class="ci-macro-input" id="ciCarbs" min="0" max="100" placeholder="0"></div>
+          <div class="ci-macro-field"><label>Fat (g)</label><input type="number" class="ci-macro-input" id="ciFat" min="0" max="100" placeholder="0"></div>
+        </div>
+        <div class="ci-per-note">All values per 100g</div>
+      </div>
+
+      <!-- Similar ingredient picker -->
+      <div id="ciSimilarSection" style="display:none;">
+        <input type="text" class="ci-similar-search" id="ciSimilarSearch" placeholder="Search existing ingredient…">
+        <div class="ci-similar-list" id="ciSimilarList"></div>
+        <div class="ci-per-note" id="ciSimilarNote" style="display:none;"></div>
+      </div>
+
+      <button class="ci-save-btn" id="ciSaveBtn" disabled>+ Add to ingredient list</button>
+    </div>
+  </div>
 </div>
 
 <!-- PIN MODAL -->
@@ -1364,12 +1467,29 @@ var S = {
   customMeals: JSON.parse(localStorage.getItem('mp_custom_meals')||'[]'),
   pinnedMeals: [], // IDs of custom meals pinned for this generation
 };
+var dayViewActive = false;
 
-var dayViewActive = false; // view toggle state — global scope
+// Boot persisted custom ingredients into ING_LIB at load time
+(function(){
+  var saved = JSON.parse(localStorage.getItem('mp_custom_ings')||'[]');
+  saved.forEach(function(ing){
+    if(!ING_LIB.find(function(x){return x.id===ing.id;})){
+      ING_LIB.push(ing);
+      (ING_LIB_CAT_MAP['custom'] = ING_LIB_CAT_MAP['custom']||[]).push(ing.id);
+    }
+  });
+  if(saved.length && !ING_LIB_CATS.find(function(c){return c.id==='custom';})){
+    ING_LIB_CATS.push({id:'custom', label:'⭐ My Ingredients'});
+  }
+})();
 
 // ─── HELPERS ─────────────────────────────────────────
 function saveFavourites(){ localStorage.setItem('mp_favourites', JSON.stringify(S.favourites)); }
 function saveCustomMeals(){ localStorage.setItem('mp_custom_meals', JSON.stringify(S.customMeals)); }
+function saveCustomIngredients(){
+  var custom = ING_LIB.filter(function(i){ return i.isCustom; });
+  localStorage.setItem('mp_custom_ings', JSON.stringify(custom));
+}
 
 function isExcluded(r){
   var allExcl = S.allergens.concat(S.excl);
@@ -2550,6 +2670,161 @@ function init(){
   }
 
   document.getElementById("mmNameInput").addEventListener("input", updateSaveBtn);
+
+  // ── CUSTOM INGREDIENT MODAL ─────────────────────────
+  var ciPath = "manual"; // "manual" | "similar"
+  var ciSelectedSimilar = null;
+
+  function openCiModal(){
+    ciPath = "manual";
+    ciSelectedSimilar = null;
+    document.getElementById("ciName").value = "";
+    document.getElementById("ciEmoji").value = "";
+    document.getElementById("ciKcal").value = "";
+    document.getElementById("ciProt").value = "";
+    document.getElementById("ciCarbs").value = "";
+    document.getElementById("ciFat").value = "";
+    document.getElementById("ciSimilarSearch").value = "";
+    document.getElementById("ciSimilarNote").style.display = "none";
+    document.getElementById("ciPathManual").classList.add("active");
+    document.getElementById("ciPathSimilar").classList.remove("active");
+    document.getElementById("ciManualSection").style.display = "block";
+    document.getElementById("ciSimilarSection").style.display = "none";
+    document.getElementById("ciSaveBtn").disabled = true;
+    renderCiSimilarList("");
+    document.getElementById("ciOv").classList.add("open");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeCiModal(){
+    document.getElementById("ciOv").classList.remove("open");
+    document.body.style.overflow = "";
+  }
+
+  function renderCiSimilarList(q){
+    var list = document.getElementById("ciSimilarList");
+    list.innerHTML = "";
+    var filtered = ING_LIB.filter(function(ing){
+      return !q || ing.name.toLowerCase().includes(q.toLowerCase());
+    }).slice(0, 30);
+    filtered.forEach(function(ing){
+      var item = document.createElement("div");
+      item.className = "ci-similar-item" + (ciSelectedSimilar && ciSelectedSimilar.id===ing.id ? " sel" : "");
+      item.innerHTML =
+        "<span class='ci-similar-em'>"+ing.em+"</span>"+
+        "<div class='ci-similar-info'>"+
+          "<div class='ci-similar-name'>"+ing.name.replace(/\*/g,"")+"</div>"+
+          "<div class='ci-similar-macros'>"+ing.kcal+" kcal · "+ing.prot+"g P · "+ing.carbs+"g C · "+ing.fat+"g F <span style='color:var(--text3)'>/ 100"+(ing.unit==="unit"?ing.defaultUnit:ing.unit)+"</span></div>"+
+        "</div>";
+      item.addEventListener("click", function(){
+        ciSelectedSimilar = ing;
+        document.querySelectorAll(".ci-similar-item").forEach(function(el){el.classList.remove("sel");});
+        item.classList.add("sel");
+        // Show copied values
+        var note = document.getElementById("ciSimilarNote");
+        note.textContent = "Will use: "+ing.kcal+" kcal · "+ing.prot+"g prot · "+ing.carbs+"g carbs · "+ing.fat+"g fat per 100"+(ing.unit==="unit"?ing.defaultUnit:ing.unit);
+        note.style.display = "block";
+        updateCiSaveBtn();
+      });
+      list.appendChild(item);
+    });
+    if(!filtered.length) list.innerHTML = "<div style='font-size:12px;color:var(--text3);padding:8px'>No matches</div>";
+  }
+
+  function updateCiSaveBtn(){
+    var name = document.getElementById("ciName").value.trim();
+    var ready = false;
+    if(ciPath === "manual"){
+      var k = parseFloat(document.getElementById("ciKcal").value);
+      ready = name.length > 0 && !isNaN(k) && k >= 0;
+    } else {
+      ready = name.length > 0 && ciSelectedSimilar !== null;
+    }
+    document.getElementById("ciSaveBtn").disabled = !ready;
+  }
+
+  // Path toggle
+  document.getElementById("ciPathManual").addEventListener("click", function(){
+    ciPath = "manual";
+    document.getElementById("ciPathManual").classList.add("active");
+    document.getElementById("ciPathSimilar").classList.remove("active");
+    document.getElementById("ciManualSection").style.display = "block";
+    document.getElementById("ciSimilarSection").style.display = "none";
+    updateCiSaveBtn();
+  });
+  document.getElementById("ciPathSimilar").addEventListener("click", function(){
+    ciPath = "similar";
+    document.getElementById("ciPathSimilar").classList.add("active");
+    document.getElementById("ciPathManual").classList.remove("active");
+    document.getElementById("ciSimilarSection").style.display = "block";
+    document.getElementById("ciManualSection").style.display = "none";
+    updateCiSaveBtn();
+  });
+
+  // Live validation
+  ["ciName","ciEmoji","ciKcal","ciProt","ciCarbs","ciFat"].forEach(function(id){
+    document.getElementById(id).addEventListener("input", updateCiSaveBtn);
+  });
+  document.getElementById("ciSimilarSearch").addEventListener("input", function(){
+    renderCiSimilarList(this.value);
+  });
+
+  // Save custom ingredient
+  document.getElementById("ciSaveBtn").addEventListener("click", function(){
+    var name = document.getElementById("ciName").value.trim();
+    var em   = document.getElementById("ciEmoji").value.trim() || "🥄";
+    var id   = "custom_ing_" + Date.now();
+    var kcal, prot, carbs, fat;
+    if(ciPath === "manual"){
+      kcal  = parseFloat(document.getElementById("ciKcal").value)  || 0;
+      prot  = parseFloat(document.getElementById("ciProt").value)  || 0;
+      carbs = parseFloat(document.getElementById("ciCarbs").value) || 0;
+      fat   = parseFloat(document.getElementById("ciFat").value)   || 0;
+    } else {
+      kcal  = ciSelectedSimilar.kcal;
+      prot  = ciSelectedSimilar.prot;
+      carbs = ciSelectedSimilar.carbs;
+      fat   = ciSelectedSimilar.fat;
+    }
+    var newIng = {
+      id:id, name:name, em:em,
+      per:100, unit:"g",
+      kcal:kcal, prot:prot, carbs:carbs, fat:fat,
+      shopCat:"pantry", shopKey:name.toLowerCase().split(" ")[0],
+      defaultQty:100, defaultUnit:"g",
+      isCustom:true,
+    };
+    ING_LIB.push(newIng);
+    // Add to "My Ingredients" category
+    if(!ING_LIB_CAT_MAP["custom"]) ING_LIB_CAT_MAP["custom"] = [];
+    ING_LIB_CAT_MAP["custom"].push(id);
+    if(!ING_LIB_CATS.find(function(c){return c.id==="custom";})){
+      ING_LIB_CATS.push({id:"custom", label:"⭐ My Ingredients"});
+      // Add the tab button
+      var btn = document.createElement("button");
+      btn.className = "ing-cat-tab";
+      btn.textContent = "⭐ My Ingredients";
+      btn.addEventListener("click", function(){
+        activeCat = "custom";
+        document.querySelectorAll(".ing-cat-tab").forEach(function(b){b.classList.remove("active");});
+        btn.classList.add("active");
+        renderIngGrid();
+      });
+      document.getElementById("ingCatTabs").appendChild(btn);
+    }
+    saveCustomIngredients();
+    closeCiModal();
+    // Auto-add the new ingredient to the current meal
+    mmAddedIngredients.push({id:id, qty:100});
+    renderAddedIngredients();
+    renderIngGrid();
+    updateMacroPreview();
+    updateSaveBtn();
+    toast("✓ "+name+" added to your ingredients!");
+  });
+
+  document.getElementById("addCustomIngBtn").addEventListener("click", openCiModal);
+  document.getElementById("ciOv").addEventListener("click", function(e){ if(e.target===this) closeCiModal(); });
 
   // Slot chips
   document.querySelectorAll("#mmSlotChips .mm-slot-chip").forEach(function(chip){
