@@ -6006,13 +6006,13 @@ function renderWizPickDIY(){
         placeholder="Search exercises…"
         value="${(_dayWiz.search||'').replace(/"/g,'&quot;')}"
         oninput="wizUpdateSearch(this.value)">
-      <span style="font-size:.75rem;color:var(--primary);font-weight:700">${selCount} selected</span>
+      <span id="wiz-sel-count" style="font-size:.75rem;color:var(--primary);font-weight:700">${selCount} selected</span>
       <button class="btn btn-outline btn-sm" onclick="wizGoStep('filter')">← Filters</button>
     </div>
     <div id="wiz-ex-list" style="max-height:52vh;overflow-y:auto;padding-right:.2rem">${buildWizExList()}</div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-top:.75rem;padding-top:.65rem;border-top:1px solid var(--border)">
       <button class="btn btn-outline btn-sm" onclick="wizClearSelection()">Clear All</button>
-      <button class="btn btn-primary" onclick="wizGoStep('configure')" ${selCount===0?'disabled style="opacity:.4"':''}>Configure ${selCount} Exercise${selCount!==1?'s':''} →</button>
+      <button id="wiz-configure-btn" class="btn btn-primary" onclick="wizGoStep('configure')" ${selCount===0?'disabled style="opacity:.4"':''}>Configure ${selCount} Exercise${selCount!==1?'s':''} →</button>
     </div>`;
 }
 
@@ -6375,13 +6375,25 @@ function wizToggleExercise(exObj){
   } else {
     _dayWiz.selected.push({...exObj, sets:3, reps:null, secs:null, unit:'reps'});
   }
-  // Don't full re-render if on pick step — just update the list
-  if(_dayWiz.step==='pick'){
-    const listEl = document.getElementById('wiz-ex-list');
-    if(listEl){ listEl.innerHTML = buildWizExList(); return; }
-    const inner = document.getElementById('wiz-inner');
-    if(inner){ inner.innerHTML = renderWizPick(); return; }
+  // Surgical update: refresh list, count label, and configure button without destroying focus
+  const listEl = document.getElementById('wiz-ex-list');
+  if(listEl){
+    listEl.innerHTML = buildWizExList();
+    // Also update count label and configure button in-place
+    const n = _dayWiz.selected.length;
+    const countEl = document.getElementById('wiz-sel-count');
+    if(countEl) countEl.textContent = n + ' selected';
+    const cfgBtn = document.getElementById('wiz-configure-btn');
+    if(cfgBtn){
+      cfgBtn.textContent = `Configure ${n} Exercise${n!==1?'s':''} →`;
+      cfgBtn.disabled = n === 0;
+      cfgBtn.style.opacity = n === 0 ? '0.4' : '';
+    }
+    return;
   }
+  // Fallback: cardio/anaerobic pick steps need a full inner re-render
+  const inner = document.getElementById('wiz-inner');
+  if(inner){ inner.innerHTML = renderWizPick(); return; }
   renderManualEditor();
 }
 
@@ -6394,6 +6406,15 @@ function wizRemoveSelected(i){
 function wizClearSelection(){
   _dayWiz.selected=[];
   _dayWiz.supersetPairs=[];
+  const listEl = document.getElementById('wiz-ex-list');
+  if(listEl){
+    listEl.innerHTML = buildWizExList();
+    const countEl = document.getElementById('wiz-sel-count');
+    if(countEl) countEl.textContent = '0 selected';
+    const cfgBtn = document.getElementById('wiz-configure-btn');
+    if(cfgBtn){ cfgBtn.textContent = 'Configure 0 Exercises →'; cfgBtn.disabled = true; cfgBtn.style.opacity='0.4'; }
+    return;
+  }
   const inner = document.getElementById('wiz-inner');
   if(inner) inner.innerHTML = renderWizPickDIY();
   else renderManualEditor();
