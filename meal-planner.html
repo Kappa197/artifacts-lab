@@ -607,6 +607,12 @@ body.shop-open .shop-fab{display:none!important;}
 .smc-slot-badge{font-size:10px;padding:2px 7px;border-radius:8px;background:var(--amber-dim);color:var(--amber);font-weight:600;border:1px solid var(--amber);}
 .smc-del{background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:0;line-height:1;flex-shrink:0;}
 .smc-del:hover{color:var(--rose);}
+.smc-actions{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;}
+.smc-edit{background:none;border:1px solid var(--border);color:var(--text2);font-size:11px;font-weight:600;cursor:pointer;padding:3px 8px;border-radius:6px;font-family:inherit;white-space:nowrap;}
+.smc-edit:hover{border-color:var(--amber);color:var(--amber);}
+.mm-edit-banner{display:flex;align-items:center;justify-content:space-between;background:var(--amber-dim);border:1.5px solid var(--amber);border-radius:8px;padding:9px 13px;margin-bottom:14px;}
+.mm-edit-banner-txt{font-size:13px;font-weight:600;color:var(--amber);}
+.mm-edit-cancel{background:none;border:none;color:var(--amber);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;text-decoration:underline;}
 /* ── PIN MODAL ───────────────────────────────── */
 .pin-ov{position:fixed;inset:0;background:rgba(11,15,26,.85);z-index:300;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(6px);}
 .pin-ov.open{opacity:1;pointer-events:all;}
@@ -2530,37 +2536,7 @@ function init(){
     });
   });
 
-  // Save meal
-  document.getElementById("mmSaveBtn").addEventListener("click", function(){
-    var name = document.getElementById("mmNameInput").value.trim();
-    if(!name || !mmAddedIngredients.length) return;
-    var totals = updateMacroPreview();
-    // Pick an emoji from the first protein ingredient, or default
-    var firstIng = ING_LIB.find(function(x){return x.id===mmAddedIngredients[0].id;});
-    var em = firstIng ? firstIng.em : "🍽️";
-    var meal = {
-      id: "custom_"+Date.now(),
-      name: name,
-      em: em,
-      slots: mmSelectedSlots,
-      kcal: Math.round(totals.kcal),
-      prot: Math.round(totals.prot),
-      carbs: Math.round(totals.carbs),
-      fat: Math.round(totals.fat),
-      ingredients: mmAddedIngredients.map(function(e){ return {id:e.id, qty:e.qty}; }),
-    };
-    S.customMeals.push(meal);
-    saveCustomMeals();
-    // Reset form
-    document.getElementById("mmNameInput").value = "";
-    mmAddedIngredients = [];
-    renderAddedIngredients();
-    renderIngGrid();
-    updateMacroPreview();
-    updateSaveBtn();
-    renderSavedMeals();
-    toast("✓ "+meal.name+" saved!");
-  });
+  var mmEditingId = null; // ID of meal currently being edited
 
   function renderSavedMeals(){
     var el = document.getElementById("mmSavedList");
@@ -2572,7 +2548,6 @@ function init(){
     S.customMeals.forEach(function(cm, idx){
       var slotLabels = {breakfast:"🌅 Breakfast", lunch:"🍽️ Lunch", dinner:"🍽️ Dinner", snack1:"🍎 Snack", snack2:"🍎 Snack"};
       var uniqueSlots = cm.slots.filter(function(v,i,a){
-        // dedupe lunch/dinner label
         var lbl = slotLabels[v];
         return a.findIndex(function(s){return slotLabels[s]===lbl;})===i;
       });
@@ -2582,8 +2557,10 @@ function init(){
             return ing ? ing.name.replace(/\*/g,"") : e.id;
           }).join(", ")
         : "";
+      var isEditing = cm.id === mmEditingId;
       var card = document.createElement("div");
-      card.className = "saved-meal-card";
+      card.className = "saved-meal-card" + (isEditing ? " editing" : "");
+      card.style.borderColor = isEditing ? "var(--amber)" : "";
       card.innerHTML =
         "<div class='smc-em'>"+cm.em+"</div>"+
         "<div class='smc-info'>"+
@@ -2592,60 +2569,143 @@ function init(){
           (ingNames?"<div class='smc-ings'>"+ingNames+"</div>":"")+
           "<div class='smc-slots'>"+uniqueSlots.map(function(s){return "<span class='smc-slot-badge'>"+slotLabels[s]+"</span>";}).join("")+"</div>"+
         "</div>"+
-        "<button class='smc-del' data-idx='"+idx+"' title='Delete'>✕</button>";
+        "<div class='smc-actions'>"+
+          "<button class='smc-del' data-idx='"+idx+"' title='Delete'>✕</button>"+
+          "<button class='smc-edit' data-idx='"+idx+"'>"+(isEditing?"✏️ Editing…":"✏️ Edit")+"</button>"+
+        "</div>";
       el.appendChild(card);
     });
+
     el.querySelectorAll(".smc-del").forEach(function(btn){
       btn.addEventListener("click",function(){
         var i = parseInt(btn.dataset.idx);
+        if(S.customMeals[i].id === mmEditingId) cancelEdit();
         S.customMeals.splice(i,1);
         saveCustomMeals();
         renderSavedMeals();
       });
     });
+
+    el.querySelectorAll(".smc-edit").forEach(function(btn){
+      btn.addEventListener("click",function(){
+        var i = parseInt(btn.dataset.idx);
+        startEdit(S.customMeals[i]);
+      });
+    });
   }
+
+  function startEdit(cm){
+    mmEditingId = cm.id;
+    // Load into form
+    document.getElementById("mmNameInput").value = cm.name;
+    mmAddedIngredients = cm.ingredients ? cm.ingredients.map(function(e){ return {id:e.id, qty:e.qty}; }) : [];
+    // Set slot chip
+    var chipSel = null;
+    if(cm.slots.includes("breakfast")) chipSel = "breakfast";
+    else if(cm.slots.includes("snack1")||cm.slots.includes("snack2")) chipSel = "snack1,snack2";
+    else chipSel = "lunch,dinner";
+    mmSelectedSlots = cm.slots;
+    document.querySelectorAll("#mmSlotChips .mm-slot-chip").forEach(function(chip){
+      var matches = chip.dataset.slots === chipSel || chip.dataset.slots.split(",").some(function(s){ return cm.slots.includes(s); });
+      chip.classList.toggle("sel", matches);
+      if(matches) mmSelectedSlots = chip.dataset.slots.split(",");
+    });
+    renderAddedIngredients();
+    renderIngGrid();
+    updateMacroPreview();
+    // Show edit banner
+    showEditBanner(cm.name);
+    // Change save button
+    var saveBtn = document.getElementById("mmSaveBtn");
+    saveBtn.textContent = "✓ Update Meal";
+    saveBtn.disabled = false;
+    // Scroll to top of page
+    document.getElementById("myMealsPage").scrollTo({top:0, behavior:"smooth"});
+    renderSavedMeals();
+  }
+
+  function cancelEdit(){
+    mmEditingId = null;
+    document.getElementById("mmNameInput").value = "";
+    mmAddedIngredients = [];
+    mmSelectedSlots = ["lunch","dinner"];
+    renderAddedIngredients();
+    renderIngGrid();
+    updateMacroPreview();
+    updateSaveBtn();
+    hideEditBanner();
+    document.getElementById("mmSaveBtn").textContent = "+ Save Meal";
+    renderSavedMeals();
+  }
+
+  function showEditBanner(name){
+    var existing = document.getElementById("mmEditBanner");
+    if(!existing){
+      var banner = document.createElement("div");
+      banner.id = "mmEditBanner";
+      banner.className = "mm-edit-banner";
+      banner.innerHTML = "<span class='mm-edit-banner-txt'>✏️ Editing: "+name+"</span><button class='mm-edit-cancel' id='mmEditCancel'>Cancel</button>";
+      document.getElementById("mmNameInput").parentNode.insertBefore(banner, document.getElementById("mmNameInput").parentNode.firstChild);
+      document.getElementById("mmEditCancel").addEventListener("click", cancelEdit);
+    }
+  }
+
+  function hideEditBanner(){
+    var b = document.getElementById("mmEditBanner");
+    if(b) b.remove();
+  }
+
+  // Override save button to handle both create and update
+  document.getElementById("mmSaveBtn").addEventListener("click", function(){
+    var name = document.getElementById("mmNameInput").value.trim();
+    if(!name || !mmAddedIngredients.length) return;
+    var totals = updateMacroPreview();
+    var firstIng = ING_LIB.find(function(x){return x.id===mmAddedIngredients[0].id;});
+    var em = firstIng ? firstIng.em : "🍽️";
+
+    if(mmEditingId){
+      // Update existing
+      var idx = S.customMeals.findIndex(function(m){return m.id===mmEditingId;});
+      if(idx>=0){
+        S.customMeals[idx].name = name;
+        S.customMeals[idx].em = em;
+        S.customMeals[idx].slots = mmSelectedSlots;
+        S.customMeals[idx].kcal = Math.round(totals.kcal);
+        S.customMeals[idx].prot = Math.round(totals.prot);
+        S.customMeals[idx].carbs = Math.round(totals.carbs);
+        S.customMeals[idx].fat = Math.round(totals.fat);
+        S.customMeals[idx].ingredients = mmAddedIngredients.map(function(e){ return {id:e.id, qty:e.qty}; });
+        saveCustomMeals();
+        toast("✓ "+name+" updated!");
+      }
+      cancelEdit();
+    } else {
+      // New meal
+      var meal = {
+        id: "custom_"+Date.now(),
+        name: name, em: em, slots: mmSelectedSlots,
+        kcal: Math.round(totals.kcal), prot: Math.round(totals.prot),
+        carbs: Math.round(totals.carbs), fat: Math.round(totals.fat),
+        ingredients: mmAddedIngredients.map(function(e){ return {id:e.id, qty:e.qty}; }),
+      };
+      S.customMeals.push(meal);
+      saveCustomMeals();
+      document.getElementById("mmNameInput").value = "";
+      mmAddedIngredients = [];
+      renderAddedIngredients();
+      renderIngGrid();
+      updateMacroPreview();
+      updateSaveBtn();
+      toast("✓ "+meal.name+" saved!");
+    }
+    renderSavedMeals();
+  });
 
   renderIngGrid();
   renderAddedIngredients();
   renderSavedMeals();
 
-  // ── PIN MODAL ───────────────────────────────────────
-  var pinSelected = [];
-
-  function openPinModal(){
-    if(!S.customMeals.length){ doGenerate(); return; }
-    pinSelected = [];
-    var list = document.getElementById("pinList");
-    list.innerHTML = "";
-    S.customMeals.forEach(function(cm){
-      var row = document.createElement("div");
-      row.className = "pin-meal-row";
-      row.innerHTML =
-        "<span class='pin-em'>"+cm.em+"</span>"+
-        "<div class='pin-info'>"+
-          "<div class='pin-name'>"+cm.name+"</div>"+
-          "<div class='pin-macros'>"+cm.kcal+" kcal · "+cm.prot+"g prot · "+cm.carbs+"g carbs · "+cm.fat+"g fat</div>"+
-        "</div>"+
-        "<div class='pin-check' data-id='"+cm.id+"'></div>";
-      list.appendChild(row);
-    });
-    list.querySelectorAll(".pin-check").forEach(function(chk){
-      chk.addEventListener("click", function(){
-        var id = chk.dataset.id;
-        var idx = pinSelected.indexOf(id);
-        if(idx>=0){ pinSelected.splice(idx,1); chk.classList.remove("sel"); chk.textContent=""; }
-        else { pinSelected.push(id); chk.classList.add("sel"); chk.textContent="✓"; }
-      });
-    });
-    document.getElementById("pinOv").classList.add("open");
-    document.body.style.overflow = "hidden";
-  }
-
-  function closePinModal(){
-    document.getElementById("pinOv").classList.remove("open");
-    document.body.style.overflow = "";
-  }
-
+  // Wire pin modal buttons (functions are at module scope below)
   document.getElementById("pinSkip").addEventListener("click", function(){
     S.pinnedMeals = [];
     closePinModal();
@@ -2662,13 +2722,49 @@ function init(){
     if(e.target===this) closePinModal();
   });
 
-  // Wire Generate button to open pin modal first
-  document.getElementById("genBtn").removeEventListener("click", generate);
+  // Wire Generate button
   document.getElementById("genBtn").addEventListener("click", function(){
     var en=Object.keys(S.slots).filter(function(k){return S.slots[k];});
     if(!en.length){toast("Please enable at least one meal slot");return;}
     openPinModal();
   });
+}
+
+// ── PIN MODAL — module scope so both genBtn and regenBtn can call it ──────
+var pinSelected = [];
+
+function openPinModal(){
+  if(!S.customMeals.length){ doGenerate(); return; }
+  pinSelected = [];
+  var list = document.getElementById("pinList");
+  list.innerHTML = "";
+  S.customMeals.forEach(function(cm){
+    var row = document.createElement("div");
+    row.className = "pin-meal-row";
+    row.innerHTML =
+      "<span class='pin-em'>"+cm.em+"</span>"+
+      "<div class='pin-info'>"+
+        "<div class='pin-name'>"+cm.name+"</div>"+
+        "<div class='pin-macros'>"+cm.kcal+" kcal · "+cm.prot+"g prot · "+cm.carbs+"g carbs · "+cm.fat+"g fat</div>"+
+      "</div>"+
+      "<div class='pin-check' data-id='"+cm.id+"'></div>";
+    list.appendChild(row);
+  });
+  list.querySelectorAll(".pin-check").forEach(function(chk){
+    chk.addEventListener("click", function(){
+      var id = chk.dataset.id;
+      var idx = pinSelected.indexOf(id);
+      if(idx>=0){ pinSelected.splice(idx,1); chk.classList.remove("sel"); chk.textContent=""; }
+      else { pinSelected.push(id); chk.classList.add("sel"); chk.textContent="✓"; }
+    });
+  });
+  document.getElementById("pinOv").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+
+function closePinModal(){
+  document.getElementById("pinOv").classList.remove("open");
+  document.body.style.overflow = "";
 }
 
 // ─── MOBILE DAY VIEW ─────────────────────────────
