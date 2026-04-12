@@ -1473,31 +1473,51 @@ function doGenerate(){
   var used={};
   var plan=[];
 
-  // Build pinned recipe objects (one per pinned meal, placed once in week 0)
+  // ── PINNED MEAL PLACEMENT ─────────────────────────────────────────────
+  // For each pinned meal find a compatible slot, assign it to a specific day
+  // in week 0, and hard-block it from being picked again by pick().
   var pinnedRecipes = S.pinnedMeals.map(function(pid){
     return customPool.find(function(r){return r.id===pid;});
   }).filter(Boolean);
+
+  // Build a placement map: placementMap[day][slot] = recipe
+  // Spread pinned meals across Mon–Sun, one per day, matched to their slot type
+  var placementMap = {}; // key: "w_d_slot" → recipe
+  var daysUsed = []; // which day indices are already claimed by a pinned meal
+  pinnedRecipes.forEach(function(pr){
+    // Find the first enabled slot that matches this meal's sl types
+    var matchSlot = en.find(function(slot){
+      return pr.sl.includes(SLOT_TYPE[slot]);
+    });
+    if(!matchSlot) return; // meal's slot type not enabled — skip
+    // Find the first day (0–6) not already used by another pinned meal
+    var targetDay = -1;
+    for(var dd=0; dd<7; dd++){
+      if(daysUsed.indexOf(dd) === -1){ targetDay=dd; break; }
+    }
+    if(targetDay === -1) return; // all 7 days claimed — skip
+    daysUsed.push(targetDay);
+    placementMap["0_"+targetDay+"_"+matchSlot] = pr;
+    // Hard-block this meal ID from pick() throughout all weeks
+    used[pr.id] = 999;
+  });
 
   for(var w=0;w<S.weeks;w++){
     var week=[];
     for(var d=0;d<7;d++){
       var day={};
       en.forEach(function(slot){
-        // If this is week 0 and we have a pinned meal for this slot not yet placed, hard-place it
-        var pinned = null;
-        if(w===0){
-          var dayIdx = d;
-          pinnedRecipes.forEach(function(pr, pi){
-            if(pinned) return;
-            // Place pinned meal pi on day pi (spread across the week)
-            if(dayIdx === pi && pr.sl.includes(SLOT_TYPE[slot])){
-              pinned = pr;
-            }
-          });
+        var key = w+"_"+d+"_"+slot;
+        // Week 0: use pinned placement if one exists for this exact day+slot
+        var pinned = (w===0) ? (placementMap[key] || null) : null;
+        if(pinned){
+          day[slot] = pinned;
+          // Don't increment used for pinned — already set to 999 above
+        } else {
+          var r = pick(slots[slot], sKcal[slot], sProt[slot], used);
+          day[slot] = r;
+          used[r.id] = (used[r.id]||0) + 1;
         }
-        var r = pinned || pick(slots[slot], sKcal[slot], sProt[slot], used);
-        day[slot]=r;
-        used[r.id]=(used[r.id]||0)+1;
       });
       week.push(day);
     }
