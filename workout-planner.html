@@ -589,6 +589,9 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 .wiz-ex-row{display:flex;align-items:center;gap:.6rem;padding:.42rem .6rem;border-radius:7px;cursor:pointer;border:1.5px solid transparent;transition:all .12s;margin-bottom:.2rem}
 .wiz-ex-row:hover{background:var(--navy3);border-color:var(--border)}
 .wiz-ex-row.selected{background:var(--primary-l);border-color:var(--primary)}
+.wiz-type-card{display:flex;align-items:center;gap:.75rem;padding:.85rem 1rem;border-radius:10px;cursor:pointer;border:2px solid var(--border);background:var(--navy3);transition:all .15s}
+.wiz-type-card:hover{border-color:var(--amber);background:var(--navy4)}
+.wiz-type-card.selected{border-color:var(--primary);background:var(--primary-l)}
 
 /* ── TRK CONFIRM MODAL ────────────────────────────────────────────────── */
 #trk-confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:600;display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(2px)}
@@ -5760,7 +5763,6 @@ function trkOpenManualEditor(slot){
   document.getElementById('trk-main').classList.add('hidden');
   document.getElementById('trk-manual-editor').classList.remove('hidden');
   document.getElementById('trk-slot-label').textContent = TRK_SLOT_LABELS[slot];
-
   const existing = trkGetManual(slot);
   _manualPlan = existing ? JSON.parse(JSON.stringify(existing)) : { name:'', days:[] };
   _dayWiz = null;
@@ -5769,19 +5771,14 @@ function trkOpenManualEditor(slot){
 
 // ── Main editor view ───────────────────────────────────────────────────
 function renderManualEditor(){
+  if(_dayWiz !== null){ renderDayWizard(); return; }
   const body = document.getElementById('trk-manual-editor-body');
   const days = _manualPlan.days || [];
-
-  // If day wizard is open, render it instead
-  if(_dayWiz !== null){
-    renderDayWizard();
-    return;
-  }
-
   let html = `
   <div class="card" style="margin-bottom:.8rem">
     <label class="fl">Plan Name</label>
-    <input type="text" class="trk-input" style="width:100%;max-width:320px;padding:.5rem .75rem;font-size:.88rem"
+    <input type="text" class="trk-input" id="manual-plan-name-input"
+      style="width:100%;max-width:320px;padding:.5rem .75rem;font-size:.88rem"
       placeholder="e.g. My Push/Pull Plan"
       value="${(_manualPlan.name||'').replace(/"/g,'&quot;')}"
       oninput="_manualPlan.name=this.value">
@@ -5791,28 +5788,23 @@ function renderManualEditor(){
       <div class="vol-title">Training Days</div>
       <button class="btn btn-primary btn-sm" onclick="openDayWizardNew()">+ Add Day</button>
     </div>`;
-
   if(!days.length){
     html += `<div style="color:var(--muted);font-size:.82rem;text-align:center;padding:1rem 0">No days yet. Click <strong>+ Add Day</strong> to build your plan.</div>`;
   } else {
     days.forEach((day, di) => { html += buildDaySummaryCard(day, di); });
   }
-
   html += `</div>
   <div style="display:flex;gap:.6rem;justify-content:flex-end;margin-bottom:1rem">
     <button class="btn btn-outline btn-sm" onclick="trkShowSlotSelector()">Cancel</button>
     <button class="btn btn-primary" onclick="saveManualPlan()">💾 Save Plan</button>
   </div>`;
-
   body.innerHTML = html;
 }
 
-// Summary card for an existing day in the editor (not the wizard)
 function buildDaySummaryCard(day, di){
   const exes = day.exercises || [];
   const style = deriveDayStyle(day);
   const styleM = MANUAL_STYLE_META[style];
-  const styleColor = styleM.color;
   const exPills = exes.slice(0,4).map(ex =>
     `<span style="font-size:.66rem;background:var(--navy3);border:1px solid var(--border);border-radius:4px;padding:.1rem .35rem;color:var(--text2);white-space:nowrap">${ex.name||'?'}</span>`
   ).join('');
@@ -5821,7 +5813,7 @@ function buildDaySummaryCard(day, di){
     <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap;margin-bottom:.45rem">
       <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
         <span style="font-weight:700;font-size:.88rem">${day.label||'Day '+(di+1)}</span>
-        <span style="font-size:.62rem;font-weight:700;background:${styleColor}22;color:${styleColor};border-radius:4px;padding:.1rem .38rem;border:1px solid ${styleColor}44">${styleM.icon} ${styleM.label}</span>
+        <span style="font-size:.62rem;font-weight:700;background:${styleM.color}22;color:${styleM.color};border-radius:4px;padding:.1rem .38rem;border:1px solid ${styleM.color}44">${styleM.icon} ${styleM.label}</span>
         <span style="font-size:.63rem;color:var(--muted)">${exes.length} exercise${exes.length!==1?'s':''}</span>
       </div>
       <div style="display:flex;gap:.35rem">
@@ -5834,76 +5826,157 @@ function buildDaySummaryCard(day, di){
 }
 
 // ── Day Wizard ─────────────────────────────────────────────────────────
+// Step 0: workout type selector
+// step: 'type' | 'filter' | 'pick' | 'configure'
+// dayType: 'diy' | 'cardio' | 'anaerobic'
+
 function openDayWizardNew(){
   const di = (_manualPlan.days||[]).length;
   if(!_manualPlan.days) _manualPlan.days = [];
   _manualPlan.days.push({ label:'Day '+(di+1), exercises:[], supersetPairs:[] });
-  _dayWiz = { di, step:'filter', muscleFilter:[], equipFilter:[], search:'', selected:[] };
+  _dayWiz = { di, step:'type', dayType:null, muscleFilter:[], equipFilter:[], search:'', selected:[], supersetPairs:[], anaerobicType:null };
   renderManualEditor();
 }
 
 function openDayWizardEdit(di){
   const day = _manualPlan.days[di];
-  // selected = copy of current exercise ids so we can diff on confirm
   _dayWiz = {
-    di,
-    step:'filter',
-    muscleFilter:[],
-    equipFilter:[],
-    search:'',
-    selected: (day.exercises||[]).map(ex => ({...ex})) // deep copy
+    di, step:'type', dayType: day.dayType||null,
+    muscleFilter:[], equipFilter:[], search:'',
+    selected: (day.exercises||[]).map(ex => ({...ex})),
+    supersetPairs: (day.supersetPairs||[]).map(p=>[...p]),
+    anaerobicType: day.anaerobicType||null
   };
   renderManualEditor();
 }
 
+// ── Wizard shell renderer (persistent, no full re-render for search) ───
 function renderDayWizard(){
   const body = document.getElementById('trk-manual-editor-body');
   const di = _dayWiz.di;
   const day = _manualPlan.days[di];
-  const steps = ['filter','pick','configure'];
-  const stepIdx = steps.indexOf(_dayWiz.step);
 
-  // Step indicator
-  const stepLabels = ['1 · Filter','2 · Pick Exercises','3 · Configure'];
-  const stepDots = stepLabels.map((l,i) => `<span style="font-size:.68rem;font-weight:700;padding:.18rem .65rem;border-radius:99px;${i===stepIdx?'background:var(--primary);color:#fff':'background:var(--navy3);color:var(--muted);border:1px solid var(--border)'}">${l}</span>`).join('<span style="color:var(--border);font-size:.7rem;padding:0 .2rem">›</span>');
+  // Steps vary by dayType
+  let stepDefs;
+  if(!_dayWiz.dayType || _dayWiz.step==='type'){
+    stepDefs = [
+      {key:'type',    label:'0 · Day Type'},
+      {key:'filter',  label:'1 · Filter'},
+      {key:'pick',    label:'2 · Pick'},
+      {key:'configure',label:'3 · Configure'}
+    ];
+  } else if(_dayWiz.dayType==='cardio'){
+    stepDefs = [
+      {key:'type',    label:'0 · Day Type'},
+      {key:'pick',    label:'1 · Pick Session'},
+      {key:'configure',label:'2 · Configure'}
+    ];
+  } else if(_dayWiz.dayType==='anaerobic'){
+    stepDefs = [
+      {key:'type',    label:'0 · Day Type'},
+      {key:'pick',    label:'1 · Pick Protocol'},
+      {key:'configure',label:'2 · Configure'}
+    ];
+  } else {
+    stepDefs = [
+      {key:'type',    label:'0 · Day Type'},
+      {key:'filter',  label:'1 · Filter'},
+      {key:'pick',    label:'2 · Pick'},
+      {key:'configure',label:'3 · Configure'}
+    ];
+  }
+
+  const stepDots = stepDefs.map((s,i) => {
+    const isActive = s.key === _dayWiz.step;
+    const isPast   = stepDefs.findIndex(x=>x.key===_dayWiz.step) > i;
+    // B: step dots are clickable to navigate back
+    const canNav   = isPast && s.key !== _dayWiz.step;
+    return `<button onclick="${canNav?`wizGoStep('${s.key}')`:''}" style="font-size:.65rem;font-weight:700;padding:.18rem .6rem;border-radius:99px;cursor:${canNav?'pointer':'default'};border:none;${isActive?'background:var(--primary);color:#fff':isPast?'background:var(--green-dim);color:var(--green)':'background:var(--navy3);color:var(--muted);border:1px solid var(--border)'}">${s.label}</button>`;
+  }).join('<span style="color:var(--border);font-size:.65rem;padding:0 .1rem">›</span>');
 
   let inner = '';
-  if(_dayWiz.step === 'filter')    inner = renderWizFilter(di, day);
-  if(_dayWiz.step === 'pick')      inner = renderWizPick(di, day);
-  if(_dayWiz.step === 'configure') inner = renderWizConfigure(di, day);
+  if(_dayWiz.step==='type')      inner = renderWizType();
+  else if(_dayWiz.step==='filter')    inner = renderWizFilter();
+  else if(_dayWiz.step==='pick')      inner = renderWizPick();
+  else if(_dayWiz.step==='configure') inner = renderWizConfigure();
+
+  // Only replace the card shell if not currently focused on search (D: preserve focus)
+  const existingCard = body.querySelector('#wiz-card');
+  if(existingCard && document.activeElement && document.activeElement.id==='wiz-search-input'){
+    // Just update the exercise list, not the search bar
+    const listEl = existingCard.querySelector('#wiz-ex-list');
+    if(listEl){ listEl.innerHTML = buildWizExList(); return; }
+  }
 
   body.innerHTML = `
-  <div class="card" style="margin-bottom:.8rem">
-    <div style="display:flex;align-items:center;gap:.65rem;margin-bottom:.8rem;flex-wrap:wrap">
+  <div class="card" id="wiz-card" style="margin-bottom:.8rem">
+    <div style="display:flex;align-items:center;gap:.65rem;margin-bottom:.75rem;flex-wrap:wrap">
       <button class="trk-back-slots" style="margin:0" onclick="cancelDayWizard(${di})">← Back to Plan</button>
-      <div style="font-family:var(--fd);font-size:.9rem;font-weight:800;color:var(--text);text-transform:uppercase;flex:1">
-        ${day.label||'Day '+(di+1)}
-        <input type="text" class="trk-input" style="display:inline;width:9rem;margin-left:.5rem;padding:.22rem .5rem;font-size:.78rem"
+      <div style="flex:1;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
+        <span style="font-family:var(--fd);font-size:.88rem;font-weight:800;color:var(--text);text-transform:uppercase">${day.label||'Day '+(di+1)}</span>
+        <input type="text" class="trk-input" id="wiz-day-name-input"
+          style="width:8.5rem;padding:.2rem .5rem;font-size:.76rem"
           placeholder="Day name" value="${(day.label||'').replace(/"/g,'&quot;')}"
           oninput="_manualPlan.days[${di}].label=this.value">
       </div>
     </div>
-    <div style="display:flex;gap:.3rem;align-items:center;flex-wrap:wrap;margin-bottom:1rem">${stepDots}</div>
-    ${inner}
+    <div style="display:flex;gap:.25rem;align-items:center;flex-wrap:wrap;margin-bottom:1rem">${stepDots}</div>
+    <div id="wiz-inner">${inner}</div>
   </div>`;
 }
 
-// STEP 1: Filter
-function renderWizFilter(di, day){
+// STEP 0: Day type selector
+function renderWizType(){
+  const types = [
+    { key:'diy',       icon:'🏋️', label:'DIY Gym Session',     desc:'Pick any gym exercises from our full library. Hill sprints & repeats included.' },
+    { key:'cardio',    icon:'🏃', label:'Cardio Session',       desc:'Steady state, tempo, fartlek, or intervals — A1 through A4.' },
+    { key:'anaerobic', icon:'⚡', label:'Anaerobic / Endurance',desc:'AGT, EMOM, or GPR — structured metabolic protocols.' }
+  ];
+  return `<div class="chip-grid" style="flex-direction:column;gap:.5rem">
+    ${types.map(t => `
+      <div class="wiz-type-card ${_dayWiz.dayType===t.key?'selected':''}" onclick="wizSetDayType('${t.key}')">
+        <div style="font-size:1.6rem;flex-shrink:0">${t.icon}</div>
+        <div>
+          <div style="font-weight:700;font-size:.88rem;color:var(--text)">${t.label}</div>
+          <div style="font-size:.72rem;color:var(--muted);margin-top:.1rem">${t.desc}</div>
+        </div>
+        <div style="margin-left:auto;font-size:1.1rem">${_dayWiz.dayType===t.key?'✅':'⬜'}</div>
+      </div>`).join('')}
+  </div>
+  <div style="display:flex;justify-content:flex-end;margin-top:.9rem">
+    <button class="btn btn-primary" onclick="wizAdvanceFromType()" ${!_dayWiz.dayType?'disabled style="opacity:.4"':''}>Next →</button>
+  </div>`;
+}
+
+function wizSetDayType(type){
+  _dayWiz.dayType = type;
+  // Re-render just the type step content without losing context
+  const inner = document.getElementById('wiz-inner');
+  if(inner) inner.innerHTML = renderWizType();
+  else renderManualEditor();
+}
+
+function wizAdvanceFromType(){
+  if(!_dayWiz.dayType) return;
+  if(_dayWiz.dayType==='diy')       _dayWiz.step='filter';
+  else if(_dayWiz.dayType==='cardio')    _dayWiz.step='pick';
+  else if(_dayWiz.dayType==='anaerobic') _dayWiz.step='pick';
+  renderManualEditor();
+}
+
+// STEP 1 (DIY): Filter
+function renderWizFilter(){
   const musclePills = MANUAL_MUSCLES.map(m => {
     const sel = _dayWiz.muscleFilter.includes(m);
     return `<button class="chip ${sel?'sel':''}" onclick="toggleWizFilter('muscle','${m}')">${MANUAL_MUSCLE_LABELS[m]}</button>`;
   }).join('');
-
   const equipPills = MANUAL_EQUIP_OPTIONS.map(e => {
     const sel = _dayWiz.equipFilter.includes(e.val);
     return `<button class="chip ${sel?'sel':''}" onclick="toggleWizFilter('equip','${e.val}')">${e.label}</button>`;
   }).join('');
-
-  const hasEndo = _dayWiz.muscleFilter.length === 0 || _dayWiz.muscleFilter.includes('cardio');
   return `
     <div class="form-group">
-      <label class="fl">Target Muscles <span class="hint">— leave blank to see all</span></label>
+      <label class="fl">Target Muscles <span class="hint">— leave blank to show all</span></label>
       <div class="chip-grid">${musclePills}</div>
     </div>
     <div class="form-group">
@@ -5911,136 +5984,326 @@ function renderWizFilter(di, day){
       <div class="chip-grid">${equipPills}</div>
     </div>
     <div style="display:flex;justify-content:flex-end;gap:.5rem;margin-top:.5rem">
+      <button class="btn btn-outline btn-sm" onclick="wizGoStep('type')">← Back</button>
       <button class="btn btn-primary" onclick="wizGoStep('pick')">Next: Pick Exercises →</button>
     </div>`;
 }
 
-// STEP 2: Pick exercises
-function renderWizPick(di, day){
-  const mf = _dayWiz.muscleFilter;
-  const ef = _dayWiz.equipFilter;
-  const sq = (_dayWiz.search||'').toLowerCase().trim();
-  const selIds = new Set(_dayWiz.selected.map(e => e.id||e.wizId||e.name));
+// STEP 2: Pick — branches on dayType
+function renderWizPick(){
+  if(_dayWiz.dayType==='cardio')    return renderWizPickCardio();
+  if(_dayWiz.dayType==='anaerobic') return renderWizPickAnaerobic();
+  return renderWizPickDIY();
+}
 
-  // Build combined pool: gym exercises + endurance sessions
-  const gymPool = EX.filter(ex => {
-    if(ef.length > 0 && !ex.eq.some(e => ef.includes(e))) return false;
-    if(mf.length > 0 && !ex.primary.some(m => mf.includes(m)) && !ex.secondary.some(m => mf.includes(m))) return false;
-    if(sq && !ex.name.toLowerCase().includes(sq)) return false;
-    return true;
-  });
-
-  // Endurance sessions — shown when no muscle filter or muscle filter is empty
-  const showEndo = mf.length === 0 || mf.some(m => ['cardio','endurance'].includes(m));
-  const endoPool = showEndo ? Object.entries(ENDO_SESSIONS).filter(([id, sess]) => {
-    if(sq && !sess.name.toLowerCase().includes(sq)) return false;
-    return true;
-  }) : [];
-
-  // Group gym by category
-  const cats = ['compound','explosive','isolation','core','accessory'];
-  const catLabels = {compound:'Compound',explosive:'Explosive',isolation:'Isolation',core:'Core',accessory:'Accessory'};
-  const catColors = {compound:'#4a90d9',explosive:'#f59e0b',isolation:'#9b72cf',core:'#2ecc8a',accessory:'#fb7185'};
-
-  let exList = '';
-  cats.forEach(cat => {
-    const items = gymPool.filter(ex => ex.cat === cat);
-    if(!items.length) return;
-    exList += `<div style="margin-bottom:.55rem">
-      <div style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:${catColors[cat]};margin-bottom:.3rem">${catLabels[cat]}</div>`;
-    items.forEach(ex => {
-      const isSel = selIds.has(ex.id);
-      const muscles = [...ex.primary,...(ex.secondary||[]).slice(0,2)].join(', ');
-      exList += `<div class="wiz-ex-row ${isSel?'selected':''}" onclick="wizToggleExercise(${JSON.stringify({id:ex.id,name:ex.name,cat:ex.cat,muscles:ex.primary.join(', '),fc:ex.fc,isEndo:false}).replace(/"/g,'&quot;')})">
-        <div style="flex:1;min-width:0">
-          <div style="font-weight:600;font-size:.82rem;display:flex;align-items:center;gap:.3rem;flex-wrap:wrap">
-            ${ex.name}
-            <span style="font-size:.58rem;font-weight:700;background:${catColors[cat]}22;color:${catColors[cat]};border-radius:3px;padding:.05rem .3rem;border:1px solid ${catColors[cat]}44">${catLabels[cat]}</span>
-          </div>
-          <div style="font-size:.67rem;color:var(--muted);margin-top:.08rem">${muscles}</div>
-        </div>
-        <div style="flex-shrink:0;font-size:1.1rem">${isSel?'✅':'⬜'}</div>
-      </div>`;
-    });
-    exList += `</div>`;
-  });
-
-  // Endurance section
-  if(endoPool.length){
-    exList += `<div style="margin-bottom:.55rem">
-      <div style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#2ecc8a;margin-bottom:.3rem">Cardio / Endurance</div>`;
-    endoPool.forEach(([id, sess]) => {
-      const endoId = 'endo_'+id;
-      const isSel = selIds.has(endoId);
-      exList += `<div class="wiz-ex-row ${isSel?'selected':''}" onclick="wizToggleExercise(${JSON.stringify({id:endoId,name:sess.name,cat:'cardio',muscles:'cardio',fc:['endurance'],icon:sess.icon,isEndo:true,sessId:id}).replace(/"/g,'&quot;')})">
-        <div style="flex:1;min-width:0">
-          <div style="font-weight:600;font-size:.82rem;display:flex;align-items:center;gap:.3rem">
-            ${sess.icon} ${sess.name}
-            <span style="font-size:.58rem;font-weight:700;background:#2ecc8a22;color:#2ecc8a;border-radius:3px;padding:.05rem .3rem;border:1px solid #2ecc8a44">${sess.abbr}</span>
-          </div>
-          <div style="font-size:.67rem;color:var(--muted);margin-top:.08rem">${sess.rpe||''}</div>
-        </div>
-        <div style="flex-shrink:0;font-size:1.1rem">${isSel?'✅':'⬜'}</div>
-      </div>`;
-    });
-    exList += `</div>`;
-  }
-
-  if(!exList) exList = `<div style="text-align:center;color:var(--muted);padding:1rem;font-size:.82rem">No exercises match your filters. Try clearing some filters.</div>`;
-
+// DIY pick — uses search + filter, NO full re-render on search keystroke
+function renderWizPickDIY(){
   const selCount = _dayWiz.selected.length;
   return `
     <div style="margin-bottom:.7rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
-      <input type="text" class="trk-input" style="flex:1;max-width:240px;padding:.38rem .65rem"
-        placeholder="Search exercises…" value="${(_dayWiz.search||'').replace(/"/g,'&quot;')}"
-        oninput="_dayWiz.search=this.value;renderManualEditor()">
+      <input type="text" id="wiz-search-input" class="trk-input"
+        style="flex:1;max-width:240px;padding:.38rem .65rem"
+        placeholder="Search exercises…"
+        value="${(_dayWiz.search||'').replace(/"/g,'&quot;')}"
+        oninput="wizUpdateSearch(this.value)">
       <span style="font-size:.75rem;color:var(--primary);font-weight:700">${selCount} selected</span>
-      <button class="btn btn-outline btn-sm" onclick="wizGoStep('filter')">← Back</button>
+      <button class="btn btn-outline btn-sm" onclick="wizGoStep('filter')">← Filters</button>
     </div>
-    <div style="max-height:52vh;overflow-y:auto;padding-right:.2rem">${exList}</div>
+    <div id="wiz-ex-list" style="max-height:52vh;overflow-y:auto;padding-right:.2rem">${buildWizExList()}</div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-top:.75rem;padding-top:.65rem;border-top:1px solid var(--border)">
       <button class="btn btn-outline btn-sm" onclick="wizClearSelection()">Clear All</button>
       <button class="btn btn-primary" onclick="wizGoStep('configure')" ${selCount===0?'disabled style="opacity:.4"':''}>Configure ${selCount} Exercise${selCount!==1?'s':''} →</button>
     </div>`;
 }
 
-// STEP 3: Configure
-function renderWizConfigure(di, day){
-  const sel = _dayWiz.selected;
-  if(!sel.length) return `<div style="color:var(--muted);font-size:.82rem">No exercises selected. <button class="btn btn-outline btn-sm" onclick="wizGoStep('pick')">← Back</button></div>`;
+// Build just the exercise list HTML — called on search update without full re-render
+function buildWizExList(){
+  const mf = _dayWiz.muscleFilter;
+  const ef = _dayWiz.equipFilter;
+  const sq = (_dayWiz.search||'').toLowerCase().trim();
+  const selIds = new Set(_dayWiz.selected.map(e => e.id));
 
-  // Superset pairs: array of [idxA, idxB]
+  // DIY: all gym exercises + hill sprints + 200m repeats (A5, A6), but NOT steady/tempo/fartlek/interval (A1-A4), NOT B-type
+  const HILL_SPRINT_IDS = ['A5','A6'];
+  const gymPool = EX.filter(ex => {
+    if(ef.length > 0 && !ex.eq.some(e => ef.includes(e))) return false;
+    if(mf.length > 0 && !ex.primary.some(m => mf.includes(m)) && !(ex.secondary||[]).some(m => mf.includes(m))) return false;
+    if(sq && !ex.name.toLowerCase().includes(sq)) return false;
+    return true;
+  });
+
+  // Hill sprints / 200m repeats from endo sessions
+  const sprintPool = HILL_SPRINT_IDS.map(id => ENDO_SESSIONS[id]).filter(Boolean).filter(sess => {
+    if(sq && !sess.name.toLowerCase().includes(sq)) return false;
+    return true;
+  }).map((sess, i) => ({_sessId: HILL_SPRINT_IDS[i], _sess: sess}));
+
+  const cats = ['compound','explosive','isolation','core','accessory'];
+  const catLabels = {compound:'Compound',explosive:'Explosive',isolation:'Isolation',core:'Core',accessory:'Accessory'};
+  const catColors = {compound:'#4a90d9',explosive:'#f59e0b',isolation:'#9b72cf',core:'#2ecc8a',accessory:'#fb7185'};
+
+  let html = '';
+  cats.forEach(cat => {
+    const items = gymPool.filter(ex => ex.cat === cat);
+    if(!items.length) return;
+    html += `<div style="margin-bottom:.55rem">
+      <div style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:${catColors[cat]};margin-bottom:.3rem">${catLabels[cat]}</div>`;
+    items.forEach(ex => {
+      const isSel = selIds.has(ex.id);
+      const muscles = [...ex.primary,...(ex.secondary||[]).slice(0,2)].join(', ');
+      const exData = JSON.stringify({id:ex.id,name:ex.name,cat:ex.cat,muscles:ex.primary.join(', '),fc:ex.fc,isEndo:false}).replace(/"/g,'&quot;');
+      html += `<div class="wiz-ex-row ${isSel?'selected':''}" onclick="wizToggleExercise(${exData})">
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;font-size:.82rem;display:flex;align-items:center;gap:.3rem;flex-wrap:wrap">
+            ${ex.name}<span style="font-size:.58rem;font-weight:700;background:${catColors[cat]}22;color:${catColors[cat]};border-radius:3px;padding:.05rem .3rem;border:1px solid ${catColors[cat]}44">${catLabels[cat]}</span>
+          </div>
+          <div style="font-size:.67rem;color:var(--muted);margin-top:.08rem">${muscles}</div>
+        </div>
+        <div style="flex-shrink:0;font-size:1.1rem">${isSel?'✅':'⬜'}</div>
+      </div>`;
+    });
+    html += `</div>`;
+  });
+
+  // Sprint sessions
+  if(sprintPool.length){
+    html += `<div style="margin-bottom:.55rem">
+      <div style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#f59e0b;margin-bottom:.3rem">Sprint / Speed Work</div>`;
+    sprintPool.forEach(({_sessId, _sess}) => {
+      const endoId = 'endo_'+_sessId;
+      const isSel = selIds.has(endoId);
+      const exData = JSON.stringify({id:endoId,name:_sess.name,cat:'cardio',muscles:'cardio',fc:['endurance','power_speed'],icon:_sess.icon,isEndo:true,sessId:_sessId,isSprintSession:true}).replace(/"/g,'&quot;');
+      html += `<div class="wiz-ex-row ${isSel?'selected':''}" onclick="wizToggleExercise(${exData})">
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;font-size:.82rem;display:flex;align-items:center;gap:.3rem">
+            ${_sess.icon} ${_sess.name}<span style="font-size:.58rem;font-weight:700;background:#f59e0b22;color:#f59e0b;border-radius:3px;padding:.05rem .3rem;border:1px solid #f59e0b44">${_sess.abbr}</span>
+          </div>
+          <div style="font-size:.67rem;color:var(--muted);margin-top:.08rem">${_sess.rpe||''}</div>
+        </div>
+        <div style="flex-shrink:0;font-size:1.1rem">${isSel?'✅':'⬜'}</div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  if(!html) html = `<div style="text-align:center;color:var(--muted);padding:1rem;font-size:.82rem">No exercises match your filters. <button class="btn btn-outline btn-sm" style="margin-left:.4rem" onclick="wizGoStep('filter')">Adjust filters</button></div>`;
+  return html;
+}
+
+// D: Search updates list without full re-render — preserves focus
+function wizUpdateSearch(val){
+  _dayWiz.search = val;
+  const listEl = document.getElementById('wiz-ex-list');
+  if(listEl) listEl.innerHTML = buildWizExList();
+  // Update selected count label
+  const countEl = document.querySelector('#wiz-card .wiz-sel-count');
+  if(countEl) countEl.textContent = _dayWiz.selected.length + ' selected';
+}
+
+// Cardio pick (A1–A4 only)
+function renderWizPickCardio(){
+  const CARDIO_IDS = ['A1','A2','A3','A4'];
+  const selIds = new Set(_dayWiz.selected.map(e => e.id));
+  const paceInfo = {
+    A1: {title:'Steady State', paceLabel:'Target pace', paceNote:'Conversational — Zone 2, sustainable for full duration', singlePace:true},
+    A2: {title:'Tempo Run',    paceLabel:'Tempo pace',  paceNote:'Comfortably hard — Zone 3–4, 20–40 min sustained', singlePace:true},
+    A3: {title:'Fartlek',      paceLabel:'Easy / Surge pace', paceNote:'Easy: Zone 2 base · Surge: Zone 4–5 bursts, 1–3 min each', singlePace:false, label2:'Surge pace'},
+    A4: {title:'Intervals',    paceLabel:'Interval pace', paceNote:'Interval: Zone 4–5 · Recovery: easy jog/walk', singlePace:false, label2:'Recovery pace'}
+  };
+  let html = `<div style="display:flex;flex-direction:column;gap:.5rem">`;
+  CARDIO_IDS.forEach(id => {
+    const sess = ENDO_SESSIONS[id]; if(!sess) return;
+    const isSel = selIds.has('endo_'+id);
+    const pi = paceInfo[id];
+    html += `<div class="wiz-ex-row ${isSel?'selected':''}" onclick="wizToggleExercise(${JSON.stringify({id:'endo_'+id,name:sess.name,cat:'cardio',muscles:'cardio',fc:['endurance'],icon:sess.icon,isEndo:true,sessId:id,paceInfo:pi}).replace(/"/g,'&quot;')})">
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:700;font-size:.86rem;display:flex;align-items:center;gap:.4rem">${sess.icon} ${sess.name}
+          <span style="font-size:.58rem;font-weight:700;background:#2ecc8a22;color:#2ecc8a;border-radius:3px;padding:.05rem .3rem;border:1px solid #2ecc8a44">${sess.abbr}</span>
+        </div>
+        <div style="font-size:.68rem;color:var(--primary);font-weight:600;margin-top:.15rem">${pi.paceLabel}</div>
+        <div style="font-size:.66rem;color:var(--muted);margin-top:.08rem;line-height:1.4">${pi.paceNote}</div>
+      </div>
+      <div style="flex-shrink:0;font-size:1.1rem">${isSel?'✅':'⬜'}</div>
+    </div>`;
+  });
+  html += `</div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:.75rem;padding-top:.65rem;border-top:1px solid var(--border)">
+    <button class="btn btn-outline btn-sm" onclick="wizGoStep('type')">← Back</button>
+    <button class="btn btn-primary" onclick="wizGoStep('configure')" ${!_dayWiz.selected.length?'disabled style="opacity:.4"':''}>Configure →</button>
+  </div>`;
+  return html;
+}
+
+// Anaerobic pick — choose AGT / EMOM / GPR, then pick exercises from that pool
+function renderWizPickAnaerobic(){
+  const ANAEROBIC_IDS = ['B1','B2','B3'];
+  const anaLabels = {B1:'AGT — Anti-Glycolytic Training',B2:'EMOM — Heavy',B3:'GPR — Glycolytic Power Repeats'};
+  const anaColors = {B1:'#9b72cf',B2:'#4a90d9',B3:'#ef4444'};
+  const selSessId = _dayWiz.anaerobicType;
+
+  let html = `<div style="margin-bottom:.75rem">
+    <label class="fl" style="margin-bottom:.4rem">Choose Protocol</label>
+    <div style="display:flex;flex-direction:column;gap:.4rem">`;
+  ANAEROBIC_IDS.forEach(id => {
+    const sess = ENDO_SESSIONS[id]; if(!sess) return;
+    const isActive = selSessId===id;
+    html += `<div class="wiz-ex-row ${isActive?'selected':''}" onclick="wizSetAnaerobicType('${id}')">
+      <div style="flex:1">
+        <div style="font-weight:700;font-size:.85rem">${sess.icon} ${anaLabels[id]||sess.name}</div>
+        <div style="font-size:.68rem;color:var(--muted);margin-top:.1rem;line-height:1.4">${sess.desc||''}</div>
+        <div style="font-size:.67rem;color:${anaColors[id]};font-weight:700;margin-top:.1rem">${sess.rpe||''}</div>
+      </div>
+      <div style="flex-shrink:0;font-size:1.1rem">${isActive?'✅':'⬜'}</div>
+    </div>`;
+  });
+  html += `</div></div>`;
+
+  // If a protocol is selected, show its exercise pool for selection
+  if(selSessId){
+    const sess = ENDO_SESSIONS[selSessId];
+    const pool = sess.exercisePool || [];
+    const selIds = new Set(_dayWiz.selected.map(e=>e.id));
+    html += `<div style="margin-top:.65rem">
+      <label class="fl" style="margin-bottom:.4rem">Select Exercises for ${sess.abbr} Circuit</label>
+      <div style="max-height:38vh;overflow-y:auto">`;
+    pool.forEach(ex => {
+      const isSel = selIds.has(ex.id);
+      const exData = JSON.stringify({id:ex.id,name:ex.name,cat:'accessory',muscles:ex.eq?ex.eq.join(', '):'',fc:['endurance'],isEndo:false,isAnaerobicEx:true,anaerobicSessId:selSessId}).replace(/"/g,'&quot;');
+      html += `<div class="wiz-ex-row ${isSel?'selected':''}" onclick="wizToggleExercise(${exData})">
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;font-size:.82rem">${ex.name}</div>
+          <div style="font-size:.66rem;color:var(--muted)">${(ex.eq||[]).join(', ')} · ${ex.note||''}</div>
+        </div>
+        <div style="flex-shrink:0;font-size:1.1rem">${isSel?'✅':'⬜'}</div>
+      </div>`;
+    });
+    html += `</div></div>`;
+  }
+
+  html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-top:.75rem;padding-top:.65rem;border-top:1px solid var(--border)">
+    <button class="btn btn-outline btn-sm" onclick="wizGoStep('type')">← Back</button>
+    <button class="btn btn-primary" onclick="wizGoStep('configure')" ${(!selSessId||!_dayWiz.selected.length)?'disabled style="opacity:.4"':''}>Configure →</button>
+  </div>`;
+  return html;
+}
+
+function wizSetAnaerobicType(id){
+  _dayWiz.anaerobicType = id;
+  _dayWiz.selected = []; // reset selections when switching protocol
+  _dayWiz.supersetPairs = [];
+  const inner = document.getElementById('wiz-inner');
+  if(inner) inner.innerHTML = renderWizPickAnaerobic();
+  else renderManualEditor();
+}
+
+// STEP 3: Configure
+function renderWizConfigure(){
+  const sel = _dayWiz.selected;
+  if(!sel.length) return `<div style="color:var(--muted);font-size:.82rem;padding:.5rem 0">No exercises selected. <button class="btn btn-outline btn-sm" onclick="wizGoStep('pick')">← Back</button></div>`;
   if(!_dayWiz.supersetPairs) _dayWiz.supersetPairs = [];
 
   let rows = '';
   sel.forEach((ex, i) => {
-    const isEndo = ex.isEndo;
-    const ssPair = _dayWiz.supersetPairs.find(p => p.includes(i));
-    const ssPartner = ssPair ? ssPair.find(x => x !== i) : null;
-    const ssLabel = ssPair ? `<span style="font-size:.62rem;font-weight:700;background:var(--primary-l);color:var(--primary);border-radius:4px;padding:.1rem .4rem;border:1px solid var(--primary)44">SS ${String.fromCharCode(65+_dayWiz.supersetPairs.indexOf(ssPair))}</span>` : '';
+    const isEndo = ex.isEndo || ex.isAnaerobicEx;
+    const isCardioSession = ex.isEndo && !ex.isAnaerobicEx && !ex.isSprintSession;
+    const isSprintSess = ex.isSprintSession;
 
-    // Unit toggle: reps / seconds
+    // Superset membership — now supports N-way supersets (groups)
+    const ssGroupIdx = _dayWiz.supersetPairs.findIndex(g => g.includes(i));
+    const ssGroup = ssGroupIdx >= 0 ? _dayWiz.supersetPairs[ssGroupIdx] : null;
+    const ssLetter = ssGroupIdx >= 0 ? String.fromCharCode(65+ssGroupIdx) : null;
+    const ssLabel  = ssLetter ? `<span style="font-size:.62rem;font-weight:700;background:var(--primary-l);color:var(--primary);border-radius:4px;padding:.1rem .4rem;border:1px solid var(--primary)44">SS ${ssLetter}</span>` : '';
+
     const unit = ex.unit || 'reps';
-    const unitBtn = (u, lbl) => `<button onclick="_dayWiz.selected[${i}].unit='${u}';renderManualEditor()" style="font-size:.65rem;padding:.12rem .42rem;border-radius:4px;border:1.5px solid ${unit===u?'var(--primary)':'var(--border)'};background:${unit===u?'var(--primary-l)':'transparent'};color:${unit===u?'var(--primary)':'var(--muted)'};cursor:pointer;font-weight:700">${lbl}</button>`;
+    const unitBtn = (u, lbl) => `<button onclick="_dayWiz.selected[${i}].unit='${u}';_dayWiz.selected[${i}].reps=null;_dayWiz.selected[${i}].secs=null;wizRefreshConfigure()" style="font-size:.65rem;padding:.12rem .42rem;border-radius:4px;border:1.5px solid ${unit===u?'var(--primary)':'var(--border)'};background:${unit===u?'var(--primary-l)':'transparent'};color:${unit===u?'var(--primary)':'var(--muted)'};cursor:pointer;font-weight:700">${lbl}</button>`;
 
-    if(isEndo){
+    if(isCardioSession){
+      const pi = ex.paceInfo || {};
+      const durationInfo = ex.sessId && ENDO_SESSIONS[ex.sessId]
+        ? `Phase prescriptions: accumulation ${ENDO_SESSIONS[ex.sessId].phases?.accumulation?.beginner?.load||'—'} → peak ${ENDO_SESSIONS[ex.sessId].phases?.peak?.beginner?.load||'—'}`
+        : '';
       rows += `<div class="trk-ex-block" style="padding:.75rem .9rem">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.4rem;flex-wrap:wrap;margin-bottom:.5rem">
-          <div style="font-weight:700;font-size:.85rem">${ex.icon||'🏃'} ${ex.name} ${ssLabel}</div>
+          <div style="font-weight:700;font-size:.85rem">${ex.icon||'🏃'} ${ex.name}</div>
           <button class="trk-del-set" onclick="wizRemoveSelected(${i})" title="Remove">✕</button>
         </div>
-        <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
+        ${durationInfo?`<div style="font-size:.67rem;color:var(--primary);margin-bottom:.5rem;line-height:1.5">${durationInfo}</div>`:''}
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-bottom:.4rem">
           <label style="font-size:.7rem;color:var(--muted);font-weight:700">Duration (min)</label>
-          <input type="number" min="5" max="180" step="5" class="trk-input trk-w-input" style="width:4rem"
+          <input type="number" min="5" max="180" step="5" class="trk-input" style="width:4rem;text-align:center"
             placeholder="30" value="${ex.durationMin||''}"
-            oninput="_dayWiz.selected[${i}].durationMin=this.value?+this.value:null">
-          <label style="font-size:.7rem;color:var(--muted);font-weight:700">Modality</label>
-          <select class="trk-input" style="padding:.22rem .4rem;font-size:.73rem" onchange="_dayWiz.selected[${i}].modality=this.value">
-            ${['run','bike','row'].map(m=>`<option value="${m}" ${(ex.modality||'run')===m?'selected':''}>${{run:'🏃 Run',bike:'🚴 Bike',row:'🚣 Row'}[m]}</option>`).join('')}
-          </select>
+            onchange="_dayWiz.selected[${i}].durationMin=this.value?+this.value:null">
         </div>
+        ${!pi.singlePace?`
+        <div style="font-size:.68rem;color:var(--muted);margin-bottom:.3rem;font-weight:600">${pi.paceLabel||'Pace'}</div>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-bottom:.3rem">
+          <label style="font-size:.68rem;color:var(--muted)">Easy min/km</label>
+          <input type="text" class="trk-input" style="width:3.5rem;text-align:center" placeholder="5:30"
+            value="${ex.easyPace||''}" onchange="_dayWiz.selected[${i}].easyPace=this.value">
+          <label style="font-size:.68rem;color:var(--muted)">${pi.label2||'Fast'} min/km</label>
+          <input type="text" class="trk-input" style="width:3.5rem;text-align:center" placeholder="4:30"
+            value="${ex.fastPace||''}" onchange="_dayWiz.selected[${i}].fastPace=this.value">
+        </div>` : `
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
+          <label style="font-size:.68rem;color:var(--muted)">${pi.paceLabel||'Pace'} min/km</label>
+          <input type="text" class="trk-input" style="width:3.5rem;text-align:center" placeholder="5:30"
+            value="${ex.pace||''}" onchange="_dayWiz.selected[${i}].pace=this.value">
+        </div>`}
+        ${_buildContinueButtons(i)}
+      </div>`;
+    } else if(isSprintSess){
+      const sess = ex.sessId ? ENDO_SESSIONS[ex.sessId] : null;
+      const phasePresc = sess ? `Accumulation: ${sess.phases?.accumulation?.beginner?.load||'—'} · Intensification: ${sess.phases?.intensification?.beginner?.load||'—'} · Peak: ${sess.phases?.peak?.beginner?.load||'—'}` : '';
+      rows += `<div class="trk-ex-block" style="padding:.75rem .9rem">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.4rem;flex-wrap:wrap;margin-bottom:.5rem">
+          <div style="font-weight:700;font-size:.85rem">${ex.icon||'⚡'} ${ex.name} ${ssLabel}</div>
+          <button class="trk-del-set" onclick="wizRemoveSelected(${i})" title="Remove">✕</button>
+        </div>
+        ${phasePresc?`<div style="font-size:.67rem;color:var(--primary);margin-bottom:.5rem;line-height:1.5">${phasePresc}</div>`:''}
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
+          <label style="font-size:.7rem;color:var(--muted);font-weight:700">Sets / Reps</label>
+          <input type="text" class="trk-input" style="width:6rem;text-align:center" placeholder="e.g. 6×8s"
+            value="${ex.setsReps||''}" onchange="_dayWiz.selected[${i}].setsReps=this.value">
+        </div>
+        ${_buildContinueButtons(i)}
+      </div>`;
+    } else if(ex.isAnaerobicEx){
+      // Anaerobic exercise — configure sets/reps within the protocol
+      rows += `<div class="trk-ex-block" style="padding:.75rem .9rem">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.4rem;flex-wrap:wrap;margin-bottom:.5rem">
+          <div style="font-weight:700;font-size:.85rem">${ex.name} ${ssLabel}</div>
+          <button class="trk-del-set" onclick="wizRemoveSelected(${i})" title="Remove">✕</button>
+        </div>
+        <div style="font-size:.67rem;color:var(--muted);margin-bottom:.45rem">Equipment: ${(ex.muscles||'').replace('cardio','')}</div>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
+          <span style="font-size:.7rem;color:var(--muted);font-weight:700">Reps/set</span>
+          <input type="number" min="1" max="20" class="trk-input" style="width:3rem;text-align:center" value="${ex.reps||5}"
+            onchange="_dayWiz.selected[${i}].reps=this.value?+this.value:5">
+        </div>
+        ${_buildContinueButtons(i)}
       </div>`;
     } else {
+      // Standard gym exercise
+      const canSS = _dayWiz.dayType === 'diy';
+      // Superset group: show multi-select checkboxes for other exercises
+      let ssGroupHtml = '';
+      if(canSS){
+        const others = sel.map((e2,j) => j!==i ? {j, name:e2.name} : null).filter(Boolean);
+        const currentGroupMembers = ssGroup ? ssGroup.filter(x=>x!==i) : [];
+        ssGroupHtml = `<div style="margin-top:.45rem">
+          <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
+            <span style="font-size:.68rem;color:var(--muted);font-weight:600">Superset group:</span>
+            ${others.map(({j, name}) => {
+              const inGroup = currentGroupMembers.includes(j);
+              return `<label style="display:flex;align-items:center;gap:.25rem;font-size:.68rem;cursor:pointer">
+                <input type="checkbox" ${inGroup?'checked':''} onchange="wizToggleSupersetMember(${i},${j},this.checked)"> ${j+1}. ${name}
+              </label>`;
+            }).join('')}
+            ${ssGroup?`<button class="btn btn-sm" style="font-size:.62rem;padding:.1rem .4rem;background:none;border:1px solid var(--border);color:var(--muted)" onclick="wizAddAllToSuperset(${i})">+ All</button>`:''}
+            ${!ssGroup?`<button class="btn btn-sm" style="font-size:.62rem;padding:.1rem .4rem;background:none;border:1px solid var(--border);color:var(--muted)" onclick="wizAddAllToSuperset(${i})">+ All in SS</button>`:''}
+          </div>
+        </div>`;
+      }
       rows += `<div class="trk-ex-block" style="padding:.75rem .9rem">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.4rem;flex-wrap:wrap;margin-bottom:.5rem">
           <div style="font-weight:700;font-size:.85rem">${ex.name} ${ssLabel}</div>
@@ -6049,40 +6312,52 @@ function renderWizConfigure(di, day){
         <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
           <span style="font-size:.7rem;color:var(--muted);font-weight:700">Sets</span>
           <input type="number" min="1" max="10" class="trk-input" style="width:3rem;text-align:center" value="${ex.sets||3}"
-            oninput="_dayWiz.selected[${i}].sets=this.value?+this.value:3">
+            onchange="_dayWiz.selected[${i}].sets=this.value?+this.value:3">
           <span style="font-size:.7rem;color:var(--muted);font-weight:700">${unit==='reps'?'Reps':'Secs'}</span>
           <input type="number" min="1" max="600" class="trk-input" style="width:4rem;text-align:center"
             placeholder="${unit==='reps'?'8–12':'30'}" value="${unit==='reps'?(ex.reps||''):(ex.secs||'')}"
-            oninput="_dayWiz.selected[${i}][_dayWiz.selected[${i}].unit==='reps'?'reps':'secs']=this.value?+this.value:null">
+            onchange="_dayWiz.selected[${i}][_dayWiz.selected[${i}].unit==='reps'?'reps':'secs']=this.value?+this.value:null">
           <div style="display:flex;gap:.2rem">${unitBtn('reps','Reps')}${unitBtn('secs','Secs')}</div>
         </div>
-        <div style="display:flex;align-items:center;gap:.5rem;margin-top:.45rem;flex-wrap:wrap">
-          <span style="font-size:.68rem;color:var(--muted);font-weight:600">Superset with:</span>
-          <select class="trk-input" style="padding:.2rem .4rem;font-size:.7rem" onchange="wizSetSuperset(${i},this.value)">
-            <option value="">— none —</option>
-            ${sel.map((e2,j)=> j!==i ? `<option value="${j}" ${ssPartner===j?'selected':''}>${j+1}. ${e2.name}</option>` : '').join('')}
-          </select>
-        </div>
+        ${ssGroupHtml}
+        ${_buildContinueButtons(i)}
       </div>`;
     }
   });
 
+  // C: bottom-level buttons
   return `
-    <div style="margin-bottom:.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.4rem">
-      <span style="font-size:.75rem;color:var(--muted)">${sel.length} exercise${sel.length!==1?'s':''} — configure sets, reps, and supersets</span>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;flex-wrap:wrap;gap:.4rem">
+      <span style="font-size:.75rem;color:var(--muted)">${sel.length} exercise${sel.length!==1?'s':''}</span>
       <button class="btn btn-outline btn-sm" onclick="wizGoStep('pick')">← Back</button>
     </div>
-    <div>${rows}</div>
+    <div id="wiz-configure-rows">${rows}</div>
     <div style="display:flex;justify-content:flex-end;gap:.5rem;margin-top:.75rem;padding-top:.65rem;border-top:1px solid var(--border)">
-      <button class="btn btn-primary" onclick="wizConfirm()">✓ Add to Plan</button>
+      <button class="btn btn-primary" onclick="wizConfirm('add_next')" title="Save and add another exercise">+ Add Exercise</button>
+      <button class="btn btn-primary" style="background:var(--green);box-shadow:0 2px 8px rgba(46,204,138,.3)" onclick="wizConfirm('finish')">✓ Day Complete</button>
     </div>`;
 }
 
-// ── Wizard helpers ─────────────────────────────────────────────────────
+// C: per-exercise continue buttons (after sets/reps inputs)
+function _buildContinueButtons(i){
+  const isLast = i === _dayWiz.selected.length - 1;
+  return `<div style="display:flex;gap:.4rem;margin-top:.55rem;flex-wrap:wrap">
+    <button class="btn btn-sm" style="font-size:.68rem;padding:.25rem .65rem;background:var(--primary-l);border:1px solid var(--primary);color:var(--primary)" onclick="wizConfirmExAndPickNext(${i})">✓ Done — Pick Next Exercise</button>
+    <button class="btn btn-sm" style="font-size:.68rem;padding:.25rem .65rem;background:var(--green-dim);border:1px solid var(--green);color:var(--green)" onclick="wizConfirm('finish')">✓ Day Complete</button>
+  </div>`;
+}
+
+// ── Wizard helpers ──────────────────────────────────────────────────────
+function wizRefreshConfigure(){
+  const inner = document.getElementById('wiz-inner');
+  if(inner) inner.innerHTML = renderWizConfigure();
+  else renderManualEditor();
+}
+
 function toggleWizFilter(type, val){
-  const arr = type === 'muscle' ? _dayWiz.muscleFilter : _dayWiz.equipFilter;
+  const arr = type==='muscle' ? _dayWiz.muscleFilter : _dayWiz.equipFilter;
   const idx = arr.indexOf(val);
-  if(idx >= 0) arr.splice(idx,1); else arr.push(val);
+  if(idx>=0) arr.splice(idx,1); else arr.push(val);
   renderManualEditor();
 }
 
@@ -6093,92 +6368,123 @@ function wizGoStep(step){
 
 function wizToggleExercise(exObj){
   const id = exObj.id;
-  const idx = _dayWiz.selected.findIndex(e => e.id === id);
-  if(idx >= 0){
-    // Remove — also remove any superset pair involving this index
-    _dayWiz.selected.splice(idx, 1);
-    _dayWiz.supersetPairs = (_dayWiz.supersetPairs||[])
-      .filter(p => !p.includes(idx))
-      .map(p => p.map(x => x > idx ? x-1 : x));
+  const idx = _dayWiz.selected.findIndex(e=>e.id===id);
+  if(idx>=0){
+    _dayWiz.selected.splice(idx,1);
+    _dayWiz.supersetPairs = (_dayWiz.supersetPairs||[]).map(g=>g.filter(x=>x!==idx).map(x=>x>idx?x-1:x)).filter(g=>g.length>1);
   } else {
-    _dayWiz.selected.push({...exObj, sets:3, reps:null, secs:null, unit:'reps', supersetWith:null});
+    _dayWiz.selected.push({...exObj, sets:3, reps:null, secs:null, unit:'reps'});
+  }
+  // Don't full re-render if on pick step — just update the list
+  if(_dayWiz.step==='pick'){
+    const listEl = document.getElementById('wiz-ex-list');
+    if(listEl){ listEl.innerHTML = buildWizExList(); return; }
+    const inner = document.getElementById('wiz-inner');
+    if(inner){ inner.innerHTML = renderWizPick(); return; }
   }
   renderManualEditor();
 }
 
 function wizRemoveSelected(i){
-  _dayWiz.selected.splice(i, 1);
-  _dayWiz.supersetPairs = (_dayWiz.supersetPairs||[])
-    .filter(p => !p.includes(i))
-    .map(p => p.map(x => x > i ? x-1 : x));
-  renderManualEditor();
+  _dayWiz.selected.splice(i,1);
+  _dayWiz.supersetPairs = (_dayWiz.supersetPairs||[]).map(g=>g.filter(x=>x!==i).map(x=>x>i?x-1:x)).filter(g=>g.length>1);
+  wizRefreshConfigure();
 }
 
 function wizClearSelection(){
-  _dayWiz.selected = [];
-  _dayWiz.supersetPairs = [];
-  renderManualEditor();
+  _dayWiz.selected=[];
+  _dayWiz.supersetPairs=[];
+  const inner = document.getElementById('wiz-inner');
+  if(inner) inner.innerHTML = renderWizPickDIY();
+  else renderManualEditor();
 }
 
-function wizSetSuperset(i, jStr){
-  if(!_dayWiz.supersetPairs) _dayWiz.supersetPairs = [];
-  // Remove any existing pair involving i
-  _dayWiz.supersetPairs = _dayWiz.supersetPairs.filter(p => !p.includes(i));
-  if(jStr !== ''){
-    const j = parseInt(jStr);
-    // Also remove any existing pair involving j
-    _dayWiz.supersetPairs = _dayWiz.supersetPairs.filter(p => !p.includes(j));
-    _dayWiz.supersetPairs.push([i, j]);
+// Multi-member superset toggle (N-way)
+function wizToggleSupersetMember(anchor, j, checked){
+  if(!_dayWiz.supersetPairs) _dayWiz.supersetPairs=[];
+  // Find or create group that contains anchor
+  let groupIdx = _dayWiz.supersetPairs.findIndex(g=>g.includes(anchor));
+  if(checked){
+    if(groupIdx>=0){
+      // Add j to existing group (if not already there)
+      if(!_dayWiz.supersetPairs[groupIdx].includes(j)) _dayWiz.supersetPairs[groupIdx].push(j);
+      // Remove j from any other group
+      _dayWiz.supersetPairs = _dayWiz.supersetPairs.map((g,gi)=> gi===groupIdx ? g : g.filter(x=>x!==j));
+    } else {
+      // Remove j from existing group if it's in one
+      _dayWiz.supersetPairs = _dayWiz.supersetPairs.map(g=>g.filter(x=>x!==j)).filter(g=>g.length>1);
+      _dayWiz.supersetPairs.push([anchor, j]);
+    }
+  } else {
+    if(groupIdx>=0){
+      _dayWiz.supersetPairs[groupIdx] = _dayWiz.supersetPairs[groupIdx].filter(x=>x!==j);
+      if(_dayWiz.supersetPairs[groupIdx].length<2) _dayWiz.supersetPairs.splice(groupIdx,1);
+    }
   }
+  _dayWiz.supersetPairs = _dayWiz.supersetPairs.filter(g=>g.length>=2);
+  wizRefreshConfigure();
+}
+
+// Add ALL exercises to the same superset group as anchor
+function wizAddAllToSuperset(anchor){
+  if(!_dayWiz.supersetPairs) _dayWiz.supersetPairs=[];
+  const all = _dayWiz.selected.map((_,i)=>i);
+  // Remove all existing groups, create one big group
+  _dayWiz.supersetPairs = [all];
+  wizRefreshConfigure();
+}
+
+// C: save this exercise's config and go back to pick to add another
+function wizConfirmExAndPickNext(i){
+  // Data is already live in _dayWiz.selected via onchange bindings
+  // Go back to pick step
+  _dayWiz.step = 'pick';
   renderManualEditor();
 }
 
-function wizConfirm(){
+// Final confirm: save day and either stay on plan editor or go to next day
+function wizConfirm(mode){
   const di = _dayWiz.di;
-  // Convert selected to the exercise format used by the rest of the system
   const exercises = _dayWiz.selected.map(ex => {
-    if(ex.isEndo) return {
-      id: ex.id, name: ex.name, cat: 'cardio', muscles: 'cardio',
-      fc: ['endurance'], isEndo: true, sessId: ex.sessId,
-      durationMin: ex.durationMin||30, modality: ex.modality||'run',
-      setsReps: `${ex.durationMin||30} min`
-    };
-    const repsOrSecs = ex.unit === 'secs'
-      ? `${ex.sets||3}×${ex.secs||30}s`
-      : `${ex.sets||3}×${ex.reps||8}`;
-    return {
-      id: ex.id, name: ex.name, cat: ex.cat,
-      muscles: ex.muscles, fc: ex.fc||['hypertrophy'],
-      sets: ex.sets||3,
-      reps: ex.unit==='reps' ? (ex.reps||null) : null,
-      secs: ex.unit==='secs' ? (ex.secs||null) : null,
-      unit: ex.unit||'reps',
-      setsReps: repsOrSecs
-    };
+    if(ex.isEndo && !ex.isAnaerobicEx){
+      const setsReps = ex.isSprintSession
+        ? (ex.setsReps||'')
+        : `${ex.durationMin||30} min`;
+      return { ...ex, setsReps, cat:'cardio', muscles:'cardio', fc:['endurance'] };
+    }
+    if(ex.isAnaerobicEx){
+      return { ...ex, setsReps:`${ex.reps||5} reps`, cat:'accessory', fc:['endurance'] };
+    }
+    const repsOrSecs = ex.unit==='secs' ? `${ex.sets||3}×${ex.secs||30}s` : `${ex.sets||3}×${ex.reps||8}`;
+    return { id:ex.id, name:ex.name, cat:ex.cat, muscles:ex.muscles, fc:ex.fc||['hypertrophy'],
+      sets:ex.sets||3, reps:ex.unit==='reps'?(ex.reps||null):null,
+      secs:ex.unit==='secs'?(ex.secs||null):null, unit:ex.unit||'reps', setsReps:repsOrSecs };
   });
-
-  // Build superset pairs as index pairs in the new exercises array
-  const ssPairs = (_dayWiz.supersetPairs||[]).map(p => [...p]);
-
   _manualPlan.days[di].exercises = exercises;
-  _manualPlan.days[di].supersetPairs = ssPairs;
+  _manualPlan.days[di].supersetPairs = (_dayWiz.supersetPairs||[]).map(g=>[...g]);
+  _manualPlan.days[di].dayType  = _dayWiz.dayType;
+  _manualPlan.days[di].anaerobicType = _dayWiz.anaerobicType||null;
   _dayWiz = null;
-  renderManualEditor();
+  if(mode==='add_next'){
+    // Open a new day wizard immediately
+    openDayWizardNew();
+  } else {
+    renderManualEditor();
+  }
 }
 
 function cancelDayWizard(di){
-  // If the day was just created (no exercises yet), remove it
   const day = _manualPlan.days[di];
   if(day && !(day.exercises||[]).length && !trkGetManual(trkState.activeSlot||0)?.days?.[di]){
-    _manualPlan.days.splice(di, 1);
+    _manualPlan.days.splice(di,1);
   }
-  _dayWiz = null;
+  _dayWiz=null;
   renderManualEditor();
 }
 
 function removeManualDay(di){
-  _manualPlan.days.splice(di, 1);
-  _dayWiz = null;
+  _manualPlan.days.splice(di,1);
+  _dayWiz=null;
   renderManualEditor();
 }
 
