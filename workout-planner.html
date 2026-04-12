@@ -583,7 +583,17 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 .eval-style-bar-fill{height:100%;border-radius:4px;transition:width .4s}
 .eval-style-pct{font-family:var(--jb);font-size:.62rem;color:var(--muted);min-width:2.5rem;text-align:right}
 
-/* ── MOBILE NAV GHOST-TAP FIX ─────────────────────────────────────── */
+.trk-slot-delete-btn{background:none;border:none;cursor:pointer;font-size:.9rem;opacity:.4;line-height:1;padding:.1rem .2rem;border-radius:4px;transition:opacity .12s,background .12s;flex-shrink:0}
+.trk-slot-delete-btn:hover{opacity:1;background:#ef444420}
+/* ── WIZARD EXERCISE PICKER ───────────────────────────────────────────── */
+.wiz-ex-row{display:flex;align-items:center;gap:.6rem;padding:.42rem .6rem;border-radius:7px;cursor:pointer;border:1.5px solid transparent;transition:all .12s;margin-bottom:.2rem}
+.wiz-ex-row:hover{background:var(--navy3);border-color:var(--border)}
+.wiz-ex-row.selected{background:var(--primary-l);border-color:var(--primary)}
+
+/* ── TRK CONFIRM MODAL ────────────────────────────────────────────────── */
+#trk-confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:600;display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(2px)}
+#trk-confirm-overlay.hidden{display:none!important}
+#trk-confirm-box{background:var(--navy2);border:1.5px solid var(--border);border-radius:16px;max-width:400px;width:100%;padding:1.4rem 1.5rem;box-shadow:0 20px 60px rgba(0,0,0,.5)}
 /* tool-inner-nav stays display:flex always; mobile overflow handled via scroll */
 .tool-inner-nav{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .tool-inner-nav::-webkit-scrollbar{display:none}
@@ -1040,7 +1050,12 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
   </div>
 </div>
 
-<!-- ==================== MANUAL ==================== -->
+<!-- ==================== TRK CONFIRM MODAL ==================== -->
+<div id="trk-confirm-overlay" class="hidden" onclick="if(event.target===this)closeTrkConfirmModal()">
+  <div id="trk-confirm-box">
+    <div id="trk-confirm-body"></div>
+  </div>
+</div>
 <div class="view" id="view-manual">
   <div class="card">
     <h2 class="doc-h">How to Use Workout Planner</h2>
@@ -4317,7 +4332,7 @@ function renderSlotGrid(){
     const isManual = !!manual;
 
     if(hasPlan){
-      const meta = plan ? plan.meta : manual.meta;
+      const meta = plan ? plan.meta : (manual.meta||{});
       const title = isManual ? (manual.name || 'Custom Plan') : `${meta.weeks}-Week Plan`;
       const sub   = isManual
         ? `${(manual.days||[]).length} day${(manual.days||[]).length!==1?'s':''}/wk · Manual`
@@ -4326,7 +4341,10 @@ function renderSlotGrid(){
         ? `<span class="trk-slot-badge badge-logged">✓ ${logs.length} session${logs.length!==1?'s':''} logged</span>`
         : `<span class="trk-slot-badge badge-empty">0 sessions</span>`;
       html += `<div class="trk-slot-card filled-slot" onclick="trkOpenSlot(${slot})">
-        <div class="trk-slot-num">${TRK_SLOT_LABELS[slot]}</div>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.3rem">
+          <div class="trk-slot-num">${TRK_SLOT_LABELS[slot]}</div>
+          <button class="trk-slot-delete-btn" onclick="event.stopPropagation();trkDeleteSlot(${slot})" title="Delete this plan">🗑</button>
+        </div>
         <div class="trk-slot-title">${title}</div>
         <div class="trk-slot-meta">${sub}</div>
         ${logBadge}
@@ -5074,9 +5092,14 @@ function promptSaveAndTrack(){
   let targetSlot = (trkState._pendingSlot != null) ? trkState._pendingSlot : null;
   if(targetSlot === null){
     for(let i=0;i<3;i++){ if(!trkSlotHasPlan(i)){targetSlot=i;break;} }
-    if(targetSlot===null) targetSlot=0; // all full — overwrite slot 0 with confirm
   }
   trkState._pendingSlot = null;
+
+  // All slots full — show the slot picker overlay
+  if(targetSlot === null){
+    showSlotPickerForSave();
+    return;
+  }
   const existing = trkGetPlan(targetSlot);
   if(!existing){ doSaveAndTrack(targetSlot); return; }
   const logCount = trkGetLogs(targetSlot).length;
@@ -5114,6 +5137,7 @@ function doSaveAndTrack(slotArg){
   // Clear any lingering partials for this slot
   for(let wk=1;wk<=S.weeks;wk++) for(let d=0;d<S.wpw;d++) trkSetPartial(wk,d,null,slot);
   document.getElementById('replace-plan-modal').classList.add('hidden');
+  closeTrkConfirmModal();
   document.body.style.overflow='';
   // Navigate to the tracker and open this slot
   trkState.activeSlot = slot;
@@ -5615,23 +5639,119 @@ function closeSwapModal(e){
 }
 
 // =====================================================================
-// MANUAL PLAN BUILDER
+// =====================================================================
+// MANUAL PLAN BUILDER — Wizard-based per-day exercise picker
 // =====================================================================
 
-// Muscle groups & training style maps derived from the EX database
 const MANUAL_MUSCLES = ['chest','back','shoulders','quads','hamstrings','glutes','biceps','triceps','core','calves'];
 const MANUAL_MUSCLE_LABELS = {chest:'Chest',back:'Back',shoulders:'Shoulders',quads:'Quads',hamstrings:'Hamstrings',glutes:'Glutes',biceps:'Biceps',triceps:'Triceps',core:'Core',calves:'Calves'};
 
-// Manual plan state per slot (ephemeral — persisted via trkSetManual)
-let _manualPlan = { name:'', days:[] };
-
-const MANUAL_STYLES = [
-  {val:'hypertrophy', label:'Hypertrophy', icon:'📈', desc:'6–12 reps · Moderate load · 60–120s rest'},
-  {val:'strength',    label:'Strength',    icon:'🏆', desc:'2–6 reps · Heavy load · 3–5 min rest'},
-  {val:'endurance',   label:'Endurance',   icon:'🏃', desc:'15–25+ reps · Light load · 30–60s rest'},
-  {val:'power_speed', label:'Power/Speed', icon:'⚡', desc:'1–5 reps · Max intent · 3–5 min rest'}
+// All equipment chips drawn from EX database
+const MANUAL_EQUIP_OPTIONS = [
+  {val:'barbell',label:'Barbell'},{val:'dumbbells',label:'Dumbbells'},{val:'kettlebells',label:'Kettlebells'},
+  {val:'cables',label:'Cables'},{val:'machines',label:'Machines'},{val:'bodyweight',label:'Bodyweight'},
+  {val:'resistance_bands',label:'Bands'},{val:'pullup_bar',label:'Pull-Up Bar'},
+  {val:'smith_machine',label:'Smith Machine'},{val:'sled',label:'Sled'},
+  {val:'weight_vest',label:'Weight Vest'},{val:'bike',label:'Bike'},
+  {val:'rowing_machine',label:'Rowing Machine'},{val:'treadmill',label:'Treadmill/Outdoor'}
 ];
 
+// Training style meta — derived automatically, but kept for display
+const MANUAL_STYLE_META = {
+  strength:    {label:'Strength',    icon:'🏆', color:'#d4920a', desc:'2–6 reps · Heavy load · 3–5 min rest'},
+  hypertrophy: {label:'Hypertrophy', icon:'📈', color:'#4a90d9', desc:'6–12 reps · Moderate load · 60–120s rest'},
+  endurance:   {label:'Endurance',   icon:'🏃', color:'#2ecc8a', desc:'15–25+ reps · Light load · 30–60s rest'},
+  power_speed: {label:'Power/Speed', icon:'⚡', color:'#9b72cf', desc:'1–5 reps · Max intent · 3–5 min rest'}
+};
+
+// Superset display label
+const SS_LABEL = 'SS';
+
+// Manual plan state (in-memory while editing)
+let _manualPlan = { name:'', days:[] };
+
+// Day wizard state
+let _dayWiz = null; // { di, step, muscleFilter, equipFilter, search, selected }
+// step: 'filter' | 'pick' | 'configure'
+
+// ── Slot delete ────────────────────────────────────────────────────────
+function trkDeleteSlot(slot){
+  // Show confirmation modal
+  const logCount = trkGetLogs(slot).length;
+  const plan = trkGetPlan(slot);
+  const manual = trkGetManual(slot);
+  const title = plan ? `${plan.meta?.weeks}-Week Plan` : (manual?.name || 'Custom Plan');
+  showTrkConfirmModal(
+    `Delete ${TRK_SLOT_LABELS[slot]}?`,
+    `This will permanently delete "<strong>${title}</strong>"${logCount ? ` and its <strong>${logCount} logged session${logCount!==1?'s':''}</strong>` : ''}. This cannot be undone.`,
+    logCount > 0 ? `<button class="btn btn-outline btn-sm" style="margin-bottom:.6rem" onclick="downloadSlotBackupCSV(${slot})">📥 Download backup first</button>` : '',
+    `confirmDeleteSlot(${slot})`
+  );
+}
+
+function confirmDeleteSlot(slot){
+  localStorage.removeItem(_slotPlanKey(slot));
+  localStorage.removeItem(_slotLogsKey(slot));
+  localStorage.removeItem(_slotManualKey(slot));
+  // Clear partials for this slot
+  for(let wk=1; wk<=52; wk++) for(let d=0; d<7; d++) localStorage.removeItem(`wpt_p_w${wk}_d${d}_s${slot}`);
+  closeTrkConfirmModal();
+  trkShowSlotSelector();
+}
+
+function downloadSlotBackupCSV(slot){
+  trkState.activeSlot = slot;
+  downloadBackupCSV();
+}
+
+// ── All-slots-full picker (shown when saving a new plan) ───────────────
+function showSlotPickerForSave(){
+  // All 3 slots occupied — let user choose which to replace
+  let html = `<div style="margin-bottom:.9rem">
+    <div style="font-family:var(--fd);font-size:.95rem;font-weight:800;text-transform:uppercase;color:var(--text);margin-bottom:.35rem">All 3 plan slots are full</div>
+    <div style="font-size:.82rem;color:var(--muted);line-height:1.6">Choose which plan to replace with your new one. Download a backup first if you want to keep any data.</div>
+  </div>`;
+  for(let slot=0; slot<3; slot++){
+    const plan = trkGetPlan(slot);
+    const manual = trkGetManual(slot);
+    const title = plan ? `${plan.meta?.weeks}-Week Plan · ${plan.meta?.split||''}` : (manual?.name || 'Custom Plan');
+    const logCount = trkGetLogs(slot).length;
+    html += `<div style="background:var(--navy3);border:1.5px solid var(--border);border-radius:10px;padding:.75rem 1rem;margin-bottom:.55rem;display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap">
+      <div>
+        <div style="font-weight:700;font-size:.85rem">${TRK_SLOT_LABELS[slot]} — ${title}</div>
+        <div style="font-size:.68rem;color:var(--muted);margin-top:.1rem">${logCount} session${logCount!==1?'s':''} logged</div>
+      </div>
+      <div style="display:flex;gap:.4rem;flex-wrap:wrap">
+        ${logCount ? `<button class="btn btn-outline btn-sm" onclick="downloadSlotBackupCSV(${slot})" style="font-size:.68rem;padding:.22rem .6rem">📥 Backup</button>` : ''}
+        <button class="btn btn-primary btn-sm" onclick="doSaveAndTrack(${slot})" style="font-size:.72rem">Replace →</button>
+      </div>
+    </div>`;
+  }
+  html += `<button class="btn btn-outline btn-sm" style="width:100%;margin-top:.3rem" onclick="closeTrkConfirmModal()">Cancel</button>`;
+
+  const overlay = document.getElementById('trk-confirm-overlay');
+  document.getElementById('trk-confirm-body').innerHTML = html;
+  overlay.classList.remove('hidden');
+}
+
+// ── Generic confirm modal ──────────────────────────────────────────────
+function showTrkConfirmModal(title, body, extra, confirmFn){
+  document.getElementById('trk-confirm-body').innerHTML = `
+    <div style="font-family:var(--fd);font-size:.95rem;font-weight:800;text-transform:uppercase;color:var(--text);margin-bottom:.35rem">${title}</div>
+    <div style="font-size:.82rem;color:var(--muted);line-height:1.65;margin-bottom:.75rem">${body}</div>
+    ${extra}
+    <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.65rem">
+      <button class="btn btn-outline btn-sm" onclick="closeTrkConfirmModal()">Cancel</button>
+      <button class="btn btn-sm" style="background:#ef4444;color:#fff;border:none" onclick="${confirmFn}">Delete</button>
+    </div>`;
+  document.getElementById('trk-confirm-overlay').classList.remove('hidden');
+}
+
+function closeTrkConfirmModal(){
+  document.getElementById('trk-confirm-overlay').classList.add('hidden');
+}
+
+// ── Entry point ────────────────────────────────────────────────────────
 function trkOpenManualEditor(slot){
   trkState.activeSlot = slot;
   document.getElementById('trk-slot-selector').classList.add('hidden');
@@ -5641,15 +5761,22 @@ function trkOpenManualEditor(slot){
   document.getElementById('trk-manual-editor').classList.remove('hidden');
   document.getElementById('trk-slot-label').textContent = TRK_SLOT_LABELS[slot];
 
-  // Load existing manual plan for this slot or start fresh
   const existing = trkGetManual(slot);
   _manualPlan = existing ? JSON.parse(JSON.stringify(existing)) : { name:'', days:[] };
+  _dayWiz = null;
   renderManualEditor();
 }
 
+// ── Main editor view ───────────────────────────────────────────────────
 function renderManualEditor(){
   const body = document.getElementById('trk-manual-editor-body');
   const days = _manualPlan.days || [];
+
+  // If day wizard is open, render it instead
+  if(_dayWiz !== null){
+    renderDayWizard();
+    return;
+  }
 
   let html = `
   <div class="card" style="margin-bottom:.8rem">
@@ -5662,15 +5789,13 @@ function renderManualEditor(){
   <div class="card" style="margin-bottom:.8rem">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;flex-wrap:wrap;gap:.5rem">
       <div class="vol-title">Training Days</div>
-      <button class="btn btn-primary btn-sm" onclick="addManualDay()">+ Add Day</button>
+      <button class="btn btn-primary btn-sm" onclick="openDayWizardNew()">+ Add Day</button>
     </div>`;
 
   if(!days.length){
-    html += `<div style="color:var(--muted);font-size:.82rem;text-align:center;padding:.8rem 0">No days yet — click <strong>Add Day</strong> to build your plan.</div>`;
+    html += `<div style="color:var(--muted);font-size:.82rem;text-align:center;padding:1rem 0">No days yet. Click <strong>+ Add Day</strong> to build your plan.</div>`;
   } else {
-    days.forEach((day, di) => {
-      html += buildManualDayHTML(day, di);
-    });
+    days.forEach((day, di) => { html += buildDaySummaryCard(day, di); });
   }
 
   html += `</div>
@@ -5682,76 +5807,410 @@ function renderManualEditor(){
   body.innerHTML = html;
 }
 
-function buildManualDayHTML(day, di){
-  const exercises = day.exercises || [];
-  return `<div class="trk-day-card" style="margin-bottom:.7rem;padding:.9rem 1rem">
-    <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.65rem;flex-wrap:wrap">
-      <input type="text" class="trk-input" style="flex:1;min-width:120px;padding:.35rem .6rem"
-        placeholder="Day name (e.g. Push A)"
-        value="${(day.label||'').replace(/"/g,'&quot;')}"
-        oninput="_manualPlan.days[${di}].label=this.value">
-      <select class="trk-input" style="padding:.32rem .55rem" onchange="_manualPlan.days[${di}].style=this.value">
-        ${MANUAL_STYLES.map(s=>`<option value="${s.val}" ${(day.style||'hypertrophy')===s.val?'selected':''}>${s.icon} ${s.label}</option>`).join('')}
-      </select>
-      <button class="btn btn-sm" style="background:#ef444420;border:1px solid #ef4444;color:#ef4444;padding:.3rem .6rem" onclick="removeManualDay(${di})">✕ Remove</button>
+// Summary card for an existing day in the editor (not the wizard)
+function buildDaySummaryCard(day, di){
+  const exes = day.exercises || [];
+  const style = deriveDayStyle(day);
+  const styleM = MANUAL_STYLE_META[style];
+  const styleColor = styleM.color;
+  const exPills = exes.slice(0,4).map(ex =>
+    `<span style="font-size:.66rem;background:var(--navy3);border:1px solid var(--border);border-radius:4px;padding:.1rem .35rem;color:var(--text2);white-space:nowrap">${ex.name||'?'}</span>`
+  ).join('');
+  const more = exes.length > 4 ? `<span style="font-size:.66rem;color:var(--muted)">+${exes.length-4} more</span>` : '';
+  return `<div style="background:var(--navy3);border:1.5px solid var(--border);border-radius:10px;padding:.75rem 1rem;margin-bottom:.55rem">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap;margin-bottom:.45rem">
+      <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
+        <span style="font-weight:700;font-size:.88rem">${day.label||'Day '+(di+1)}</span>
+        <span style="font-size:.62rem;font-weight:700;background:${styleColor}22;color:${styleColor};border-radius:4px;padding:.1rem .38rem;border:1px solid ${styleColor}44">${styleM.icon} ${styleM.label}</span>
+        <span style="font-size:.63rem;color:var(--muted)">${exes.length} exercise${exes.length!==1?'s':''}</span>
+      </div>
+      <div style="display:flex;gap:.35rem">
+        <button class="btn btn-sm" style="font-size:.7rem;padding:.25rem .65rem;background:var(--primary-l);border:1px solid var(--primary);color:var(--primary)" onclick="openDayWizardEdit(${di})">✏️ Edit</button>
+        <button class="btn btn-sm" style="font-size:.7rem;padding:.25rem .55rem;background:#ef444418;border:1px solid #ef4444;color:#ef4444" onclick="removeManualDay(${di})">✕</button>
+      </div>
     </div>
-    <div style="margin-bottom:.45rem">
-      ${exercises.map((ex,ei) => buildManualExRow(ex, di, ei)).join('')}
-    </div>
-    <button class="trk-add-set" onclick="addManualExercise(${di})" style="width:100%;margin-top:.3rem">+ Add Exercise</button>
+    <div style="display:flex;flex-wrap:wrap;gap:.28rem">${exPills}${more}</div>
   </div>`;
 }
 
-function buildManualExRow(ex, di, ei){
-  const catOptions = ['compound','isolation','explosive','core','accessory'];
-  return `<div class="trk-set-row" style="gap:.4rem;margin-bottom:.3rem;flex-wrap:nowrap;align-items:center" id="manual-ex-${di}-${ei}">
-    <input type="text" class="trk-input" style="flex:2;min-width:110px;padding:.28rem .45rem;font-size:.78rem"
-      placeholder="Exercise name"
-      value="${(ex.name||'').replace(/"/g,'&quot;')}"
-      oninput="_manualPlan.days[${di}].exercises[${ei}].name=this.value">
-    <input type="text" class="trk-input" style="width:5.5rem;padding:.28rem .38rem;font-size:.74rem"
-      placeholder="Muscles"
-      title="Primary muscles (comma-separated)"
-      value="${(ex.muscles||'').replace(/"/g,'&quot;')}"
-      oninput="_manualPlan.days[${di}].exercises[${ei}].muscles=this.value">
-    <select class="trk-input" style="padding:.25rem .35rem;font-size:.73rem" onchange="_manualPlan.days[${di}].exercises[${ei}].cat=this.value">
-      ${catOptions.map(c=>`<option value="${c}" ${(ex.cat||'compound')===c?'selected':''}>${c.charAt(0).toUpperCase()+c.slice(1)}</option>`).join('')}
-    </select>
-    <input type="text" class="trk-input" style="width:3.8rem;padding:.28rem .3rem;text-align:center;font-size:.74rem"
-      placeholder="3×8"
-      title="Sets × Reps"
-      value="${(ex.setsReps||'').replace(/"/g,'&quot;')}"
-      oninput="_manualPlan.days[${di}].exercises[${ei}].setsReps=this.value">
-    <button class="trk-del-set" onclick="removeManualExercise(${di},${ei})" title="Remove">×</button>
-  </div>`;
-}
-
-function addManualDay(){
+// ── Day Wizard ─────────────────────────────────────────────────────────
+function openDayWizardNew(){
+  const di = (_manualPlan.days||[]).length;
   if(!_manualPlan.days) _manualPlan.days = [];
-  _manualPlan.days.push({ label:'Day '+((_manualPlan.days.length||0)+1), style:'hypertrophy', exercises:[] });
+  _manualPlan.days.push({ label:'Day '+(di+1), exercises:[], supersetPairs:[] });
+  _dayWiz = { di, step:'filter', muscleFilter:[], equipFilter:[], search:'', selected:[] };
+  renderManualEditor();
+}
+
+function openDayWizardEdit(di){
+  const day = _manualPlan.days[di];
+  // selected = copy of current exercise ids so we can diff on confirm
+  _dayWiz = {
+    di,
+    step:'filter',
+    muscleFilter:[],
+    equipFilter:[],
+    search:'',
+    selected: (day.exercises||[]).map(ex => ({...ex})) // deep copy
+  };
+  renderManualEditor();
+}
+
+function renderDayWizard(){
+  const body = document.getElementById('trk-manual-editor-body');
+  const di = _dayWiz.di;
+  const day = _manualPlan.days[di];
+  const steps = ['filter','pick','configure'];
+  const stepIdx = steps.indexOf(_dayWiz.step);
+
+  // Step indicator
+  const stepLabels = ['1 · Filter','2 · Pick Exercises','3 · Configure'];
+  const stepDots = stepLabels.map((l,i) => `<span style="font-size:.68rem;font-weight:700;padding:.18rem .65rem;border-radius:99px;${i===stepIdx?'background:var(--primary);color:#fff':'background:var(--navy3);color:var(--muted);border:1px solid var(--border)'}">${l}</span>`).join('<span style="color:var(--border);font-size:.7rem;padding:0 .2rem">›</span>');
+
+  let inner = '';
+  if(_dayWiz.step === 'filter')    inner = renderWizFilter(di, day);
+  if(_dayWiz.step === 'pick')      inner = renderWizPick(di, day);
+  if(_dayWiz.step === 'configure') inner = renderWizConfigure(di, day);
+
+  body.innerHTML = `
+  <div class="card" style="margin-bottom:.8rem">
+    <div style="display:flex;align-items:center;gap:.65rem;margin-bottom:.8rem;flex-wrap:wrap">
+      <button class="trk-back-slots" style="margin:0" onclick="cancelDayWizard(${di})">← Back to Plan</button>
+      <div style="font-family:var(--fd);font-size:.9rem;font-weight:800;color:var(--text);text-transform:uppercase;flex:1">
+        ${day.label||'Day '+(di+1)}
+        <input type="text" class="trk-input" style="display:inline;width:9rem;margin-left:.5rem;padding:.22rem .5rem;font-size:.78rem"
+          placeholder="Day name" value="${(day.label||'').replace(/"/g,'&quot;')}"
+          oninput="_manualPlan.days[${di}].label=this.value">
+      </div>
+    </div>
+    <div style="display:flex;gap:.3rem;align-items:center;flex-wrap:wrap;margin-bottom:1rem">${stepDots}</div>
+    ${inner}
+  </div>`;
+}
+
+// STEP 1: Filter
+function renderWizFilter(di, day){
+  const musclePills = MANUAL_MUSCLES.map(m => {
+    const sel = _dayWiz.muscleFilter.includes(m);
+    return `<button class="chip ${sel?'sel':''}" onclick="toggleWizFilter('muscle','${m}')">${MANUAL_MUSCLE_LABELS[m]}</button>`;
+  }).join('');
+
+  const equipPills = MANUAL_EQUIP_OPTIONS.map(e => {
+    const sel = _dayWiz.equipFilter.includes(e.val);
+    return `<button class="chip ${sel?'sel':''}" onclick="toggleWizFilter('equip','${e.val}')">${e.label}</button>`;
+  }).join('');
+
+  const hasEndo = _dayWiz.muscleFilter.length === 0 || _dayWiz.muscleFilter.includes('cardio');
+  return `
+    <div class="form-group">
+      <label class="fl">Target Muscles <span class="hint">— leave blank to see all</span></label>
+      <div class="chip-grid">${musclePills}</div>
+    </div>
+    <div class="form-group">
+      <label class="fl">Equipment Available</label>
+      <div class="chip-grid">${equipPills}</div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:.5rem;margin-top:.5rem">
+      <button class="btn btn-primary" onclick="wizGoStep('pick')">Next: Pick Exercises →</button>
+    </div>`;
+}
+
+// STEP 2: Pick exercises
+function renderWizPick(di, day){
+  const mf = _dayWiz.muscleFilter;
+  const ef = _dayWiz.equipFilter;
+  const sq = (_dayWiz.search||'').toLowerCase().trim();
+  const selIds = new Set(_dayWiz.selected.map(e => e.id||e.wizId||e.name));
+
+  // Build combined pool: gym exercises + endurance sessions
+  const gymPool = EX.filter(ex => {
+    if(ef.length > 0 && !ex.eq.some(e => ef.includes(e))) return false;
+    if(mf.length > 0 && !ex.primary.some(m => mf.includes(m)) && !ex.secondary.some(m => mf.includes(m))) return false;
+    if(sq && !ex.name.toLowerCase().includes(sq)) return false;
+    return true;
+  });
+
+  // Endurance sessions — shown when no muscle filter or muscle filter is empty
+  const showEndo = mf.length === 0 || mf.some(m => ['cardio','endurance'].includes(m));
+  const endoPool = showEndo ? Object.entries(ENDO_SESSIONS).filter(([id, sess]) => {
+    if(sq && !sess.name.toLowerCase().includes(sq)) return false;
+    return true;
+  }) : [];
+
+  // Group gym by category
+  const cats = ['compound','explosive','isolation','core','accessory'];
+  const catLabels = {compound:'Compound',explosive:'Explosive',isolation:'Isolation',core:'Core',accessory:'Accessory'};
+  const catColors = {compound:'#4a90d9',explosive:'#f59e0b',isolation:'#9b72cf',core:'#2ecc8a',accessory:'#fb7185'};
+
+  let exList = '';
+  cats.forEach(cat => {
+    const items = gymPool.filter(ex => ex.cat === cat);
+    if(!items.length) return;
+    exList += `<div style="margin-bottom:.55rem">
+      <div style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:${catColors[cat]};margin-bottom:.3rem">${catLabels[cat]}</div>`;
+    items.forEach(ex => {
+      const isSel = selIds.has(ex.id);
+      const muscles = [...ex.primary,...(ex.secondary||[]).slice(0,2)].join(', ');
+      exList += `<div class="wiz-ex-row ${isSel?'selected':''}" onclick="wizToggleExercise(${JSON.stringify({id:ex.id,name:ex.name,cat:ex.cat,muscles:ex.primary.join(', '),fc:ex.fc,isEndo:false}).replace(/"/g,'&quot;')})">
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;font-size:.82rem;display:flex;align-items:center;gap:.3rem;flex-wrap:wrap">
+            ${ex.name}
+            <span style="font-size:.58rem;font-weight:700;background:${catColors[cat]}22;color:${catColors[cat]};border-radius:3px;padding:.05rem .3rem;border:1px solid ${catColors[cat]}44">${catLabels[cat]}</span>
+          </div>
+          <div style="font-size:.67rem;color:var(--muted);margin-top:.08rem">${muscles}</div>
+        </div>
+        <div style="flex-shrink:0;font-size:1.1rem">${isSel?'✅':'⬜'}</div>
+      </div>`;
+    });
+    exList += `</div>`;
+  });
+
+  // Endurance section
+  if(endoPool.length){
+    exList += `<div style="margin-bottom:.55rem">
+      <div style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#2ecc8a;margin-bottom:.3rem">Cardio / Endurance</div>`;
+    endoPool.forEach(([id, sess]) => {
+      const endoId = 'endo_'+id;
+      const isSel = selIds.has(endoId);
+      exList += `<div class="wiz-ex-row ${isSel?'selected':''}" onclick="wizToggleExercise(${JSON.stringify({id:endoId,name:sess.name,cat:'cardio',muscles:'cardio',fc:['endurance'],icon:sess.icon,isEndo:true,sessId:id}).replace(/"/g,'&quot;')})">
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;font-size:.82rem;display:flex;align-items:center;gap:.3rem">
+            ${sess.icon} ${sess.name}
+            <span style="font-size:.58rem;font-weight:700;background:#2ecc8a22;color:#2ecc8a;border-radius:3px;padding:.05rem .3rem;border:1px solid #2ecc8a44">${sess.abbr}</span>
+          </div>
+          <div style="font-size:.67rem;color:var(--muted);margin-top:.08rem">${sess.rpe||''}</div>
+        </div>
+        <div style="flex-shrink:0;font-size:1.1rem">${isSel?'✅':'⬜'}</div>
+      </div>`;
+    });
+    exList += `</div>`;
+  }
+
+  if(!exList) exList = `<div style="text-align:center;color:var(--muted);padding:1rem;font-size:.82rem">No exercises match your filters. Try clearing some filters.</div>`;
+
+  const selCount = _dayWiz.selected.length;
+  return `
+    <div style="margin-bottom:.7rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
+      <input type="text" class="trk-input" style="flex:1;max-width:240px;padding:.38rem .65rem"
+        placeholder="Search exercises…" value="${(_dayWiz.search||'').replace(/"/g,'&quot;')}"
+        oninput="_dayWiz.search=this.value;renderManualEditor()">
+      <span style="font-size:.75rem;color:var(--primary);font-weight:700">${selCount} selected</span>
+      <button class="btn btn-outline btn-sm" onclick="wizGoStep('filter')">← Back</button>
+    </div>
+    <div style="max-height:52vh;overflow-y:auto;padding-right:.2rem">${exList}</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:.75rem;padding-top:.65rem;border-top:1px solid var(--border)">
+      <button class="btn btn-outline btn-sm" onclick="wizClearSelection()">Clear All</button>
+      <button class="btn btn-primary" onclick="wizGoStep('configure')" ${selCount===0?'disabled style="opacity:.4"':''}>Configure ${selCount} Exercise${selCount!==1?'s':''} →</button>
+    </div>`;
+}
+
+// STEP 3: Configure
+function renderWizConfigure(di, day){
+  const sel = _dayWiz.selected;
+  if(!sel.length) return `<div style="color:var(--muted);font-size:.82rem">No exercises selected. <button class="btn btn-outline btn-sm" onclick="wizGoStep('pick')">← Back</button></div>`;
+
+  // Superset pairs: array of [idxA, idxB]
+  if(!_dayWiz.supersetPairs) _dayWiz.supersetPairs = [];
+
+  let rows = '';
+  sel.forEach((ex, i) => {
+    const isEndo = ex.isEndo;
+    const ssPair = _dayWiz.supersetPairs.find(p => p.includes(i));
+    const ssPartner = ssPair ? ssPair.find(x => x !== i) : null;
+    const ssLabel = ssPair ? `<span style="font-size:.62rem;font-weight:700;background:var(--primary-l);color:var(--primary);border-radius:4px;padding:.1rem .4rem;border:1px solid var(--primary)44">SS ${String.fromCharCode(65+_dayWiz.supersetPairs.indexOf(ssPair))}</span>` : '';
+
+    // Unit toggle: reps / seconds
+    const unit = ex.unit || 'reps';
+    const unitBtn = (u, lbl) => `<button onclick="_dayWiz.selected[${i}].unit='${u}';renderManualEditor()" style="font-size:.65rem;padding:.12rem .42rem;border-radius:4px;border:1.5px solid ${unit===u?'var(--primary)':'var(--border)'};background:${unit===u?'var(--primary-l)':'transparent'};color:${unit===u?'var(--primary)':'var(--muted)'};cursor:pointer;font-weight:700">${lbl}</button>`;
+
+    if(isEndo){
+      rows += `<div class="trk-ex-block" style="padding:.75rem .9rem">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.4rem;flex-wrap:wrap;margin-bottom:.5rem">
+          <div style="font-weight:700;font-size:.85rem">${ex.icon||'🏃'} ${ex.name} ${ssLabel}</div>
+          <button class="trk-del-set" onclick="wizRemoveSelected(${i})" title="Remove">✕</button>
+        </div>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
+          <label style="font-size:.7rem;color:var(--muted);font-weight:700">Duration (min)</label>
+          <input type="number" min="5" max="180" step="5" class="trk-input trk-w-input" style="width:4rem"
+            placeholder="30" value="${ex.durationMin||''}"
+            oninput="_dayWiz.selected[${i}].durationMin=this.value?+this.value:null">
+          <label style="font-size:.7rem;color:var(--muted);font-weight:700">Modality</label>
+          <select class="trk-input" style="padding:.22rem .4rem;font-size:.73rem" onchange="_dayWiz.selected[${i}].modality=this.value">
+            ${['run','bike','row'].map(m=>`<option value="${m}" ${(ex.modality||'run')===m?'selected':''}>${{run:'🏃 Run',bike:'🚴 Bike',row:'🚣 Row'}[m]}</option>`).join('')}
+          </select>
+        </div>
+      </div>`;
+    } else {
+      rows += `<div class="trk-ex-block" style="padding:.75rem .9rem">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.4rem;flex-wrap:wrap;margin-bottom:.5rem">
+          <div style="font-weight:700;font-size:.85rem">${ex.name} ${ssLabel}</div>
+          <button class="trk-del-set" onclick="wizRemoveSelected(${i})" title="Remove">✕</button>
+        </div>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
+          <span style="font-size:.7rem;color:var(--muted);font-weight:700">Sets</span>
+          <input type="number" min="1" max="10" class="trk-input" style="width:3rem;text-align:center" value="${ex.sets||3}"
+            oninput="_dayWiz.selected[${i}].sets=this.value?+this.value:3">
+          <span style="font-size:.7rem;color:var(--muted);font-weight:700">${unit==='reps'?'Reps':'Secs'}</span>
+          <input type="number" min="1" max="600" class="trk-input" style="width:4rem;text-align:center"
+            placeholder="${unit==='reps'?'8–12':'30'}" value="${unit==='reps'?(ex.reps||''):(ex.secs||'')}"
+            oninput="_dayWiz.selected[${i}][_dayWiz.selected[${i}].unit==='reps'?'reps':'secs']=this.value?+this.value:null">
+          <div style="display:flex;gap:.2rem">${unitBtn('reps','Reps')}${unitBtn('secs','Secs')}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:.5rem;margin-top:.45rem;flex-wrap:wrap">
+          <span style="font-size:.68rem;color:var(--muted);font-weight:600">Superset with:</span>
+          <select class="trk-input" style="padding:.2rem .4rem;font-size:.7rem" onchange="wizSetSuperset(${i},this.value)">
+            <option value="">— none —</option>
+            ${sel.map((e2,j)=> j!==i ? `<option value="${j}" ${ssPartner===j?'selected':''}>${j+1}. ${e2.name}</option>` : '').join('')}
+          </select>
+        </div>
+      </div>`;
+    }
+  });
+
+  return `
+    <div style="margin-bottom:.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.4rem">
+      <span style="font-size:.75rem;color:var(--muted)">${sel.length} exercise${sel.length!==1?'s':''} — configure sets, reps, and supersets</span>
+      <button class="btn btn-outline btn-sm" onclick="wizGoStep('pick')">← Back</button>
+    </div>
+    <div>${rows}</div>
+    <div style="display:flex;justify-content:flex-end;gap:.5rem;margin-top:.75rem;padding-top:.65rem;border-top:1px solid var(--border)">
+      <button class="btn btn-primary" onclick="wizConfirm()">✓ Add to Plan</button>
+    </div>`;
+}
+
+// ── Wizard helpers ─────────────────────────────────────────────────────
+function toggleWizFilter(type, val){
+  const arr = type === 'muscle' ? _dayWiz.muscleFilter : _dayWiz.equipFilter;
+  const idx = arr.indexOf(val);
+  if(idx >= 0) arr.splice(idx,1); else arr.push(val);
+  renderManualEditor();
+}
+
+function wizGoStep(step){
+  _dayWiz.step = step;
+  renderManualEditor();
+}
+
+function wizToggleExercise(exObj){
+  const id = exObj.id;
+  const idx = _dayWiz.selected.findIndex(e => e.id === id);
+  if(idx >= 0){
+    // Remove — also remove any superset pair involving this index
+    _dayWiz.selected.splice(idx, 1);
+    _dayWiz.supersetPairs = (_dayWiz.supersetPairs||[])
+      .filter(p => !p.includes(idx))
+      .map(p => p.map(x => x > idx ? x-1 : x));
+  } else {
+    _dayWiz.selected.push({...exObj, sets:3, reps:null, secs:null, unit:'reps', supersetWith:null});
+  }
+  renderManualEditor();
+}
+
+function wizRemoveSelected(i){
+  _dayWiz.selected.splice(i, 1);
+  _dayWiz.supersetPairs = (_dayWiz.supersetPairs||[])
+    .filter(p => !p.includes(i))
+    .map(p => p.map(x => x > i ? x-1 : x));
+  renderManualEditor();
+}
+
+function wizClearSelection(){
+  _dayWiz.selected = [];
+  _dayWiz.supersetPairs = [];
+  renderManualEditor();
+}
+
+function wizSetSuperset(i, jStr){
+  if(!_dayWiz.supersetPairs) _dayWiz.supersetPairs = [];
+  // Remove any existing pair involving i
+  _dayWiz.supersetPairs = _dayWiz.supersetPairs.filter(p => !p.includes(i));
+  if(jStr !== ''){
+    const j = parseInt(jStr);
+    // Also remove any existing pair involving j
+    _dayWiz.supersetPairs = _dayWiz.supersetPairs.filter(p => !p.includes(j));
+    _dayWiz.supersetPairs.push([i, j]);
+  }
+  renderManualEditor();
+}
+
+function wizConfirm(){
+  const di = _dayWiz.di;
+  // Convert selected to the exercise format used by the rest of the system
+  const exercises = _dayWiz.selected.map(ex => {
+    if(ex.isEndo) return {
+      id: ex.id, name: ex.name, cat: 'cardio', muscles: 'cardio',
+      fc: ['endurance'], isEndo: true, sessId: ex.sessId,
+      durationMin: ex.durationMin||30, modality: ex.modality||'run',
+      setsReps: `${ex.durationMin||30} min`
+    };
+    const repsOrSecs = ex.unit === 'secs'
+      ? `${ex.sets||3}×${ex.secs||30}s`
+      : `${ex.sets||3}×${ex.reps||8}`;
+    return {
+      id: ex.id, name: ex.name, cat: ex.cat,
+      muscles: ex.muscles, fc: ex.fc||['hypertrophy'],
+      sets: ex.sets||3,
+      reps: ex.unit==='reps' ? (ex.reps||null) : null,
+      secs: ex.unit==='secs' ? (ex.secs||null) : null,
+      unit: ex.unit||'reps',
+      setsReps: repsOrSecs
+    };
+  });
+
+  // Build superset pairs as index pairs in the new exercises array
+  const ssPairs = (_dayWiz.supersetPairs||[]).map(p => [...p]);
+
+  _manualPlan.days[di].exercises = exercises;
+  _manualPlan.days[di].supersetPairs = ssPairs;
+  _dayWiz = null;
+  renderManualEditor();
+}
+
+function cancelDayWizard(di){
+  // If the day was just created (no exercises yet), remove it
+  const day = _manualPlan.days[di];
+  if(day && !(day.exercises||[]).length && !trkGetManual(trkState.activeSlot||0)?.days?.[di]){
+    _manualPlan.days.splice(di, 1);
+  }
+  _dayWiz = null;
   renderManualEditor();
 }
 
 function removeManualDay(di){
   _manualPlan.days.splice(di, 1);
+  _dayWiz = null;
   renderManualEditor();
 }
 
-function addManualExercise(di){
-  if(!_manualPlan.days[di].exercises) _manualPlan.days[di].exercises = [];
-  _manualPlan.days[di].exercises.push({ name:'', muscles:'', cat:'compound', setsReps:'' });
-  renderManualEditor();
+// ── Derive day training style from exercises ───────────────────────────
+function deriveDayStyle(day){
+  const exes = day.exercises || [];
+  if(!exes.length) return 'hypertrophy';
+
+  // Check for all-endurance (cardio) day
+  if(exes.every(e => e.cat === 'cardio' || (e.fc||[]).includes('endurance'))) return 'endurance';
+
+  // Tally fc tags, weight compound/explosive higher
+  const counts = {strength:0, hypertrophy:0, endurance:0, power_speed:0};
+  exes.forEach(ex => {
+    const weight = (ex.cat==='compound'||ex.cat==='explosive') ? 2 : 1;
+    (ex.fc||['hypertrophy']).forEach(f => { if(counts[f]!==undefined) counts[f]+=weight; });
+  });
+
+  // Power_speed → fallback to strength if not dominant
+  const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  const top = sorted[0][0];
+  if(top==='power_speed' && counts.power_speed < counts.strength + counts.hypertrophy) return 'strength';
+  return top || 'hypertrophy';
 }
 
-function removeManualExercise(di, ei){
-  _manualPlan.days[di].exercises.splice(ei, 1);
-  renderManualEditor();
-}
-
+// ── Save manual plan ───────────────────────────────────────────────────
 function saveManualPlan(){
   const slot = trkState.activeSlot || 0;
   _manualPlan.savedAt = new Date().toISOString();
   if(!_manualPlan.name) _manualPlan.name = 'Custom Plan';
+  // Derive style for each day automatically
+  (_manualPlan.days||[]).forEach(day => { day.style = deriveDayStyle(day); });
   trkSetManual(_manualPlan, slot);
   renderManualPlanView(slot);
 }
@@ -5759,78 +6218,82 @@ function saveManualPlan(){
 // ── Manual plan "My Plan" view ─────────────────────────────────────────
 function renderManualPlanView(slot){
   const manual = trkGetManual(slot);
-  if(!manual){ renderManualEditor(); return; }
+  if(!manual){ trkOpenManualEditor(slot); return; }
   const body = document.getElementById('trk-manual-editor-body');
   const days = manual.days || [];
 
-  let html = ``;
-
-  // Weekly Volume collapsible card
-  const volData = computeManualVolume(days);
+  const volData  = computeManualVolume(days);
   const evalData = computeManualEvaluator(days);
 
-  // — Days —
+  let html = '';
+
+  // Plan name header
+  html += `<div style="font-family:var(--fd);font-size:1rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em;color:var(--text);margin-bottom:.85rem">${manual.name||'Custom Plan'}</div>`;
+
+  // Day cards
   html += days.map(day => {
-    const exRows = (day.exercises||[]).map((ex,ei) => {
-      const catCls = {compound:'cat-compound',explosive:'cat-explosive',isolation:'cat-isolation',core:'cat-core',accessory:'cat-accessory'}[ex.cat]||'cat-compound';
+    const style   = deriveDayStyle(day);
+    const styleM  = MANUAL_STYLE_META[style];
+    const styleColor = styleM.color;
+    const ssPairs = day.supersetPairs || [];
+
+    // Build a set of superset indices for display
+    const ssMap = {}; // exIdx → SS letter
+    ssPairs.forEach((pair, pi) => pair.forEach(idx => { ssMap[idx] = String.fromCharCode(65+pi); }));
+
+    const exRows = (day.exercises||[]).map((ex, ei) => {
+      const catCls = {compound:'cat-compound',explosive:'cat-explosive',isolation:'cat-isolation',core:'cat-core',accessory:'cat-accessory',cardio:'cat-accessory'}[ex.cat]||'cat-compound';
       const catLbl = ex.cat ? ex.cat.charAt(0).toUpperCase()+ex.cat.slice(1) : 'Compound';
-      const styleObj = MANUAL_STYLES.find(s=>s.val===(day.style||'hypertrophy'))||MANUAL_STYLES[0];
+      const ssTag  = ssMap[ei] ? `<span style="font-size:.58rem;font-weight:800;background:var(--primary);color:#fff;border-radius:3px;padding:.05rem .32rem;margin-left:.25rem">SS ${ssMap[ei]}</span>` : '';
+      const muscleStr = ex.muscles && ex.muscles !== 'cardio' ? ex.muscles : '';
       return `<div class="ex-row">
         <div>
-          <div class="ex-name"><span class="ex-num">${ei+1}</span>${ex.name||'Exercise'}<span class="ex-cat ${catCls}">${catLbl}</span></div>
-          ${ex.muscles ? `<div class="ex-muscles">${ex.muscles}</div>` : ''}
+          <div class="ex-name">
+            <span class="ex-num">${ei+1}</span>
+            ${ex.isEndo?(ex.icon||'🏃')+' ':''}${ex.name||'Exercise'}
+            <span class="ex-cat ${catCls}">${catLbl}</span>${ssTag}
+          </div>
+          ${muscleStr ? `<div class="ex-muscles">${muscleStr}</div>` : ''}
+          ${ex.isEndo && ex.modality ? `<div class="ex-muscles">${{run:'🏃 Running',bike:'🚴 Cycling',row:'🚣 Rowing'}[ex.modality]||ex.modality}</div>` : ''}
         </div>
         <div class="ex-params">
           <div class="sets-reps">${ex.setsReps||'—'}</div>
-          <div class="rest-time">${styleObj.desc.split('·').slice(-1)[0].trim()}</div>
+          <div class="rest-time">${styleM.desc.split('·').slice(-1)[0].trim()}</div>
         </div>
       </div>`;
     }).join('');
-    const styleObj = MANUAL_STYLES.find(s=>s.val===(day.style||'hypertrophy'))||MANUAL_STYLES[0];
-    const styleColor = {hypertrophy:'#4a90d9',strength:'#d4920a',endurance:'#2ecc8a',power_speed:'#9b72cf'}[day.style||'hypertrophy']||'#4a90d9';
+
     return `<div class="day-card">
       <div class="day-hdr" style="background:${styleColor}">
-        <h3>${day.label||'Training Day'} <span class="day-focus-tag">${styleObj.icon} ${styleObj.label}</span></h3>
+        <h3>${day.label||'Training Day'} <span class="day-focus-tag">${styleM.icon} ${styleM.label}</span></h3>
         <div class="day-meta">${(day.exercises||[]).length} exercise${(day.exercises||[]).length!==1?'s':''}</div>
       </div>
       ${(day.exercises||[]).length ? exRows : '<div style="padding:.9rem 1.1rem;color:var(--muted);font-size:.83rem;font-style:italic">No exercises added.</div>'}
     </div>`;
   }).join('');
 
-  // — Weekly Volume collapsible —
   html += buildManualVolCard(volData, evalData);
 
-  // — Edit button —
-  html += `<div style="display:flex;gap:.6rem;margin-top:.5rem">
+  html += `<div style="display:flex;gap:.6rem;margin-top:.5rem;flex-wrap:wrap">
     <button class="btn btn-outline btn-sm" onclick="trkOpenManualEditor(${slot})">✏️ Edit Plan</button>
   </div>`;
 
   body.innerHTML = html;
-
-  // Show manual plan header (hide the trk-main header)
   document.getElementById('trk-manual-editor').classList.remove('hidden');
   document.getElementById('trk-main').classList.add('hidden');
 }
 
-// ── Volume computation for manual plan ────────────────────────────────
+// ── Volume computation ─────────────────────────────────────────────────
 function computeManualVolume(days){
-  // Returns { muscle: totalSets } across all days
   const vol = {};
   MANUAL_MUSCLES.forEach(m => vol[m] = 0);
+  const aliases = {lower_back:'back',upper_back:'back',lats:'back',traps:'back',forearms:'biceps',hip_flexors:'quads',abs:'core',obliques:'core'};
   days.forEach(day => {
     (day.exercises||[]).forEach(ex => {
-      if(!ex.name || !ex.muscles) return;
-      const setsMatch = (ex.setsReps||'').match(/^(\d+)/);
-      const sets = setsMatch ? parseInt(setsMatch[1]) : 3;
-      // Parse muscles field — comma separated
+      if(!ex.name || !ex.muscles || ex.muscles==='cardio') return;
+      const sets = ex.sets || ((ex.setsReps||'').match(/^(\d+)/)?parseInt(RegExp.$1):3);
       ex.muscles.split(',').forEach(m => {
         const key = m.trim().toLowerCase().replace(/\s+/g,'_');
-        // Map common aliases
-        const aliases = {
-          'lower_back':'back', 'upper_back':'back', 'lats':'back',
-          'traps':'back', 'forearms':'biceps', 'hip_flexors':'quads',
-          'abs':'core', 'obliques':'core'
-        };
         const mapped = aliases[key] || key;
         if(vol[mapped] !== undefined) vol[mapped] += sets;
       });
@@ -5839,56 +6302,40 @@ function computeManualVolume(days){
   return vol;
 }
 
-// ── Evaluator computation ─────────────────────────────────────────────
+// ── Evaluator computation ──────────────────────────────────────────────
 function computeManualEvaluator(days){
-  // Returns { muscles: {present:[...], missing:[...]}, styles: [{val, label, icon, pct}] }
   const allMuscleSets = computeManualVolume(days);
   const present = [], missing = [];
-  MANUAL_MUSCLES.forEach(m => {
-    if(allMuscleSets[m] > 0) present.push(m);
-    else missing.push(m);
-  });
+  MANUAL_MUSCLES.forEach(m => (allMuscleSets[m] > 0 ? present : missing).push(m));
 
-  // Training styles from day.style
+  // Training styles — derived automatically from each day
   const styleCounts = {};
-  let total = 0;
   days.forEach(day => {
-    const s = day.style || 'hypertrophy';
+    const s = deriveDayStyle(day);
     styleCounts[s] = (styleCounts[s]||0) + 1;
-    total++;
   });
-  const styles = MANUAL_STYLES.map(s => ({
-    ...s,
-    count: styleCounts[s.val]||0,
-    pct: total > 0 ? Math.round((styleCounts[s.val]||0)/total*100) : 0
-  })).filter(s => s.count > 0);
+  const total = days.length || 1;
+  const styles = Object.entries(MANUAL_STYLE_META)
+    .map(([val, m]) => ({val, ...m, count:styleCounts[val]||0, pct:Math.round((styleCounts[val]||0)/total*100)}))
+    .filter(s => s.count > 0);
 
   return { muscles:{present, missing}, styles };
 }
 
 // ── Volume + evaluator card builder ───────────────────────────────────
 function buildManualVolCard(volData, evalData){
-  // Volume table
-  const muscles = MANUAL_MUSCLES.filter(m => volData[m] > 0 || evalData.muscles.missing.includes(m));
   const maxSets = Math.max(...Object.values(volData), 1);
-
   let volRows = '';
-  if(muscles.length){
-    const allMusc = [...MANUAL_MUSCLES];
-    allMusc.forEach(m => {
-      const sets = volData[m]||0;
-      if(sets === 0 && !evalData.muscles.missing.includes(m)) return; // skip zero but only show all for completeness
-      const pct = Math.round(sets/maxSets*100);
-      const color = sets === 0 ? 'var(--border)' : sets < 6 ? '#f59e0b' : sets < 12 ? '#4a90d9' : '#2ecc8a';
-      volRows += `<tr>
-        <td class="muscle-name">${MANUAL_MUSCLE_LABELS[m]||m}</td>
-        <td><span class="vol-cell" style="background:${color}22;color:${color}">${sets}</span></td>
-        <td style="font-size:.68rem;color:var(--muted)">${sets===0?'—':sets<6?'Low':sets<12?'Moderate':'High'}</td>
-      </tr>`;
-    });
-  }
+  MANUAL_MUSCLES.forEach(m => {
+    const sets = volData[m]||0;
+    const color = sets===0?'var(--border)':sets<6?'#f59e0b':sets<12?'#4a90d9':'#2ecc8a';
+    volRows += `<tr>
+      <td class="muscle-name">${MANUAL_MUSCLE_LABELS[m]||m}</td>
+      <td><span class="vol-cell" style="background:${color}22;color:${color}">${sets||0}</span></td>
+      <td style="font-size:.68rem;color:var(--muted)">${sets===0?'—':sets<6?'Low':sets<12?'Moderate':'High'}</td>
+    </tr>`;
+  });
 
-  // Evaluator section
   const presentPills = evalData.muscles.present.map(m =>
     `<span class="eval-muscle-pill present">✓ ${MANUAL_MUSCLE_LABELS[m]||m}</span>`).join('');
   const missingPills = evalData.muscles.missing.map(m =>
@@ -5909,13 +6356,12 @@ function buildManualVolCard(volData, evalData){
       <span class="vol-chevron collapsed" id="manual-vol-chevron">▾</span>
     </div>
     <div class="vol-body collapsed" id="manual-vol-body">
-      ${volRows ? `<div class="vol-wrap" style="margin-top:.7rem">
+      <div class="vol-wrap" style="margin-top:.7rem">
         <table class="vol-table">
           <thead><tr><th class="muscle-h">Muscle</th><th>Sets/wk</th><th>Level</th></tr></thead>
           <tbody>${volRows}</tbody>
         </table>
-      </div>` : '<div style="color:var(--muted);font-size:.82rem;padding:.5rem 0">Add exercises with muscle groups to see volume.</div>'}
-
+      </div>
       <div id="manual-evaluator-card" style="margin-top:1rem">
         <div class="vol-card-header" onclick="toggleManualEvalCard()" style="margin-bottom:.5rem;cursor:pointer">
           <div class="vol-title" style="font-size:.82rem">🔬 Workout Evaluator</div>
@@ -5923,11 +6369,9 @@ function buildManualVolCard(volData, evalData){
         </div>
         <div id="manual-eval-body">
           <div class="eval-section-title">Muscles Covered</div>
-          <div class="eval-muscle-grid">${presentPills||'<span style="color:var(--muted);font-size:.78rem">No muscles mapped yet — add muscle fields to your exercises.</span>'}</div>
-          ${missingPills ? `<div class="eval-section-title" style="margin-top:.6rem">Muscles Not Covered</div>
-          <div class="eval-muscle-grid">${missingPills}</div>` : ''}
-          ${evalData.styles.length ? `<div class="eval-section-title" style="margin-top:.85rem">Training Style Focus</div>
-          <div class="eval-style-bars">${styleBars}</div>` : ''}
+          <div class="eval-muscle-grid">${presentPills||'<span style="color:var(--muted);font-size:.78rem">No exercises with muscle data yet.</span>'}</div>
+          ${missingPills?`<div class="eval-section-title" style="margin-top:.6rem">Muscles Not Covered</div><div class="eval-muscle-grid">${missingPills}</div>`:''}
+          ${evalData.styles.length?`<div class="eval-section-title" style="margin-top:.85rem">Training Style (Auto-detected)</div><div class="eval-style-bars">${styleBars}</div>`:''}
         </div>
       </div>
     </div>
@@ -5935,30 +6379,21 @@ function buildManualVolCard(volData, evalData){
 }
 
 function toggleManualVolCard(){
-  const body = document.getElementById('manual-vol-body');
-  const chev = document.getElementById('manual-vol-chevron');
-  if(!body) return;
-  body.classList.toggle('collapsed');
-  if(chev) chev.classList.toggle('collapsed');
+  const body=document.getElementById('manual-vol-body');
+  const chev=document.getElementById('manual-vol-chevron');
+  if(body){body.classList.toggle('collapsed');if(chev)chev.classList.toggle('collapsed');}
 }
-
 function toggleManualEvalCard(){
-  const body = document.getElementById('manual-eval-body');
-  const chev = document.getElementById('manual-eval-chevron');
-  if(!body) return;
-  body.classList.toggle('collapsed');
-  if(chev) chev.classList.toggle('collapsed');
+  const body=document.getElementById('manual-eval-body');
+  const chev=document.getElementById('manual-eval-chevron');
+  if(body){body.classList.toggle('collapsed');if(chev)chev.classList.toggle('collapsed');}
 }
 
 function trkViewManualPlan(){
-  const slot = trkState.activeSlot || 0;
-  // If unsaved edits exist, prompt to save first
+  const slot = trkState.activeSlot||0;
   const manual = trkGetManual(slot);
-  if(!manual){
-    saveManualPlan();
-  } else {
-    renderManualPlanView(slot);
-  }
+  if(!manual) saveManualPlan();
+  else renderManualPlanView(slot);
 }
 
 </script>
