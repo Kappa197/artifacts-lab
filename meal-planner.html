@@ -1424,8 +1424,12 @@ function doGenerate(){
 
   // Build recipe pool based on tier — include user custom meals
   var customPool = S.customMeals.map(function(cm){
+    // cm.slots are full keys e.g. ["lunch","dinner"] — convert to type codes e.g. ["M"]
+    var slTypeCodes = cm.slots.map(function(s){ return SLOT_TYPE[s]; }).filter(Boolean);
+    // Deduplicate (lunch + dinner both map to "M")
+    var slUnique = slTypeCodes.filter(function(v,i,a){ return a.indexOf(v)===i; });
     return {
-      id: cm.id, name: cm.name, sl: cm.slots,
+      id: cm.id, name: cm.name, sl: slUnique,
       diff:1, tags:{vg:true,ve:true,pe:true,gf:true,df:true},
       kcal:[cm.kcal*0.95, cm.kcal*1.05],
       prot:[cm.prot*0.95, cm.prot*1.05],
