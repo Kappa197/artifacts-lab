@@ -4349,6 +4349,7 @@ function trkSetManual(m,slot){ localStorage.setItem(_slotManualKey(slot), JSON.s
 
 // Returns true if slot has a plan (auto-generated or manual)
 function trkSlotHasPlan(slot){ return !!(trkGetPlan(slot) || trkGetManual(slot)); }
+// A slot is "manual draft only" (never saved as a plan) if it has a manual draft but no trkSetPlan entry
 function trkSlotIsManual(slot){ return !trkGetPlan(slot) && !!trkGetManual(slot); }
 
 // =====================================================================
@@ -4384,13 +4385,16 @@ function renderSlotGrid(){
     const manual  = !plan ? trkGetManual(slot) : null;
     const hasPlan = !!(plan || manual);
     const logs    = hasPlan ? trkGetLogs(slot) : [];
-    const isManual = !!manual;
+    const isManual = !!(plan?.isManual) || (!plan && !!manual);
 
     if(hasPlan){
-      const meta = plan ? plan.meta : (manual.meta||{});
-      const title = isManual ? (manual.name || 'Custom Plan') : `${meta.weeks}-Week Plan`;
-      const sub   = isManual
-        ? `${(manual.days||[]).length} day${(manual.days||[]).length!==1?'s':''}/wk · Manual`
+      const meta = plan ? plan.meta : (manual?.meta||{});
+      const planName = plan?.meta?.split || manual?.name || 'Custom Plan';
+      const title = (plan?.isManual || !plan)
+        ? planName
+        : `${meta.weeks}-Week Plan`;
+      const sub = (plan?.isManual || !plan)
+        ? `${meta.wpw||0} day${(meta.wpw||0)!==1?'s':''}/wk · ${meta.weeks||'?'} weeks · Custom`
         : `${(meta.level||'').charAt(0).toUpperCase()+(meta.level||'').slice(1)} · ${meta.wpw} days/wk · ${meta.duration} min`;
       const logBadge = logs.length
         ? `<span class="trk-slot-badge badge-logged">✓ ${logs.length} session${logs.length!==1?'s':''} logged</span>`
@@ -4446,16 +4450,12 @@ function trkOpenSlot(slot){
   document.getElementById('trk-slot-detail').classList.remove('hidden');
   document.getElementById('trk-slot-label').textContent = TRK_SLOT_LABELS[slot];
 
-  const isManual = trkSlotIsManual(slot);
-  document.getElementById('trk-main').classList.toggle('hidden', isManual);
-  document.getElementById('trk-manual-editor').classList.toggle('hidden', !isManual);
+  const plan = trkGetPlan(slot);
 
-  if(isManual){
-    renderManualPlanView(slot);
-  } else {
-    // Existing plan tracker
-    const plan = trkGetPlan(slot);
-    if(!plan){ trkShowSlotSelector(); return; }
+  if(plan){
+    // Both wizard-generated and saved manual plans use the standard tracker UI
+    document.getElementById('trk-main').classList.remove('hidden');
+    document.getElementById('trk-manual-editor').classList.add('hidden');
     if(trkState.week > plan.weeks.length) trkState.week = 1;
     trkState.subView = 'log';
     document.getElementById('trk-tab-log').classList.add('active');
@@ -4466,17 +4466,93 @@ function trkOpenSlot(slot){
     document.getElementById('trk-view-progress').classList.add('hidden');
     renderTrkHeader(plan);
     renderTrkLog(plan);
+  } else if(trkSlotIsManual(slot)){
+    // Unsaved manual draft — open the editor
+    document.getElementById('trk-main').classList.add('hidden');
+    document.getElementById('trk-manual-editor').classList.remove('hidden');
+    renderManualPlanView(slot);
+  } else {
+    trkShowSlotSelector();
   }
 }
 
 function trkViewCurrentSlotPlan(){
   const slot = trkState.activeSlot;
   if(slot === null) return;
-  if(trkSlotIsManual(slot)){
-    trkViewManualPlan();
+  const plan = trkGetPlan(slot);
+  if(plan && plan.isManual){
+    // Manual plan — show the plan days view in the "My Plan" tab
+    viewManualPlanAsPlan(slot);
   } else {
     viewSavedPlan(slot);
   }
+}
+
+// View a saved manual plan's day structure in the My Plan tab
+function viewManualPlanAsPlan(slot){
+  const plan = trkGetPlan(slot);
+  if(!plan) return;
+  // Use the week 1 days as the display (all weeks are identical for manual plans)
+  const w1 = plan.weeks[0];
+  if(!w1){ showView('plan'); return; }
+
+  // Build a one-week display plan using the existing renderPlan infrastructure
+  // We do this by directly building the HTML the same way renderManualPlanView used to
+  const body = document.getElementById('plan-content');
+  const days = w1.days || [];
+  const manual = plan.manualDraft || {};
+
+  let html = `<div class="save-cta-banner" style="background:var(--navy3);border:1.5px solid var(--border);box-shadow:none">
+    <div class="save-cta-text" style="color:var(--text)">
+      <div class="save-cta-title" style="color:var(--amber2)">${plan.meta?.split||'Custom Plan'}</div>
+      <div class="save-cta-sub" style="color:var(--muted)">${plan.meta?.weeks}-Week Plan · ${plan.meta?.wpw} days/wk · Manual</div>
+    </div>
+    <button class="btn btn-outline btn-sm" onclick="showView('tracker')" style="font-size:.72rem;padding:.28rem .75rem;flex-shrink:0">← Back to Tracker</button>
+  </div>`;
+
+  // Weekly volume + evaluator (collapsible)
+  const volData  = computeManualVolume(days);
+  const evalData = computeManualEvaluator(days);
+
+  // Day cards
+  html += days.map(day => {
+    const style  = deriveDayStyle(day);
+    const styleM = MANUAL_STYLE_META[style] || MANUAL_STYLE_META.hypertrophy;
+    const ssPairs = day.supersetPairs || [];
+    const ssMap = {};
+    ssPairs.forEach((pair, pi) => pair.forEach(idx => { ssMap[idx] = String.fromCharCode(65+pi); }));
+
+    const exRows = (day.exercises||[]).map((ex, ei) => {
+      const catCls = {compound:'cat-compound',explosive:'cat-explosive',isolation:'cat-isolation',core:'cat-core',accessory:'cat-accessory',cardio:'cat-accessory'}[ex.cat]||'cat-compound';
+      const catLbl = ex.cat ? ex.cat.charAt(0).toUpperCase()+ex.cat.slice(1) : 'Compound';
+      const ssTag  = ssMap[ei] ? `<span style="font-size:.58rem;font-weight:800;background:var(--primary);color:#fff;border-radius:3px;padding:.05rem .32rem;margin-left:.25rem">SS ${ssMap[ei]}</span>` : '';
+      const muscleStr = ex.muscles && ex.muscles !== 'cardio' ? ex.muscles : '';
+      return `<div class="ex-row">
+        <div>
+          <div class="ex-name"><span class="ex-num">${ei+1}</span>${ex.isEndo?(ex.icon||'🏃')+' ':''}${ex.name||'Exercise'}<span class="ex-cat ${catCls}">${catLbl}</span>${ssTag}</div>
+          ${muscleStr ? `<div class="ex-muscles">${muscleStr}</div>` : ''}
+          ${ex.isEndo && ex.modality ? `<div class="ex-muscles">${{run:'🏃 Running',bike:'🚴 Cycling',row:'🚣 Rowing'}[ex.modality]||ex.modality}</div>` : ''}
+        </div>
+        <div class="ex-params">
+          <div class="sets-reps">${ex.setsReps||'—'}</div>
+          <div class="rest-time">${styleM.desc.split('·').slice(-1)[0].trim()}</div>
+        </div>
+      </div>`;
+    }).join('');
+
+    return `<div class="day-card">
+      <div class="day-hdr" style="background:${styleM.color}">
+        <h3>${day.label||'Training Day'} <span class="day-focus-tag">${styleM.icon} ${styleM.label}</span></h3>
+        <div class="day-meta">${(day.exercises||[]).length} exercise${(day.exercises||[]).length!==1?'s':''}</div>
+      </div>
+      ${(day.exercises||[]).length ? exRows : '<div style="padding:.9rem 1.1rem;color:var(--muted);font-size:.83rem;font-style:italic">No exercises added.</div>'}
+    </div>`;
+  }).join('');
+
+  html += buildManualVolCard(volData, evalData);
+
+  body.innerHTML = html;
+  showView('plan');
 }
 
 // ─── Header ───────────────────────────────────────────────────────────
@@ -4484,19 +4560,44 @@ function renderTrkHeader(plan){
   const slot = trkState.activeSlot || 0;
   const logs = trkGetLogs(slot);
   const m = plan.meta;
+  const isManual = !!plan.isManual;
+  const splitLabel = isManual ? (m.split||'Custom Plan') : m.split;
+
   document.getElementById('trk-header').innerHTML = `
     <div class="trk-plan-info">
       <div>
-        <div class="trk-plan-title">${m.weeks}-Week Plan · ${m.split}</div>
-        <div class="trk-plan-sub">${(m.level||'').charAt(0).toUpperCase()+(m.level||'').slice(1)} · ${m.wpw} days/wk · ${m.duration} min · <strong>${logs.length}</strong> session${logs.length!==1?'s':''} logged · Saved ${formatLogDate(plan.savedAt)}</div>
+        <div class="trk-plan-title">${isManual ? m.split||'Custom Plan' : `${m.weeks}-Week Plan · ${splitLabel}`}</div>
+        <div class="trk-plan-sub">${isManual ? `${m.weeks} weeks · ${m.wpw} days/wk · Manual` : `${(m.level||'').charAt(0).toUpperCase()+(m.level||'').slice(1)} · ${m.wpw} days/wk · ${m.duration} min`} · <strong>${logs.length}</strong> session${logs.length!==1?'s':''} logged · Saved ${formatLogDate(plan.savedAt)}</div>
       </div>
       <div style="display:flex;align-items:center;gap:.65rem;flex-wrap:wrap">
+        ${isManual ? `<button class="btn btn-outline btn-sm" style="font-size:.72rem;padding:.28rem .7rem" onclick="trkEditManualPlan(${slot})">✏️ Edit Plan</button>` : ''}
         <div class="trk-unit-toggle">
           <button class="trk-unit-btn ${trkState.unit==='kg'?'active':''}"  onclick="setTrkUnit('kg')">kg</button>
           <button class="trk-unit-btn ${trkState.unit==='lbs'?'active':''}" onclick="setTrkUnit('lbs')">lbs</button>
         </div>
       </div>
     </div>`;
+}
+
+// Edit a saved manual plan — restore the draft and open the editor
+function trkEditManualPlan(slot){
+  const plan = trkGetPlan(slot);
+  // Restore the draft from the snapshot
+  if(plan?.manualDraft){
+    _manualPlan = JSON.parse(JSON.stringify(plan.manualDraft));
+  } else {
+    // Reconstruct from week 1 days if no draft stored
+    const w1days = plan?.weeks?.[0]?.days || [];
+    _manualPlan = {
+      name: plan?.meta?.split || 'Custom Plan',
+      weeks: plan?.meta?.weeks || 4,
+      days: w1days.map(d => ({...d}))
+    };
+  }
+  _dayWiz = null;
+  document.getElementById('trk-main').classList.add('hidden');
+  document.getElementById('trk-manual-editor').classList.remove('hidden');
+  renderManualEditor();
 }
 
 function setTrkUnit(unit){
@@ -4573,8 +4674,8 @@ function renderTrkLog(plan){
 
   const wk = plan.weeks.find(w=>w.weekNum===trkState.week);
   if(!wk){ el.innerHTML=html; return; }
-  const phaseLbl = (wk.phase||'').charAt(0).toUpperCase()+(wk.phase||'').slice(1);
-  html+=`<div class="trk-phase-label">Week ${trkState.week} · ${phaseLbl}${wk.isDeload?' · 🔄 Deload':''}</div>`;
+  const phaseLbl = wk.phase === 'custom' ? '' : ((wk.phase||'').charAt(0).toUpperCase()+(wk.phase||'').slice(1));
+  html+=`<div class="trk-phase-label">Week ${trkState.week}${phaseLbl ? ' · '+phaseLbl : ''}${wk.isDeload?' · 🔄 Deload':''}</div>`;
 
   (wk.days||[]).filter(Boolean).forEach(day=>{
     const log     = logs.find(l=>l.weekNum===trkState.week&&l.dayIdx===day.dayIdx);
@@ -5826,6 +5927,8 @@ function renderManualEditor(){
   if(_dayWiz !== null){ renderDayWizard(); return; }
   const body = document.getElementById('trk-manual-editor-body');
   const days = _manualPlan.days || [];
+  const weeks = _manualPlan.weeks || 4;
+
   let html = `
   <div class="card" style="margin-bottom:.8rem">
     <label class="fl">Plan Name</label>
@@ -5837,7 +5940,7 @@ function renderManualEditor(){
   </div>
   <div class="card" style="margin-bottom:.8rem">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;flex-wrap:wrap;gap:.5rem">
-      <div class="vol-title">Training Days</div>
+      <div class="vol-title">Training Days <span style="font-size:.7rem;font-weight:400;color:var(--muted)">(Week 1 template — repeated for all weeks)</span></div>
       <button class="btn btn-primary btn-sm" onclick="openDayWizardNew()">+ Add Day</button>
     </div>`;
   if(!days.length){
@@ -5846,11 +5949,32 @@ function renderManualEditor(){
     days.forEach((day, di) => { html += buildDaySummaryCard(day, di); });
   }
   html += `</div>
+
+  <div class="card" style="margin-bottom:.8rem">
+    <label class="fl">Plan Duration</label>
+    <div style="font-size:.78rem;color:var(--muted);margin-bottom:.7rem;line-height:1.5">Week 1 will be copied to all weeks. You can log different weights each week as you progress.</div>
+    <div class="chip-grid" id="manual-weeks-chips">
+      ${[4,8,12].map(w => `<div class="chip ${weeks===w?'sel':''}" onclick="setManualWeeks(${w})" style="text-align:center">
+        <strong>${w} weeks</strong><br><small style="font-weight:400;font-size:.73rem">${w===4?'Short block':w===8?'Recommended':'Full programme'}</small>
+      </div>`).join('')}
+    </div>
+  </div>
+
   <div style="display:flex;gap:.6rem;justify-content:flex-end;margin-bottom:1rem">
     <button class="btn btn-outline btn-sm" onclick="trkShowSlotSelector()">Cancel</button>
-    <button class="btn btn-primary" onclick="saveManualPlan()">💾 Save Plan</button>
+    <button class="btn btn-primary" onclick="saveManualPlan()" ${!days.length?'disabled style="opacity:.4"':''}>💾 Save &amp; Start Tracking →</button>
   </div>`;
   body.innerHTML = html;
+}
+
+function setManualWeeks(n){
+  _manualPlan.weeks = n;
+  // Update chips without full re-render
+  document.querySelectorAll('#manual-weeks-chips .chip').forEach(c => {
+    c.classList.toggle('sel', parseInt(c.textContent) === n || c.querySelector('strong')?.textContent === n+'');
+  });
+  // Re-render to update chip state cleanly
+  renderManualEditor();
 }
 
 function buildDaySummaryCard(day, di){
@@ -6586,80 +6710,113 @@ function deriveDayStyle(day){
 // ── Save manual plan ───────────────────────────────────────────────────
 function saveManualPlan(){
   const slot = trkState.activeSlot || 0;
+  const days = _manualPlan.days || [];
+  if(!days.length){ alert('Add at least one training day before saving.'); return; }
+
   _manualPlan.savedAt = new Date().toISOString();
   if(!_manualPlan.name) _manualPlan.name = 'Custom Plan';
-  // Derive style for each day automatically
-  (_manualPlan.days||[]).forEach(day => { day.style = deriveDayStyle(day); });
+  if(!_manualPlan.weeks) _manualPlan.weeks = 4;
+
+  // Derive style for each day
+  days.forEach(day => { day.style = deriveDayStyle(day); });
+
+  const numWeeks = _manualPlan.weeks;
+  const wpw = days.length;
+
+  // Build the plan.weeks array — propagate week 1 template to all N weeks
+  const planWeeks = Array.from({length: numWeeks}, (_, wi) => {
+    const weekNum = wi + 1;
+    return {
+      weekNum,
+      phase: 'custom',   // no periodisation phase for manual plans
+      isDeload: false,
+      weekInPhase: null,
+      proto: null,
+      days: days.map((day, di) => ({
+        ...day,
+        dayIdx: di,
+        type: _dayTypeForDay(day),
+        // proto: derive per-exercise from setsReps string for the log form
+        proto: _deriveProtoFromDay(day)
+      }))
+    };
+  });
+
+  // Save as a proper plan snapshot (same structure as wizard-generated plans)
+  const snapshot = {
+    savedAt: _manualPlan.savedAt,
+    isManual: true,           // flag so we can show "Custom Plan" label
+    manualDraft: JSON.parse(JSON.stringify(_manualPlan)), // keep draft for editing
+    meta: {
+      weeks:    numWeeks,
+      wpw:      wpw,
+      level:    'intermediate',
+      duration: 60,
+      split:    _manualPlan.name || 'Custom Plan',
+      isManual: true
+    },
+    weeks: planWeeks
+  };
+
+  // Save the plan snapshot (enables full tracker UI)
+  trkSetPlan(snapshot, slot);
+  // Clear logs for fresh start (same as wizard flow)
+  trkSetLogs([], slot);
+  for(let wk=1; wk<=numWeeks; wk++) for(let d=0; d<wpw; d++) trkSetPartial(wk,d,null,slot);
+  // Also persist the manual draft for future editing
   trkSetManual(_manualPlan, slot);
-  renderManualPlanView(slot);
+
+  // Navigate to standard tracker view
+  trkState.week = 1;
+  trkState.openDay = null;
+  trkState.subView = 'log';
+  trkOpenSlot(slot);
 }
 
-// ── Manual plan "My Plan" view ─────────────────────────────────────────
+// Determine the day type string for the tracker log form
+function _dayTypeForDay(day){
+  const exes = day.exercises || [];
+  if(exes.every(e => e.cat === 'cardio' || e.isEndo)) return 'cardio';
+  return 'gym';
+}
+
+// Derive a proto object from a manual day's exercises (for the log form prescribed display)
+function _deriveProtoFromDay(day){
+  const exes = day.exercises || [];
+  // Take the first gym exercise's sets/reps as the proto
+  const first = exes.find(e => e.cat !== 'cardio' && !e.isEndo);
+  if(!first) return { sets:3, rmin:8, rmax:12, rest:'60s' };
+  const sets = first.sets || 3;
+  const reps = first.reps || 8;
+  const secs = first.secs || null;
+  const rmin = secs ? secs : reps;
+  const rmax = secs ? secs : (first.reps ? first.reps : 12);
+  const style = deriveDayStyle(day);
+  const restMap = { strength:'3–5 min', hypertrophy:'60–120 s', endurance:'30–60 s', power_speed:'3–5 min' };
+  return { sets, rmin, rmax, rest: restMap[style]||'90 s' };
+}
+
+// ── Manual plan "My Plan" view — now delegates to standard tracker ──────
 function renderManualPlanView(slot){
-  const manual = trkGetManual(slot);
-  if(!manual){ trkOpenManualEditor(slot); return; }
-  const body = document.getElementById('trk-manual-editor-body');
-  const days = manual.days || [];
-
-  const volData  = computeManualVolume(days);
-  const evalData = computeManualEvaluator(days);
-
-  let html = '';
-
-  // Plan name header
-  html += `<div style="font-family:var(--fd);font-size:1rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em;color:var(--text);margin-bottom:.85rem">${manual.name||'Custom Plan'}</div>`;
-
-  // Day cards
-  html += days.map(day => {
-    const style   = deriveDayStyle(day);
-    const styleM  = MANUAL_STYLE_META[style];
-    const styleColor = styleM.color;
-    const ssPairs = day.supersetPairs || [];
-
-    // Build a set of superset indices for display
-    const ssMap = {}; // exIdx → SS letter
-    ssPairs.forEach((pair, pi) => pair.forEach(idx => { ssMap[idx] = String.fromCharCode(65+pi); }));
-
-    const exRows = (day.exercises||[]).map((ex, ei) => {
-      const catCls = {compound:'cat-compound',explosive:'cat-explosive',isolation:'cat-isolation',core:'cat-core',accessory:'cat-accessory',cardio:'cat-accessory'}[ex.cat]||'cat-compound';
-      const catLbl = ex.cat ? ex.cat.charAt(0).toUpperCase()+ex.cat.slice(1) : 'Compound';
-      const ssTag  = ssMap[ei] ? `<span style="font-size:.58rem;font-weight:800;background:var(--primary);color:#fff;border-radius:3px;padding:.05rem .32rem;margin-left:.25rem">SS ${ssMap[ei]}</span>` : '';
-      const muscleStr = ex.muscles && ex.muscles !== 'cardio' ? ex.muscles : '';
-      return `<div class="ex-row">
-        <div>
-          <div class="ex-name">
-            <span class="ex-num">${ei+1}</span>
-            ${ex.isEndo?(ex.icon||'🏃')+' ':''}${ex.name||'Exercise'}
-            <span class="ex-cat ${catCls}">${catLbl}</span>${ssTag}
-          </div>
-          ${muscleStr ? `<div class="ex-muscles">${muscleStr}</div>` : ''}
-          ${ex.isEndo && ex.modality ? `<div class="ex-muscles">${{run:'🏃 Running',bike:'🚴 Cycling',row:'🚣 Rowing'}[ex.modality]||ex.modality}</div>` : ''}
-        </div>
-        <div class="ex-params">
-          <div class="sets-reps">${ex.setsReps||'—'}</div>
-          <div class="rest-time">${styleM.desc.split('·').slice(-1)[0].trim()}</div>
-        </div>
-      </div>`;
-    }).join('');
-
-    return `<div class="day-card">
-      <div class="day-hdr" style="background:${styleColor}">
-        <h3>${day.label||'Training Day'} <span class="day-focus-tag">${styleM.icon} ${styleM.label}</span></h3>
-        <div class="day-meta">${(day.exercises||[]).length} exercise${(day.exercises||[]).length!==1?'s':''}</div>
-      </div>
-      ${(day.exercises||[]).length ? exRows : '<div style="padding:.9rem 1.1rem;color:var(--muted);font-size:.83rem;font-style:italic">No exercises added.</div>'}
-    </div>`;
-  }).join('');
-
-  html += buildManualVolCard(volData, evalData);
-
-  html += `<div style="display:flex;gap:.6rem;margin-top:.5rem;flex-wrap:wrap">
-    <button class="btn btn-outline btn-sm" onclick="trkOpenManualEditor(${slot})">✏️ Edit Plan</button>
-  </div>`;
-
-  body.innerHTML = html;
-  document.getElementById('trk-manual-editor').classList.remove('hidden');
-  document.getElementById('trk-main').classList.add('hidden');
+  // If we have a proper plan saved, use the standard tracker UI
+  const plan = trkGetPlan(slot);
+  if(plan){
+    document.getElementById('trk-main').classList.remove('hidden');
+    document.getElementById('trk-manual-editor').classList.add('hidden');
+    trkState.week = 1;
+    trkState.subView = 'log';
+    document.getElementById('trk-tab-log').classList.add('active');
+    document.getElementById('trk-tab-history').classList.remove('active');
+    document.getElementById('trk-tab-progress').classList.remove('active');
+    document.getElementById('trk-view-log').classList.remove('hidden');
+    document.getElementById('trk-view-history').classList.add('hidden');
+    document.getElementById('trk-view-progress').classList.add('hidden');
+    renderTrkHeader(plan);
+    renderTrkLog(plan);
+    return;
+  }
+  // No plan saved yet — show the editor
+  trkOpenManualEditor(slot);
 }
 
 // ── Volume computation ─────────────────────────────────────────────────
@@ -6770,9 +6927,14 @@ function toggleManualEvalCard(){
 
 function trkViewManualPlan(){
   const slot = trkState.activeSlot||0;
-  const manual = trkGetManual(slot);
-  if(!manual) saveManualPlan();
-  else renderManualPlanView(slot);
+  const plan = trkGetPlan(slot);
+  if(plan && plan.isManual){
+    viewManualPlanAsPlan(slot);
+  } else {
+    const manual = trkGetManual(slot);
+    if(!manual) saveManualPlan();
+    else renderManualPlanView(slot);
+  }
 }
 
 </script>
