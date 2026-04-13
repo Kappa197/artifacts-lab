@@ -135,6 +135,7 @@ select option{background:var(--navy3);}
 .budget-meter-fill.warn{background:linear-gradient(90deg,#F59E0B,#E05252);}
 .budget-chip{font-family:var(--mono);font-size:0.63rem;padding:2px 8px;border-radius:999px;border:1px solid var(--border2);color:var(--text3);}
 .budget-alert-dot{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--red-dim);border:1px solid var(--red);color:var(--red);font-size:0.7rem;margin-left:6px;}
+.budget-inline-alert{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:var(--red-dim);border:1px solid var(--red);color:var(--red);font-size:0.62rem;margin-left:6px;cursor:help;vertical-align:middle;}
 .drop-zone{border:2px dashed var(--border2);border-radius:10px;padding:40px;text-align:center;cursor:pointer;transition:all 0.2s;background:var(--navy2);}
 .drop-zone:hover,.drop-zone.over{border-color:var(--amber);background:var(--amber-dim);}
 .drop-icon{font-size:2.2rem;margin-bottom:10px;opacity:0.45;}
@@ -3936,6 +3937,15 @@ function updateBudgetTarget(kind, key, value) {
   renderBudgetPlanning();
 }
 
+function setBudgetWarnPct(value) {
+  const month = document.getElementById('budgetMonthSel')?.value || _currentMonth;
+  const st = getBudgetState(month);
+  const pct = Math.max(1, Math.min(100, parseFloat(value) || 80));
+  st.warnPct = pct;
+  persist();
+  renderBudgetPlanning();
+}
+
 function propagateBudgetTargets(month, monthsAhead) {
   const src = getBudgetState(month);
   const [y, m] = month.split('-').map(Number);
@@ -3970,6 +3980,7 @@ function renderBudgetPlanning() {
     ? [...((S.txns.p1||{})[month]||[]), ...((S.txns.p2||{})[month]||[])]
     : ((S.txns[_viewProfile]||{})[month]||[]);
   const state = getBudgetState(month);
+  const warnPct = Math.max(1, Math.min(100, parseFloat(state.warnPct || 80)));
   const expCats = S.cats.filter(c => c.type !== 'income');
   const expBuckets = getBucketList().filter(b => b !== 'Income');
 
@@ -3991,7 +4002,6 @@ function renderBudgetPlanning() {
     return { cat, target, actual, remaining, invalid };
   });
   runBudgetCoherenceCheck(month, catRows);
-  const monthAlerts = _budgetAlerts[month] || [];
   const selectedBucket = _budgetCatBucketFilter || expBuckets[0] || '';
   _budgetCatBucketFilter = selectedBucket;
   const catRowsFiltered = catRows.filter(r => !selectedBucket || r.cat.bucket === selectedBucket);
@@ -4007,7 +4017,12 @@ function renderBudgetPlanning() {
         <button class="btn btn-ghost btn-sm" onclick="propagateBudgetTargets('${month}',1)">+1 month</button>
         <button class="btn btn-ghost btn-sm" onclick="propagateBudgetTargets('${month}',3)">+3 months</button>
         <button class="btn btn-ghost btn-sm" onclick="propagateBudgetTargets('${month}',12)">+12 months</button>
-        ${monthAlerts.length ? `<span class="budget-alert-dot" title="${esc(monthAlerts.join(', '))}">!</span>` : ''}
+        <span style="font-size:0.72rem;color:var(--text3);line-height:1.5;">Copy this month's bucket and category targets forward to speed up planning.</span>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <span class="budget-chip">Warning threshold</span>
+        <input type="number" min="1" max="100" value="${warnPct}" onchange="setBudgetWarnPct(this.value)" style="width:86px;">
+        <span style="font-size:0.72rem;color:var(--text3);">Show warning when actual spending reaches this % of target.</span>
       </div>
     </div>
     <div class="card">
@@ -4017,14 +4032,15 @@ function renderBudgetPlanning() {
         <tbody>${bucketRows.map(r => {
           const pct = r.budgeted > 0 ? Math.min(100, (r.actual / r.budgeted) * 100) : 0;
           const over = r.remaining < 0;
+          const nearWarn = !over && r.budgeted > 0 && ((r.actual / r.budgeted) * 100) >= warnPct;
           return `<tr>
             <td>${esc(r.bucket)}</td>
             <td><input type="number" min="0" step="0.01" value="${r.budgeted||''}" onchange="updateBudgetTarget('bucket','${jsq(r.bucket)}',this.value)"></td>
             <td class="bp-col-actual" style="font-family:var(--mono);">${fmtAmt(r.actual)}</td>
             <td style="font-family:var(--mono);color:${over?'var(--red)':'var(--green)'};">${fmtAmt(r.remaining)}</td>
             <td style="min-width:220px;">
-              <div class="budget-meter"><div class="budget-meter-fill ${over?'warn':'ok'}" style="width:${pct.toFixed(1)}%;"></div></div>
-              <div style="font-size:0.68rem;color:var(--text3);margin-top:4px;">${r.targetedCats}/${r.totalCats} categories targeted ${over?'· ⚠ Over budget':''}</div>
+              <div class="budget-meter" style="height:12px;border:1px solid var(--border2);box-shadow:inset 0 0 0 1px rgba(0,0,0,0.2);"><div class="budget-meter-fill ${over || nearWarn ? 'warn':'ok'}" style="width:${pct.toFixed(1)}%;"></div></div>
+              <div style="font-size:0.68rem;color:var(--text3);margin-top:4px;">${r.targetedCats}/${r.totalCats} categories targeted ${over?'· ⚠ Over budget':nearWarn?`· ⚠ ${warnPct}% reached`:''}</div>
             </td>
           </tr>`;
         }).join('')}</tbody>
@@ -4043,19 +4059,18 @@ function renderBudgetPlanning() {
         </select>
       </div>
       <div style="overflow-x:auto;"><table class="data-table">
-        <thead><tr><th>Category</th><th>Bucket</th><th>Budgeted</th><th>Actual</th><th>Remaining</th><th>Check</th></tr></thead>
+        <thead><tr><th>Category</th><th>Bucket</th><th>Budgeted</th><th>Actual</th><th>Remaining</th></tr></thead>
         <tbody>${catRowsFiltered.map(r => {
           const pct = r.target > 0 ? Math.min(100, (r.actual / r.target) * 100) : 0;
           const over = r.remaining < 0;
           return `<tr>
-          <td>${esc(r.cat.name)}</td><td>${esc(r.cat.bucket)}</td>
+          <td>${esc(r.cat.name)}${r.invalid ? `<span class="budget-inline-alert" title="Target is higher than bucket target for ${esc(r.cat.bucket)}">!</span>` : ''}</td><td>${esc(r.cat.bucket)}</td>
           <td><input type="number" min="0" step="0.01" value="${r.target||''}" onchange="updateBudgetTarget('cat','${r.cat.id}',this.value)"></td>
           <td class="bp-col-actual" style="font-family:var(--mono);">${fmtAmt(r.actual)}</td>
           <td style="font-family:var(--mono);color:${over?'var(--red)':'var(--green)'};">
             ${fmtAmt(r.remaining)}
             <div class="budget-meter" style="margin-top:4px;"><div class="budget-meter-fill ${over?'warn':'ok'}" style="width:${pct.toFixed(1)}%;"></div></div>
           </td>
-          <td style="font-size:0.72rem;color:${r.invalid?'var(--red)':'var(--text3)'};">${r.invalid ? '⚠' : ''}</td>
         </tr>`;
         }).join('')}</tbody>
       </table></div>
