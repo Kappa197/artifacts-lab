@@ -1144,7 +1144,8 @@ let can  = {};
 function buildCan(tier) {
   TIER = tier;
   can = {
-    csvImport:        TIER !== 'free',      // basic + premium
+    csvImport:        TIER !== 'free',      // basic + premium (manual CSV flow)
+    aiImport:         TIER === 'premium',   // premium only
     autoRules:        TIER !== 'free',      // basic + premium
     customCats:       TIER !== 'free',      // basic + premium
     trendChart:       TIER !== 'free',      // basic + premium
@@ -1657,8 +1658,11 @@ function openImportAction(action) {
   }
 
   if (action === 'ai') {
+    if (!can.aiImport) {
+      toast('🔒 AI statement import is a Premium feature', 'err');
+      return;
+    }
     revealImportSection('ai');
-    if (!can.csvImport) toast('🔒 AI statement import is a Basic feature', 'err');
     (document.getElementById('aiImportCard') || document.getElementById('importOnlySection'))?.scrollIntoView({ behavior:'smooth', block:'start' });
   }
 }
@@ -3458,6 +3462,7 @@ async function extractPDFText(file) {
 }
 
 async function processWithAI() {
+  if (!can.aiImport) { toast('🔒 AI statement import is a Premium feature', 'err'); return; }
   if (!_aiFile) return;
   const elId = id => document.getElementById(id);
   const loadingMsg = elId('aiLoadingMsg');
@@ -3708,8 +3713,8 @@ function applyTierGates() {
     receiptLauncherBtn.title = can.pdfExport ? 'Take a picture of a receipt' : 'Receipt scanning is a Premium feature';
   }
   if (aiLauncherBtn) {
-    aiLauncherBtn.classList.toggle('locked', !can.csvImport);
-    aiLauncherBtn.title = can.csvImport ? 'Import a statement with AI' : 'AI statement import is a Basic feature';
+    aiLauncherBtn.classList.toggle('locked', !can.aiImport);
+    aiLauncherBtn.title = can.aiImport ? 'Import a statement with AI' : 'AI statement import is a Premium feature';
   }
 
   // ── Add/Import tab — lock CSV section for free, leave manual entry visible ──
@@ -3718,9 +3723,9 @@ function applyTierGates() {
     if (sec) {
       sec.innerHTML = `
         <div style="margin-top:18px;">
-          ${nudge('CSV import and AI-assisted categorization require a <strong>Basic plan</strong>.')}
+          ${nudge('CSV import requires a <strong>Basic plan</strong>. AI statement import requires <strong>Premium</strong>.')}
           <p style="font-size:0.8rem;color:var(--text3);margin-top:10px;line-height:1.7;">
-            Upgrade to unlock: file upload, column mapping, the full AI workflow guide, and automatic categorization with rules.
+            Upgrade to unlock file upload, column mapping, and faster import workflows by tier.
           </p>
         </div>`;
     }
@@ -3950,8 +3955,6 @@ function runBudgetCoherenceCheck(month, catRows) {
   if (_budgetCheckTimer) clearTimeout(_budgetCheckTimer);
   _budgetCheckTimer = setTimeout(() => {
     _budgetAlerts[month] = catRows.filter(r => r.invalid).map(r => r.cat.name);
-    const tabActive = document.getElementById('tab-budget')?.classList.contains('active');
-    if (tabActive) renderBudgetPlanning();
   }, 0);
 }
 
