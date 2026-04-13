@@ -129,6 +129,12 @@ select option{background:var(--navy3);}
 .entry-action-icon{font-size:1.15rem;}
 .entry-action-title{font-family:var(--mono);font-size:0.76rem;letter-spacing:0.06em;text-transform:uppercase;color:var(--amber2);}
 .entry-action-desc{font-size:0.8rem;color:var(--text3);line-height:1.6;}
+.budget-meter{height:8px;background:var(--navy4);border-radius:99px;overflow:hidden;position:relative;}
+.budget-meter-fill{height:100%;border-radius:99px;transition:width 0.25s ease;}
+.budget-meter-fill.ok{background:linear-gradient(90deg,#4A90D9,#2ECC8A);}
+.budget-meter-fill.warn{background:linear-gradient(90deg,#F59E0B,#E05252);}
+.budget-chip{font-family:var(--mono);font-size:0.63rem;padding:2px 8px;border-radius:999px;border:1px solid var(--border2);color:var(--text3);}
+.budget-alert-dot{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--red-dim);border:1px solid var(--red);color:var(--red);font-size:0.7rem;margin-left:6px;}
 .drop-zone{border:2px dashed var(--border2);border-radius:10px;padding:40px;text-align:center;cursor:pointer;transition:all 0.2s;background:var(--navy2);}
 .drop-zone:hover,.drop-zone.over{border-color:var(--amber);background:var(--amber-dim);}
 .drop-icon{font-size:2.2rem;margin-bottom:10px;opacity:0.45;}
@@ -238,7 +244,7 @@ select option{background:var(--navy3);}
 
 html,body{overflow-x:hidden;max-width:100%;}
 @media(max-width:900px){.kpi-grid{grid-template-columns:1fr 1fr;}.dg2,.dg3{grid-template-columns:1fr;}.grid4{grid-template-columns:1fr 1fr;}}
-@media(max-width:600px){.tool-header{padding:0 14px;}.tool-nav-brand{display:none;}.tool-nav-sep{display:none;}.tool-nav-back{font-size:0.72rem;padding:5px 10px;}.tab-panel{padding:14px;}.kpi-grid{grid-template-columns:1fr;}.grid2,.grid3{grid-template-columns:1fr;}.entry-actions{grid-template-columns:1fr;}.bp-col-actual{display:none;}}
+@media(max-width:600px){.tool-header{padding:0 14px;}.tool-nav-brand{display:none;}.tool-nav-sep{display:none;}.tool-nav-back{font-size:0.72rem;padding:5px 10px;}.tab-panel{padding:14px;}.kpi-grid{grid-template-columns:1fr;}.grid2,.grid3{grid-template-columns:1fr;}.entry-actions{grid-template-columns:1fr;}.bp-col-actual{display:none;}#manualEntryRow{grid-template-columns:1fr 1fr !important;}}
 
 /* ═══ FIRST-RUN WIZARD ═══════════════════════════════════ */
 /* When wizard is active, hide tabs and tab panels */
@@ -647,7 +653,8 @@ body.wizard-active #wizardOverlay{display:block!important;}
           </div>
         </div>
         <div style="margin-top:12px;display:flex;gap:8px;align-items:center;">
-          <button class="btn btn-amber" onclick="saveManualTx()">+ Add Transaction</button>
+          <button id="manualSaveBtn" class="btn btn-amber" onclick="saveManualTx()">+ Add Transaction</button>
+          <button id="manualCancelEditBtn" class="btn btn-ghost btn-sm" style="display:none;" onclick="cancelEditManualTx()">Cancel Edit</button>
           <span id="meError" style="font-family:var(--mono);font-size:0.7rem;color:var(--red);display:none;"></span>
         </div>
         <div id="manualTxList" style="margin-top:18px;display:none;">
@@ -877,7 +884,7 @@ body.wizard-active #wizardOverlay{display:block!important;}
       <p style="font-size:0.85rem;color:var(--text3);line-height:1.7;max-width:400px;margin:0 auto 20px;">Import your bank statement or add an expense to get started. Your dashboard updates instantly.</p>
       <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
         <button class="btn btn-amber" onclick="showTab('import',getTabButton('import'))">📊 Import Statement</button>
-        <button class="btn btn-ghost" onclick="showTab('import',getTabButton('import'));setTimeout(()=>{const c=document.getElementById('manualEntryCard');if(c)c.scrollIntoView({behavior:'smooth'});},200)">✏️ Add Expense Manually</button>
+        <button class="btn btn-ghost" onclick="showTab('import',getTabButton('import'));setTimeout(()=>openImportAction('manual'),200)">✏️ Add Expense Manually</button>
       </div>
     </div>
   </div>
@@ -1547,9 +1554,9 @@ function showTab(name, btn) {
 const SETTINGS_STEPS = [
   { label: 'Profile names', hint: 'Step 1 sets profile names.' },
   { label: 'Currency', hint: 'Step 2 sets primary and optional secondary currency.' },
-  { label: 'Buckets / Wallets', hint: 'Step 3 creates your main budget buckets.' },
-  { label: 'Categories (Optional)', hint: 'Step 4 links categories to your buckets.' },
-  { label: 'Rules (Optional)', hint: 'Step 5 sets automatic categorization rules.' },
+  { label: 'Buckets', hint: 'Step 3 creates your main budget buckets.' },
+  { label: 'Categories', hint: 'Step 4 links categories to your buckets.' },
+  { label: 'Rules', hint: 'Step 5 (optional) sets automatic categorization rules.' },
 ];
 let _settingsStep = 0;
 
@@ -1599,6 +1606,7 @@ function settingsNext() {
     saveRules();
     localStorage.setItem('ft_setup_done', '1');
     toast('✓ Settings setup complete','ok');
+    showTab('import', getTabButton('import'));
     return;
   }
   goToSettingsStep(_settingsStep + 1);
@@ -3158,6 +3166,39 @@ function populateManualCatSelect() {
     cats.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
 }
 
+let _manualEditCtx = null; // { prof, month, txId }
+
+function startEditManualTx(prof, month, txId) {
+  const tx = (S.txns[prof]?.[month] || []).find(t => t.id === txId);
+  if (!tx) return;
+  _manualProfile = prof;
+  const cat = S.cats.find(c => c.id === tx.catId);
+  const type = tx.cr > 0 ? 'income' : 'expense';
+  document.getElementById('meDate').value = tx.date || '';
+  document.getElementById('meDesc').value = tx.desc || '';
+  document.getElementById('meAmt').value = (tx.cr > 0 ? tx.cr : tx.dr) || '';
+  document.getElementById('meType').value = type;
+  populateManualBucketSelect();
+  if (cat?.bucket) document.getElementById('meBucket').value = cat.bucket;
+  populateManualCatSelect();
+  document.getElementById('meCat').value = tx.catId || '';
+  _manualEditCtx = { prof, month, txId };
+  const saveBtn = document.getElementById('manualSaveBtn');
+  if (saveBtn) saveBtn.textContent = '✓ Save Changes';
+  const cancelBtn = document.getElementById('manualCancelEditBtn');
+  if (cancelBtn) cancelBtn.style.display = '';
+  revealImportSection('manual');
+  document.getElementById('manualEntryCard')?.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function cancelEditManualTx() {
+  _manualEditCtx = null;
+  const saveBtn = document.getElementById('manualSaveBtn');
+  if (saveBtn) saveBtn.textContent = '+ Add Transaction';
+  const cancelBtn = document.getElementById('manualCancelEditBtn');
+  if (cancelBtn) cancelBtn.style.display = 'none';
+}
+
 function saveManualTx() {
   const dateEl  = document.getElementById('meDate');
   const descEl  = document.getElementById('meDesc');
@@ -3186,7 +3227,7 @@ function saveManualTx() {
   const prof = can.multiUser ? _manualProfile : 'p1';
 
   const tx = {
-    id:       'manual_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+    id:       _manualEditCtx?.txId || ('manual_' + Date.now() + '_' + Math.random().toString(36).slice(2,6)),
     date,
     desc,
     rawDesc:  desc,
@@ -3199,16 +3240,27 @@ function saveManualTx() {
     manual:   true,
   };
 
+  if (_manualEditCtx) {
+    const oldProf = _manualEditCtx.prof;
+    const oldMonth = _manualEditCtx.month;
+    if (S.txns[oldProf]?.[oldMonth]) {
+      S.txns[oldProf][oldMonth] = S.txns[oldProf][oldMonth].filter(t => t.id !== _manualEditCtx.txId);
+      if (!S.txns[oldProf][oldMonth].length) delete S.txns[oldProf][oldMonth];
+    }
+  }
   if (!S.txns[prof][month]) S.txns[prof][month] = [];
   S.txns[prof][month].push(tx);
   persist();
+
+  const wasEditing = !!_manualEditCtx;
 
   // Reset form (keep date and type, clear desc/amt/cat)
   descEl.value = '';
   amtEl.value  = '';
   catEl.value  = '';
+  cancelEditManualTx();
 
-  toast(`✓ Transaction added to ${pName(prof)}`, 'ok');
+  toast(wasEditing ? `✓ Transaction updated in ${pName(prof)}` : `✓ Transaction added to ${pName(prof)}`, 'ok');
 
   // If the added month matches current dashboard month, re-render
   if (month === _currentMonth) {
@@ -3263,6 +3315,7 @@ function renderManualTxList() {
       <span style="flex:1;font-size:0.82rem;color:var(--text);min-width:120px;">${esc(tx.desc)}</span>
       <span style="font-family:var(--mono);font-size:0.8rem;color:${isIncome?'var(--green)':'var(--red)'};white-space:nowrap;">${isIncome?'+':'-'}${fmtAmt(amt)}</span>
       ${cat ? `<span style="font-size:0.7rem;padding:2px 8px;border-radius:99px;background:${cat.color}22;color:${cat.color};border:1px solid ${cat.color}44;">${esc(cat.name)}</span>` : ''}
+      <button onclick="startEditManualTx('${prof}','${month}','${tx.id}')" style="background:none;border:none;color:var(--blue);cursor:pointer;padding:2px 6px;font-size:0.75rem;border-radius:4px;line-height:1;" title="Edit" onmouseover="this.style.color='var(--amber2)'" onmouseout="this.style.color='var(--blue)'">Edit</button>
       <button onclick="deleteManualTx('${month}','${tx.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;padding:2px 6px;font-size:0.8rem;border-radius:4px;line-height:1;" title="Delete" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text3)'">✕</button>
     </div>`;
   }).join('');
@@ -3863,6 +3916,11 @@ function setBudgetMonth(month) {
   renderBudgetPlanning();
 }
 
+let _budgetCatExpanded = false;
+let _budgetCatBucketFilter = '';
+let _budgetAlerts = {};
+let _budgetCheckTimer = null;
+
 function updateBudgetTarget(kind, key, value) {
   const month = document.getElementById('budgetMonthSel')?.value || _currentMonth;
   const st = getBudgetState(month);
@@ -3871,6 +3929,30 @@ function updateBudgetTarget(kind, key, value) {
   if (kind === 'cat') st.catTargets[key] = num;
   persist();
   renderBudgetPlanning();
+}
+
+function propagateBudgetTargets(month, monthsAhead) {
+  const src = getBudgetState(month);
+  const [y, m] = month.split('-').map(Number);
+  for (let i = 1; i <= monthsAhead; i++) {
+    const d = new Date(y, m - 1 + i, 1);
+    const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+    S.budgets[key] = {
+      bucketTargets: { ...src.bucketTargets },
+      catTargets: { ...src.catTargets },
+    };
+  }
+  persist();
+  toast(`✓ Targets copied to next ${monthsAhead} month(s)`, 'ok');
+}
+
+function runBudgetCoherenceCheck(month, catRows) {
+  if (_budgetCheckTimer) clearTimeout(_budgetCheckTimer);
+  _budgetCheckTimer = setTimeout(() => {
+    _budgetAlerts[month] = catRows.filter(r => r.invalid).map(r => r.cat.name);
+    const tabActive = document.getElementById('tab-budget')?.classList.contains('active');
+    if (tabActive) renderBudgetPlanning();
+  }, 0);
 }
 
 function renderBudgetPlanning() {
@@ -3887,7 +3969,6 @@ function renderBudgetPlanning() {
   const state = getBudgetState(month);
   const expCats = S.cats.filter(c => c.type !== 'income');
   const expBuckets = getBucketList().filter(b => b !== 'Income');
-  const warnings = [];
 
   const bucketRows = expBuckets.map(bucket => {
     const ids = expCats.filter(c => c.bucket === bucket).map(c => c.id);
@@ -3902,11 +3983,15 @@ function renderBudgetPlanning() {
     const target = parseFloat(state.catTargets[cat.id] || 0);
     const bucketTarget = parseFloat(state.bucketTargets[cat.bucket] || 0);
     const invalid = target > 0 && bucketTarget > 0 && target > bucketTarget;
-    if (invalid) warnings.push(`${cat.name} target is higher than ${cat.bucket} bucket target`);
     const actual = txs.filter(t => t.dr > 0 && t.catId === cat.id).reduce((s, t) => s + t.dr, 0);
     const remaining = target - actual;
     return { cat, target, actual, remaining, invalid };
   });
+  runBudgetCoherenceCheck(month, catRows);
+  const monthAlerts = _budgetAlerts[month] || [];
+  const selectedBucket = _budgetCatBucketFilter || expBuckets[0] || '';
+  _budgetCatBucketFilter = selectedBucket;
+  const catRowsFiltered = catRows.filter(r => !selectedBucket || r.cat.bucket === selectedBucket);
 
   root.innerHTML = `
     <div class="card" style="margin-bottom:14px;">
@@ -3914,7 +3999,13 @@ function renderBudgetPlanning() {
         <div class="card-title" style="margin-bottom:0;border-bottom:none;padding-bottom:0;">Monthly Budget Targets</div>
         <input type="month" id="budgetMonthSel" value="${month}" onchange="setBudgetMonth(this.value)" style="max-width:170px;">
       </div>
-      ${warnings.length ? `<div style="margin-top:12px;">${nudge(`⚠ ${warnings.length} warning(s): ${esc(warnings[0])}`)}</div>` : ''}
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <span class="budget-chip">Copy targets</span>
+        <button class="btn btn-ghost btn-sm" onclick="propagateBudgetTargets('${month}',1)">+1 month</button>
+        <button class="btn btn-ghost btn-sm" onclick="propagateBudgetTargets('${month}',3)">+3 months</button>
+        <button class="btn btn-ghost btn-sm" onclick="propagateBudgetTargets('${month}',12)">+12 months</button>
+        ${monthAlerts.length ? `<span class="budget-alert-dot" title="${esc(monthAlerts.join(', '))}">!</span>` : ''}
+      </div>
     </div>
     <div class="card">
       <div class="card-title">By Bucket</div>
@@ -3928,23 +4019,44 @@ function renderBudgetPlanning() {
             <td><input type="number" min="0" step="0.01" value="${r.budgeted||''}" onchange="updateBudgetTarget('bucket','${jsq(r.bucket)}',this.value)"></td>
             <td class="bp-col-actual" style="font-family:var(--mono);">${fmtAmt(r.actual)}</td>
             <td style="font-family:var(--mono);color:${over?'var(--red)':'var(--green)'};">${fmtAmt(r.remaining)}</td>
-            <td style="min-width:180px;"><div class="bar-track"><div class="bar-fill" style="width:${pct.toFixed(1)}%;background:${over?'var(--red)':'var(--blue)'};"></div></div><div style="font-size:0.68rem;color:var(--text3);margin-top:4px;">${r.targetedCats}/${r.totalCats} categories targeted ${over?'· ⚠ Over budget':''}</div></td>
+            <td style="min-width:220px;">
+              <div class="budget-meter"><div class="budget-meter-fill ${over?'warn':'ok'}" style="width:${pct.toFixed(1)}%;"></div></div>
+              <div style="font-size:0.68rem;color:var(--text3);margin-top:4px;">${r.targetedCats}/${r.totalCats} categories targeted ${over?'· ⚠ Over budget':''}</div>
+            </td>
           </tr>`;
         }).join('')}</tbody>
       </table></div>
     </div>
     <div class="card">
-      <div class="card-title">By Category</div>
+      <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
+        <span>By Category</span>
+        <button class="btn btn-ghost btn-sm" onclick="_budgetCatExpanded=!_budgetCatExpanded;renderBudgetPlanning()">${_budgetCatExpanded ? 'Collapse' : 'Expand'}</button>
+      </div>
+      <div style="${_budgetCatExpanded ? '' : 'display:none;'}">
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap;">
+        <span class="budget-chip">Bucket filter</span>
+        <select id="budgetCatBucketSel" onchange="_budgetCatBucketFilter=this.value;renderBudgetPlanning()" style="max-width:220px;">
+          ${expBuckets.map(b => `<option value="${esc(b)}"${selectedBucket===b?' selected':''}>${esc(b)}</option>`).join('')}
+        </select>
+      </div>
       <div style="overflow-x:auto;"><table class="data-table">
         <thead><tr><th>Category</th><th>Bucket</th><th>Budgeted</th><th>Actual</th><th>Remaining</th><th>Check</th></tr></thead>
-        <tbody>${catRows.map(r => `<tr>
+        <tbody>${catRowsFiltered.map(r => {
+          const pct = r.target > 0 ? Math.min(100, (r.actual / r.target) * 100) : 0;
+          const over = r.remaining < 0;
+          return `<tr>
           <td>${esc(r.cat.name)}</td><td>${esc(r.cat.bucket)}</td>
           <td><input type="number" min="0" step="0.01" value="${r.target||''}" onchange="updateBudgetTarget('cat','${r.cat.id}',this.value)"></td>
           <td class="bp-col-actual" style="font-family:var(--mono);">${fmtAmt(r.actual)}</td>
-          <td style="font-family:var(--mono);color:${r.remaining<0?'var(--red)':'var(--green)'};">${fmtAmt(r.remaining)}</td>
-          <td style="font-size:0.72rem;color:${r.invalid?'var(--red)':'var(--text3)'};">${r.invalid ? '⚠ Above bucket target' : 'OK'}</td>
-        </tr>`).join('')}</tbody>
+          <td style="font-family:var(--mono);color:${over?'var(--red)':'var(--green)'};">
+            ${fmtAmt(r.remaining)}
+            <div class="budget-meter" style="margin-top:4px;"><div class="budget-meter-fill ${over?'warn':'ok'}" style="width:${pct.toFixed(1)}%;"></div></div>
+          </td>
+          <td style="font-size:0.72rem;color:${r.invalid?'var(--red)':'var(--text3)'};">${r.invalid ? '⚠' : ''}</td>
+        </tr>`;
+        }).join('')}</tbody>
       </table></div>
+      </div>
     </div>`;
 }
 
@@ -4117,10 +4229,7 @@ function completeWizard(dest) {
     showTab('import', getTabButton('import'));
   } else if (dest === 'manual') {
     showTab('import', getTabButton('import'));
-    setTimeout(() => {
-      const card = document.getElementById('manualEntryCard');
-      if (card) card.scrollIntoView({ behavior: 'smooth' });
-    }, 200);
+    setTimeout(() => openImportAction('manual'), 200);
   } else {
     // Show dashboard
     showTab('dashboard', getTabButton('dashboard'));
