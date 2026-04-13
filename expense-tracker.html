@@ -238,7 +238,7 @@ select option{background:var(--navy3);}
 
 html,body{overflow-x:hidden;max-width:100%;}
 @media(max-width:900px){.kpi-grid{grid-template-columns:1fr 1fr;}.dg2,.dg3{grid-template-columns:1fr;}.grid4{grid-template-columns:1fr 1fr;}}
-@media(max-width:600px){.tool-header{padding:0 14px;}.tool-nav-brand{display:none;}.tool-nav-sep{display:none;}.tool-nav-back{font-size:0.72rem;padding:5px 10px;}.tab-panel{padding:14px;}.kpi-grid{grid-template-columns:1fr;}.grid2,.grid3{grid-template-columns:1fr;}.entry-actions{grid-template-columns:1fr;}}
+@media(max-width:600px){.tool-header{padding:0 14px;}.tool-nav-brand{display:none;}.tool-nav-sep{display:none;}.tool-nav-back{font-size:0.72rem;padding:5px 10px;}.tab-panel{padding:14px;}.kpi-grid{grid-template-columns:1fr;}.grid2,.grid3{grid-template-columns:1fr;}.entry-actions{grid-template-columns:1fr;}.bp-col-actual{display:none;}}
 
 /* ═══ FIRST-RUN WIZARD ═══════════════════════════════════ */
 /* When wizard is active, hide tabs and tab panels */
@@ -330,6 +330,7 @@ body.wizard-active #wizardOverlay{display:block!important;}
   <div class="tool-header-tabs">
     <button class="tab-btn active" onclick="showTab('settings',this)">⚙ Settings</button>
     <button class="tab-btn" onclick="showTab('import',this)">↑ Add / Import</button>
+    <button id="budgetTabBtn" class="tab-btn" onclick="showTab('budget',this)">◎ Budget Planning</button>
     <button class="tab-btn" onclick="showTab('dashboard',this)">◈ Dashboard</button>
     <button id="annualTabBtn" class="tab-btn" onclick="showTab('annual',this)">◑ Annual</button>
   </div>
@@ -624,18 +625,17 @@ body.wizard-active #wizardOverlay{display:block!important;}
       <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none;" onclick="toggleManualEntry()">
         <span>✏️ Add Transaction</span>
         <div style="display:flex;align-items:center;gap:10px;">
-          <button id="scanReceiptBtn" onclick="event.stopPropagation();document.getElementById('receiptFileIn').click()" style="display:none;background:var(--navy3);border:1px solid var(--border2);border-radius:6px;color:var(--text2);font-family:var(--mono);font-size:0.62rem;padding:4px 10px;cursor:pointer;" onmouseover="this.style.borderColor='var(--amber2)'" onmouseout="this.style.borderColor='var(--border2)'">📷 Scan Receipt</button>
-          <input type="file" id="receiptFileIn" accept="image/*" capture="environment" style="display:none" onchange="handleReceiptScan(this.files[0])">
           <span id="manualEntrySubtitle" style="font-family:var(--mono);font-size:0.6rem;color:var(--text3);font-weight:400;letter-spacing:0.04em;"></span>
           <span id="manualEntryChevron" style="color:var(--amber2);font-size:0.9rem;transition:transform 0.2s;">▲</span>
         </div>
       </div>
       <div id="manualEntryBody">
-        <div style="display:grid;grid-template-columns:130px 1fr 120px auto auto;gap:10px;align-items:end;flex-wrap:wrap;" id="manualEntryRow">
+        <div style="display:grid;grid-template-columns:130px 1fr 120px auto auto auto;gap:10px;align-items:end;flex-wrap:wrap;" id="manualEntryRow">
           <div class="fg"><label class="fl">Date</label><input type="date" id="meDate"></div>
           <div class="fg"><label class="fl">Description</label><input type="text" id="meDesc" placeholder="e.g. Grab, Starbucks…" maxlength="120"></div>
           <div class="fg"><label class="fl">Amount</label><input type="number" id="meAmt" placeholder="0.00" step="0.01" min="0"></div>
           <div class="fg"><label class="fl">Type</label><select id="meType"><option value="expense">💸 Expense</option><option value="income">💰 Income</option></select></div>
+          <div class="fg"><label class="fl">Bucket</label><select id="meBucket"></select></div>
           <div class="fg"><label class="fl">Category</label><select id="meCat"></select></div>
         </div>
         <!-- Profile selector — shown for Premium (multiUser) only, hidden by initManualEntry -->
@@ -658,8 +658,37 @@ body.wizard-active #wizardOverlay{display:block!important;}
     </div>
   </div>
 
+  <div id="receiptImportCard" style="display:none;margin-bottom:18px;">
+    <div class="card" style="margin-bottom:0;border-color:var(--amber);">
+      <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
+        <span>📷 Take a Picture</span>
+        <span style="background:var(--amber);color:#000;font-family:var(--mono);font-size:0.55rem;font-weight:700;letter-spacing:0.1em;padding:3px 8px;border-radius:99px;">PREMIUM</span>
+      </div>
+      <p style="font-size:0.78rem;color:var(--text3);line-height:1.65;margin-bottom:16px;">Capture a receipt photo. AI pre-fills your manual entry with amount, merchant, date, bucket, and category when possible.</p>
+      <div class="drop-zone" id="receiptDropZone" onclick="document.getElementById('receiptPanelFileIn').click()" style="margin-bottom:0;">
+        <div class="drop-icon">📸</div>
+        <h3>Drop receipt image here</h3>
+        <p>Supports photos and screenshots — click to browse</p>
+        <input type="file" id="receiptPanelFileIn" accept="image/*" capture="environment" style="display:none" onchange="selectReceiptFile(this.files[0])">
+      </div>
+      <div id="receiptImportActions" style="display:none;margin-top:12px;align-items:center;gap:10px;flex-wrap:wrap;">
+        <span id="receiptFileName" style="font-family:var(--mono);font-size:0.75rem;color:var(--amber2);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+        <button class="btn btn-amber" onclick="processReceiptImport()">📷 Process receipt</button>
+        <button class="btn btn-ghost btn-sm" onclick="resetReceiptImport()">✕ Change file</button>
+      </div>
+      <div id="receiptImportLoading" style="display:none;margin-top:14px;padding:14px 16px;background:var(--navy3);border-radius:8px;align-items:center;gap:14px;">
+        <div style="width:22px;height:22px;border:2.5px solid var(--border2);border-top-color:var(--amber);border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0;"></div>
+        <div>
+          <div style="font-size:0.8rem;color:var(--text);margin-bottom:2px;">Reading your receipt…</div>
+          <div style="font-family:var(--mono);font-size:0.65rem;color:var(--text3);">This takes 5–15 seconds.</div>
+        </div>
+      </div>
+      <div id="receiptImportError" style="display:none;margin-top:12px;"></div>
+    </div>
+  </div>
+
   <!-- Import section — basic/premium only; replaced with nudge for free -->
-  <div id="importOnlySection">
+  <div id="importOnlySection" style="display:none;">
 
   <!-- AI Statement Import -->
   <div class="card" id="aiImportCard" style="margin-bottom:18px;border-color:var(--green);">
@@ -778,6 +807,12 @@ body.wizard-active #wizardOverlay{display:block!important;}
   </div><!-- /importOnlySection -->
 </div>
 
+<!-- ══════ TAB: BUDGET PLANNING ══════ -->
+<div id="tab-budget" class="tab-panel">
+  <div class="section-head"><h2>Budget Planning</h2><p>Set monthly targets by bucket and category, then track actual spending against plan.</p></div>
+  <div id="budgetPlanningRoot"></div>
+</div>
+
 <!-- ══════ TAB: DASHBOARD ══════ -->
 <div id="tab-dashboard" class="tab-panel">
   <!-- Print-only header -->
@@ -841,8 +876,8 @@ body.wizard-active #wizardOverlay{display:block!important;}
       <h3 style="font-family:var(--serif);font-size:1.1rem;color:var(--text);margin-bottom:8px;">No data yet for this month</h3>
       <p style="font-size:0.85rem;color:var(--text3);line-height:1.7;max-width:400px;margin:0 auto 20px;">Import your bank statement or add an expense to get started. Your dashboard updates instantly.</p>
       <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-        <button class="btn btn-amber" onclick="showTab('import',document.querySelectorAll('.tab-btn')[1])">📊 Import Statement</button>
-        <button class="btn btn-ghost" onclick="showTab('import',document.querySelectorAll('.tab-btn')[1]);setTimeout(()=>{const c=document.getElementById('manualEntryCard');if(c)c.scrollIntoView({behavior:'smooth'});},200)">✏️ Add Expense Manually</button>
+        <button class="btn btn-amber" onclick="showTab('import',getTabButton('import'))">📊 Import Statement</button>
+        <button class="btn btn-ghost" onclick="showTab('import',getTabButton('import'));setTimeout(()=>{const c=document.getElementById('manualEntryCard');if(c)c.scrollIntoView({behavior:'smooth'});},200)">✏️ Add Expense Manually</button>
       </div>
     </div>
   </div>
@@ -1029,7 +1064,7 @@ body.wizard-active #wizardOverlay{display:block!important;}
           </div>
 
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button onclick="closeGuide();showTab('import',document.querySelectorAll('.tab-btn')[1])" style="background:var(--amber);color:#000;border:none;border-radius:6px;font-family:var(--body);font-size:0.78rem;font-weight:600;padding:7px 16px;cursor:pointer;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">→ Go to Add / Import</button>
+            <button onclick="closeGuide();showTab('import',getTabButton('import'))" style="background:var(--amber);color:#000;border:none;border-radius:6px;font-family:var(--body);font-size:0.78rem;font-weight:600;padding:7px 16px;cursor:pointer;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">→ Go to Add / Import</button>
           </div>
         </div>
       </div>
@@ -1113,6 +1148,7 @@ function buildCan(tier) {
     unlimitedHistory: TIER === 'premium',   // premium only
     multiUser:        TIER === 'premium',   // premium only
     yearlySummary:    TIER === 'premium',   // premium only
+    budgetPlanning:   TIER === 'premium',   // premium only
     pdfExport:        TIER === 'premium',   // premium only
   };
 }
@@ -1241,6 +1277,7 @@ function catColor(name) {
 let S = {
   cats: [],
   buckets: DEFAULT_BUCKETS.slice(),
+  budgets: {},
   rules: [],
   currency: {primary:'THB', secondary:'EUR', rate:0.027},
   income: 0,
@@ -1259,7 +1296,7 @@ const LS_KEY = 'ft_v4';
 
 function persist() {
   localStorage.setItem(LS_KEY, JSON.stringify({
-    cats: S.cats, buckets: S.buckets, rules: S.rules, currency: S.currency,
+    cats: S.cats, buckets: S.buckets, budgets: S.budgets, rules: S.rules, currency: S.currency,
     income: S.income, colMap: S.colMap, txns: S.txns,
     profiles: S.profiles,
   }));
@@ -1274,6 +1311,7 @@ function hydrate() {
       const d = JSON.parse(raw);
       S.cats     = d.cats     || getSuggestedDefaultCats();
       S.buckets  = normalizeBuckets(d.buckets || S.cats.map(c => c.bucket));
+      S.budgets  = d.budgets  || {};
       S.rules    = d.rules    || [];
       S.currency = d.currency || S.currency;
       S.income   = d.income   || 0;
@@ -1292,12 +1330,14 @@ function hydrate() {
     } else {
       S.cats     = getSuggestedDefaultCats();
       S.buckets  = DEFAULT_BUCKETS.slice();
+      S.budgets  = {};
       S.txns     = {p1:{}, p2:{}};
       S.profiles = {p1:'Person 1', p2:'Person 2'};
     }
   } catch(e) {
     S.cats     = getSuggestedDefaultCats();
     S.buckets  = DEFAULT_BUCKETS.slice();
+    S.budgets  = {};
     S.txns     = {p1:{}, p2:{}};
     S.profiles = {p1:'Person 1', p2:'Person 2'};
   }
@@ -1423,6 +1463,7 @@ function setViewProfile(pid) {
   refreshProfileLabels();
   populateYearDropdown();
   renderDash();
+  if (document.getElementById('tab-budget')?.classList.contains('active')) renderBudgetPlanning();
 }
 
 function setAnnualProfile(pid) {
@@ -1488,6 +1529,10 @@ function showTab(name, btn) {
     toast('🔒 Annual summary is a Premium feature — upgrade at theartifactslab.com', 'err');
     return;
   }
+  if (name === 'budget' && !can.budgetPlanning) {
+    toast('🔒 Budget planning is a Premium feature — upgrade at theartifactslab.com', 'err');
+    return;
+  }
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
@@ -1495,6 +1540,7 @@ function showTab(name, btn) {
   if (name === 'dashboard') renderDash();
   if (name === 'annual') renderAnnual();
   if (name === 'import') { checkStaleCats(); renderManualTxList(); }
+  if (name === 'budget') renderBudgetPlanning();
   if (name === 'settings') goToSettingsStep(_settingsStep);
 }
 
@@ -1563,8 +1609,27 @@ function initSettingsWizard() {
   goToSettingsStep(0);
 }
 
+function getTabButton(name) {
+  const map = { settings:0, import:1, budget:2, dashboard:3, annual:4 };
+  const idx = map[name];
+  return document.querySelectorAll('.tab-btn')[idx];
+}
+
+function revealImportSection(action) {
+  const manual = document.getElementById('manualEntryCard');
+  const receipt = document.getElementById('receiptImportCard');
+  const ai = document.getElementById('importOnlySection');
+  if (manual) manual.style.display = 'none';
+  if (receipt) receipt.style.display = 'none';
+  if (ai) ai.style.display = 'none';
+  if (action === 'manual' && manual) manual.style.display = '';
+  if (action === 'receipt' && receipt) receipt.style.display = '';
+  if (action === 'ai' && ai) ai.style.display = '';
+}
+
 function openImportAction(action) {
   if (action === 'manual') {
+    revealImportSection('manual');
     const body = document.getElementById('manualEntryBody');
     const chevron = document.getElementById('manualEntryChevron');
     if (body) body.style.display = '';
@@ -1576,21 +1641,17 @@ function openImportAction(action) {
   if (action === 'receipt') {
     if (!can.pdfExport) {
       toast('🔒 Receipt scanning is a Premium feature', 'err');
-      document.getElementById('manualEntryCard')?.scrollIntoView({ behavior:'smooth', block:'start' });
       return;
     }
-    document.getElementById('manualEntryCard')?.scrollIntoView({ behavior:'smooth', block:'start' });
-    setTimeout(() => document.getElementById('receiptFileIn')?.click(), 180);
+    revealImportSection('receipt');
+    document.getElementById('receiptImportCard')?.scrollIntoView({ behavior:'smooth', block:'start' });
     return;
   }
 
   if (action === 'ai') {
-    if (!can.csvImport) {
-      toast('🔒 AI statement import is a Basic feature', 'err');
-      document.getElementById('importOnlySection')?.scrollIntoView({ behavior:'smooth', block:'start' });
-      return;
-    }
-    document.getElementById('aiImportCard')?.scrollIntoView({ behavior:'smooth', block:'start' });
+    revealImportSection('ai');
+    if (!can.csvImport) toast('🔒 AI statement import is a Basic feature', 'err');
+    (document.getElementById('aiImportCard') || document.getElementById('importOnlySection'))?.scrollIntoView({ behavior:'smooth', block:'start' });
   }
 }
 
@@ -1690,6 +1751,8 @@ function saveBuckets() {
   persist();
   renderBuckets();
   renderCats();
+  populateManualBucketSelect();
+  populateManualCatSelect();
   populateDrillSelect();
   toast('✓ Buckets saved','ok');
 }
@@ -1721,7 +1784,7 @@ function addCat() {
 
 function delCat(i) { S.cats.splice(i,1); renderCats(); }
 
-function saveCats() { persist(); buildLookup(); populateManualCatSelect(); renderBuckets(); toast('✓ Categories saved','ok'); }
+function saveCats() { persist(); buildLookup(); populateManualBucketSelect(); populateManualCatSelect(); renderBuckets(); toast('✓ Categories saved','ok'); }
 
 function resetCats() {
   if (!confirm('Reset to default categories?')) return;
@@ -1729,6 +1792,8 @@ function resetCats() {
   S.buckets = DEFAULT_BUCKETS.slice();
   renderBuckets();
   renderCats();
+  populateManualBucketSelect();
+  populateManualCatSelect();
   toast('Categories reset to defaults');
 }
 
@@ -1778,7 +1843,7 @@ let _restoreData = null;
 function doBackup() {
   const backup = {
     _v:3, _at:new Date().toISOString(), _tool:'Expense Tracker',
-    cats:S.cats, buckets:S.buckets, rules:S.rules, currency:S.currency,
+    cats:S.cats, buckets:S.buckets, budgets:S.budgets, rules:S.rules, currency:S.currency,
     income:S.income, colMap:S.colMap, txns:S.txns,
   };
   const a = document.createElement('a');
@@ -1825,6 +1890,7 @@ function confirmRestore() {
   const d = _restoreData;
   S.cats=d.cats||getSuggestedDefaultCats();
   S.buckets=normalizeBuckets(d.buckets || S.cats.map(c => c.bucket));
+  S.budgets=d.budgets||{};
   S.rules=d.rules||[]; S.currency=d.currency||S.currency;
   S.income=d.income||0; S.colMap=d.colMap||{}; S.txns=d.txns||{p1:{},p2:{}};
   persist(); buildLookup(); loadCurrencyUI(); renderBuckets(); renderCats(); renderRules();
@@ -2899,6 +2965,9 @@ function refreshCurrToggles() {
 function esc(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+function jsq(s) {
+  return String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+}
 
 // ═══════════════════════════════════════════════
 // GET STARTED GUIDE
@@ -3028,8 +3097,8 @@ function initManualEntry() {
   const card = document.getElementById('manualEntryCard');
   if (!card) return;
 
-  // Always visible for all tiers
-  card.style.display = '';
+  // Hidden by default; launcher controls visibility
+  card.style.display = 'none';
 
   // Promo banner — free tier only
   const promoBanner = document.getElementById('manualEntryPromoBanner');
@@ -3043,14 +3112,11 @@ function initManualEntry() {
       : 'Free plan — enter transactions one by one';
   }
 
-  // Scan receipt button — Premium only
-  const scanBtn = document.getElementById('scanReceiptBtn');
-  if (scanBtn) scanBtn.style.display = can.pdfExport ? '' : 'none';
-
   // Shared launcher now controls which profile receives new entries
   const profileRow = document.getElementById('meProfileRow');
   if (profileRow) profileRow.style.display = 'none';
 
+  populateManualBucketSelect();
   populateManualCatSelect();
   refreshManualProfileLabels();
   refreshEntryProfileToggle();
@@ -3060,15 +3126,34 @@ function initManualEntry() {
   document.getElementById('meDate').value =
     today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
 
-  // Re-populate cats when type changes
-  document.getElementById('meType').addEventListener('change', populateManualCatSelect);
+  // Re-populate bucket/cats when type or bucket changes
+  document.getElementById('meType').addEventListener('change', () => {
+    populateManualBucketSelect();
+    populateManualCatSelect();
+  });
+  document.getElementById('meBucket').addEventListener('change', populateManualCatSelect);
+}
+
+function populateManualBucketSelect() {
+  const sel = document.getElementById('meBucket');
+  if (!sel) return;
+  const prev = sel.value;
+  const isIncome = document.getElementById('meType')?.value === 'income';
+  const buckets = isIncome ? ['Income'] : getBucketList().filter(b => b !== 'Income');
+  sel.innerHTML = buckets.map(b => `<option value="${esc(b)}">${esc(b)}</option>`).join('');
+  if (buckets.includes(prev)) sel.value = prev;
+  sel.disabled = isIncome;
 }
 
 function populateManualCatSelect() {
   const sel = document.getElementById('meCat');
   if (!sel) return;
   const isIncome = document.getElementById('meType')?.value === 'income';
-  const cats = S.cats.filter(c => isIncome ? c.type === 'income' : c.type !== 'income');
+  const bucket = document.getElementById('meBucket')?.value || (isIncome ? 'Income' : '');
+  const cats = S.cats.filter(c => {
+    if (isIncome) return c.type === 'income' && c.bucket === 'Income';
+    return c.type !== 'income' && (!bucket || c.bucket === bucket);
+  });
   sel.innerHTML = '<option value="">— Select category —</option>' +
     cats.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
 }
@@ -3085,6 +3170,7 @@ function saveManualTx() {
   const desc = descEl.value.trim();
   const amt  = parseFloat(amtEl.value);
   const type = typeEl.value;
+  const bucket = document.getElementById('meBucket')?.value;
   const catId = catEl.value;
 
   // Validate
@@ -3092,6 +3178,7 @@ function saveManualTx() {
   if (!date) { showMeError('Please enter a date.'); return; }
   if (!desc)  { showMeError('Please enter a description.'); return; }
   if (!amt || amt <= 0) { showMeError('Please enter a valid amount.'); return; }
+  if (!bucket) { showMeError('Please select a bucket.'); return; }
   if (!catId) { showMeError('Please select a category.'); return; }
 
   const month = date.slice(0, 7);
@@ -3186,6 +3273,7 @@ function renderManualTxList() {
 // AI STATEMENT IMPORT
 // ═══════════════════════════════════════════════
 let _aiFile = null;
+let _receiptFile = null;
 
 function initAIImport() {
   const dz = document.getElementById('aiDropZone');
@@ -3197,6 +3285,60 @@ function initAIImport() {
     const f = e.dataTransfer.files[0];
     if (f) selectAIFile(f);
   });
+}
+
+function initReceiptImport() {
+  const dz = document.getElementById('receiptDropZone');
+  if (!dz) return;
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('over'));
+  dz.addEventListener('drop', e => {
+    e.preventDefault(); dz.classList.remove('over');
+    const f = e.dataTransfer.files[0];
+    if (f) selectReceiptFile(f);
+  });
+}
+
+function selectReceiptFile(file) {
+  if (!file) return;
+  _receiptFile = file;
+  const el = id => document.getElementById(id);
+  if (el('receiptDropZone')) el('receiptDropZone').style.display = 'none';
+  if (el('receiptImportActions')) el('receiptImportActions').style.display = 'flex';
+  if (el('receiptFileName')) el('receiptFileName').textContent = file.name;
+  if (el('receiptImportError')) el('receiptImportError').style.display = 'none';
+}
+
+function resetReceiptImport() {
+  _receiptFile = null;
+  const el = id => document.getElementById(id);
+  if (el('receiptDropZone')) el('receiptDropZone').style.display = '';
+  if (el('receiptImportActions')) el('receiptImportActions').style.display = 'none';
+  if (el('receiptImportLoading')) el('receiptImportLoading').style.display = 'none';
+  if (el('receiptImportError')) el('receiptImportError').style.display = 'none';
+  if (el('receiptFileName')) el('receiptFileName').textContent = '';
+  if (el('receiptPanelFileIn')) el('receiptPanelFileIn').value = '';
+}
+
+async function processReceiptImport() {
+  if (!_receiptFile) return;
+  const el = id => document.getElementById(id);
+  if (el('receiptImportActions')) el('receiptImportActions').style.display = 'none';
+  if (el('receiptImportLoading')) el('receiptImportLoading').style.display = 'flex';
+  if (el('receiptImportError')) el('receiptImportError').style.display = 'none';
+  try {
+    await handleReceiptScan(_receiptFile);
+    revealImportSection('manual');
+    document.getElementById('manualEntryCard')?.scrollIntoView({ behavior:'smooth', block:'start' });
+    resetReceiptImport();
+  } catch (e) {
+    if (el('receiptImportError')) {
+      el('receiptImportError').style.display = '';
+      el('receiptImportError').innerHTML = `<div class="feature-locked"><span>⚠</span><span>${esc(e.message || 'Receipt scan failed')}</span></div>`;
+    }
+  } finally {
+    if (el('receiptImportLoading')) el('receiptImportLoading').style.display = 'none';
+  }
 }
 
 function selectAIFile(file) {
@@ -3406,7 +3548,7 @@ function parseAIDate(s) {
 // ═══════════════════════════════════════════════
 async function handleReceiptScan(file) {
   if (!file) return;
-  if (!can.pdfExport) { toast('🔒 Receipt scanning is a Premium feature', 'err'); return; }
+  if (!can.pdfExport) throw new Error('Receipt scanning is a Premium feature');
 
   const btn = document.getElementById('scanReceiptBtn');
   if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
@@ -3463,9 +3605,12 @@ async function handleReceiptScan(file) {
       const catId = catLookup[r.category.trim().toLowerCase()];
       if (catId) {
         const typeEl = document.getElementById('meType');
+        const bucketEl = document.getElementById('meBucket');
         const cat    = S.cats.find(c => c.id === catId);
         // Set the correct type first so the dropdown populates correctly
         if (cat && typeEl) typeEl.value = cat.type === 'income' ? 'income' : 'expense';
+        populateManualBucketSelect();
+        if (cat && bucketEl && cat.bucket) bucketEl.value = cat.bucket;
         populateManualCatSelect();
         const catEl = document.getElementById('meCat');
         if (catEl) catEl.value = catId;
@@ -3480,12 +3625,14 @@ async function handleReceiptScan(file) {
       if (chev) chev.style.transform = '';
     }
 
-    const inp = document.getElementById('receiptFileIn');
+    const inp = document.getElementById('receiptPanelFileIn');
     if (inp) inp.value = '';
     toast('✓ Receipt scanned — review and save', 'ok');
+    return true;
 
   } catch(e) {
     toast('Receipt scan failed: ' + e.message, 'err');
+    throw e;
   } finally {
     if (btn) { btn.textContent = '📷 Scan Receipt'; btn.disabled = false; }
   }
@@ -3631,6 +3778,11 @@ function applyTierGates() {
   }
 
   // ── Annual tab ───────────────────────────────
+  const budgetBtn = document.getElementById('budgetTabBtn');
+  if (!can.budgetPlanning && budgetBtn) {
+    budgetBtn.classList.add('locked');
+    budgetBtn.title = 'Budget planning — Premium feature';
+  }
   const annBtn = document.getElementById('annualTabBtn');
   if (!can.yearlySummary && annBtn) {
     annBtn.classList.add('locked');
@@ -3688,6 +3840,114 @@ function printReport() {
   setTimeout(() => { if (ph) ph.style.display = 'none'; }, 500);
 }
 
+function moveBackupCardToDashboard() {
+  const backupCard = document.getElementById('backupCard');
+  const dashTab = document.getElementById('tab-dashboard');
+  if (!backupCard || !dashTab) return;
+  if (backupCard.dataset.movedToDashboard === '1') return;
+  backupCard.dataset.movedToDashboard = '1';
+  backupCard.style.marginTop = '18px';
+  dashTab.appendChild(backupCard);
+}
+
+function getBudgetState(month) {
+  if (!S.budgets[month]) S.budgets[month] = { bucketTargets: {}, catTargets: {} };
+  if (!S.budgets[month].bucketTargets) S.budgets[month].bucketTargets = {};
+  if (!S.budgets[month].catTargets) S.budgets[month].catTargets = {};
+  return S.budgets[month];
+}
+
+function setBudgetMonth(month) {
+  const sel = document.getElementById('budgetMonthSel');
+  if (sel) sel.value = month;
+  renderBudgetPlanning();
+}
+
+function updateBudgetTarget(kind, key, value) {
+  const month = document.getElementById('budgetMonthSel')?.value || _currentMonth;
+  const st = getBudgetState(month);
+  const num = parseFloat(value) || 0;
+  if (kind === 'bucket') st.bucketTargets[key] = num;
+  if (kind === 'cat') st.catTargets[key] = num;
+  persist();
+  renderBudgetPlanning();
+}
+
+function renderBudgetPlanning() {
+  const root = document.getElementById('budgetPlanningRoot');
+  if (!root) return;
+  if (!can.budgetPlanning) {
+    root.innerHTML = nudge('Budget planning is a <strong>Premium feature</strong>.');
+    return;
+  }
+  const month = document.getElementById('budgetMonthSel')?.value || _currentMonth;
+  const txs = (_viewProfile === 'household')
+    ? [...((S.txns.p1||{})[month]||[]), ...((S.txns.p2||{})[month]||[])]
+    : ((S.txns[_viewProfile]||{})[month]||[]);
+  const state = getBudgetState(month);
+  const expCats = S.cats.filter(c => c.type !== 'income');
+  const expBuckets = getBucketList().filter(b => b !== 'Income');
+  const warnings = [];
+
+  const bucketRows = expBuckets.map(bucket => {
+    const ids = expCats.filter(c => c.bucket === bucket).map(c => c.id);
+    const actual = txs.filter(t => t.dr > 0 && ids.includes(t.catId)).reduce((s, t) => s + t.dr, 0);
+    const budgeted = parseFloat(state.bucketTargets[bucket] || 0);
+    const remaining = budgeted - actual;
+    const targetedCats = expCats.filter(c => c.bucket === bucket && (state.catTargets[c.id] || 0) > 0).length;
+    const totalCats = expCats.filter(c => c.bucket === bucket).length;
+    return { bucket, budgeted, actual, remaining, targetedCats, totalCats };
+  });
+  const catRows = expCats.map(cat => {
+    const target = parseFloat(state.catTargets[cat.id] || 0);
+    const bucketTarget = parseFloat(state.bucketTargets[cat.bucket] || 0);
+    const invalid = target > 0 && bucketTarget > 0 && target > bucketTarget;
+    if (invalid) warnings.push(`${cat.name} target is higher than ${cat.bucket} bucket target`);
+    const actual = txs.filter(t => t.dr > 0 && t.catId === cat.id).reduce((s, t) => s + t.dr, 0);
+    const remaining = target - actual;
+    return { cat, target, actual, remaining, invalid };
+  });
+
+  root.innerHTML = `
+    <div class="card" style="margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div class="card-title" style="margin-bottom:0;border-bottom:none;padding-bottom:0;">Monthly Budget Targets</div>
+        <input type="month" id="budgetMonthSel" value="${month}" onchange="setBudgetMonth(this.value)" style="max-width:170px;">
+      </div>
+      ${warnings.length ? `<div style="margin-top:12px;">${nudge(`⚠ ${warnings.length} warning(s): ${esc(warnings[0])}`)}</div>` : ''}
+    </div>
+    <div class="card">
+      <div class="card-title">By Bucket</div>
+      <div style="overflow-x:auto;"><table class="data-table">
+        <thead><tr><th>Bucket</th><th>Budgeted</th><th>Actual</th><th>Remaining</th><th>Coverage</th></tr></thead>
+        <tbody>${bucketRows.map(r => {
+          const pct = r.budgeted > 0 ? Math.min(100, (r.actual / r.budgeted) * 100) : 0;
+          const over = r.remaining < 0;
+          return `<tr>
+            <td>${esc(r.bucket)}</td>
+            <td><input type="number" min="0" step="0.01" value="${r.budgeted||''}" onchange="updateBudgetTarget('bucket','${jsq(r.bucket)}',this.value)"></td>
+            <td class="bp-col-actual" style="font-family:var(--mono);">${fmtAmt(r.actual)}</td>
+            <td style="font-family:var(--mono);color:${over?'var(--red)':'var(--green)'};">${fmtAmt(r.remaining)}</td>
+            <td style="min-width:180px;"><div class="bar-track"><div class="bar-fill" style="width:${pct.toFixed(1)}%;background:${over?'var(--red)':'var(--blue)'};"></div></div><div style="font-size:0.68rem;color:var(--text3);margin-top:4px;">${r.targetedCats}/${r.totalCats} categories targeted ${over?'· ⚠ Over budget':''}</div></td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table></div>
+    </div>
+    <div class="card">
+      <div class="card-title">By Category</div>
+      <div style="overflow-x:auto;"><table class="data-table">
+        <thead><tr><th>Category</th><th>Bucket</th><th>Budgeted</th><th>Actual</th><th>Remaining</th><th>Check</th></tr></thead>
+        <tbody>${catRows.map(r => `<tr>
+          <td>${esc(r.cat.name)}</td><td>${esc(r.cat.bucket)}</td>
+          <td><input type="number" min="0" step="0.01" value="${r.target||''}" onchange="updateBudgetTarget('cat','${r.cat.id}',this.value)"></td>
+          <td class="bp-col-actual" style="font-family:var(--mono);">${fmtAmt(r.actual)}</td>
+          <td style="font-family:var(--mono);color:${r.remaining<0?'var(--red)':'var(--green)'};">${fmtAmt(r.remaining)}</td>
+          <td style="font-size:0.72rem;color:${r.invalid?'var(--red)':'var(--text3)'};">${r.invalid ? '⚠ Above bucket target' : 'OK'}</td>
+        </tr>`).join('')}</tbody>
+      </table></div>
+    </div>`;
+}
+
 
 function init() {
   hydrate();
@@ -3712,6 +3972,7 @@ function init() {
   const [dy, dm] = defaultMonth.split('-');
   document.getElementById('dashMonthSel').value = dm;
   document.getElementById('dashYearSel').value  = dy;
+  moveBackupCardToDashboard();
 
   // Show a backup reminder if we have data but no recent backup warning seen
   if (allKeys.length > 0 && can.backup) {
@@ -3729,6 +3990,7 @@ function init() {
   initSettingsWizard();
   initManualEntry();
   initAIImport();
+  initReceiptImport();
   const wizardShown = checkFirstRun();
   if (!wizardShown) routeInitialTab();
 }
@@ -3755,9 +4017,9 @@ function checkFirstRun() {
 function routeInitialTab() {
   const hasData = hasAnySavedTransactions();
   if (hasData) {
-    showTab('import', document.querySelectorAll('.tab-btn')[1]);
+    showTab('import', getTabButton('import'));
   } else {
-    showTab('settings', document.querySelectorAll('.tab-btn')[0]);
+    showTab('settings', getTabButton('settings'));
     goToSettingsStep(0);
   }
 }
@@ -3852,16 +4114,16 @@ function completeWizard(dest) {
   document.body.classList.remove('wizard-active');
 
   if (dest === 'import') {
-    showTab('import', document.querySelectorAll('.tab-btn')[1]);
+    showTab('import', getTabButton('import'));
   } else if (dest === 'manual') {
-    showTab('import', document.querySelectorAll('.tab-btn')[1]);
+    showTab('import', getTabButton('import'));
     setTimeout(() => {
       const card = document.getElementById('manualEntryCard');
       if (card) card.scrollIntoView({ behavior: 'smooth' });
     }, 200);
   } else {
     // Show dashboard
-    showTab('dashboard', document.querySelectorAll('.tab-btn')[2]);
+    showTab('dashboard', getTabButton('dashboard'));
   }
 }
 
@@ -3869,7 +4131,7 @@ function skipWizard() {
   localStorage.setItem('ft_setup_done', '1');
   document.body.classList.remove('wizard-active');
   // Stay on Settings tab so user can explore
-  showTab('settings', document.querySelectorAll('.tab-btn')[0]);
+  showTab('settings', getTabButton('settings'));
 }
 
 
