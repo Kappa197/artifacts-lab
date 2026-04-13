@@ -990,11 +990,15 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 <!-- ==================== PLAN ==================== -->
 <div class="view" id="view-plan">
   <div id="plan-content">
-    <div class="empty-state card">
+    <div class="empty-state card" id="plan-empty-state">
       <div class="eicon">🏗️</div>
       <h3>No plan yet</h3>
       <p>Complete the setup to generate your personalised programme.</p>
-      <button class="btn btn-primary" onclick="showView('wizard')">Go to Setup →</button>
+      <div style="display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="showView('wizard')">Go to Setup →</button>
+        <button class="btn btn-outline" onclick="trkOpenManualEditorFromPlan()">✏️ Create Your Own Plan</button>
+      </div>
+      <div id="plan-empty-load-plans" style="margin-top:1.2rem"></div>
     </div>
   </div>
 </div>
@@ -3942,6 +3946,7 @@ function showView(name){
   document.querySelectorAll('.tool-inner-nav button').forEach(b=>b.classList.remove('active'));
   document.getElementById(`nav-${name}`).classList.add('active');
   if(name==='tracker') initTracker();
+  if(name==='plan') refreshPlanEmptyState();
   // When returning to wizard, always reset to step 0 (hero) — hide progress bar
   if(name==='wizard'){
     document.querySelectorAll('[id^="step-"]').forEach(el=>el.classList.add('hidden'));
@@ -3950,6 +3955,53 @@ function showView(name){
     const pbm=document.getElementById('setupProgressMobile'); if(pbm) pbm.style.display='none';
   }
   window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// Populate "load from tracker" buttons on the My Plan empty state
+function refreshPlanEmptyState(){
+  // Only relevant when there's no currentPlan active
+  if(currentPlan) return;
+  const container = document.getElementById('plan-empty-load-plans');
+  if(!container) return;
+
+  // Collect all non-empty slots (auto-generated plans only — manual plans can't be loaded into renderPlan)
+  const savedSlots = [];
+  for(let slot=0; slot<3; slot++){
+    const plan = trkGetPlan(slot);
+    if(plan) savedSlots.push({ slot, plan });
+  }
+
+  if(!savedSlots.length){ container.innerHTML = ''; return; }
+
+  let html = `<div style="border-top:1px solid var(--border);padding-top:.9rem;margin-top:.3rem">
+    <div style="font-size:.78rem;color:var(--muted);margin-bottom:.6rem;font-weight:600">Or load a saved plan from the Tracker:</div>
+    <div style="display:flex;flex-direction:column;gap:.4rem;max-width:320px;margin:0 auto">`;
+
+  savedSlots.forEach(({slot, plan}) => {
+    const m = plan.meta || {};
+    const title = `${m.weeks||'?'}-Week Plan · ${m.split||''}`;
+    const sub   = `${(m.level||'').charAt(0).toUpperCase()+(m.level||'').slice(1)} · ${m.wpw||'?'} days/wk`;
+    html += `<button class="btn btn-outline" style="font-size:.82rem;padding:.55rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem"
+      onclick="viewSavedPlan(${slot})">
+      <span>
+        <strong>${TRK_SLOT_LABELS[slot]}</strong> — ${title}
+        <span style="font-size:.7rem;color:var(--muted);display:block;margin-top:.1rem">${sub}</span>
+      </span>
+      <span style="font-size:.8rem;opacity:.7">→</span>
+    </button>`;
+  });
+
+  html += `</div></div>`;
+  container.innerHTML = html;
+}
+
+// Helper: open manual editor from the My Plan tab (no active slot yet — find first empty or slot 0)
+function trkOpenManualEditorFromPlan(){
+  let targetSlot = 0;
+  for(let i=0; i<3; i++){ if(!trkSlotHasPlan(i)){ targetSlot=i; break; } }
+  showView('tracker');
+  // After tracker initialises (slot selector shown), open the manual editor for the target slot
+  setTimeout(()=>{ trkOpenManualEditor(targetSlot); }, 50);
 }
 
 function showCuesModal(exId){
@@ -4351,7 +4403,7 @@ function renderSlotGrid(){
         <div class="trk-slot-title">${title}</div>
         <div class="trk-slot-meta">${sub}</div>
         ${logBadge}
-        <button class="trk-slot-view-btn" onclick="event.stopPropagation();trkOpenSlot(${slot})">📋 View This Plan</button>
+        <button class="trk-slot-view-btn" onclick="event.stopPropagation();trkOpenSlot(${slot})">🏋️ Track This Plan</button>
       </div>`;
     } else {
       html += `<div class="trk-slot-card" onclick="trkShowEmptyDisclaimer(${slot})">
