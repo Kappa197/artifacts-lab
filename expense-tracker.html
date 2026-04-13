@@ -428,17 +428,16 @@ body.wizard-active #wizardOverlay{display:block!important;}
 <div id="tab-settings" class="tab-panel active">
   <div class="section-head"><h2>Settings & Configuration</h2><p>Configure currency, income, categories and rules — saved permanently in your browser.</p></div>
 
-  <!-- Get Started banner -->
-  <div style="background:linear-gradient(135deg,#1a2a1a 0%,#1A2235 60%,#1a2235 100%);border:1.5px solid var(--green);border-radius:12px;padding:22px 26px;margin-bottom:22px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;">
-    <div>
-      <div style="font-family:var(--serif);font-size:1.1rem;color:var(--green);margin-bottom:5px;">New here? Start with the guide ↗</div>
-      <div style="font-size:0.78rem;color:var(--text3);line-height:1.6;max-width:480px;">Learn how to export your bank statement, use AI to categorize it in seconds, and import it here — no manual data entry needed.</div>
+  <div class="setup-progress" id="settingsWizardBar" style="position:static;margin-bottom:16px;border:1px solid var(--border);border-radius:10px;background:var(--navy2);padding:14px 18px 8px;">
+    <div class="sp-top">
+      <div class="sp-tool-name">Settings Setup</div>
+      <div class="sp-fraction">Step <span id="sStepNum">1</span> of 5</div>
     </div>
-    <button onclick="openGuide()" style="background:var(--green);color:#000;border:none;border-radius:8px;padding:11px 26px;font-family:var(--mono);font-size:0.78rem;font-weight:700;letter-spacing:0.06em;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:opacity 0.15s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">▶ Get Started Guide</button>
+    <div class="sp-steps" id="sSteps"></div>
   </div>
 
   <!-- Profile Names -->
-  <div class="card">
+  <div id="profileCard" class="card" data-settings-step="0">
     <div class="card-title">👤 Profile Names</div>
     <p style="font-size:0.76rem;color:var(--text3);margin-bottom:14px;line-height:1.6;">Names are used across Import, Dashboard and Annual tabs. Saved automatically when you click away.</p>
     <div class="grid2" style="max-width:500px;">
@@ -454,7 +453,7 @@ body.wizard-active #wizardOverlay{display:block!important;}
   </div>
 
   <!-- Currency & Income -->
-  <div class="card">
+  <div id="currencyCard" class="card" data-settings-step="1">
     <div class="card-title">Currency & Income</div>
     <div class="grid4">
       <div class="fg"><label class="fl">Primary Currency</label>
@@ -485,8 +484,26 @@ body.wizard-active #wizardOverlay{display:block!important;}
     </div>
   </div>
 
+  <!-- Buckets / Wallets -->
+  <div id="bucketCard" class="card" data-settings-step="2">
+    <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
+      <span>Buckets / Wallets</span>
+      <button class="btn btn-amber btn-sm" onclick="addBucket()">+ Add Bucket</button>
+    </div>
+    <p style="font-size:0.76rem;color:var(--text3);margin-bottom:14px;line-height:1.6;">Suggested defaults are Essential, Lifestyle, Saving &amp; Future, and Income. You can rename, add, or remove buckets.</p>
+    <div style="overflow-x:auto;">
+      <table class="data-table">
+        <thead><tr><th style="width:72%">Bucket Name</th><th style="width:18%">Used in Categories</th><th></th></tr></thead>
+        <tbody id="bucketBody"></tbody>
+      </table>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:8px;">
+      <button class="btn btn-ghost btn-sm" onclick="saveBuckets()">💾 Save Buckets</button>
+    </div>
+  </div>
+
   <!-- Categories -->
-  <div id="catCard" class="card">
+  <div id="catCard" class="card" data-settings-step="3">
     <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
       <span>Categories &amp; Auto-Matching Keywords</span>
       <button class="btn btn-amber btn-sm" onclick="addCat()">+ Add Category</button>
@@ -500,7 +517,7 @@ body.wizard-active #wizardOverlay{display:block!important;}
   </div>
 
   <!-- Rules Manager -->
-  <div id="rulesCard" class="card">
+  <div id="rulesCard" class="card" data-settings-step="4">
     <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
       <span>Description Rules — Explicit Categorization</span>
       <button class="btn btn-amber btn-sm" onclick="addRule()">+ Add Rule</button>
@@ -542,6 +559,16 @@ body.wizard-active #wizardOverlay{display:block!important;}
       <div style="display:flex;gap:8px;">
         <button class="btn btn-green btn-sm" onclick="confirmRestore()">✓ Restore — Replace All Data</button>
         <button class="btn btn-ghost btn-sm" onclick="cancelRestore()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="settingsWizardNavCard" style="padding:14px 18px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+      <div id="settingsStepHint" style="font-size:0.76rem;color:var(--text3);">Step 1 sets profile names.</div>
+      <div style="display:flex;gap:8px;">
+        <button id="settingsPrevBtn" class="btn btn-ghost" onclick="goToSettingsStep(_settingsStep-1)">← Previous</button>
+        <button id="settingsNextBtn" class="btn btn-amber" onclick="settingsNext()">Next →</button>
       </div>
     </div>
   </div>
@@ -1165,10 +1192,38 @@ const DEFAULT_CATS = [
   {id:'c20',name:'Other Income',                 bucket:'Income',     color:'#34D399', keywords:'interest,dividend,refund,pos refund,เงินคืน',               type:'income'},
 ];
 
+const DEFAULT_BUCKETS = ['Essential', 'Lifestyle', 'Saving & Future', 'Income'];
+
+function mapLegacyBucketName(bucket) {
+  const b = String(bucket || '').trim();
+  if (!b) return 'Essential';
+  if (['Fixed', 'Daily Life', 'Other'].includes(b)) return 'Essential';
+  if (['Lifestyle'].includes(b)) return 'Lifestyle';
+  if (['Transfers', 'Investment'].includes(b)) return 'Saving & Future';
+  if (b === 'Income') return 'Income';
+  return b;
+}
+
+function getSuggestedDefaultCats() {
+  return JSON.parse(JSON.stringify(DEFAULT_CATS)).map(c => ({
+    ...c,
+    bucket: mapLegacyBucketName(c.bucket),
+  }));
+}
+
+function normalizeBuckets(list) {
+  const unique = [...new Set((list || []).map(v => String(v || '').trim()).filter(Boolean))];
+  if (!unique.length) return DEFAULT_BUCKETS.slice();
+  if (!unique.some(b => b.toLowerCase() === 'income')) unique.push('Income');
+  return unique;
+}
+
 const BUCKET_COLORS = {
+  'Essential':  '#A78BFA',
   'Fixed':      '#A78BFA',  // soft violet
   'Daily Life': '#FB923C',  // warm orange
   'Lifestyle':  '#34D399',  // mint green
+  'Saving & Future': '#60A5FA',
   'Transfers':  '#60A5FA',  // sky blue
   'Investment': '#F472B6',  // pink
   'Income':     '#FBBF24',  // golden amber
@@ -1185,6 +1240,7 @@ function catColor(name) {
 // ═══════════════════════════════════════════════
 let S = {
   cats: [],
+  buckets: DEFAULT_BUCKETS.slice(),
   rules: [],
   currency: {primary:'THB', secondary:'EUR', rate:0.027},
   income: 0,
@@ -1203,7 +1259,7 @@ const LS_KEY = 'ft_v4';
 
 function persist() {
   localStorage.setItem(LS_KEY, JSON.stringify({
-    cats: S.cats, rules: S.rules, currency: S.currency,
+    cats: S.cats, buckets: S.buckets, rules: S.rules, currency: S.currency,
     income: S.income, colMap: S.colMap, txns: S.txns,
     profiles: S.profiles,
   }));
@@ -1216,7 +1272,8 @@ function hydrate() {
     const raw = localStorage.getItem(LS_KEY) || localStorage.getItem('ft_v3');
     if (raw) {
       const d = JSON.parse(raw);
-      S.cats     = d.cats     || JSON.parse(JSON.stringify(DEFAULT_CATS));
+      S.cats     = d.cats     || getSuggestedDefaultCats();
+      S.buckets  = normalizeBuckets(d.buckets || S.cats.map(c => c.bucket));
       S.rules    = d.rules    || [];
       S.currency = d.currency || S.currency;
       S.income   = d.income   || 0;
@@ -1233,15 +1290,23 @@ function hydrate() {
         S.txns = {p1:{}, p2:{}};
       }
     } else {
-      S.cats     = JSON.parse(JSON.stringify(DEFAULT_CATS));
+      S.cats     = getSuggestedDefaultCats();
+      S.buckets  = DEFAULT_BUCKETS.slice();
       S.txns     = {p1:{}, p2:{}};
       S.profiles = {p1:'Person 1', p2:'Person 2'};
     }
   } catch(e) {
-    S.cats     = JSON.parse(JSON.stringify(DEFAULT_CATS));
+    S.cats     = getSuggestedDefaultCats();
+    S.buckets  = DEFAULT_BUCKETS.slice();
     S.txns     = {p1:{}, p2:{}};
     S.profiles = {p1:'Person 1', p2:'Person 2'};
   }
+
+  S.buckets = normalizeBuckets(S.buckets);
+  const fallbackBucket = S.buckets[0] || 'Essential';
+  S.cats.forEach(c => {
+    if (!S.buckets.includes(c.bucket)) c.bucket = fallbackBucket;
+  });
 }
 
 // ═══════════════════════════════════════════════
@@ -1430,6 +1495,72 @@ function showTab(name, btn) {
   if (name === 'dashboard') renderDash();
   if (name === 'annual') renderAnnual();
   if (name === 'import') { checkStaleCats(); renderManualTxList(); }
+  if (name === 'settings') goToSettingsStep(_settingsStep);
+}
+
+const SETTINGS_STEPS = [
+  { label: 'Profile names', hint: 'Step 1 sets profile names.' },
+  { label: 'Currency', hint: 'Step 2 sets primary and optional secondary currency.' },
+  { label: 'Buckets / Wallets', hint: 'Step 3 creates your main budget buckets.' },
+  { label: 'Categories (Optional)', hint: 'Step 4 links categories to your buckets.' },
+  { label: 'Rules (Optional)', hint: 'Step 5 sets automatic categorization rules.' },
+];
+let _settingsStep = 0;
+
+function renderSettingsWizardBar(step) {
+  const container = document.getElementById('sSteps');
+  if (!container) return;
+  container.innerHTML = '';
+  SETTINGS_STEPS.forEach((s, i) => {
+    const isDone = i < step;
+    const isActive = i === step;
+    if (i > 0) {
+      const conn = document.createElement('div');
+      conn.className = 'sp-connector';
+      conn.innerHTML = '<div class="sp-connector-fill" style="width:' + (isDone ? '100' : '0') + '%"></div>';
+      container.appendChild(conn);
+    }
+    const el = document.createElement('div');
+    el.className = 'sp-step ' + (isDone ? 'done' : isActive ? 'active' : '');
+    if (isDone) el.onclick = () => goToSettingsStep(i);
+    el.innerHTML = '<div class="sp-dot"><div class="sp-dot-inner"></div></div><div class="sp-label">' + s.label + '</div>';
+    container.appendChild(el);
+  });
+  const numEl = document.getElementById('sStepNum');
+  if (numEl) numEl.textContent = String(step + 1);
+}
+
+function goToSettingsStep(nextStep) {
+  _settingsStep = Math.max(0, Math.min(SETTINGS_STEPS.length - 1, nextStep));
+  renderSettingsWizardBar(_settingsStep);
+  document.querySelectorAll('[data-settings-step]').forEach(el => {
+    el.style.display = Number(el.getAttribute('data-settings-step')) === _settingsStep ? '' : 'none';
+  });
+  const prevBtn = document.getElementById('settingsPrevBtn');
+  const nextBtn = document.getElementById('settingsNextBtn');
+  const hint = document.getElementById('settingsStepHint');
+  if (prevBtn) prevBtn.style.display = _settingsStep === 0 ? 'none' : '';
+  if (nextBtn) nextBtn.textContent = _settingsStep === SETTINGS_STEPS.length - 1 ? 'Finish Setup' : 'Next →';
+  if (hint) hint.textContent = SETTINGS_STEPS[_settingsStep].hint;
+}
+
+function settingsNext() {
+  if (_settingsStep === 0) saveProfileNames();
+  if (_settingsStep === 1) { saveCurrency(); saveIncome(); }
+  if (_settingsStep === 2) saveBuckets();
+  if (_settingsStep === 3) saveCats();
+  if (_settingsStep === 4) {
+    saveRules();
+    localStorage.setItem('ft_setup_done', '1');
+    toast('✓ Settings setup complete','ok');
+    return;
+  }
+  goToSettingsStep(_settingsStep + 1);
+}
+
+function initSettingsWizard() {
+  renderSettingsWizardBar(0);
+  goToSettingsStep(0);
 }
 
 function openImportAction(action) {
@@ -1511,14 +1642,66 @@ function loadCurrencyUI() {
 // ═══════════════════════════════════════════════
 // SETTINGS — CATEGORIES
 // ═══════════════════════════════════════════════
-const BUCKETS = ['Fixed','Daily Life','Lifestyle','Transfers','Investment','Income'];
+function getBucketList() {
+  return normalizeBuckets(S.buckets);
+}
+
+function renderBuckets() {
+  const body = document.getElementById('bucketBody');
+  if (!body) return;
+  const usage = {};
+  S.cats.forEach(c => { usage[c.bucket] = (usage[c.bucket] || 0) + 1; });
+  body.innerHTML = getBucketList().map((b, i) => `
+    <tr>
+      <td><input type="text" value="${esc(b)}" style="min-width:180px" onchange="S.buckets[${i}]=this.value"></td>
+      <td style="font-family:var(--mono);font-size:0.72rem;color:var(--text3);">${usage[b] || 0}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="delBucket(${i})">✕</button></td>
+    </tr>`).join('');
+}
+
+function addBucket() {
+  S.buckets = getBucketList();
+  S.buckets.push('New Bucket');
+  renderBuckets();
+}
+
+function delBucket(i) {
+  S.buckets = getBucketList();
+  if (S.buckets.length <= 1) {
+    toast('At least one bucket is required', 'err');
+    return;
+  }
+  const removed = S.buckets[i];
+  S.buckets.splice(i, 1);
+  const nextBucket = S.buckets[0];
+  S.cats.forEach(c => {
+    if (c.bucket === removed) c.bucket = nextBucket;
+  });
+  renderBuckets();
+  renderCats();
+}
+
+function saveBuckets() {
+  S.buckets = normalizeBuckets(S.buckets);
+  const fallback = S.buckets[0];
+  S.cats.forEach(c => {
+    if (!S.buckets.includes(c.bucket)) c.bucket = fallback;
+  });
+  persist();
+  renderBuckets();
+  renderCats();
+  populateDrillSelect();
+  toast('✓ Buckets saved','ok');
+}
 
 function renderCats() {
+  S.buckets = getBucketList();
+  const buckets = S.buckets;
   document.getElementById('catBody').innerHTML = S.cats.map((c,i)=>`
     <tr>
       <td><input type="color" class="color-in" value="${c.color}" onchange="S.cats[${i}].color=this.value"></td>
       <td><input type="text" value="${esc(c.name)}" style="min-width:150px" onchange="S.cats[${i}].name=this.value"></td>
-      <td><select onchange="S.cats[${i}].bucket=this.value">${BUCKETS.map(b=>`<option value="${b}"${c.bucket===b?' selected':''}>${b}</option>`).join('')}</select></td>
+      <td><select onchange="S.cats[${i}].bucket=this.value">${buckets.map(b=>`<option value="${b}"${c.bucket===b?' selected':''}>${b}</option>`).join('')}</select></td>
       <td><input type="text" value="${esc(c.keywords||'')}" placeholder="keyword1, keyword2…" style="min-width:190px" onchange="S.cats[${i}].keywords=this.value"></td>
       <td><select onchange="S.cats[${i}].type=this.value">
         <option value="expense"${c.type==='expense'?' selected':''}>Expense</option>
@@ -1530,17 +1713,21 @@ function renderCats() {
 }
 
 function addCat() {
-  S.cats.push({id:'c'+Date.now(),name:'New Category',bucket:'Daily Life',color:'#888888',keywords:'',type:'expense'});
+  const fallback = (S.buckets || [])[0] || 'Essential';
+  const expenseBucket = (S.buckets || []).find(b => b !== 'Income') || fallback;
+  S.cats.push({id:'c'+Date.now(),name:'New Category',bucket:expenseBucket,color:'#888888',keywords:'',type:'expense'});
   renderCats();
 }
 
 function delCat(i) { S.cats.splice(i,1); renderCats(); }
 
-function saveCats() { persist(); buildLookup(); populateManualCatSelect(); toast('✓ Categories saved','ok'); }
+function saveCats() { persist(); buildLookup(); populateManualCatSelect(); renderBuckets(); toast('✓ Categories saved','ok'); }
 
 function resetCats() {
   if (!confirm('Reset to default categories?')) return;
-  S.cats = JSON.parse(JSON.stringify(DEFAULT_CATS));
+  S.cats = getSuggestedDefaultCats();
+  S.buckets = DEFAULT_BUCKETS.slice();
+  renderBuckets();
   renderCats();
   toast('Categories reset to defaults');
 }
@@ -1591,7 +1778,7 @@ let _restoreData = null;
 function doBackup() {
   const backup = {
     _v:3, _at:new Date().toISOString(), _tool:'Expense Tracker',
-    cats:S.cats, rules:S.rules, currency:S.currency,
+    cats:S.cats, buckets:S.buckets, rules:S.rules, currency:S.currency,
     income:S.income, colMap:S.colMap, txns:S.txns,
   };
   const a = document.createElement('a');
@@ -1636,10 +1823,11 @@ function doRestore(file) {
 function confirmRestore() {
   if (!_restoreData) return;
   const d = _restoreData;
-  S.cats=d.cats||JSON.parse(JSON.stringify(DEFAULT_CATS));
+  S.cats=d.cats||getSuggestedDefaultCats();
+  S.buckets=normalizeBuckets(d.buckets || S.cats.map(c => c.bucket));
   S.rules=d.rules||[]; S.currency=d.currency||S.currency;
-  S.income=d.income||0; S.colMap=d.colMap||{}; S.txns=d.txns||{};
-  persist(); buildLookup(); loadCurrencyUI(); renderCats(); renderRules();
+  S.income=d.income||0; S.colMap=d.colMap||{}; S.txns=d.txns||{p1:{},p2:{}};
+  persist(); buildLookup(); loadCurrencyUI(); renderBuckets(); renderCats(); renderRules();
   document.getElementById('restorePreview').style.display='none';
   _restoreData=null;
   toast('✓ Backup restored','ok');
@@ -2186,7 +2374,7 @@ function renderMOM(cur) {
   const prev=idx>0?months[idx-1]:null;
   const ct=getTxns(cur), pt=prev?getTxns(prev):[];
   if(!ct.length){document.getElementById('momArea').innerHTML='<div class="no-data"><div class="ico">📅</div>No data</div>';return;}
-  const buckets=['Fixed','Daily Life','Lifestyle','Investment'];
+  const buckets=getBucketList().filter(b=>b!=='Income').slice(0,4);
   const rows=buckets.map(b=>{
     const ids=S.cats.filter(c=>c.bucket===b).map(c=>c.id);
     const cv=ct.filter(t=>ids.includes(t.catId)&&t.dr>0).reduce((s,t)=>s+t.dr,0);
@@ -2217,6 +2405,12 @@ function renderMOM(cur) {
     </table>`;
 }
 
+function getInvestmentCatIds() {
+  return S.cats
+    .filter(c => /invest|saving/i.test(String(c.bucket || '')))
+    .map(c => c.id);
+}
+
 function renderTrend() {
   if (!can.trendChart) return;
   if (chartTrend) { chartTrend.destroy(); chartTrend = null; }
@@ -2233,7 +2427,7 @@ function renderTrend() {
     months.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'));
   }
 
-  const investIds = S.cats.filter(c=>c.bucket==='Investment').map(c=>c.id);
+  const investIds = getInvestmentCatIds();
   const expData = months.map(m => toDisplay(getTxns(m).filter(t=>t.dr>0&&!investIds.includes(t.catId)).reduce((s,t)=>s+t.dr,0)));
   const invData = months.map(m => toDisplay(getTxns(m).filter(t=>t.dr>0&&investIds.includes(t.catId)).reduce((s,t)=>s+t.dr,0)));
   const incData = months.map(m => { const v=getTxns(m).filter(t=>t.cr>0).reduce((s,t)=>s+t.cr,0); return toDisplay(v)||0; });
@@ -2457,7 +2651,7 @@ function renderAnnual() {
   document.getElementById('annualPeriodLabel').textContent = modeLabel;
   document.getElementById('annChartLabel').textContent = modeLabel;
 
-  const investIds = S.cats.filter(c=>c.bucket==='Investment').map(c=>c.id);
+  const investIds = getInvestmentCatIds();
 
   let totIncome=0, totExpenses=0, totInvest=0, txCount=0;
   months.forEach(m=>{
@@ -3499,6 +3693,7 @@ function init() {
   hydrate();
   loadCurrencyUI();
   loadProfileNamesUI();
+  renderBuckets();
   renderCats();
   renderRules();
   buildLookup();
@@ -3531,6 +3726,7 @@ function init() {
   }
 
   applyTierGates();
+  initSettingsWizard();
   initManualEntry();
   initAIImport();
   const wizardShown = checkFirstRun();
@@ -3552,13 +3748,7 @@ function hasAnySavedTransactions() {
 }
 
 function checkFirstRun() {
-  // Show wizard only when: no setup flag AND no transaction data exists
-  const done = localStorage.getItem('ft_setup_done');
-  if (done) return false;
-  if (!hasAnySavedTransactions()) {
-    showWizard();
-    return true;
-  }
+  // Phase 2: first-time guidance now lives directly inside the Settings tab wizard.
   return false;
 }
 
@@ -3568,6 +3758,7 @@ function routeInitialTab() {
     showTab('import', document.querySelectorAll('.tab-btn')[1]);
   } else {
     showTab('settings', document.querySelectorAll('.tab-btn')[0]);
+    goToSettingsStep(0);
   }
 }
 
