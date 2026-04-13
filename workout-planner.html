@@ -2355,6 +2355,37 @@ function warmupKey(dayKey){
   return'full';
 }
 
+// Derive warmup key for a manual day from its label and primary muscles
+function manualWarmupKey(day){
+  // First try label keywords (user-named, most informative)
+  const key = warmupKey(day.label||'');
+  if(key !== 'full') return key; // got a specific match from the label
+
+  // Fall back to primary muscles of exercises
+  const muscles = (day.exercises||[]).flatMap(ex => {
+    if(ex.isEndo || ex.cat==='cardio') return [];
+    const dbEx = EX.find(e=>e.id===ex.id);
+    return dbEx ? dbEx.primary : (ex.muscles||'').split(',').map(m=>m.trim().toLowerCase());
+  });
+
+  const lowerMuscles = new Set(['quads','hamstrings','glutes','calves']);
+  const pushMuscles  = new Set(['chest','shoulders','triceps']);
+  const pullMuscles  = new Set(['back','biceps']);
+
+  let lower=0, push=0, pull=0;
+  muscles.forEach(m => {
+    if(lowerMuscles.has(m)) lower++;
+    if(pushMuscles.has(m))  push++;
+    if(pullMuscles.has(m))  pull++;
+  });
+
+  const max = Math.max(lower, push, pull);
+  if(max === 0) return 'full';
+  if(lower === max) return 'legs';
+  if(push  === max) return 'push';
+  return 'pull';
+}
+
 // =====================================================================
 // PHASE ASSIGNMENT
 // =====================================================================
@@ -2928,6 +2959,7 @@ function generatePlan(){
 let currentPlan=null;
 
 function renderPlan(){
+  window._uvActiveSlot = null; // not a unified view
   const el=document.getElementById('plan-content');
   if(!currentPlan){return;}
   const week=currentPlan[S.currentWeek-1];
@@ -3373,7 +3405,12 @@ function toggleVolCard(){
     const c = volCardIsCollapsed();
     localStorage.setItem('wpt_volcollapsed', c ? '0' : '1');
   }catch{}
-  renderPlan();
+  // Re-render the correct view
+  if(window._uvActiveSlot != null){
+    renderUnifiedPlanView(window._uvActiveSlot);
+  } else {
+    renderPlan();
+  }
 }
 
 function renderVolumeTable(matrix, weeks){
@@ -4541,6 +4578,7 @@ function derivePlanLevel(days){
 
 // ── Unified plan view — handles both wizard and manual plans ───────────
 function renderUnifiedPlanView(slot){
+  window._uvActiveSlot = slot; // so toggleVolCard knows to re-render here
   const plan = trkGetPlan(slot);
   if(!plan) return;
   const isManual = !!plan.isManual;
@@ -4605,7 +4643,7 @@ function renderUnifiedPlanView(slot){
     <div class="stat-card"><div class="stat-v">${isManual ? days.length : deloadCount}</div><div class="stat-l">${isManual ? 'Exercises/Day avg' : 'Deloads'}</div></div>
   </div>`;
 
-  // ── Volume table — wizard plans only, Basic+ ─────────────────────────
+  // ── Volume table — wizard plans (Basic+), or manual evaluator ───────
   if(!isManual){
     if(can.volumeTable){
       const volMatrix = computeVolumeMatrix(plan.weeks);
@@ -4616,6 +4654,11 @@ function renderUnifiedPlanView(slot){
         🔒 <strong>Weekly Volume Table</strong> — available on <a href="#" onclick="return showNudgeModal('basic')">Basic plan ($8/year)</a>
       </div>`;
     }
+  } else {
+    // Manual plan: volume + evaluator shown here, above day cards
+    const volData  = computeManualVolume(days);
+    const evalData = computeManualEvaluator(days);
+    html += buildManualVolCard(volData, evalData);
   }
 
   // ── Week navigator ───────────────────────────────────────────────────
@@ -4714,9 +4757,13 @@ function renderUnifiedPlanView(slot){
         <div class="day-meta">Day ${di+1} of ${days.length}<br><span style="font-size:.65rem">${day.desc||''}</span></div>
       </div>`;
 
-    // Warm-up row — wizard plans only
+    // Warm-up row — wizard plans use stored warmup; manual plans derive it
     if(!isManual && day.warmup){
       html += `<div class="warmup-row"><span class="warmup-lbl">🔥 Warm-Up</span><span class="warmup-txt">${day.warmup.join(' · ')}</span></div>`;
+    } else if(isManual && day.type !== 'cardio'){
+      const wuKey  = manualWarmupKey(day);
+      const wuList = WARMUPS[wuKey] || WARMUPS.full;
+      html += `<div class="warmup-row"><span class="warmup-lbl">🔥 Warm-Up</span><span class="warmup-txt">${wuList.join(' · ')}</span></div>`;
     }
 
     const exercises = day.exercises || [];
@@ -4801,13 +4848,6 @@ function renderUnifiedPlanView(slot){
 
     html += '</div>'; // close day-card
   });
-
-  // ── Volume + Evaluator (both plan types) ─────────────────────────────
-  if(isManual){
-    const volData  = computeManualVolume(days);
-    const evalData = computeManualEvaluator(days);
-    html += buildManualVolCard(volData, evalData);
-  }
 
   body.innerHTML = html;
   showView('plan');
