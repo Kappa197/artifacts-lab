@@ -3959,12 +3959,14 @@ function showView(name){
 
 // Populate "load from tracker" buttons on the My Plan empty state
 function refreshPlanEmptyState(){
-  // Only relevant when there's no currentPlan active
-  if(currentPlan) return;
-  const container = document.getElementById('plan-empty-load-plans');
-  if(!container) return;
+  // If a fresh wizard plan is active, nothing to do
+  if(currentPlan && !S._viewingSaved && !S._viewingManual) return;
 
-  // Collect all non-empty slots (auto-generated plans only — manual plans can't be loaded into renderPlan)
+  const container = document.getElementById('plan-empty-load-plans');
+  const emptyState = document.getElementById('plan-empty-state');
+  if(!container || !emptyState) return;
+
+  // Collect all saved slots
   const savedSlots = [];
   for(let slot=0; slot<3; slot++){
     const plan = trkGetPlan(slot);
@@ -3973,26 +3975,60 @@ function refreshPlanEmptyState(){
 
   if(!savedSlots.length){ container.innerHTML = ''; return; }
 
-  let html = `<div style="border-top:1px solid var(--border);padding-top:.9rem;margin-top:.3rem">
-    <div style="font-size:.78rem;color:var(--muted);margin-bottom:.6rem;font-weight:600">Or load a saved plan from the Tracker:</div>
-    <div style="display:flex;flex-direction:column;gap:.4rem;max-width:320px;margin:0 auto">`;
+  // Single plan → no grid, just a compact load button
+  if(savedSlots.length === 1){
+    const {slot, plan} = savedSlots[0];
+    const m = plan.meta || {};
+    const isManual = !!plan.isManual;
+    const title = isManual ? (m.split||'Custom Plan') : `${m.weeks}-Week Plan · ${m.split||''}`;
+    const sub = isManual ? `${m.wpw||'?'} days/wk · ${m.weeks} weeks · Custom` : `${(m.level||'').charAt(0).toUpperCase()+(m.level||'').slice(1)} · ${m.wpw||'?'} days/wk`;
+    container.innerHTML = `<div style="border-top:1px solid var(--border);padding-top:.9rem;margin-top:.3rem">
+      <div style="font-size:.78rem;color:var(--muted);margin-bottom:.6rem;font-weight:600">Or load your saved plan:</div>
+      <button class="btn btn-outline" style="font-size:.82rem;padding:.55rem 1rem;width:100%;max-width:320px;display:flex;align-items:center;justify-content:space-between;gap:.5rem" onclick="loadPlanFromSlot(${slot})">
+        <span><strong>${title}</strong><span style="font-size:.7rem;color:var(--muted);display:block;margin-top:.1rem">${sub}</span></span>
+        <span style="opacity:.7">→</span>
+      </button>
+    </div>`;
+    return;
+  }
+
+  // Multiple plans → full card grid (same style as tracker slot grid)
+  let html = `<div style="border-top:1px solid var(--border);padding-top:1rem;margin-top:.5rem">
+    <div style="font-size:.78rem;color:var(--muted);margin-bottom:.75rem;font-weight:600">Or load a saved plan:</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.65rem">`;
 
   savedSlots.forEach(({slot, plan}) => {
     const m = plan.meta || {};
-    const title = `${m.weeks||'?'}-Week Plan · ${m.split||''}`;
-    const sub   = `${(m.level||'').charAt(0).toUpperCase()+(m.level||'').slice(1)} · ${m.wpw||'?'} days/wk`;
-    html += `<button class="btn btn-outline" style="font-size:.82rem;padding:.55rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem"
-      onclick="viewSavedPlan(${slot})">
-      <span>
-        <strong>${TRK_SLOT_LABELS[slot]}</strong> — ${title}
-        <span style="font-size:.7rem;color:var(--muted);display:block;margin-top:.1rem">${sub}</span>
-      </span>
-      <span style="font-size:.8rem;opacity:.7">→</span>
-    </button>`;
+    const isManual = !!plan.isManual;
+    const title = isManual ? (m.split||'Custom Plan') : `${m.weeks}-Week Plan`;
+    const split = isManual ? 'Custom' : (m.split||'');
+    const sub   = isManual
+      ? `${m.wpw||'?'} days/wk · ${m.weeks||'?'} weeks`
+      : `${(m.level||'').charAt(0).toUpperCase()+(m.level||'').slice(1)} · ${m.wpw||'?'} days/wk`;
+    const logs = trkGetLogs(slot);
+    const logBadge = logs.length ? `<span style="font-size:.62rem;color:var(--green);font-weight:700">✓ ${logs.length} session${logs.length!==1?'s':''}</span>` : '';
+    html += `<div style="background:var(--navy3);border:2px solid var(--border);border-radius:12px;padding:.85rem .95rem;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;gap:.35rem" onmouseover="this.style.borderColor='var(--amber)'" onmouseout="this.style.borderColor='var(--border)'" onclick="loadPlanFromSlot(${slot})">
+      <div style="font-family:var(--mono);font-size:.55rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text3)">${TRK_SLOT_LABELS[slot]}</div>
+      <div style="font-family:var(--fd);font-size:.88rem;font-weight:800;color:var(--text);text-transform:uppercase;line-height:1.2">${title}</div>
+      <div style="font-size:.7rem;color:var(--muted)">${split}${split&&sub?' · ':''}${sub}</div>
+      ${logBadge}
+      <button class="trk-slot-view-btn" style="margin-top:auto" onclick="event.stopPropagation();loadPlanFromSlot(${slot})">📋 View Plan</button>
+    </div>`;
   });
 
   html += `</div></div>`;
   container.innerHTML = html;
+}
+
+// Unified entry: load any saved plan (wizard or manual) into the My Plan view
+function loadPlanFromSlot(slot){
+  const plan = trkGetPlan(slot);
+  if(!plan) return;
+  if(plan.isManual){
+    renderUnifiedPlanView(slot);
+  } else {
+    viewSavedPlan(slot);
+  }
 }
 
 // Helper: open manual editor from the My Plan tab (no active slot yet — find first empty or slot 0)
@@ -4479,80 +4515,418 @@ function trkOpenSlot(slot){
 function trkViewCurrentSlotPlan(){
   const slot = trkState.activeSlot;
   if(slot === null) return;
-  const plan = trkGetPlan(slot);
-  if(plan && plan.isManual){
-    // Manual plan — show the plan days view in the "My Plan" tab
-    viewManualPlanAsPlan(slot);
-  } else {
-    viewSavedPlan(slot);
-  }
+  renderUnifiedPlanView(slot);
 }
 
 // View a saved manual plan's day structure in the My Plan tab
-function viewManualPlanAsPlan(slot){
+// ── Experience level scoring from exercises ────────────────────────────
+function derivePlanLevel(days){
+  const LV_SCORE = {beginner:1, intermediate:2, advanced:3};
+  let totalScore = 0, totalWeight = 0;
+  (days||[]).forEach(day => {
+    (day.exercises||[]).forEach(ex => {
+      const dbEx = EX.find(e => e.id === ex.id);
+      if(!dbEx || !dbEx.lv) return;
+      const w = (dbEx.cat==='compound'||dbEx.cat==='explosive') ? 2 : 1;
+      totalScore  += LV_SCORE[dbEx.lv] * w;
+      totalWeight += w;
+    });
+  });
+  if(!totalWeight) return null; // no scoreable exercises
+  const avg = totalScore / totalWeight;
+  if(avg < 1.5) return 'Beginner';
+  if(avg < 2.2) return 'Intermediate';
+  return 'Advanced';
+}
+
+// ── Unified plan view — handles both wizard and manual plans ───────────
+function renderUnifiedPlanView(slot){
   const plan = trkGetPlan(slot);
   if(!plan) return;
-  // Use the week 1 days as the display (all weeks are identical for manual plans)
-  const w1 = plan.weeks[0];
-  if(!w1){ showView('plan'); return; }
+  const isManual = !!plan.isManual;
+  const m = plan.meta || {};
+  const numWeeks = plan.weeks.length;
 
-  // Build a one-week display plan using the existing renderPlan infrastructure
-  // We do this by directly building the HTML the same way renderManualPlanView used to
+  // State for week navigation
+  if(!window._uvState) window._uvState = {};
+  if(!window._uvState[slot]) window._uvState[slot] = { currentWeek:1 };
+  const uvS = window._uvState[slot];
+
   const body = document.getElementById('plan-content');
-  const days = w1.days || [];
-  const manual = plan.manualDraft || {};
+  const currentWeek = Math.min(uvS.currentWeek, numWeeks);
+  const wk = plan.weeks.find(w => w.weekNum === currentWeek) || plan.weeks[0];
+  const days = wk.days || [];
 
-  let html = `<div class="save-cta-banner" style="background:var(--navy3);border:1.5px solid var(--border);box-shadow:none">
-    <div class="save-cta-text" style="color:var(--text)">
-      <div class="save-cta-title" style="color:var(--amber2)">${plan.meta?.split||'Custom Plan'}</div>
-      <div class="save-cta-sub" style="color:var(--muted)">${plan.meta?.weeks}-Week Plan · ${plan.meta?.wpw} days/wk · Manual</div>
-    </div>
+  // Derive display metadata
+  const levelLabel = isManual ? derivePlanLevel(days) : ({beginner:'Beginner',intermediate:'Intermediate',advanced:'Advanced'}[m.level]||'');
+  const splitLabel = m.split || 'Custom Plan';
+  const title = isManual
+    ? splitLabel
+    : `${m.wpw}-Day ${splitLabel} · ${numWeeks}-Week Plan`;
+
+  // Focus badge for wizard plans
+  let focusBadgeStr = '';
+  if(!isManual && wk.days){
+    const fc = {};
+    wk.days.filter(Boolean).forEach(d => { const f=d.focus||'hypertrophy'; fc[f]=(fc[f]||0)+1; });
+    focusBadgeStr = Object.entries(fc).sort((a,b)=>b[1]-a[1])
+      .map(([f,n])=>`${n}× ${{strength:'Strength',hypertrophy:'Hypertrophy',endurance:'Endurance',power_speed:'Power'}[f]||f}`)
+      .join(' · ');
+  }
+
+  let html = '';
+
+  // ── Back banner ─────────────────────────────────────────────────────
+  html += `<div class="saved-plan-banner">
+    <span>📋 <strong>${isManual ? splitLabel : 'Saved Plan'}</strong>${isManual ? ' — Custom plan from Tracker' : ' — viewing your saved plan'}</span>
     <button class="btn btn-outline btn-sm" onclick="showView('tracker')" style="font-size:.72rem;padding:.28rem .75rem;flex-shrink:0">← Back to Tracker</button>
   </div>`;
 
-  // Weekly volume + evaluator (collapsible)
-  const volData  = computeManualVolume(days);
-  const evalData = computeManualEvaluator(days);
+  // ── Plan header card ─────────────────────────────────────────────────
+  html += `<div class="plan-header">
+    <h2>${title}</h2>
+    ${levelLabel ? `<p>${levelLabel} · ${numWeeks}-week programme</p>` : `<p>${numWeeks}-week programme</p>`}
+    <div class="plan-meta">
+      <span class="pbadge">${numWeeks} Weeks</span>
+      <span class="pbadge">${m.wpw||days.length} Days/Week</span>
+      ${levelLabel ? `<span class="pbadge">${levelLabel}</span>` : ''}
+      ${focusBadgeStr ? `<span class="pbadge">🎯 ${focusBadgeStr}</span>` : ''}
+      ${isManual ? `<span class="pbadge">✏️ Custom Plan</span>` : ''}
+    </div>
+  </div>`;
 
-  // Day cards
-  html += days.map(day => {
-    const style  = deriveDayStyle(day);
-    const styleM = MANUAL_STYLE_META[style] || MANUAL_STYLE_META.hypertrophy;
-    const ssPairs = day.supersetPairs || [];
-    const ssMap = {};
-    ssPairs.forEach((pair, pi) => pair.forEach(idx => { ssMap[idx] = String.fromCharCode(65+pi); }));
+  // ── Stats grid ───────────────────────────────────────────────────────
+  const totalSessions = numWeeks * (m.wpw || days.length);
+  const deloadCount = isManual ? 0 : plan.weeks.filter(w=>w.isDeload).length;
+  html += `<div class="stats-grid">
+    <div class="stat-card"><div class="stat-v">${numWeeks}</div><div class="stat-l">Weeks</div></div>
+    <div class="stat-card"><div class="stat-v">${totalSessions}</div><div class="stat-l">Sessions</div></div>
+    <div class="stat-card"><div class="stat-v">${m.wpw||days.length}</div><div class="stat-l">Days/Wk</div></div>
+    <div class="stat-card"><div class="stat-v">${isManual ? days.length : deloadCount}</div><div class="stat-l">${isManual ? 'Exercises/Day avg' : 'Deloads'}</div></div>
+  </div>`;
 
-    const exRows = (day.exercises||[]).map((ex, ei) => {
-      const catCls = {compound:'cat-compound',explosive:'cat-explosive',isolation:'cat-isolation',core:'cat-core',accessory:'cat-accessory',cardio:'cat-accessory'}[ex.cat]||'cat-compound';
-      const catLbl = ex.cat ? ex.cat.charAt(0).toUpperCase()+ex.cat.slice(1) : 'Compound';
-      const ssTag  = ssMap[ei] ? `<span style="font-size:.58rem;font-weight:800;background:var(--primary);color:#fff;border-radius:3px;padding:.05rem .32rem;margin-left:.25rem">SS ${ssMap[ei]}</span>` : '';
-      const muscleStr = ex.muscles && ex.muscles !== 'cardio' ? ex.muscles : '';
-      return `<div class="ex-row">
-        <div>
-          <div class="ex-name"><span class="ex-num">${ei+1}</span>${ex.isEndo?(ex.icon||'🏃')+' ':''}${ex.name||'Exercise'}<span class="ex-cat ${catCls}">${catLbl}</span>${ssTag}</div>
-          ${muscleStr ? `<div class="ex-muscles">${muscleStr}</div>` : ''}
-          ${ex.isEndo && ex.modality ? `<div class="ex-muscles">${{run:'🏃 Running',bike:'🚴 Cycling',row:'🚣 Rowing'}[ex.modality]||ex.modality}</div>` : ''}
+  // ── Volume table — wizard plans only, Basic+ ─────────────────────────
+  if(!isManual){
+    if(can.volumeTable){
+      const volMatrix = computeVolumeMatrix(plan.weeks);
+      const allWeekNums = plan.weeks.map(w=>w.weekNum);
+      html += renderVolumeTable(volMatrix, allWeekNums);
+    } else {
+      html += `<div class="tier-nudge tier-nudge-block" style="margin:.6rem 0">
+        🔒 <strong>Weekly Volume Table</strong> — available on <a href="#" onclick="return showNudgeModal('basic')">Basic plan ($8/year)</a>
+      </div>`;
+    }
+  }
+
+  // ── Week navigator ───────────────────────────────────────────────────
+  html += '<div class="week-nav">';
+  plan.weeks.forEach(w => {
+    const d = !isManual && w.isDeload;
+    const active = w.weekNum === currentWeek;
+    html += `<button class="wbtn ${d?'deload':''} ${active?'active':''}" onclick="uvSwitchWeek(${slot},${w.weekNum})">W${w.weekNum}${d?' 🔄':''}</button>`;
+  });
+  html += '</div>';
+
+  // ── Phase banner — wizard plans only ────────────────────────────────
+  if(!isManual && wk.proto){
+    const proto = wk.proto;
+    const wip   = wk.weekInPhase;
+    const undP  = wk.isDeload ? proto : {...proto, ...undulateReps(proto, wip)};
+    const repsStr = undP.rmin===undP.rmax ? `${undP.rmin} reps` : `${undP.rmin}–${undP.rmax} reps`;
+    const sets  = wk.isDeload ? Math.max(2,proto.sets) : proto.sets;
+    let wipHTML = '';
+    if(!wk.isDeload && wip){
+      const loadDelta = wip===1?'Full load':wip===2?'−5% load · +1 rep':'−10% load · +2 reps';
+      const dots = [1,2,3].map(d=>`<span class="wip-dot ${d===wip?'active':''}"></span>`).join('');
+      wipHTML = `<div class="wip-indicator">${dots}<span class="wip-label">W${wip}/3 · ${loadDelta}</span></div>`;
+    }
+    html += `<div class="phase-banner">
+      <span class="phase-name">${proto.label||''}</span>
+      <span class="phase-pill">${sets} sets × ${repsStr}</span>
+      <span class="phase-pill">Rest: ${proto.rest}</span>
+      ${wipHTML}
+    </div>
+    <div class="phase-note">${proto.note||''}</div>`;
+  } else if(isManual){
+    // Manual plan: simple week label
+    html += `<div class="trk-phase-label" style="margin-bottom:.7rem">Week ${currentWeek} of ${numWeeks}</div>`;
+  }
+
+  // ── Day cards ────────────────────────────────────────────────────────
+  days.forEach((day, di) => {
+    if(!day) return;
+
+    // Cardio day (wizard-generated A-type) — unchanged
+    if(day.type === 'cardio' && !isManual){
+      const rpeTooltipHtml = `<span class="rpe-tooltip">${day.rpe||''} <span class="rpe-info-icon">ℹ</span><span class="rpe-tip"><strong>RPE — Rate of Perceived Exertion (1–10)</strong><br>1–2 Very easy · 3–4 Easy<br>5–6 Moderate · 7–8 Hard · 9–10 Max</span></span>`;
+      html += `<div class="day-card">
+        <div class="day-hdr" style="background:${day.color}">
+          <h3>${day.icon||'🏃'} ${day.label}</h3>
+          <div class="day-meta">Day ${di+1} of ${days.length}<br><span style="font-size:.65rem">${day.desc||''}</span></div>
         </div>
-        <div class="ex-params">
-          <div class="sets-reps">${ex.setsReps||'—'}</div>
-          <div class="rest-time">${styleM.desc.split('·').slice(-1)[0].trim()}</div>
+        <div class="cardio-block">
+          <div class="cardio-zone-row">
+            ${day.zone?`<span class="cardio-zone-pill">${day.zone}</span>`:''}
+            <span class="cardio-rpe-pill">${rpeTooltipHtml}</span>
+            ${day.modalityLabel?`<span class="cardio-modality-pill">${day.modalityLabel}</span>`:''}
+          </div>
+          <div class="cardio-load">${day.phaseInfo?.load||''}</div>
+          <div class="cardio-detail">${day.phaseInfo?.detail||''}</div>
+          <div class="cardio-structure">
+            <div class="cardio-structure-hdr">📋 Session structure</div>
+            ${(day.structure||[]).map((s,si)=>`<div class="cardio-step"><span class="cardio-step-n">${si+1}</span>${s}</div>`).join('')}
+          </div>
         </div>
       </div>`;
-    }).join('');
+      return;
+    }
 
-    return `<div class="day-card">
-      <div class="day-hdr" style="background:${styleM.color}">
-        <h3>${day.label||'Training Day'} <span class="day-focus-tag">${styleM.icon} ${styleM.label}</span></h3>
-        <div class="day-meta">${(day.exercises||[]).length} exercise${(day.exercises||[]).length!==1?'s':''}</div>
-      </div>
-      ${(day.exercises||[]).length ? exRows : '<div style="padding:.9rem 1.1rem;color:var(--muted);font-size:.83rem;font-style:italic">No exercises added.</div>'}
-    </div>`;
-  }).join('');
+    // B-type muscular endurance (wizard only) — delegate to existing renderer
+    if(day.type === 'muscular_endurance' && !isManual){
+      // Reuse the same block from renderPlan — build inline
+      const sess = ENDO_SESSIONS[day.sessId];
+      if(!sess){ return; }
+      html += _buildBtypeDayCard(day, di, days.length, wk);
+      return;
+    }
 
-  html += buildManualVolCard(volData, evalData);
+    // ── GYM day (wizard or manual) ──────────────────────────────────────
+    const styleM = isManual ? (MANUAL_STYLE_META[deriveDayStyle(day)] || MANUAL_STYLE_META.hypertrophy) : null;
+    const hdrColor = isManual ? styleM.color : (day.color || '#334466');
+    const focusTag = isManual
+      ? `<span class="day-focus-tag">${styleM.icon} ${styleM.label}</span>`
+      : (day.dayFocusLabel ? `<span class="day-focus-tag">${day.dayFocusLabel}</span>` : '');
+
+    const dayProto = day.proto || wk.proto || {};
+    const wip = wk.weekInPhase;
+    const undP = (isManual || wk.isDeload) ? dayProto : {...dayProto, ...undulateReps(dayProto, wip)};
+    const dayRepsStr = undP.rmin===undP.rmax ? `${undP.rmin||8} reps` : `${undP.rmin||6}–${undP.rmax||12} reps`;
+
+    // ── Build superset groups for manual plans from supersetPairs ────────
+    const ssPairs = day.supersetPairs || [];
+    // Build index→group mapping
+    const ssGroupOf = {}; // exIdx → group index
+    ssPairs.forEach((group, gi) => group.forEach(idx => { ssGroupOf[idx] = gi; }));
+
+    html += `<div class="day-card">
+      <div class="day-hdr" style="background:${hdrColor}">
+        <h3>${day.label||'Training Day'}${focusTag}</h3>
+        <div class="day-meta">Day ${di+1} of ${days.length}<br><span style="font-size:.65rem">${day.desc||''}</span></div>
+      </div>`;
+
+    // Warm-up row — wizard plans only
+    if(!isManual && day.warmup){
+      html += `<div class="warmup-row"><span class="warmup-lbl">🔥 Warm-Up</span><span class="warmup-txt">${day.warmup.join(' · ')}</span></div>`;
+    }
+
+    const exercises = day.exercises || [];
+    if(!exercises.length){
+      html += `<div style="padding:1rem 1.1rem;color:var(--muted);font-size:.83rem;font-style:italic">No exercises added.</div>`;
+    } else if(isManual && ssPairs.length > 0){
+      // ── MANUAL SUPERSET RENDERING ──────────────────────────────────────
+      // Determine rendering order: build groups + solo exercises in order of first appearance
+      const rendered = new Set();
+      let groupLetterIdx = 0;
+      exercises.forEach((ex, ei) => {
+        if(rendered.has(ei)) return;
+        const gi = ssGroupOf[ei];
+        if(gi !== undefined){
+          // Render the whole group
+          const group = ssPairs[gi];
+          const letter = String.fromCharCode(65 + groupLetterIdx++);
+          html += `<div class="ss-group">
+            <div class="ss-pair-wrap">
+              <div class="ss-side-label"><span>Superset ${letter}</span></div>
+              <div class="ss-pair">`;
+          group.forEach((exIdx, pairIdx) => {
+            const gEx = exercises[exIdx];
+            if(!gEx){ rendered.add(exIdx); return; }
+            rendered.add(exIdx);
+            html += _buildManualExRow(gEx, exIdx, day, dayProto, dayRepsStr, isManual, wk, slot);
+            if(pairIdx < group.length-1) html += `<div class="ss-inner-rest">↕ 30 sec — then next in Superset ${letter}</div>`;
+          });
+          html += `</div></div>
+            <div class="ss-outer-rest">Full rest after Superset ${letter}: ${dayProto.rest||'90s'}</div>
+          </div>`;
+        } else {
+          // Solo exercise
+          html += `<div class="ss-group"><div class="ss-solo">`;
+          html += _buildManualExRow(ex, ei, day, dayProto, dayRepsStr, isManual, wk, slot);
+          html += `</div></div>`;
+          rendered.add(ei);
+        }
+      });
+    } else if(!isManual && day.supersets){
+      // ── WIZARD SUPERSET RENDERING (unchanged) ──────────────────────────
+      let ssExIdx = 0;
+      day.supersets.forEach((group, gi) => {
+        const isPair = group.type === 'pair';
+        html += `<div class="ss-group">`;
+        if(isPair){ html += `<div class="ss-pair-wrap"><div class="ss-side-label"><span>Superset ${group.label}</span></div>`; }
+        html += `<div class="${isPair?'ss-pair':'ss-solo'}">`;
+        group.exercises.forEach((ex, pairIdx) => {
+          const catCls = {compound:'cat-compound',explosive:'cat-explosive',isolation:'cat-isolation',core:'cat-core',accessory:'cat-accessory'}[ex.cat]||'cat-compound';
+          const catLbl = {compound:'Compound',explosive:'Explosive',isolation:'Isolation',core:'Core',accessory:'Accessory'}[ex.cat]||ex.cat;
+          const muscles = [...(ex.primary||[]),...(ex.secondary||[]).slice(0,2)].join(', ');
+          const exSets  = wk.isDeload ? Math.max(2,dayProto.sets-1) : dayProto.sets;
+          const reps    = wk.isDeload ? `${Math.round(((dayProto.rmin||6)+(dayProto.rmax||12))/2)}` : dayRepsStr;
+          const isBW    = (ex.eq||[]).every(e=>e==='bodyweight'||e==='pullup_bar');
+          const badge   = getLoadBadge(day.focus||S.focus, S.secondaryFocus, wk.phase, isBW, wk.weekNum, plan.weeks.length);
+          const ssLabel = isPair ? `<span class="ss-label">${group.label}${pairIdx+1}</span>` : `<span class="ex-num">${group.label}</span>`;
+          const _ssIdx  = ssExIdx++;
+          html += `<div class="ex-row"><div>
+            <div class="ex-name">${ssLabel}${ex.name}<span class="ex-cat ${catCls}">${catLbl}</span>
+              <button class="cues-btn" onclick="showCuesModal('${ex.id}')">📋 Form</button>
+              <button class="swap-btn${can.exerciseSwap?'':' swap-locked'}" onclick="${can.exerciseSwap?`showSwapModal(${di},${_ssIdx},'${ex.id}')`:`showNudgeModal('basic')`}">⇄ Swap</button>
+            </div>
+            <div class="ex-muscles">${muscles}</div>
+            ${ex.note?`<div class="ex-note">💡 ${ex.note}</div>`:''}
+          </div><div class="ex-params">
+            <div class="sets-reps">${exSets}×${reps}</div>
+            ${isPair&&pairIdx===0?`<div class="rest-time" style="color:var(--primary);font-weight:700">↓ 30 sec rest</div>`:`<div class="rest-time">Rest: ${dayProto.rest||''}</div>`}
+            <div class="rm-badge" style="background:${badge.color}" title="${badge.title}">${badge.text}</div>
+          </div></div>`;
+          if(isPair&&pairIdx===0) html += `<div class="ss-inner-rest">↕ 30 sec — then Superset ${group.label}2</div>`;
+        });
+        html += '</div>';
+        if(isPair){ html += '</div>'; html += `<div class="ss-outer-rest">Full rest after Superset ${group.label}: ${dayProto.rest||''}</div>`; }
+        html += '</div>';
+      });
+    } else {
+      // ── STANDARD (no supersets) ─────────────────────────────────────────
+      exercises.forEach((ex, ei) => {
+        html += _buildManualExRow(ex, ei, day, dayProto, dayRepsStr, isManual, wk, slot);
+      });
+    }
+
+    html += '</div>'; // close day-card
+  });
+
+  // ── Volume + Evaluator (both plan types) ─────────────────────────────
+  if(isManual){
+    const volData  = computeManualVolume(days);
+    const evalData = computeManualEvaluator(days);
+    html += buildManualVolCard(volData, evalData);
+  }
 
   body.innerHTML = html;
   showView('plan');
+}
+
+// ── Helper: build one exercise row (manual or wizard standard) ─────────
+function _buildManualExRow(ex, ei, day, dayProto, dayRepsStr, isManual, wk, slot){
+  const catCls = {compound:'cat-compound',explosive:'cat-explosive',isolation:'cat-isolation',core:'cat-core',accessory:'cat-accessory',cardio:'cat-accessory'}[ex.cat]||'cat-compound';
+  const catLbl = ex.cat ? ex.cat.charAt(0).toUpperCase()+ex.cat.slice(1) : 'Compound';
+  const dbEx   = isManual ? EX.find(e=>e.id===ex.id) : null;
+  const muscleStr = isManual
+    ? (ex.muscles && ex.muscles!=='cardio' ? ex.muscles : (dbEx?[...(dbEx.primary||[]),...(dbEx.secondary||[]).slice(0,2)].join(', '):''))
+    : [...(ex.primary||[]),...(ex.secondary||[]).slice(0,2)].join(', ');
+  const note   = isManual ? (dbEx?.note||'') : (ex.note||'');
+  const exSets = wk.isDeload ? Math.max(2,(dayProto.sets||3)-1) : (dayProto.sets||3);
+  const setsRepsDisp = isManual ? (ex.setsReps||'—') : `${exSets}×${dayRepsStr}`;
+  const restDisp = isManual
+    ? (MANUAL_STYLE_META[deriveDayStyle(day)]?.desc?.split('·').slice(-1)[0]?.trim()||'')
+    : `Rest: ${dayProto.rest||''}`;
+
+  // Form cues: show if exercise exists in EX database
+  const hasCues = !!EX.find(e=>e.id===ex.id);
+  const cuesBtn = hasCues ? `<button class="cues-btn" onclick="showCuesModal('${ex.id}')" title="Execution checklist">📋 Form</button>` : '';
+
+  // Swap button: show if exercise in EX database, tier-gated
+  const hasSwap = !!EX.find(e=>e.id===ex.id);
+  const swapBtn = hasSwap
+    ? `<button class="swap-btn${can.exerciseSwap?'':' swap-locked'}" onclick="${can.exerciseSwap?`showSwapModal(${day.dayIdx!=null?day.dayIdx:0},${ei},'${ex.id}')`:`showNudgeModal('basic')`}" title="${can.exerciseSwap?'Swap':'Upgrade to swap'}">⇄ Swap</button>`
+    : '';
+
+  // % RM badge — wizard plans only
+  const badge = (!isManual && ex.eq)
+    ? getLoadBadge(day.focus||S.focus, S.secondaryFocus, wk.phase, (ex.eq||[]).every(e=>e==='bodyweight'||e==='pullup_bar'), wk.weekNum, S.weeks||wk.weekNum)
+    : null;
+
+  return `<div class="ex-row"><div>
+    <div class="ex-name">
+      <span class="ex-num">${ei+1}</span>
+      ${ex.isEndo?(ex.icon||'🏃')+' ':''}${ex.name||'Exercise'}
+      <span class="ex-cat ${catCls}">${catLbl}</span>
+      ${cuesBtn}${swapBtn}
+    </div>
+    ${muscleStr?`<div class="ex-muscles">${muscleStr}</div>`:''}
+    ${note?`<div class="ex-note">💡 ${note}</div>`:''}
+  </div><div class="ex-params">
+    <div class="sets-reps">${setsRepsDisp}</div>
+    <div class="rest-time">${restDisp}</div>
+    ${badge?`<div class="rm-badge" style="background:${badge.color}" title="${badge.title}">${badge.text}</div>`:''}
+  </div></div>`;
+}
+
+// ── B-type muscular endurance day card builder (wizard only) ──────────
+function _buildBtypeDayCard(day, di, totalDays, wk){
+  const sess = ENDO_SESSIONS[day.sessId];
+  if(!sess) return '';
+  const pd = day.phaseData || {};
+  const exArr = day.exercises || [];
+  const rpeTooltipHtml = `<span class="rpe-tooltip">${day.rpe||''} <span class="rpe-info-icon">ℹ</span><span class="rpe-tip"><strong>RPE (1–10)</strong></span></span>`;
+  let presBoxes = '', exRows = '', emomNote = '';
+
+  if(day.sessId==='B1'){
+    const roundsPerEx = pd.repsPerEx||Math.floor(pd.rounds/Math.max(exArr.length,1));
+    presBoxes = `<div class="mendo-pres-box"><div class="mendo-pres-val">${pd.rounds}</div><div class="mendo-pres-lbl">Total Rounds</div></div>
+      <div class="mendo-pres-box"><div class="mendo-pres-val">${roundsPerEx} rounds / ex.</div><div class="mendo-pres-lbl">Per Exercise</div></div>
+      <div class="mendo-pres-box"><div class="mendo-pres-val">${pd.reps} reps</div><div class="mendo-pres-lbl">Reps / Round</div></div>
+      <div class="mendo-pres-box"><div class="mendo-pres-val">${pd.rest}</div><div class="mendo-pres-lbl">Rest Between</div></div>`;
+    exArr.forEach((ex,ei)=>{
+      exRows += `<div class="mendo-exercise-row"><div style="display:flex;align-items:center;gap:.6rem;flex:1;min-width:0">
+        <span class="mendo-circuit-num">${ei+1}</span>
+        <div><div class="mendo-ex-name">${ex.name||''}</div><div class="mendo-ex-meta"><span>${roundsPerEx} rounds × ${pd.reps} reps</span><span>${ex.note||''}</span></div></div>
+      </div>${can.exerciseSwap?`<button class="mendo-swap-btn" onclick="openMendoSwap('${day.sessId}',${ei},${di})">⇄ Swap</button>`:`<button class="mendo-swap-btn swap-locked" onclick="showNudgeModal('basic')">⇄ Swap</button>`}</div>`;
+    });
+  } else if(day.sessId==='B2'){
+    const totalMins = pd.totalMins||parseInt(pd.duration)||10;
+    presBoxes = `<div class="mendo-pres-box"><div class="mendo-pres-val">${pd.duration}</div><div class="mendo-pres-lbl">Duration</div></div>
+      <div class="mendo-pres-box"><div class="mendo-pres-val">${pd.reps} reps @ ${pd.pct}</div><div class="mendo-pres-lbl">Each Minute</div></div>
+      <div class="mendo-pres-box"><div class="mendo-pres-val">3 exercises</div><div class="mendo-pres-lbl">Rotating</div></div>`;
+    emomNote = `<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:.45rem .7rem;font-size:.75rem;color:#1e40af;margin-bottom:.75rem;line-height:1.5"><strong>🔄 How to rotate:</strong> A, B, C, A, B, C… Rest is what remains of the minute.</div>`;
+    exArr.forEach((ex,ei)=>{
+      const mins=[]; for(let m=ei+1;m<=totalMins;m+=3) mins.push(`Min ${m}`);
+      exRows+=`<div class="mendo-exercise-row"><div style="display:flex;align-items:center;gap:.6rem;flex:1;min-width:0">
+        <span class="mendo-circuit-num">${'ABC'[ei]}</span>
+        <div><div class="mendo-ex-name">${ex.name||''}</div><div class="mendo-ex-meta"><span>${mins.slice(0,3).join(', ')}${mins.length>3?'…':''}</span><span>${pd.reps} reps @ ${pd.pct}</span></div></div>
+      </div>${can.exerciseSwap?`<button class="mendo-swap-btn" onclick="openMendoSwap('${day.sessId}',${ei},${di})">⇄ Swap</button>`:`<button class="mendo-swap-btn swap-locked" onclick="showNudgeModal('basic')">⇄ Swap</button>`}</div>`;
+    });
+  } else {
+    presBoxes = `<div class="mendo-pres-box"><div class="mendo-pres-val">${pd.rounds}</div><div class="mendo-pres-lbl">Repeats</div></div>
+      <div class="mendo-pres-box"><div class="mendo-pres-val">${pd.workSec}s on / ${pd.restSec}s off</div><div class="mendo-pres-lbl">Work / Rest</div></div>`;
+    const ex = exArr[0]||{};
+    exRows=`<div class="mendo-exercise-row"><div><div class="mendo-ex-name">${ex.name||''}</div><div class="mendo-ex-meta"><span>${ex.note||''}</span></div></div>
+      ${can.exerciseSwap?`<button class="mendo-swap-btn" onclick="openMendoSwap('${day.sessId}',0,${di})">⇄ Swap</button>`:`<button class="mendo-swap-btn swap-locked" onclick="showNudgeModal('basic')">⇄ Swap</button>`}</div>`;
+  }
+
+  return `<div class="day-card">
+    <div class="day-hdr" style="background:${day.color}">
+      <h3>${day.icon||''} ${day.label} <span style="font-size:.62rem;font-weight:700;background:rgba(255,255,255,.2);border-radius:4px;padding:.1rem .4rem;margin-left:.3rem">${sess.abbr}</span></h3>
+      <div class="day-meta">Day ${di+1} of ${totalDays}<br><span style="font-size:.65rem">${day.desc||''}</span></div>
+    </div>
+    <div class="mendo-block">
+      <div class="cardio-zone-row"><span class="cardio-rpe-pill">${rpeTooltipHtml}</span></div>
+      ${day.keyRule?`<div class="mendo-key-rule">${day.keyRule}</div>`:''}
+      ${day.warning?`<div class="mendo-warning">${day.warning}</div>`:''}
+      <div class="mendo-prescription">${presBoxes}</div>
+      <div class="cardio-detail" style="margin-bottom:.75rem">${pd.detail||''}</div>
+      ${emomNote}${exRows}
+      <div class="cardio-structure"><div class="cardio-structure-hdr">📋 Session structure</div>
+        ${(day.structure||[]).map((s,si)=>`<div class="cardio-step"><span class="cardio-step-n">${si+1}</span>${s}</div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── Week nav for unified view ──────────────────────────────────────────
+function uvSwitchWeek(slot, weekNum){
+  if(!window._uvState) window._uvState = {};
+  if(!window._uvState[slot]) window._uvState[slot] = {};
+  window._uvState[slot].currentWeek = weekNum;
+  renderUnifiedPlanView(slot);
+  document.getElementById('plan-content').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 // ─── Header ───────────────────────────────────────────────────────────
@@ -5355,28 +5729,8 @@ function viewSavedPlan(slotArg){
   const slot = (slotArg != null) ? slotArg : (trkState.activeSlot || 0);
   const saved = trkGetPlan(slot);
   if(!saved){ alert('No saved plan found. Generate and save a plan first.'); return; }
-  // Load saved weeks into currentPlan (display-only — wpt_plan in localStorage is untouched)
-  currentPlan = saved.weeks;
-  // Sync S to saved meta so renderPlan doesn't crash
-  const m = saved.meta||{};
-  S.weeks    = m.weeks    || S.weeks;
-  S.wpw      = m.wpw      || S.wpw;
-  S.duration = m.duration || S.duration;
-  S.level    = m.level    || S.level;
-  S.currentWeek  = 1;
-  S.completedWeeks = new Set();
-  // Derive focus from the most common day type in week 1 (for rationale text only)
-  const w1 = saved.weeks[0];
-  if(w1){
-    const focuses = (w1.days||[]).filter(Boolean).map(d=>d.focus||d.type).filter(f=>f&&f!=='cardio'&&f!=='muscular_endurance');
-    const focusCounts = {};
-    focuses.forEach(f=>focusCounts[f]=(focusCounts[f]||0)+1);
-    const topFocus = Object.entries(focusCounts).sort((a,b)=>b[1]-a[1])[0];
-    if(topFocus) S.focus = topFocus[0];
-  }
-  S._viewingSaved = true;
-  renderPlan();
-  showView('plan');
+  // Both wizard and manual plans now use the unified renderer
+  renderUnifiedPlanView(slot);
 }
 
 
