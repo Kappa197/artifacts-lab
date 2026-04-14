@@ -8,7 +8,8 @@ export const config = { runtime: 'edge' };
 const SUPABASE_URL = 'https://fvgajfiksxmwioxnesry.supabase.co';
 
 // Gemini API endpoint (non-streaming is more stable across models on Vercel Edge)
-const GEMINI_DEFAULT_MODEL = 'gemini-2.5-flash';
+const GEMINI_DEFAULT_MODEL = 'gemini-2.0-flash'; // high-availability default
+const GEMINI_PRO_MODEL = 'gemini-2.0-pro';       // stable for complex tables
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 
 function toBase64(buffer) {
@@ -158,7 +159,7 @@ function extractJSON(text, mode) {
 // Gemini request format:
 //   { contents: [{ role: 'user', parts: [...] }], generationConfig: {...} }
 // Parts can be: { text: '...' } or { inlineData: { mimeType, data } }
-// Response (SSE): each `data:` line is a JSON chunk with candidates[].content.parts[].text
+// Response: JSON with candidates[].content.parts[].text
 
 function normalizeModelName(modelName) {
   const m = String(modelName || '').trim();
@@ -191,10 +192,13 @@ function buildModelPreferenceList(requestedModel, availableModels) {
   }
 
   const preferredShort = [
-    requestedModel || '',
     GEMINI_DEFAULT_MODEL,
+    GEMINI_PRO_MODEL,
+    requestedModel || '',
     'gemini-2.5-pro',
+    'gemini-2.5-flash',
     'gemini-2.0-flash',
+    'gemini-2.0-pro',
     'gemini-1.5-flash',
     'gemini-1.5-pro',
   ].filter(Boolean);
@@ -213,6 +217,46 @@ function buildModelPreferenceList(requestedModel, availableModels) {
   }
 
   return [...new Set(prioritized)];
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function isRetriableStatus(status) {
+  return status === 429 || status === 500 || status === 502 || status === 503 || status === 504;
+}
+
+async function fetchGeminiWithRetry(url, payload, model, retries = 3) {
+  let lastRes = null;
+  let lastErr = null;
+
+  for (let i = 0; i < retries; i++) {
+    try {
+      const res = await fetch(url, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      lastRes = res;
+
+      if (res.ok) return res;
+      if (!isRetriableStatus(res.status) || i === retries - 1) return res;
+
+      const wait = Math.pow(2, i) * 1000; // 1s, 2s, 4s
+      console.warn(`[process-statement] transient ${res.status} on ${model}; retrying in ${wait}ms`);
+      await sleep(wait);
+    } catch (e) {
+      lastErr = e;
+      if (i === retries - 1) break;
+      const wait = Math.pow(2, i) * 1000;
+      console.warn(`[process-statement] network error on ${model}; retrying in ${wait}ms`);
+      await sleep(wait);
+    }
+  }
+
+  if (lastRes) return lastRes;
+  throw lastErr || new Error('Network error while contacting AI service.');
 }
 
 function splitStatementTextIntoChunks(text, maxChars = 120000) {
@@ -242,19 +286,16 @@ async function callGemini(parts, apiKey, requestedModel) {
   for (const model of models) {
     const modelPath = normalizeModelName(model);
     const url = `${GEMINI_API_BASE}/${encodeURIComponent(modelPath.replace(/^models\//, ''))}:generateContent?key=${encodeURIComponent(apiKey)}`;
+    const requestPayload = {
+      contents: [{ role: 'user', parts }],
+      generationConfig: {
+        maxOutputTokens: 16384,
+        temperature: 0,
+        responseMimeType: 'application/json',
+      },
+    };
 
-    const res = await fetch(url, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ role: 'user', parts }],
-        generationConfig: {
-          maxOutputTokens: 16384,
-          temperature: 0,
-          responseMimeType: 'application/json',
-        },
-      }),
-    });
+    const res = await fetchGeminiWithRetry(url, requestPayload, model, 3);
 
     if (!res.ok) {
       const errText = await res.text();
@@ -263,6 +304,7 @@ async function callGemini(parts, apiKey, requestedModel) {
       console.error(`[process-statement] Gemini error on model ${model}`, res.status, errText.slice(0, 300));
       // Try next model on not found (model/endpoint mismatch)
       if (res.status === 404) continue;
+      if (res.status === 503 || res.status === 502 || res.status === 504) continue;
       if (res.status === 400) throw new Error('Invalid request — the file may be corrupted or in an unsupported format.');
       if (res.status === 401 || res.status === 403) throw new Error('AI service authentication failed. Check GEMINI_API_KEY in Vercel environment variables.');
       if (res.status === 429) throw new Error('AI service rate limit reached. Please wait a moment and try again.');
