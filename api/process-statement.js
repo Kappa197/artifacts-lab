@@ -227,6 +227,20 @@ function isRetriableStatus(status) {
   return status === 429 || status === 500 || status === 502 || status === 503 || status === 504;
 }
 
+function isModelInputMismatch400(errText) {
+  const t = String(errText || '').toLowerCase();
+  return (
+    t.includes('unsupported') ||
+    t.includes('not supported') ||
+    t.includes('mime') ||
+    t.includes('modality') ||
+    t.includes('inline_data') ||
+    t.includes('inline data') ||
+    t.includes('file type') ||
+    t.includes('application/pdf')
+  );
+}
+
 async function fetchGeminiWithRetry(url, payload, model, retries = 3) {
   let lastRes = null;
   let lastErr = null;
@@ -304,6 +318,8 @@ async function callGemini(parts, apiKey, requestedModel) {
       console.error(`[process-statement] Gemini error on model ${model}`, res.status, errText.slice(0, 300));
       // Try next model on not found (model/endpoint mismatch)
       if (res.status === 404) continue;
+      // Some models do not accept some input types (e.g. PDF inlineData) -> try next model
+      if (res.status === 400 && isModelInputMismatch400(errText)) continue;
       if (res.status === 503 || res.status === 502 || res.status === 504) continue;
       if (res.status === 400) throw new Error('Invalid request — the file may be corrupted or in an unsupported format.');
       if (res.status === 401 || res.status === 403) throw new Error('AI service authentication failed. Check GEMINI_API_KEY in Vercel environment variables.');
@@ -335,6 +351,9 @@ async function callGemini(parts, apiKey, requestedModel) {
   if (lastStatus === 404) {
     console.error('[process-statement] All model fallbacks returned 404:', lastBody.slice(0, 300));
     throw new Error('AI service model not found (404). Check available Gemini models for your API key/project.');
+  }
+  if (lastStatus === 400 && isModelInputMismatch400(lastBody)) {
+    throw new Error('AI service rejected this file type on available models. Please try converting the statement to text/CSV and retry.');
   }
   throw new Error(`AI service error (${lastStatus || 'unknown'}). Please try again.`);
 }
