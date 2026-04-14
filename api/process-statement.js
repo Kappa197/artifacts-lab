@@ -305,8 +305,13 @@ function splitStatementTextIntoChunks(text, maxChars = 120000) {
 }
 
 function splitChunkInHalf(text) {
-  const lines = String(text || '').split('\n');
-  if (lines.length <= 1) return [text, ''];
+  const src = String(text || '');
+  const lines = src.split('\n');
+  if (lines.length <= 1) {
+    const mid = Math.floor(src.length / 2);
+    if (mid <= 0 || mid >= src.length) return [src, ''];
+    return [src.slice(0, mid), src.slice(mid)];
+  }
   const mid = Math.floor(lines.length / 2);
   const left = lines.slice(0, mid).join('\n');
   const right = lines.slice(mid).join('\n');
