@@ -318,6 +318,44 @@ function normalizeStatementRows(data) {
   });
 }
 
+function makeRowFingerprint(row) {
+  const d = String(row?.date ?? '').trim();
+  const s = String(row?.description ?? '').trim().toLowerCase();
+  const dr = row?.debit == null ? '' : String(row.debit);
+  const cr = row?.credit == null ? '' : String(row.credit);
+  return `${d}|${s}|${dr}|${cr}`;
+}
+
+function buildStatementPagePrompt(currency, categories, alreadySeenCompactRows, pageNum) {
+  const base = statementPrompt(currency, categories);
+  const seenList = (alreadySeenCompactRows || [])
+    .slice(-250)
+    .map(r => `- d:${r.d || ''} | s:${r.s || ''} | dr:${r.dr ?? ''} | cr:${r.cr ?? ''}`)
+    .join('\n');
+
+  return `${base}
+
+PAGED EXTRACTION MODE:
+- This is extraction pass ${pageNum}.
+- Return AT MOST 35 transactions in this pass.
+- Skip transactions already returned in previous passes.
+- If no more transactions remain, return rows: [] and hasMore: false.
+
+ALREADY RETURNED TRANSACTIONS (DO NOT REPEAT):
+${seenList || '- (none)'}
+
+OUTPUT FORMAT (ONLY this JSON object, no markdown):
+{"rows":[{"d":"...","s":"...","dr":null,"cr":123.45,"c":"..."}],"hasMore":true}`;
+}
+
+function extractStatementPagePayload(rawText) {
+  const parsed = extractJSON(rawText, 'statement');
+  if (Array.isArray(parsed)) return { rows: parsed, hasMore: false };
+  const rows = Array.isArray(parsed?.rows) ? parsed.rows : [];
+  const hasMore = !!parsed?.hasMore;
+  return { rows, hasMore };
+}
+
 function splitChunkInHalf(text) {
   const src = String(text || '');
   const lines = src.split('\n');
@@ -460,6 +498,33 @@ IMPORTANT FOR CHUNKED EXTRACTION:
   return allRows;
 }
 
+async function callGeminiForStatementPaged(sourceParts, currency, categories, apiKey, model) {
+  const allCompactRows = [];
+  const seen = new Set();
+
+  for (let page = 1; page <= 8; page++) {
+    const pagePrompt = buildStatementPagePrompt(currency, categories, allCompactRows, page);
+    const parts = [...sourceParts, { text: pagePrompt }];
+    const rawText = await callGemini(parts, apiKey, model);
+    const { rows, hasMore } = extractStatementPagePayload(rawText);
+
+    let newRows = 0;
+    for (const row of (rows || [])) {
+      const normalized = normalizeStatementRows([row])[0];
+      const key = makeRowFingerprint(normalized);
+      if (!key || seen.has(key)) continue;
+      seen.add(key);
+      allCompactRows.push(row);
+      newRows++;
+    }
+
+    if (!hasMore) break;
+    if (newRows === 0) break;
+  }
+
+  return allCompactRows;
+}
+
 // ─── Main handler ─────────────────────────────────────────────────────────────
 
 export default async function handler(req) {
@@ -498,34 +563,34 @@ async function processRequest(req) {
   // Gemini 1.5 Pro supports PDF, images, and text natively via inlineData.
   // No separate document-block API needed — everything is inlineData or text.
 
-  const parts    = [];
+  const sourceParts = [];
   const fileType = file.type || 'application/octet-stream';
   let statementText = '';
 
   if (fileType === 'application/pdf') {
     // Gemini 1.5 Pro reads PDFs natively (both searchable and scanned)
     const bytes = await file.arrayBuffer();
-    parts.push({ inlineData: { mimeType: 'application/pdf', data: toBase64(bytes) } });
+    sourceParts.push({ inlineData: { mimeType: 'application/pdf', data: toBase64(bytes) } });
 
   } else if (fileType.startsWith('image/')) {
     const validMime = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(fileType)
       ? fileType : 'image/jpeg';
     const bytes = await file.arrayBuffer();
-    parts.push({ inlineData: { mimeType: validMime, data: toBase64(bytes) } });
+    sourceParts.push({ inlineData: { mimeType: validMime, data: toBase64(bytes) } });
 
   } else {
     // Plain text / CSV / PDF text extracted client-side by PDF.js
     statementText = await file.text();
     if (!statementText.trim()) return jsonResponse({ error: 'The file appears to be empty.' }, 400);
-    parts.push({ text: `Bank statement (${file.name}):\n\n${statementText}` });
+    sourceParts.push({ text: `Bank statement (${file.name}):\n\n${statementText}` });
   }
 
   // Prompt is always the final text part in the same user turn
-  parts.push({
+  const parts = [...sourceParts, {
     text: mode === 'receipt'
       ? receiptPrompt(currency, categories)
       : statementPrompt(currency, categories),
-  });
+  }];
 
   // ── Stream Gemini response back to client ──────────────────────────────────
   // Wrapped in ReadableStream so Vercel keeps the connection open
@@ -539,6 +604,15 @@ async function processRequest(req) {
           const parsed = await callGeminiForStatementWithAutoChunking(
             file.name,
             statementText,
+            currency,
+            categories,
+            GEMINI_KEY,
+            model
+          );
+          data = normalizeStatementRows(parsed);
+        } else if (mode === 'statement') {
+          const parsed = await callGeminiForStatementPaged(
+            sourceParts,
             currency,
             categories,
             GEMINI_KEY,
