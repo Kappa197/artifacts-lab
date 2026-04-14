@@ -147,6 +147,14 @@ async function processRequest(req) {
   const file       = formData.get('file');
   const catsRaw    = formData.get('categories');
   const categories = catsRaw ? JSON.parse(catsRaw) : [];
+  // Model is sent by the client (expense-tracker.html); whitelist-validated, falls back to Haiku
+  const ALLOWED_MODELS = new Set([
+    'claude-haiku-4-5-20251001',
+    'claude-sonnet-4-20250514',
+    'claude-opus-4-20250514',
+  ]);
+  const requestedModel = formData.get('model') || '';
+  const model = ALLOWED_MODELS.has(requestedModel) ? requestedModel : 'claude-haiku-4-5-20251001';
   if (!file) return jsonResponse({ error: 'No file provided.' }, 400);
 
   // Build Claude message content
@@ -176,7 +184,7 @@ async function processRequest(req) {
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model:      'claude-sonnet-4-20250514',
+      model,
       max_tokens: 8096,
       stream:     true,   // ← streaming keeps Vercel connection alive
       messages:   [{ role:'user', content }],
