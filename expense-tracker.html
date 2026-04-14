@@ -3496,6 +3496,116 @@ async function extractPDFText(file) {
   return text;
 }
 
+async function extractPDFPagesText(file) {
+  const CDN    = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+  const WORKER = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  if (!window.pdfjsLib) {
+    await loadScript(CDN);
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc = WORKER;
+  }
+  const ab  = await file.arrayBuffer();
+  const pdf = await window.pdfjsLib.getDocument({ data: ab }).promise;
+  const pages = [];
+  for (let p = 1; p <= pdf.numPages; p++) {
+    const page    = await pdf.getPage(p);
+    const content = await page.getTextContent();
+    const rows = {};
+    content.items.forEach(item => {
+      if (!item.str.trim()) return;
+      const y = Math.round(item.transform[5]);
+      if (!rows[y]) rows[y] = [];
+      rows[y].push({ x: item.transform[4], str: item.str });
+    });
+    let pageText = '';
+    Object.keys(rows)
+      .sort((a, b) => b - a)
+      .forEach(y => {
+        const line = rows[y].sort((a, b) => a.x - b.x).map(i => i.str).join('  ');
+        pageText += line + '\n';
+      });
+    pages.push(pageText.trim());
+  }
+  return { pages, numPages: pdf.numPages };
+}
+
+async function renderPDFPagesAsImages(file) {
+  const CDN    = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+  const WORKER = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  if (!window.pdfjsLib) {
+    await loadScript(CDN);
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc = WORKER;
+  }
+  const ab  = await file.arrayBuffer();
+  const pdf = await window.pdfjsLib.getDocument({ data: ab }).promise;
+  const images = [];
+
+  for (let p = 1; p <= pdf.numPages; p++) {
+    const page = await pdf.getPage(p);
+    const vp = page.getViewport({ scale: 2.0 });
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = Math.ceil(vp.width);
+    canvas.height = Math.ceil(vp.height);
+    await page.render({ canvasContext: ctx, viewport: vp }).promise;
+
+    const blob = await new Promise((resolve, reject) => {
+      canvas.toBlob(b => b ? resolve(b) : reject(new Error('Could not render PDF page image.')), 'image/jpeg', 0.9);
+    });
+    images.push(new File([blob], `${file.name.replace(/\.pdf$/i, '')}_page_${p}.jpg`, { type: 'image/jpeg' }));
+  }
+  return images;
+}
+
+async function callStatementAPI(session, fileToSend, model = 'gemini-2.0-pro') {
+  const fd = new FormData();
+  fd.append('file',       fileToSend);
+  fd.append('mode',       'statement');
+  fd.append('currency',   S.currency.primary || 'THB');
+  fd.append('categories', JSON.stringify(S.cats));
+  fd.append('model',      model);
+
+  const res = await fetch('/api/process-statement', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${session.access_token}` },
+    body: fd,
+  });
+
+  let result;
+  try {
+    const reader  = res.body.getReader();
+    const decoder = new TextDecoder();
+    let fullText  = '';
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      fullText += decoder.decode(value, { stream: true });
+    }
+    result = JSON.parse(fullText);
+  } catch (e) {
+    throw new Error('Could not read server response. Please try again.');
+  }
+
+  if (!result.ok) throw new Error(result?.error || 'Processing failed. Please try again.');
+  return Array.isArray(result.data) ? result.data : [result.data];
+}
+
+function dedupeAITransactions(transactions) {
+  const seen = new Set();
+  const out = [];
+  for (const tx of (transactions || [])) {
+    const key = [
+      String(tx?.date || '').trim(),
+      String(tx?.description || '').trim().toLowerCase(),
+      String(tx?.debit ?? ''),
+      String(tx?.credit ?? '')
+    ].join('|');
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    out.push(tx);
+  }
+  return out;
+}
+
 async function processWithAI() {
   if (!can.aiImport) { toast('🔒 AI statement import is a Premium feature', 'err'); return; }
   if (!_aiFile) return;
@@ -3510,70 +3620,60 @@ async function processWithAI() {
     const { data: { session } } = await _supa.auth.getSession();
     if (!session?.access_token) throw new Error('Not logged in. Please refresh the page and try again.');
 
-    let fileToSend = _aiFile;
+    let allTransactions = [];
     const name = _aiFile.name.toLowerCase();
 
     if (name.endsWith('.pdf')) {
-      // Try text extraction first (works for all digitally-generated PDFs)
+      // Hybrid PDF flow:
+      // - Searchable PDFs: send text in small page chunks.
+      // - Scanned PDFs: render each page to image and send page-by-page.
       if (loadingMsg) loadingMsg.textContent = 'Extracting text from PDF…';
-      const rawText = await extractPDFText(_aiFile);
-
-      // Heuristic: a real statement should have at least 10 lines with numbers.
-      // If we get very little text, it's likely a scanned/image PDF — send raw to Claude vision.
+      const { pages, numPages } = await extractPDFPagesText(_aiFile);
+      const rawText = pages.join('\n\n');
       const meaningfulLines = rawText.split('\n').filter(l => /\d/.test(l) && l.trim().length > 5);
       const isSearchable = meaningfulLines.length >= 10;
 
       if (isSearchable) {
-        // Searchable PDF — send full extracted text including headers for context
-        fileToSend = new File([rawText], _aiFile.name.replace(/\.pdf$/i, '.txt'), { type: 'text/plain' });
-        if (loadingMsg) loadingMsg.textContent = 'Gemini is analysing your transactions…';
+        const chunkSize = 2; // pages per request
+        const totalChunks = Math.ceil(numPages / chunkSize);
+        for (let c = 0; c < totalChunks; c++) {
+          const pStart = c * chunkSize + 1;
+          const pEnd = Math.min((c + 1) * chunkSize, numPages);
+          if (loadingMsg) loadingMsg.textContent = `Gemini is analysing pages ${pStart}-${pEnd} of ${numPages}…`;
+          const chunkText = pages.slice(c * chunkSize, (c + 1) * chunkSize).join('\n\n');
+          const fileToSend = new File(
+            [chunkText],
+            `${_aiFile.name.replace(/\.pdf$/i, '')}_p${pStart}-${pEnd}.txt`,
+            { type: 'text/plain' }
+          );
+          const rows = await callStatementAPI(session, fileToSend, 'gemini-2.0-pro');
+          allTransactions.push(...rows);
+        }
       } else {
-        // Scanned/image PDF — send raw PDF bytes to Claude vision
-        // Note: this uses more tokens (~$0.30-0.50 per file) vs searchable PDF (~$0.15-0.18)
-        if (loadingMsg) loadingMsg.textContent = 'Scanned PDF detected — sending to Claude vision…';
-        fileToSend = _aiFile; // send the original PDF directly
+        const pageImages = await renderPDFPagesAsImages(_aiFile);
+        for (let i = 0; i < pageImages.length; i++) {
+          if (loadingMsg) loadingMsg.textContent = `Scanned PDF detected — processing page ${i + 1}/${pageImages.length}…`;
+          const rows = await callStatementAPI(session, pageImages[i], 'gemini-2.0-pro');
+          allTransactions.push(...rows);
+        }
       }
     } else if (name.match(/\.(xlsx|xls)$/i)) {
       // Convert Excel → CSV client-side
       const ab  = await _aiFile.arrayBuffer();
       const wb  = XLSX.read(ab, { type: 'array' });
       const csv = XLSX.utils.sheet_to_csv(wb.Sheets[wb.SheetNames[0]]);
-      fileToSend = new File([csv], _aiFile.name.replace(/\.(xlsx|xls)$/i, '.csv'), { type: 'text/csv' });
+      const fileToSend = new File([csv], _aiFile.name.replace(/\.(xlsx|xls)$/i, '.csv'), { type: 'text/csv' });
+      if (loadingMsg) loadingMsg.textContent = 'Gemini is analysing your transactions…';
+      const rows = await callStatementAPI(session, fileToSend, 'gemini-2.0-pro');
+      allTransactions.push(...rows);
+    } else {
+      if (loadingMsg) loadingMsg.textContent = 'Gemini is analysing your transactions…';
+      const rows = await callStatementAPI(session, _aiFile, 'gemini-2.0-pro');
+      allTransactions.push(...rows);
     }
 
-    const fd = new FormData();
-    fd.append('file',       fileToSend);
-    fd.append('mode',       'statement');
-    fd.append('currency',   S.currency.primary || 'THB');
-    fd.append('categories', JSON.stringify(S.cats));
-    fd.append('model',      'gemini-1.5-pro');
-
-    const res = await fetch('/api/process-statement', {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${session.access_token}` },
-      body: fd,
-    });
-
-    // Read streaming response — Edge Function streams to keep Vercel connection alive,
-    // then sends a single JSON payload at the end once Claude finishes
-    let result;
-    try {
-      const reader  = res.body.getReader();
-      const decoder = new TextDecoder();
-      let fullText  = '';
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        fullText += decoder.decode(value, { stream: true });
-      }
-      result = JSON.parse(fullText);
-    } catch (e) {
-      throw new Error('Could not read server response. Please try again.');
-    }
-
-    if (!result.ok) throw new Error(result?.error || 'Processing failed. Please try again.');
-
-    mapAIStatementToPending(result.data);
+    allTransactions = dedupeAITransactions(allTransactions);
+    mapAIStatementToPending(allTransactions);
     if (!S.pending.length) throw new Error('No valid transactions found in this file.');
 
     renderTxPreview();
