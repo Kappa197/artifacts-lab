@@ -52,7 +52,7 @@ Your task: extract every transaction and return a JSON array. Each object must h
 {"date":"copy exactly as shown in source","description":"copy original description exactly, do not translate","debit":<number or null>,"credit":<number or null>,"category":"exact name from list below"}
 
 EXTRACTION RULES:
-1. Include EVERY transaction row. Do not skip any row, including fees, transfers, and small amounts.
+1. Include EVERY transaction row. Do not skip any row, including fees, transfers, and small amounts. Keep "description" concise (max 50 chars) while preserving key merchant/context details.
 2. Ignore header rows, page numbers, running balance rows, and summary totals — these are not transactions.
 3. debit: the amount when money LEFT the account (purchase, fee, withdrawal, transfer out). Use null if this is an incoming transaction.
 4. credit: the amount when money ARRIVED in the account (salary, refund, deposit, transfer in). Use null if this is an outgoing transaction.
@@ -274,7 +274,11 @@ async function fetchGeminiWithRetry(url, payload, model, retries = 3) {
 }
 
 function splitStatementTextIntoChunks(text, maxChars = 120000) {
-  const lines = String(text || '').split('\n');
+  const src = String(text || '');
+  if (!src.trim()) return [];
+
+  // Primary strategy: split by lines (best for tabular statements)
+  const lines = src.split('\n');
   const chunks = [];
   let current = '';
   for (const line of lines) {
@@ -287,7 +291,26 @@ function splitStatementTextIntoChunks(text, maxChars = 120000) {
     }
   }
   if (current.trim()) chunks.push(current);
+
+  // Fallback strategy: OCR/searchable-PDF text can arrive as one giant line.
+  if (chunks.length <= 1 && src.length > maxChars) {
+    const charChunks = [];
+    for (let i = 0; i < src.length; i += maxChars) {
+      const end = Math.min(i + maxChars, src.length);
+      charChunks.push(src.slice(i, end));
+    }
+    return charChunks;
+  }
   return chunks;
+}
+
+function splitChunkInHalf(text) {
+  const lines = String(text || '').split('\n');
+  if (lines.length <= 1) return [text, ''];
+  const mid = Math.floor(lines.length / 2);
+  const left = lines.slice(0, mid).join('\n');
+  const right = lines.slice(mid).join('\n');
+  return [left, right];
 }
 
 async function callGemini(parts, apiKey, requestedModel) {
@@ -371,14 +394,12 @@ async function callGeminiForStatementWithAutoChunking(fileName, statementText, c
     if (e?.code !== 'MAX_TOKENS') throw e;
   }
 
-  const chunks = splitStatementTextIntoChunks(statementText, 120000);
+  const chunks = splitStatementTextIntoChunks(statementText, 30000);
   if (chunks.length <= 1) {
     throw new Error('The statement is too large for a single AI call. Try splitting it into smaller date ranges (e.g. one month at a time).');
   }
 
-  const allRows = [];
-  for (let i = 0; i < chunks.length; i++) {
-    const chunk = chunks[i];
+  async function extractChunk(chunkText, i, total, depth = 0) {
     const chunkPrompt = `${statementPrompt(currency, categories)}
 
 IMPORTANT FOR CHUNKED EXTRACTION:
@@ -388,13 +409,33 @@ IMPORTANT FOR CHUNKED EXTRACTION:
 - Return ONLY a JSON array.`;
 
     const chunkParts = [
-      { text: `Bank statement (${fileName}) [chunk ${i + 1}/${chunks.length}]:\n\n${chunk}` },
+      { text: `Bank statement (${fileName}) [chunk ${i + 1}/${total}, split-depth ${depth}]:\n\n${chunkText}` },
       { text: chunkPrompt },
     ];
 
-    const rawChunk = await callGemini(chunkParts, apiKey, model);
-    const parsed = extractJSON(rawChunk, 'statement');
-    if (Array.isArray(parsed)) allRows.push(...parsed);
+    try {
+      const rawChunk = await callGemini(chunkParts, apiKey, model);
+      const parsed = extractJSON(rawChunk, 'statement');
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      if (e?.code !== 'MAX_TOKENS') throw e;
+      if (depth >= 4) {
+        throw new Error('The statement is too large for automatic chunk processing. Please split it into smaller date ranges (e.g. one month at a time).');
+      }
+      const [left, right] = splitChunkInHalf(chunkText);
+      if (!left.trim() || !right.trim()) {
+        throw new Error('The statement is too large for automatic chunk processing. Please split it into smaller date ranges (e.g. one month at a time).');
+      }
+      const leftRows = await extractChunk(left, i, total * 2, depth + 1);
+      const rightRows = await extractChunk(right, i, total * 2, depth + 1);
+      return [...leftRows, ...rightRows];
+    }
+  }
+
+  const allRows = [];
+  for (let i = 0; i < chunks.length; i++) {
+    const rows = await extractChunk(chunks[i], i, chunks.length, 0);
+    allRows.push(...rows);
   }
 
   return allRows;
