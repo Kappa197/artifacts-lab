@@ -215,6 +215,23 @@ function buildModelPreferenceList(requestedModel, availableModels) {
   return [...new Set(prioritized)];
 }
 
+function splitStatementTextIntoChunks(text, maxChars = 120000) {
+  const lines = String(text || '').split('\n');
+  const chunks = [];
+  let current = '';
+  for (const line of lines) {
+    const candidate = current ? `${current}\n${line}` : line;
+    if (candidate.length > maxChars && current) {
+      chunks.push(current);
+      current = line;
+    } else {
+      current = candidate;
+    }
+  }
+  if (current.trim()) chunks.push(current);
+  return chunks;
+}
+
 async function callGemini(parts, apiKey, requestedModel) {
   const availableModels = await getAvailableGeminiModels(apiKey);
   const models = buildModelPreferenceList(requestedModel, availableModels);
@@ -232,7 +249,7 @@ async function callGemini(parts, apiKey, requestedModel) {
       body: JSON.stringify({
         contents: [{ role: 'user', parts }],
         generationConfig: {
-          maxOutputTokens: 8192,
+          maxOutputTokens: 16384,
           temperature: 0,
           responseMimeType: 'application/json',
         },
@@ -258,7 +275,9 @@ async function callGemini(parts, apiKey, requestedModel) {
     const fullText = (candidate?.content?.parts || []).map(p => p?.text || '').join('').trim();
 
     if (finishReason === 'MAX_TOKENS') {
-      throw new Error('The statement is too large for a single AI call. Try splitting it into smaller date ranges (e.g. one month at a time).');
+      const err = new Error('The statement is too large for a single AI call.');
+      err.code = 'MAX_TOKENS';
+      throw err;
     }
     if (!fullText) {
       const blockedReason = payload?.promptFeedback?.blockReason;
@@ -276,6 +295,48 @@ async function callGemini(parts, apiKey, requestedModel) {
     throw new Error('AI service model not found (404). Check available Gemini models for your API key/project.');
   }
   throw new Error(`AI service error (${lastStatus || 'unknown'}). Please try again.`);
+}
+
+async function callGeminiForStatementWithAutoChunking(fileName, statementText, currency, categories, apiKey, model) {
+  const singleParts = [
+    { text: `Bank statement (${fileName}):\n\n${statementText}` },
+    { text: statementPrompt(currency, categories) },
+  ];
+
+  try {
+    const rawText = await callGemini(singleParts, apiKey, model);
+    return extractJSON(rawText, 'statement');
+  } catch (e) {
+    if (e?.code !== 'MAX_TOKENS') throw e;
+  }
+
+  const chunks = splitStatementTextIntoChunks(statementText, 120000);
+  if (chunks.length <= 1) {
+    throw new Error('The statement is too large for a single AI call. Try splitting it into smaller date ranges (e.g. one month at a time).');
+  }
+
+  const allRows = [];
+  for (let i = 0; i < chunks.length; i++) {
+    const chunk = chunks[i];
+    const chunkPrompt = `${statementPrompt(currency, categories)}
+
+IMPORTANT FOR CHUNKED EXTRACTION:
+- This is chunk ${i + 1} of ${chunks.length} from one statement.
+- Extract ONLY transactions visible in this chunk.
+- Keep original dates/descriptions exactly as shown.
+- Return ONLY a JSON array.`;
+
+    const chunkParts = [
+      { text: `Bank statement (${fileName}) [chunk ${i + 1}/${chunks.length}]:\n\n${chunk}` },
+      { text: chunkPrompt },
+    ];
+
+    const rawChunk = await callGemini(chunkParts, apiKey, model);
+    const parsed = extractJSON(rawChunk, 'statement');
+    if (Array.isArray(parsed)) allRows.push(...parsed);
+  }
+
+  return allRows;
 }
 
 // ─── Main handler ─────────────────────────────────────────────────────────────
@@ -318,6 +379,7 @@ async function processRequest(req) {
 
   const parts    = [];
   const fileType = file.type || 'application/octet-stream';
+  let statementText = '';
 
   if (fileType === 'application/pdf') {
     // Gemini 1.5 Pro reads PDFs natively (both searchable and scanned)
@@ -332,9 +394,9 @@ async function processRequest(req) {
 
   } else {
     // Plain text / CSV / PDF text extracted client-side by PDF.js
-    const text = await file.text();
-    if (!text.trim()) return jsonResponse({ error: 'The file appears to be empty.' }, 400);
-    parts.push({ text: `Bank statement (${file.name}):\n\n${text}` });
+    statementText = await file.text();
+    if (!statementText.trim()) return jsonResponse({ error: 'The file appears to be empty.' }, 400);
+    parts.push({ text: `Bank statement (${file.name}):\n\n${statementText}` });
   }
 
   // Prompt is always the final text part in the same user turn
@@ -351,10 +413,22 @@ async function processRequest(req) {
   const stream = new ReadableStream({
     async start(controller) {
       try {
-        const rawText = await callGemini(parts, GEMINI_KEY, model);
-        console.log('[process-statement] Gemini raw (first 200):', rawText.slice(0, 200));
+        let data;
+        if (mode === 'statement' && statementText) {
+          data = await callGeminiForStatementWithAutoChunking(
+            file.name,
+            statementText,
+            currency,
+            categories,
+            GEMINI_KEY,
+            model
+          );
+        } else {
+          const rawText = await callGemini(parts, GEMINI_KEY, model);
+          console.log('[process-statement] Gemini raw (first 200):', rawText.slice(0, 200));
+          data = extractJSON(rawText, mode);
+        }
 
-        const data   = extractJSON(rawText, mode);
         const result = JSON.stringify({ ok: true, data, mode });
         controller.enqueue(new TextEncoder().encode(result));
         controller.close();
