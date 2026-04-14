@@ -211,7 +211,7 @@ async function processRequest(req) {
     },
     body: JSON.stringify({
       model,
-      max_tokens: 4096,   // Haiku safe ceiling; normal statements fit well within this
+      max_tokens: 8000,   // Haiku hard limit is 8192; 8000 gives safe headroom for large statements
       stream:     true,   // ← streaming keeps Vercel connection alive
       messages:   [{ role:'user', content }],
     }),
