@@ -48,11 +48,11 @@ function statementPrompt(currency, categories) {
 
   return `You are a financial data assistant helping to process a bank statement. The statement is in ${currency} from a bank account. It may include a header section with account details and a transaction table below.
 
-Your task: extract every transaction and return a JSON array. Each object must have exactly these keys:
-{"date":"copy exactly as shown in source","description":"copy original description exactly, do not translate","debit":<number or null>,"credit":<number or null>,"category":"exact name from list below"}
+Your task: extract every transaction and return a JSON array using this COMPACT schema:
+{"d":"date exactly as shown","s":"short description","dr":<number or null>,"cr":<number or null>,"c":"exact category name from list below"}
 
 EXTRACTION RULES:
-1. Include EVERY transaction row. Do not skip any row, including fees, transfers, and small amounts. Keep "description" concise (max 50 chars) while preserving key merchant/context details.
+1. Include EVERY transaction row. Do not skip any row, including fees, transfers, and small amounts. Keep "s" concise (max 40 chars), prioritizing merchant name and city.
 2. Ignore header rows, page numbers, running balance rows, and summary totals — these are not transactions.
 3. debit: the amount when money LEFT the account (purchase, fee, withdrawal, transfer out). Use null if this is an incoming transaction.
 4. credit: the amount when money ARRIVED in the account (salary, refund, deposit, transfer in). Use null if this is an outgoing transaction.
@@ -63,7 +63,7 @@ CATEGORIZATION RULES:
 7. Use your knowledge of merchants, brands, apps, and services worldwide (including Thai businesses) to assign the best matching category.
 8. Consider the full description — app names, merchant codes, and partial names are all useful clues.
 9. Assign categories from EXPENSE CATEGORIES for debit transactions, and INCOME CATEGORIES for credit transactions.
-10. Write ONLY the category name — do not include the bucket label in parentheses.
+10. Write ONLY the category name in "c" — do not include the bucket label in parentheses.
 11. If you genuinely cannot determine the category after considering the description, write: Uncategorized
 
 OUTPUT:
@@ -304,6 +304,20 @@ function splitStatementTextIntoChunks(text, maxChars = 120000) {
   return chunks;
 }
 
+function normalizeStatementRows(data) {
+  if (!Array.isArray(data)) data = [data];
+  return data.map((row) => {
+    if (!row || typeof row !== 'object') return row;
+    return {
+      date: row.date ?? row.d ?? null,
+      description: row.description ?? row.s ?? '',
+      debit: row.debit ?? row.dr ?? null,
+      credit: row.credit ?? row.cr ?? null,
+      category: row.category ?? row.c ?? 'Uncategorized',
+    };
+  });
+}
+
 function splitChunkInHalf(text) {
   const src = String(text || '');
   const lines = src.split('\n');
@@ -522,7 +536,7 @@ async function processRequest(req) {
       try {
         let data;
         if (mode === 'statement' && statementText) {
-          data = await callGeminiForStatementWithAutoChunking(
+          const parsed = await callGeminiForStatementWithAutoChunking(
             file.name,
             statementText,
             currency,
@@ -530,10 +544,12 @@ async function processRequest(req) {
             GEMINI_KEY,
             model
           );
+          data = normalizeStatementRows(parsed);
         } else {
           const rawText = await callGemini(parts, GEMINI_KEY, model);
           console.log('[process-statement] Gemini raw (first 200):', rawText.slice(0, 200));
-          data = extractJSON(rawText, mode);
+          const parsed = extractJSON(rawText, mode);
+          data = mode === 'statement' ? normalizeStatementRows(parsed) : parsed;
         }
 
         const result = JSON.stringify({ ok: true, data, mode });
