@@ -54,7 +54,7 @@ Your task: extract every transaction and return a JSON array using this COMPACT 
 {"d":"date exactly as shown","s":"short description","dr":<number or null>,"cr":<number or null>,"c":"exact category name from list below"}
 
 EXTRACTION RULES:
-1. Include EVERY transaction row. Do not skip any row, including fees, transfers, and small amounts. Keep "s" concise (max 40 chars), prioritizing merchant name and city.
+1. Include EVERY transaction row. Do not skip any row, including fees, transfers, and small amounts. Keep "s" concise (max 25 chars), prioritizing merchant name and city.
 2. Ignore header rows, page numbers, running balance rows, and summary totals — these are not transactions.
 3. debit: the amount when money LEFT the account (purchase, fee, withdrawal, transfer out). Use null if this is an incoming transaction.
 4. credit: the amount when money ARRIVED in the account (salary, refund, deposit, transfer in). Use null if this is an outgoing transaction.
@@ -385,7 +385,7 @@ async function callGemini(parts, apiKey, requestedModel) {
     const requestPayload = {
       contents: [{ role: 'user', parts }],
       generationConfig: {
-        maxOutputTokens: 24576,
+        maxOutputTokens: 32768,
         temperature: 0,
         responseMimeType: 'application/json',
       },
@@ -415,9 +415,7 @@ async function callGemini(parts, apiKey, requestedModel) {
     const fullText = (candidate?.content?.parts || []).map(p => p?.text || '').join('').trim();
 
     if (finishReason === 'MAX_TOKENS') {
-      const err = new Error('The statement is too large for a single AI call.');
-      err.code = 'MAX_TOKENS';
-      throw err;
+      console.warn('[process-statement] MAX_TOKENS reached; attempting to parse partial response.');
     }
     if (!fullText) {
       const blockedReason = payload?.promptFeedback?.blockReason;
@@ -568,7 +566,7 @@ async function processRequest(req) {
   const file       = formData.get('file');
   const catsRaw    = formData.get('categories');
   const model      = formData.get('model') || GEMINI_DEFAULT_MODEL;
-  const effectiveModel = mode === 'statement' ? GEMINI_DEFAULT_MODEL : model;
+  const effectiveModel = model;
   const categories = catsRaw ? JSON.parse(catsRaw) : [];
 
   if (!file) return jsonResponse({ error: 'No file provided.' }, 400);
