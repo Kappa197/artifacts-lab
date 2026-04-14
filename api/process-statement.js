@@ -8,7 +8,7 @@ export const config = { runtime: 'edge' };
 const SUPABASE_URL = 'https://fvgajfiksxmwioxnesry.supabase.co';
 
 // Gemini API endpoint (non-streaming is more stable across models on Vercel Edge)
-const GEMINI_DEFAULT_MODEL = 'gemini-1.5-flash';
+const GEMINI_DEFAULT_MODEL = 'gemini-2.5-flash';
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 
 function toBase64(buffer) {
@@ -160,20 +160,71 @@ function extractJSON(text, mode) {
 // Parts can be: { text: '...' } or { inlineData: { mimeType, data } }
 // Response (SSE): each `data:` line is a JSON chunk with candidates[].content.parts[].text
 
-async function callGemini(parts, apiKey, requestedModel) {
-  const modelCandidates = [
+function normalizeModelName(modelName) {
+  const m = String(modelName || '').trim();
+  if (!m) return '';
+  return m.startsWith('models/') ? m : `models/${m}`;
+}
+
+async function getAvailableGeminiModels(apiKey) {
+  const url = `${GEMINI_API_BASE}?key=${encodeURIComponent(apiKey)}`;
+  const res = await fetch(url);
+  if (!res.ok) {
+    const errText = await res.text();
+    console.error('[process-statement] Could not list Gemini models', res.status, errText.slice(0, 300));
+    return [];
+  }
+  const payload = await res.json();
+  const models = payload?.models || [];
+  return models
+    .filter(m => (m?.supportedGenerationMethods || []).includes('generateContent'))
+    .map(m => m.name)
+    .filter(Boolean);
+}
+
+function buildModelPreferenceList(requestedModel, availableModels) {
+  const available = new Set(availableModels);
+  const shortToFull = {};
+  for (const full of availableModels) {
+    const short = full.replace(/^models\//, '');
+    shortToFull[short] = full;
+  }
+
+  const preferredShort = [
     requestedModel || '',
     GEMINI_DEFAULT_MODEL,
-    'gemini-1.5-pro',
+    'gemini-2.5-pro',
     'gemini-2.0-flash',
+    'gemini-1.5-flash',
+    'gemini-1.5-pro',
   ].filter(Boolean);
-  const models = [...new Set(modelCandidates)];
+
+  const prioritized = [];
+  for (const pref of preferredShort) {
+    const nFull = normalizeModelName(pref);
+    if (available.has(nFull)) prioritized.push(nFull);
+    if (shortToFull[pref]) prioritized.push(shortToFull[pref]);
+    const latestAlias = `${pref}-latest`;
+    if (shortToFull[latestAlias]) prioritized.push(shortToFull[latestAlias]);
+  }
+
+  for (const full of availableModels) {
+    if (/gemini/i.test(full)) prioritized.push(full);
+  }
+
+  return [...new Set(prioritized)];
+}
+
+async function callGemini(parts, apiKey, requestedModel) {
+  const availableModels = await getAvailableGeminiModels(apiKey);
+  const models = buildModelPreferenceList(requestedModel, availableModels);
 
   let lastStatus = null;
   let lastBody = '';
 
   for (const model of models) {
-    const url = `${GEMINI_API_BASE}/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
+    const modelPath = normalizeModelName(model);
+    const url = `${GEMINI_API_BASE}/${encodeURIComponent(modelPath.replace(/^models\//, ''))}:generateContent?key=${encodeURIComponent(apiKey)}`;
 
     const res = await fetch(url, {
       method:  'POST',
@@ -217,6 +268,9 @@ async function callGemini(parts, apiKey, requestedModel) {
     return fullText;
   }
 
+  if (!models.length) {
+    throw new Error('No Gemini models with generateContent are enabled for this API key/project.');
+  }
   if (lastStatus === 404) {
     console.error('[process-statement] All model fallbacks returned 404:', lastBody.slice(0, 300));
     throw new Error('AI service model not found (404). Check available Gemini models for your API key/project.');
