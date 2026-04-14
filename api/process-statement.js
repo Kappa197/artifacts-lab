@@ -7,9 +7,9 @@ export const config = { runtime: 'edge' };
 
 const SUPABASE_URL = 'https://fvgajfiksxmwioxnesry.supabase.co';
 
-// Gemini 1.5 Pro — SSE streaming endpoint
-const GEMINI_MODEL   = 'gemini-1.5-pro';
-const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:streamGenerateContent?alt=sse`;
+// Gemini API endpoint (non-streaming is more stable across models on Vercel Edge)
+const GEMINI_DEFAULT_MODEL = 'gemini-1.5-flash';
+const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 
 function toBase64(buffer) {
   let binary = '';
@@ -160,73 +160,68 @@ function extractJSON(text, mode) {
 // Parts can be: { text: '...' } or { inlineData: { mimeType, data } }
 // Response (SSE): each `data:` line is a JSON chunk with candidates[].content.parts[].text
 
-async function callGemini(parts, apiKey) {
-  const url = `${GEMINI_API_URL}&key=${apiKey}`;
+async function callGemini(parts, apiKey, requestedModel) {
+  const modelCandidates = [
+    requestedModel || '',
+    GEMINI_DEFAULT_MODEL,
+    'gemini-1.5-pro',
+    'gemini-2.0-flash',
+  ].filter(Boolean);
+  const models = [...new Set(modelCandidates)];
 
-  const res = await fetch(url, {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ role: 'user', parts }],
-      generationConfig: {
-        maxOutputTokens: 8192,
-        temperature:     0,    // deterministic — best for structured data extraction
-      },
-    }),
-  });
+  let lastStatus = null;
+  let lastBody = '';
 
-  if (!res.ok) {
-    const errText = await res.text();
-    console.error('[process-statement] Gemini error', res.status, errText.slice(0, 300));
-    if (res.status === 400) throw new Error('Invalid request — the file may be corrupted or in an unsupported format.');
-    if (res.status === 401 || res.status === 403) throw new Error('AI service authentication failed. Check GEMINI_API_KEY in Vercel environment variables.');
-    if (res.status === 429) throw new Error('AI service rate limit reached. Please wait a moment and try again.');
-    throw new Error(`AI service error (${res.status}). Please try again.`);
-  }
+  for (const model of models) {
+    const url = `${GEMINI_API_BASE}/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
 
-  // Read SSE stream and accumulate all text parts
-  const reader  = res.body.getReader();
-  const decoder = new TextDecoder();
-  let fullText    = '';
-  let buffer      = '';
-  let finishReason = null;
+    const res = await fetch(url, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ role: 'user', parts }],
+        generationConfig: {
+          maxOutputTokens: 8192,
+          temperature: 0,
+          responseMimeType: 'application/json',
+        },
+      }),
+    });
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-
-    buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split('\n');
-    buffer = lines.pop(); // keep incomplete last line
-
-    for (const line of lines) {
-      if (!line.startsWith('data: ')) continue;
-      const payload = line.slice(6).trim();
-      if (!payload || payload === '[DONE]') continue;
-      try {
-        const chunk     = JSON.parse(payload);
-        const candidate = chunk.candidates?.[0];
-        if (!candidate) continue;
-
-        for (const part of (candidate.content?.parts || [])) {
-          if (part.text) fullText += part.text;
-        }
-
-        // MAX_TOKENS = response was cut off mid-JSON
-        if (candidate.finishReason && candidate.finishReason !== 'STOP') {
-          finishReason = candidate.finishReason;
-        }
-      } catch {}
+    if (!res.ok) {
+      const errText = await res.text();
+      lastStatus = res.status;
+      lastBody = errText;
+      console.error(`[process-statement] Gemini error on model ${model}`, res.status, errText.slice(0, 300));
+      // Try next model on not found (model/endpoint mismatch)
+      if (res.status === 404) continue;
+      if (res.status === 400) throw new Error('Invalid request — the file may be corrupted or in an unsupported format.');
+      if (res.status === 401 || res.status === 403) throw new Error('AI service authentication failed. Check GEMINI_API_KEY in Vercel environment variables.');
+      if (res.status === 429) throw new Error('AI service rate limit reached. Please wait a moment and try again.');
+      throw new Error(`AI service error (${res.status}). Please try again.`);
     }
+
+    const payload = await res.json();
+    const candidate = payload?.candidates?.[0];
+    const finishReason = candidate?.finishReason || null;
+    const fullText = (candidate?.content?.parts || []).map(p => p?.text || '').join('').trim();
+
+    if (finishReason === 'MAX_TOKENS') {
+      throw new Error('The statement is too large for a single AI call. Try splitting it into smaller date ranges (e.g. one month at a time).');
+    }
+    if (!fullText) {
+      const blockedReason = payload?.promptFeedback?.blockReason;
+      if (blockedReason) throw new Error(`AI response was blocked: ${blockedReason}.`);
+      throw new Error('Empty response from AI — the file may be unreadable or blank.');
+    }
+    return fullText;
   }
 
-  if (finishReason === 'MAX_TOKENS') {
-    throw new Error('The statement is too large for a single AI call. Try splitting it into smaller date ranges (e.g. one month at a time).');
+  if (lastStatus === 404) {
+    console.error('[process-statement] All model fallbacks returned 404:', lastBody.slice(0, 300));
+    throw new Error('AI service model not found (404). Check available Gemini models for your API key/project.');
   }
-
-  if (!fullText) throw new Error('Empty response from AI — the file may be unreadable or blank.');
-
-  return fullText;
+  throw new Error(`AI service error (${lastStatus || 'unknown'}). Please try again.`);
 }
 
 // ─── Main handler ─────────────────────────────────────────────────────────────
@@ -258,6 +253,7 @@ async function processRequest(req) {
   const currency   = formData.get('currency') || 'THB';
   const file       = formData.get('file');
   const catsRaw    = formData.get('categories');
+  const model      = formData.get('model') || GEMINI_DEFAULT_MODEL;
   const categories = catsRaw ? JSON.parse(catsRaw) : [];
 
   if (!file) return jsonResponse({ error: 'No file provided.' }, 400);
@@ -301,7 +297,7 @@ async function processRequest(req) {
   const stream = new ReadableStream({
     async start(controller) {
       try {
-        const rawText = await callGemini(parts, GEMINI_KEY);
+        const rawText = await callGemini(parts, GEMINI_KEY, model);
         console.log('[process-statement] Gemini raw (first 200):', rawText.slice(0, 200));
 
         const data   = extractJSON(rawText, mode);
