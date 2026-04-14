@@ -252,6 +252,22 @@ html,body{overflow-x:hidden;max-width:100%;}
 @media(max-width:900px){.kpi-grid{grid-template-columns:1fr 1fr;}.dg2,.dg3{grid-template-columns:1fr;}.grid4{grid-template-columns:1fr 1fr;}}
 @media(max-width:600px){.tool-header{padding:0 14px;}.tool-nav-brand{display:none;}.tool-nav-sep{display:none;}.tool-nav-back{font-size:0.72rem;padding:5px 10px;}.tab-panel{padding:14px;}.kpi-grid{grid-template-columns:1fr;}.grid2,.grid3{grid-template-columns:1fr;}.entry-actions{grid-template-columns:1fr;}.bp-col-actual{display:none;}#manualEntryRow{grid-template-columns:1fr 1fr !important;}}
 
+/* ═══ BUDGET PLANNING — MOBILE STACKED LAYOUT ═══════════════ */
+@media(max-width:600px){
+  .bp-mobile-table thead{display:none;}
+  .bp-mobile-table tbody tr{display:block;border:1px solid var(--border);border-radius:8px;margin-bottom:12px;background:var(--navy3);padding:12px 14px;}
+  .bp-mobile-table tbody tr:last-child{margin-bottom:0;}
+  .bp-mobile-table td{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid var(--border);font-size:0.82rem;}
+  .bp-mobile-table td:last-child{border-bottom:none;padding-bottom:0;}
+  .bp-mobile-table td:first-child{padding-top:0;}
+  .bp-mobile-table td[data-label]::before{content:attr(data-label);font-family:var(--mono);font-size:0.62rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);flex-shrink:0;white-space:nowrap;}
+  .bp-mobile-table td.bp-progress-cell{display:block;padding-top:8px;border-bottom:none;}
+  .bp-mobile-table td.bp-progress-cell::before{display:block;margin-bottom:6px;}
+  .bp-mobile-table td input[type=number]{width:100%;max-width:140px;text-align:right;}
+  .bp-mobile-table .budget-meter-wrap{width:100%;min-width:0;}
+  /* bp-col-actual already hidden via existing rule above */
+}
+
 /* ═══ FIRST-RUN WIZARD ═══════════════════════════════════ */
 /* When wizard is active, hide tabs and tab panels */
 body.wizard-active .tool-header-tabs{display:none!important;}
@@ -4047,7 +4063,7 @@ function renderBudgetPlanning() {
     </div>
     <div class="card">
       <div class="card-title">By Bucket</div>
-      <div style="overflow-x:auto;"><table class="data-table">
+      <div style="overflow-x:auto;"><table class="data-table bp-mobile-table">
         <thead><tr><th>Bucket</th><th>Budgeted</th><th>Actual</th><th>Remaining</th><th style="min-width:240px;">Progress</th></tr></thead>
         <tbody>${bucketRows.map(r => {
           const rawPct = r.budgeted > 0 ? (r.actual / r.budgeted) * 100 : 0;
@@ -4058,11 +4074,11 @@ function renderBudgetPlanning() {
           const nameColor = over ? 'var(--red)' : nearWarn ? '#F5A623' : '';
           const warnMarkerLeft = Math.min(100, warnPct);
           return `<tr>
-            <td style="${nameColor ? `color:${nameColor};font-weight:600;` : ''}">${esc(r.bucket)}</td>
-            <td><input type="number" min="0" step="0.01" value="${r.budgeted||''}" onchange="updateBudgetTarget('bucket','${jsq(r.bucket)}',this.value)"></td>
-            <td class="bp-col-actual" style="font-family:var(--mono);">${fmtAmt(r.actual)}</td>
-            <td style="font-family:var(--mono);color:${over?'var(--red)':nearWarn?'#F5A623':'var(--green)'};">${fmtAmt(r.remaining)}</td>
-            <td>
+            <td data-label="Bucket" style="${nameColor ? `color:${nameColor};font-weight:600;` : ''}">${esc(r.bucket)}</td>
+            <td data-label="Budgeted"><input type="number" min="0" step="0.01" value="${r.budgeted||''}" onchange="updateBudgetTarget('bucket','${jsq(r.bucket)}',this.value)"></td>
+            <td data-label="Actual" class="bp-col-actual" style="font-family:var(--mono);">${fmtAmt(r.actual)}</td>
+            <td data-label="Remaining" style="font-family:var(--mono);color:${over?'var(--red)':nearWarn?'#F5A623':'var(--green)'};">${fmtAmt(r.remaining)}</td>
+            <td data-label="Progress" class="bp-progress-cell">
               <div class="budget-meter-wrap">
                 <div style="position:relative;">
                   <div class="budget-meter-track"><div class="budget-meter-fill ${fillClass}" style="width:${pct.toFixed(1)}%;"></div></div>
@@ -4090,7 +4106,7 @@ function renderBudgetPlanning() {
           ${expBuckets.map(b => `<option value="${esc(b)}"${selectedBucket===b?' selected':''}>${esc(b)}</option>`).join('')}
         </select>
       </div>
-      <div style="overflow-x:auto;"><table class="data-table">
+      <div style="overflow-x:auto;"><table class="data-table bp-mobile-table">
         <thead><tr><th>Category</th><th>Bucket</th><th>Budgeted</th><th>Actual</th><th style="min-width:200px;">Progress</th></tr></thead>
         <tbody>${catRowsFiltered.map(r => {
           const rawPct = r.target > 0 ? (r.actual / r.target) * 100 : 0;
@@ -4101,13 +4117,13 @@ function renderBudgetPlanning() {
           const nameColor = over ? 'var(--red)' : nearWarn ? '#F5A623' : '';
           const warnMarkerLeft = Math.min(100, warnPct);
           return `<tr>
-          <td style="${nameColor ? `color:${nameColor};font-weight:600;` : ''}">
+          <td data-label="Category" style="${nameColor ? `color:${nameColor};font-weight:600;` : ''}">
             ${esc(r.cat.name)}${r.invalid ? `<span class="budget-inline-alert" title="Target is higher than bucket target for ${esc(r.cat.bucket)}">!</span>` : ''}
           </td>
-          <td>${esc(r.cat.bucket)}</td>
-          <td><input type="number" min="0" step="0.01" value="${r.target||''}" onchange="updateBudgetTarget('cat','${r.cat.id}',this.value)"></td>
-          <td class="bp-col-actual" style="font-family:var(--mono);">${fmtAmt(r.actual)}</td>
-          <td>
+          <td data-label="Bucket">${esc(r.cat.bucket)}</td>
+          <td data-label="Budgeted"><input type="number" min="0" step="0.01" value="${r.target||''}" onchange="updateBudgetTarget('cat','${r.cat.id}',this.value)"></td>
+          <td data-label="Actual" class="bp-col-actual" style="font-family:var(--mono);">${fmtAmt(r.actual)}</td>
+          <td data-label="Progress" class="bp-progress-cell">
             <div class="budget-meter-wrap">
               <div style="position:relative;">
                 <div class="budget-meter-track"><div class="budget-meter-fill ${fillClass}" style="width:${pct.toFixed(1)}%;"></div></div>
