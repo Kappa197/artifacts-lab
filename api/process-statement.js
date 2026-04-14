@@ -1,10 +1,15 @@
 // api/process-statement.js
 // Vercel Edge Function — AI Statement Import + Receipt Scanning
-// Uses streaming to stay within Vercel Hobby free plan limits
+// Uses Gemini 1.5 Pro via Google AI REST API
+// Streaming keep-alive maintained via ReadableStream (Vercel Hobby compatible)
 
 export const config = { runtime: 'edge' };
 
 const SUPABASE_URL = 'https://fvgajfiksxmwioxnesry.supabase.co';
+
+// Gemini 1.5 Pro — SSE streaming endpoint
+const GEMINI_MODEL   = 'gemini-1.5-pro';
+const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:streamGenerateContent?alt=sse`;
 
 function toBase64(buffer) {
   let binary = '';
@@ -27,6 +32,8 @@ function jsonResponse(data, status = 200) {
     headers: { 'Content-Type': 'application/json', ...CORS },
   });
 }
+
+// ─── Prompts ─────────────────────────────────────────────────────────────────
 
 function statementPrompt(currency, categories) {
   const expLines = categories
@@ -91,6 +98,8 @@ EXPENSE CATEGORIES:
 ${expLines}`;
 }
 
+// ─── Supabase auth ────────────────────────────────────────────────────────────
+
 async function verifyAuth(req) {
   const SUPABASE_ANON = process.env.SUPABASE_ANON_KEY;
   const auth = req.headers.get('Authorization') || '';
@@ -102,10 +111,12 @@ async function verifyAuth(req) {
   return res.ok;
 }
 
+// ─── JSON extraction (robust multi-fallback) ──────────────────────────────────
+
 function extractJSON(text, mode) {
   if (!text) throw new Error('Empty response from AI');
 
-  // Strip ALL markdown code fences anywhere in the string (Haiku sometimes adds preamble)
+  // Strip all markdown code fences (Gemini occasionally wraps output)
   text = text
     .replace(/```json\s*/gi, '')
     .replace(/```\s*/gi, '')
@@ -119,11 +130,10 @@ function extractJSON(text, mode) {
     const s = text.indexOf('['), e = text.lastIndexOf(']');
     if (s !== -1 && e > s) {
       try { return JSON.parse(text.slice(s, e + 1)); } catch {}
-      // Array found but still invalid — attempt trailing-comma cleanup then retry
       try {
         const cleaned = text.slice(s, e + 1)
-          .replace(/,\s*([}\]])/g, '$1')           // trailing commas
-          .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, ''); // control chars
+          .replace(/,\s*([}\]])/g, '$1')
+          .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '');
         return JSON.parse(cleaned);
       } catch {}
     }
@@ -144,8 +154,84 @@ function extractJSON(text, mode) {
   throw new Error('Response was not valid JSON — the AI may have returned an unexpected format');
 }
 
+// ─── Gemini API call ──────────────────────────────────────────────────────────
+// Gemini request format:
+//   { contents: [{ role: 'user', parts: [...] }], generationConfig: {...} }
+// Parts can be: { text: '...' } or { inlineData: { mimeType, data } }
+// Response (SSE): each `data:` line is a JSON chunk with candidates[].content.parts[].text
+
+async function callGemini(parts, apiKey) {
+  const url = `${GEMINI_API_URL}&key=${apiKey}`;
+
+  const res = await fetch(url, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ role: 'user', parts }],
+      generationConfig: {
+        maxOutputTokens: 8192,
+        temperature:     0,    // deterministic — best for structured data extraction
+      },
+    }),
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    console.error('[process-statement] Gemini error', res.status, errText.slice(0, 300));
+    if (res.status === 400) throw new Error('Invalid request — the file may be corrupted or in an unsupported format.');
+    if (res.status === 401 || res.status === 403) throw new Error('AI service authentication failed. Check GEMINI_API_KEY in Vercel environment variables.');
+    if (res.status === 429) throw new Error('AI service rate limit reached. Please wait a moment and try again.');
+    throw new Error(`AI service error (${res.status}). Please try again.`);
+  }
+
+  // Read SSE stream and accumulate all text parts
+  const reader  = res.body.getReader();
+  const decoder = new TextDecoder();
+  let fullText    = '';
+  let buffer      = '';
+  let finishReason = null;
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop(); // keep incomplete last line
+
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+      const payload = line.slice(6).trim();
+      if (!payload || payload === '[DONE]') continue;
+      try {
+        const chunk     = JSON.parse(payload);
+        const candidate = chunk.candidates?.[0];
+        if (!candidate) continue;
+
+        for (const part of (candidate.content?.parts || [])) {
+          if (part.text) fullText += part.text;
+        }
+
+        // MAX_TOKENS = response was cut off mid-JSON
+        if (candidate.finishReason && candidate.finishReason !== 'STOP') {
+          finishReason = candidate.finishReason;
+        }
+      } catch {}
+    }
+  }
+
+  if (finishReason === 'MAX_TOKENS') {
+    throw new Error('The statement is too large for a single AI call. Try splitting it into smaller date ranges (e.g. one month at a time).');
+  }
+
+  if (!fullText) throw new Error('Empty response from AI — the file may be unreadable or blank.');
+
+  return fullText;
+}
+
+// ─── Main handler ─────────────────────────────────────────────────────────────
+
 export default async function handler(req) {
-  // Outer safety net — always returns JSON even on unexpected crash
   try {
     return await processRequest(req);
   } catch (e) {
@@ -158,8 +244,8 @@ async function processRequest(req) {
   if (req.method === 'OPTIONS') return new Response(null, { headers: CORS });
   if (req.method !== 'POST')    return jsonResponse({ error: 'Method not allowed' }, 405);
 
-  const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
-  if (!ANTHROPIC_KEY) return jsonResponse({ error: 'Server configuration error: missing API key.' }, 500);
+  const GEMINI_KEY = process.env.GEMINI_API_KEY;
+  if (!GEMINI_KEY) return jsonResponse({ error: 'Server configuration error: missing GEMINI_API_KEY.' }, 500);
 
   const authed = await verifyAuth(req);
   if (!authed) return jsonResponse({ error: 'Unauthorized. Please log in and try again.' }, 401);
@@ -173,109 +259,59 @@ async function processRequest(req) {
   const file       = formData.get('file');
   const catsRaw    = formData.get('categories');
   const categories = catsRaw ? JSON.parse(catsRaw) : [];
-  // Model is sent by the client (expense-tracker.html); whitelist-validated, falls back to Haiku
-  const ALLOWED_MODELS = new Set([
-    'claude-haiku-4-5-20251001',
-    'claude-sonnet-4-20250514',
-    'claude-opus-4-20250514',
-  ]);
-  const requestedModel = formData.get('model') || '';
-  const model = ALLOWED_MODELS.has(requestedModel) ? requestedModel : 'claude-haiku-4-5-20251001';
+
   if (!file) return jsonResponse({ error: 'No file provided.' }, 400);
 
-  // Build Claude message content
-  const content  = [];
+  // ── Build Gemini parts array ───────────────────────────────────────────────
+  // Gemini 1.5 Pro supports PDF, images, and text natively via inlineData.
+  // No separate document-block API needed — everything is inlineData or text.
+
+  const parts    = [];
   const fileType = file.type || 'application/octet-stream';
 
   if (fileType === 'application/pdf') {
+    // Gemini 1.5 Pro reads PDFs natively (both searchable and scanned)
     const bytes = await file.arrayBuffer();
-    content.push({ type:'document', source:{ type:'base64', media_type:'application/pdf', data:toBase64(bytes) } });
+    parts.push({ inlineData: { mimeType: 'application/pdf', data: toBase64(bytes) } });
+
   } else if (fileType.startsWith('image/')) {
-    const validType = ['image/jpeg','image/png','image/gif','image/webp'].includes(fileType) ? fileType : 'image/jpeg';
+    const validMime = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(fileType)
+      ? fileType : 'image/jpeg';
     const bytes = await file.arrayBuffer();
-    content.push({ type:'image', source:{ type:'base64', media_type:validType, data:toBase64(bytes) } });
+    parts.push({ inlineData: { mimeType: validMime, data: toBase64(bytes) } });
+
   } else {
+    // Plain text / CSV / PDF text extracted client-side by PDF.js
     const text = await file.text();
     if (!text.trim()) return jsonResponse({ error: 'The file appears to be empty.' }, 400);
-    content.push({ type:'text', text:`Bank statement (${file.name}):\n\n${text}` });
+    parts.push({ text: `Bank statement (${file.name}):\n\n${text}` });
   }
-  content.push({ type:'text', text: mode === 'receipt' ? receiptPrompt(currency, categories) : statementPrompt(currency, categories) });
 
-  // Call Claude API with streaming enabled
-  const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type':      'application/json',
-      'x-api-key':         ANTHROPIC_KEY,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model,
-      max_tokens: 8000,   // Haiku hard limit is 8192; 8000 gives safe headroom for large statements
-      stream:     true,   // ← streaming keeps Vercel connection alive
-      messages:   [{ role:'user', content }],
-    }),
+  // Prompt is always the final text part in the same user turn
+  parts.push({
+    text: mode === 'receipt'
+      ? receiptPrompt(currency, categories)
+      : statementPrompt(currency, categories),
   });
 
-  if (!claudeRes.ok) {
-    const errText = await claudeRes.text();
-    console.error('[process-statement] Claude error', claudeRes.status, errText.slice(0, 200));
-    return jsonResponse({
-      error: `AI service error (${claudeRes.status}). ${claudeRes.status === 401 ? 'Check your API key.' : 'Please try again.'}`,
-    }, 502);
-  }
+  // ── Stream Gemini response back to client ──────────────────────────────────
+  // Wrapped in ReadableStream so Vercel keeps the connection open
+  // while Gemini processes (same pattern as the previous Anthropic version).
 
-  // Stream Claude's SSE response through, collecting the full text
-  // Then return a single JSON response once complete
   const stream = new ReadableStream({
     async start(controller) {
-      const reader  = claudeRes.body.getReader();
-      const decoder = new TextDecoder();
-      let fullText  = '';
-      let buffer    = '';
-      let stopReason = null;
-
       try {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
+        const rawText = await callGemini(parts, GEMINI_KEY);
+        console.log('[process-statement] Gemini raw (first 200):', rawText.slice(0, 200));
 
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop(); // keep incomplete last line
-
-          for (const line of lines) {
-            if (!line.startsWith('data: ')) continue;
-            const payload = line.slice(6).trim();
-            if (payload === '[DONE]') continue;
-            try {
-              const evt = JSON.parse(payload);
-              if (evt.type === 'content_block_delta' && evt.delta?.type === 'text_delta') {
-                fullText += evt.delta.text;
-              }
-              // Capture stop reason — 'max_tokens' means the response was cut off
-              if (evt.type === 'message_delta' && evt.delta?.stop_reason) {
-                stopReason = evt.delta.stop_reason;
-              }
-            } catch {}
-          }
-        }
-
-        // If truncated, the JSON will be broken — fail fast with a clear message
-        if (stopReason === 'max_tokens') {
-          throw new Error('The statement is too large for a single AI call. Try splitting it into smaller date ranges (e.g. one month at a time).');
-        }
-
-        // Parse the complete response and return as JSON
-        const data   = extractJSON(fullText, mode);
-        const result = JSON.stringify({ ok:true, data, mode });
+        const data   = extractJSON(rawText, mode);
+        const result = JSON.stringify({ ok: true, data, mode });
         controller.enqueue(new TextEncoder().encode(result));
         controller.close();
 
       } catch (e) {
-        console.error('[process-statement] Stream processing error:', e.message);
-        console.error('[process-statement] Raw (first 300):', fullText.slice(0, 300));
-        const errResult = JSON.stringify({ error: 'Could not parse AI response: ' + e.message });
+        console.error('[process-statement] Error:', e.message);
+        const errResult = JSON.stringify({ error: e.message });
         controller.enqueue(new TextEncoder().encode(errResult));
         controller.close();
       }
