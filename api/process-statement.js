@@ -46,7 +46,9 @@ function statementPrompt(currency, categories) {
     .map(c => `  - ${c.name}`)
     .join('\n');
 
-  return `You are a financial data assistant helping to process a bank statement. The statement is in ${currency} from a bank account. It may include a header section with account details and a transaction table below.
+  return `STRICT RULE: Output ONLY valid JSON. Do not include headers, balance columns, address/account info, or any explanation. Keep descriptions <= 40 chars.
+
+You are a financial data assistant helping to process a bank statement. The statement is in ${currency} from a bank account. It may include a header section with account details and a transaction table below.
 
 Your task: extract every transaction and return a JSON array using this COMPACT schema:
 {"d":"date exactly as shown","s":"short description","dr":<number or null>,"cr":<number or null>,"c":"exact category name from list below"}
@@ -326,7 +328,7 @@ function makeRowFingerprint(row) {
   return `${d}|${s}|${dr}|${cr}`;
 }
 
-function buildStatementPagePrompt(currency, categories, alreadySeenCompactRows, pageNum) {
+function buildStatementPagePrompt(currency, categories, alreadySeenCompactRows, pageNum, pageSize) {
   const base = statementPrompt(currency, categories);
   const seenList = (alreadySeenCompactRows || [])
     .slice(-250)
@@ -337,7 +339,7 @@ function buildStatementPagePrompt(currency, categories, alreadySeenCompactRows, 
 
 PAGED EXTRACTION MODE:
 - This is extraction pass ${pageNum}.
-- Return AT MOST 35 transactions in this pass.
+- Return AT MOST ${pageSize} transactions in this pass.
 - Skip transactions already returned in previous passes.
 - If no more transactions remain, return rows: [] and hasMore: false.
 
@@ -383,7 +385,7 @@ async function callGemini(parts, apiKey, requestedModel) {
     const requestPayload = {
       contents: [{ role: 'user', parts }],
       generationConfig: {
-        maxOutputTokens: 16384,
+        maxOutputTokens: 24576,
         temperature: 0,
         responseMimeType: 'application/json',
       },
@@ -501,11 +503,22 @@ IMPORTANT FOR CHUNKED EXTRACTION:
 async function callGeminiForStatementPaged(sourceParts, currency, categories, apiKey, model) {
   const allCompactRows = [];
   const seen = new Set();
+  let pageSize = 35;
 
   for (let page = 1; page <= 8; page++) {
-    const pagePrompt = buildStatementPagePrompt(currency, categories, allCompactRows, page);
+    const pagePrompt = buildStatementPagePrompt(currency, categories, allCompactRows, page, pageSize);
     const parts = [...sourceParts, { text: pagePrompt }];
-    const rawText = await callGemini(parts, apiKey, model);
+    let rawText;
+    try {
+      rawText = await callGemini(parts, apiKey, model);
+    } catch (e) {
+      if (e?.code === 'MAX_TOKENS' && pageSize > 10) {
+        pageSize = Math.max(10, Math.floor(pageSize / 2));
+        page--;
+        continue;
+      }
+      throw e;
+    }
     const { rows, hasMore } = extractStatementPagePayload(rawText);
 
     let newRows = 0;
@@ -555,6 +568,7 @@ async function processRequest(req) {
   const file       = formData.get('file');
   const catsRaw    = formData.get('categories');
   const model      = formData.get('model') || GEMINI_DEFAULT_MODEL;
+  const effectiveModel = mode === 'statement' ? GEMINI_DEFAULT_MODEL : model;
   const categories = catsRaw ? JSON.parse(catsRaw) : [];
 
   if (!file) return jsonResponse({ error: 'No file provided.' }, 400);
@@ -607,7 +621,7 @@ async function processRequest(req) {
             currency,
             categories,
             GEMINI_KEY,
-            model
+            effectiveModel
           );
           data = normalizeStatementRows(parsed);
         } else if (mode === 'statement') {
@@ -616,11 +630,11 @@ async function processRequest(req) {
             currency,
             categories,
             GEMINI_KEY,
-            model
+            effectiveModel
           );
           data = normalizeStatementRows(parsed);
         } else {
-          const rawText = await callGemini(parts, GEMINI_KEY, model);
+          const rawText = await callGemini(parts, GEMINI_KEY, effectiveModel);
           console.log('[process-statement] Gemini raw (first 200):', rawText.slice(0, 200));
           const parsed = extractJSON(rawText, mode);
           data = mode === 'statement' ? normalizeStatementRows(parsed) : parsed;
