@@ -104,18 +104,44 @@ async function verifyAuth(req) {
 
 function extractJSON(text, mode) {
   if (!text) throw new Error('Empty response from AI');
-  text = text.replace(/^```json\s*/im, '').replace(/^```\s*/im, '').replace(/\s*```$/im, '').trim();
+
+  // Strip ALL markdown code fences anywhere in the string (Haiku sometimes adds preamble)
+  text = text
+    .replace(/```json\s*/gi, '')
+    .replace(/```\s*/gi, '')
+    .trim();
+
+  // Fast path — clean JSON
   try { return JSON.parse(text); } catch {}
+
+  // Extract outermost array (statement mode)
   if (mode !== 'receipt') {
     const s = text.indexOf('['), e = text.lastIndexOf(']');
-    if (s !== -1 && e > s) { try { return JSON.parse(text.slice(s, e + 1)); } catch {} }
+    if (s !== -1 && e > s) {
+      try { return JSON.parse(text.slice(s, e + 1)); } catch {}
+      // Array found but still invalid — attempt trailing-comma cleanup then retry
+      try {
+        const cleaned = text.slice(s, e + 1)
+          .replace(/,\s*([}\]])/g, '$1')           // trailing commas
+          .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, ''); // control chars
+        return JSON.parse(cleaned);
+      } catch {}
+    }
   }
+
+  // Extract outermost object (receipt mode or fallback)
   const os = text.indexOf('{'), oe = text.lastIndexOf('}');
-  if (os !== -1 && oe > os) { try { return JSON.parse(text.slice(os, oe + 1)); } catch {} }
-  try {
-    return JSON.parse(text.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').replace(/,\s*([}\]])/g, '$1'));
-  } catch {}
-  throw new Error('Response was not valid JSON');
+  if (os !== -1 && oe > os) {
+    try { return JSON.parse(text.slice(os, oe + 1)); } catch {}
+    try {
+      const cleaned = text.slice(os, oe + 1)
+        .replace(/,\s*([}\]])/g, '$1')
+        .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '');
+      return JSON.parse(cleaned);
+    } catch {}
+  }
+
+  throw new Error('Response was not valid JSON — the AI may have returned an unexpected format');
 }
 
 export default async function handler(req) {
@@ -185,7 +211,7 @@ async function processRequest(req) {
     },
     body: JSON.stringify({
       model,
-      max_tokens: 8096,
+      max_tokens: 4096,   // Haiku safe ceiling; normal statements fit well within this
       stream:     true,   // ← streaming keeps Vercel connection alive
       messages:   [{ role:'user', content }],
     }),
@@ -207,6 +233,7 @@ async function processRequest(req) {
       const decoder = new TextDecoder();
       let fullText  = '';
       let buffer    = '';
+      let stopReason = null;
 
       try {
         while (true) {
@@ -226,8 +253,17 @@ async function processRequest(req) {
               if (evt.type === 'content_block_delta' && evt.delta?.type === 'text_delta') {
                 fullText += evt.delta.text;
               }
+              // Capture stop reason — 'max_tokens' means the response was cut off
+              if (evt.type === 'message_delta' && evt.delta?.stop_reason) {
+                stopReason = evt.delta.stop_reason;
+              }
             } catch {}
           }
+        }
+
+        // If truncated, the JSON will be broken — fail fast with a clear message
+        if (stopReason === 'max_tokens') {
+          throw new Error('The statement is too large for a single AI call. Try splitting it into smaller date ranges (e.g. one month at a time).');
         }
 
         // Parse the complete response and return as JSON
