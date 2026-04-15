@@ -83,12 +83,24 @@ body::before{
 .btn-sm{padding:.38rem .85rem;font-size:.78rem}
 
 /* WELCOME */
-.welcome-hero{text-align:center;padding:2.5rem 1rem 2rem;max-width:520px;margin:0 auto}
+.welcome-hero{text-align:center;padding:2.5rem 1rem 2rem;max-width:580px;margin:0 auto}
 .hero-svg{margin-bottom:1.2rem;display:flex;justify-content:center}
 .hero-title{font-family:var(--serif);font-size:2.8rem;font-weight:900;letter-spacing:.01em;text-transform:uppercase;line-height:1.05;margin-bottom:.7rem}
 .hero-sub{color:var(--muted);font-size:.95rem;max-width:400px;margin:.5rem auto 1.8rem;line-height:1.7}
 .hero-pills{display:flex;flex-wrap:wrap;gap:.45rem;justify-content:center;margin-bottom:2rem}
 .hero-pill{background:var(--primary-l);color:var(--primary);font-size:.76rem;font-weight:600;padding:.28rem .85rem;border-radius:999px}
+/* Hero entry cards */
+.hero-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:.85rem;margin-top:1.8rem;text-align:left}
+.hero-card{background:var(--amber);border-radius:18px;padding:1.3rem 1.15rem 1.5rem;cursor:pointer;transition:all .18s;position:relative;overflow:hidden;min-height:160px;display:flex;flex-direction:column;gap:.6rem}
+.hero-card:hover{background:var(--amber2);transform:translateY(-3px);box-shadow:0 10px 32px rgba(212,146,10,.4)}
+.hero-card.disabled{background:var(--navy3);border:1px solid var(--border);cursor:default}
+.hero-card.disabled:hover{transform:none;box-shadow:none}
+.hero-card-title{font-family:var(--serif);font-size:1.15rem;font-weight:700;color:#1c1100;line-height:1.2}
+.hero-card.disabled .hero-card-title{color:var(--text2)}
+.hero-card-sub{font-size:.8rem;color:#3d2600;line-height:1.5}
+.hero-card.disabled .hero-card-sub{color:var(--text3)}
+.hero-card-soon{position:absolute;top:.75rem;right:.75rem;font-family:var(--mono);font-size:.5rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;background:var(--border);color:var(--text3);border-radius:999px;padding:.2rem .55rem}
+@media(max-width:560px){.hero-cards{grid-template-columns:1fr;max-width:340px;margin-left:auto;margin-right:auto}}
 
 /* WIZARD */
 .wizard{max-width:580px;margin:0 auto}
@@ -235,9 +247,29 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 .phase-int{font-size:.73rem;color:var(--muted);margin-left:auto}
 .phase-note{font-size:.78rem;color:var(--muted);font-style:italic;margin-bottom:.8rem;padding-left:.2rem}
 
+/* PROTOCOL CARDS (B-class anaerobic wizard configure) */
+.proto-card{background:var(--navy3);border:1.5px solid var(--proto-col,var(--border));border-radius:12px;padding:1rem 1.1rem;margin-bottom:.75rem}
+.proto-card-hdr{display:flex;align-items:flex-start;gap:.7rem;margin-bottom:.65rem}
+.proto-card-icon{font-size:1.5rem;flex-shrink:0;line-height:1}
+.proto-card-name{font-family:var(--fd);font-size:.95rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--text);margin-bottom:.1rem}
+.proto-card-desc{font-size:.75rem;color:var(--text2);line-height:1.45}
+.proto-key-rule{font-size:.75rem;color:var(--text2);line-height:1.5;border-left:3px solid var(--proto-col,var(--border));padding:.4rem .65rem;background:rgba(255,255,255,.04);border-radius:0 6px 6px 0;margin-bottom:.8rem}
+.proto-params{display:flex;flex-direction:column;gap:.75rem}
+.proto-param-row{display:flex;flex-direction:column;gap:.2rem}
+.proto-param-label{font-size:.75rem;font-weight:700;color:var(--text);display:flex;justify-content:space-between;align-items:center}
+.proto-param-val{font-family:var(--mono);font-size:.78rem;font-weight:800;color:var(--amber2)}
+.proto-param-hint{font-size:.68rem;color:var(--text3);line-height:1.4;margin-top:-.1rem}
+.proto-param-range{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.6rem;color:var(--text3);margin-top:.05rem}
+
 /* DAY CARD */
 .day-card{background:var(--navy2);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);margin-bottom:.9rem;border:1px solid var(--border)}
-.day-hdr{padding:.78rem 1.1rem;display:flex;align-items:center;justify-content:space-between;color:#fff}
+.day-card-body{display:none} /* collapsed by default */
+.day-card.expanded .day-card-body{display:block}
+.day-hdr{padding:.78rem 1.1rem;display:flex;align-items:center;justify-content:space-between;color:#fff;cursor:pointer;user-select:none}
+.day-hdr:hover{filter:brightness(1.08)}
+.day-hdr-left{display:flex;align-items:center;gap:.55rem;flex:1;min-width:0}
+.day-expand-chevron{font-size:.75rem;opacity:.75;transition:transform .2s;flex-shrink:0;margin-left:.5rem}
+.day-card.expanded .day-expand-chevron{transform:rotate(180deg)}
 .day-hdr h3{font-family:var(--fd);font-size:1.05rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
 .day-hdr .day-meta{font-size:.7rem;opacity:.8;text-align:right}
 .warmup-row{background:var(--ok-l);padding:.52rem 1.1rem;border-bottom:1px solid #d1fae5;display:flex;align-items:baseline;gap:.5rem;flex-wrap:wrap}
@@ -822,13 +854,27 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
         <svg width="140" height="56"><use href="#barbell-icon"/></svg>
       </div>
       <h1 class="hero-title">Your Personal<br>Workout Planner</h1>
-      <p class="hero-sub">Answer 4 quick questions. Get a science-backed, periodised training programme tailored to your goals, equipment, and body — in seconds.</p>
+      <p class="hero-sub">Get a science-backed, periodised training programme — or build your own from scratch.</p>
       <div class="hero-pills">
         <span class="hero-pill">Periodised programming</span>
         <span class="hero-pill">Per-session focus control</span>
         <span class="hero-pill">Printable plan</span>
       </div>
-      <button class="btn btn-primary btn-lg" onclick="goStep(1)">Build My Plan →</button>
+      <div class="hero-cards">
+        <div class="hero-card" onclick="heroTabCreateOwn()">
+          <div class="hero-card-title">Create your workout</div>
+          <div class="hero-card-sub">Don't need help?<br>Do it yourself</div>
+        </div>
+        <div class="hero-card" onclick="goStep(1)">
+          <div class="hero-card-title">Build the plan</div>
+          <div class="hero-card-sub">Let the tool guide you to build the best plan</div>
+        </div>
+        <div class="hero-card disabled">
+          <span class="hero-card-soon">Coming soon</span>
+          <div class="hero-card-title">Set a specific goal</div>
+          <div class="hero-card-sub">Let the tool bring you to your goal</div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1360,10 +1406,15 @@ async function initTier() {
 function initUI() {
   S.wpw = 3;
   updateSplitHint();
-  // Don't show progress bar on the welcome step (step 0)
-  // renderProgress is called by goStep when moving to step 1+
   updateDayFocusGrid();
   initTierGating();
+  // Smart routing: returning users (any slot has data) → My Plan empty state
+  // New users (no data anywhere) → Setup wizard
+  const hasAnyData = [0,1,2].some(s => trkSlotHasPlan(s));
+  if(hasAnyData){
+    showView('plan');
+  }
+  // else: default view is already 'wizard' (active in HTML)
 }
 
 
@@ -3282,7 +3333,10 @@ function renderPlan(){
   if(isViewingSaved){
     html+=`<div class="saved-plan-banner">
       <span>📋 <strong>Viewing your saved plan</strong> — this is the plan currently active in the Tracker. Changes made here (swaps) will not update your Tracker logs.</span>
-      <button class="btn btn-outline btn-sm" onclick="showView('tracker')" style="font-size:.72rem;padding:.28rem .75rem;flex-shrink:0">← Back to Tracker</button>
+      <div style="display:flex;gap:.4rem;flex-shrink:0;flex-wrap:wrap">
+        <button class="btn btn-outline btn-sm" onclick="showView('tracker');trkShowSlotSelector()" style="font-size:.72rem;padding:.28rem .75rem">📋 All Plans</button>
+        <button class="btn btn-outline btn-sm" onclick="showView('tracker')" style="font-size:.72rem;padding:.28rem .75rem">← Back to Tracker</button>
+      </div>
     </div>`;
   } else {
     if(!can.sessionLogging){
@@ -3368,11 +3422,11 @@ function renderPlan(){
       // ── CLASS A: SYSTEMIC ENDURANCE CARD ───────────────────────────────
       const rpeTooltipHtml = `<span class="rpe-tooltip">${day.rpe} <span class="rpe-info-icon">ℹ</span><span class="rpe-tip"><strong>RPE — Rate of Perceived Exertion (1–10)</strong><br>1–2 Very easy · 3–4 Easy, conversational<br>5–6 Moderate, short sentences only<br>7–8 Hard, few words only<br>9 Very hard, cannot speak<br>10 Maximum — unsustainable beyond 20–30s</span></span>`;
       html+=`<div class="day-card">
-        <div class="day-hdr" style="background:${day.color}">
+        <div class="day-hdr" onclick="toggleDayCard(this)" style="background:${day.color}">
           <h3>${day.icon} ${day.label}</h3>
           <div class="day-meta">Day ${di+1} of ${week.days.length}<br><span style="font-size:.65rem">${day.desc}</span></div>
         </div>
-        <div class="cardio-block">
+        <div class="day-card-body"><div class="cardio-block">
           <div class="cardio-zone-row">
             ${day.zone ? `<span class="cardio-zone-pill">${day.zone}</span>` : ''}
             <span class="cardio-rpe-pill">${rpeTooltipHtml}</span>
@@ -3384,7 +3438,7 @@ function renderPlan(){
             <div class="cardio-structure-hdr">📋 Session structure</div>
             ${day.structure.map((s,si)=>`<div class="cardio-step"><span class="cardio-step-n">${si+1}</span>${s}</div>`).join('')}
           </div>
-        </div>
+        </div></div>
       </div>`;
       return;
     }
@@ -3482,11 +3536,11 @@ function renderPlan(){
         </div>` : '';
 
       html+=`<div class="day-card">
-        <div class="day-hdr" style="background:${day.color}">
+        <div class="day-hdr" onclick="toggleDayCard(this)" style="background:${day.color}">
           <h3>${day.icon} ${day.label} <span style="font-size:.62rem;font-weight:700;background:rgba(255,255,255,.2);border-radius:4px;padding:.1rem .4rem;margin-left:.3rem">${sess.abbr}</span>${estBadge}</h3>
           <div class="day-meta">Day ${di+1} of ${week.days.length}<br><span style="font-size:.65rem">${day.desc}</span></div>
         </div>
-        <div class="mendo-block">
+        <div class="day-card-body"><div class="mendo-block">
           <div class="cardio-zone-row">
             <span class="cardio-rpe-pill">${rpeTooltipHtml}</span>
           </div>
@@ -3500,7 +3554,7 @@ function renderPlan(){
             <div class="cardio-structure-hdr">📋 Session structure</div>
             ${day.structure.map((s,si)=>`<div class="cardio-step"><span class="cardio-step-n">${si+1}</span>${s}</div>`).join('')}
           </div>
-        </div>
+        </div></div>
       </div>`;
       return;
     }
@@ -3509,11 +3563,11 @@ function renderPlan(){
     const undulatedDay = week.isDeload ? dayProto : {...dayProto, ...undulateReps(dayProto, wip)};
     const dayRepsStr = undulatedDay.rmin===undulatedDay.rmax ? `${undulatedDay.rmin} reps` : `${undulatedDay.rmin}–${undulatedDay.rmax} reps`;
     html+=`<div class="day-card">
-      <div class="day-hdr" style="background:${day.color}">
+      <div class="day-hdr" onclick="toggleDayCard(this)" style="background:${day.color}">
         <h3>${day.label}${day.dayFocusLabel ? `<span class="day-focus-tag">${day.dayFocusLabel}</span>` : ''}</h3>
         <div class="day-meta">Day ${di+1} of ${week.days.length}<br><span style="font-size:.65rem">${day.desc}</span></div>
       </div>
-      <div class="warmup-row"><span class="warmup-lbl">🔥 Warm-Up</span><span class="warmup-txt">${day.warmup.join(' · ')}</span></div>`;
+      <div class="day-card-body"><div class="warmup-row"><span class="warmup-lbl">🔥 Warm-Up</span><span class="warmup-txt">${day.warmup.join(' · ')}</span></div>`;
 
     if(day.exercises.length===0){
       html+=`<div style="padding:1rem 1.1rem;color:var(--muted);font-size:.83rem;font-style:italic">No exercises matched your equipment. Try adding more equipment in Setup.</div>`;
@@ -3639,6 +3693,15 @@ function volColor(sets, maxSets){
   if(ratio<0.5)  return {bg:'#93c5fd', txt:'#1e3a8a'};
   if(ratio<0.75) return {bg:'#3b82f6', txt:'#fff'};
   return              {bg:'#1d4ed8', txt:'#fff'};
+}
+
+// ── Day card collapse / expand ─────────────────────────────────────────
+// Called by onclick="toggleDayCard(this)" on .day-hdr
+// Toggles .expanded on the parent .day-card, which CSS uses to show/hide
+// .day-card-body and rotate the chevron.
+function toggleDayCard(hdrEl){
+  const card = hdrEl.closest('.day-card');
+  if(card) card.classList.toggle('expanded');
 }
 
 function volCardIsCollapsed(){
@@ -3807,6 +3870,20 @@ const SP_STEPS = [
   { label: 'Your Goal',  tooltip: 'Set a training focus for each session — strength, size, endurance, or power.' },
   { label: 'Your Plan',  tooltip: 'Your personalised periodised programme — ready to save and start tracking.' },
 ];
+
+// ── Hero tab handlers ──────────────────────────────────────────────────
+function heroTabCreateOwn(){
+  // Find first empty slot and open manual editor; if all full, use slot picker
+  const emptySlot = [0,1,2].find(s => !trkSlotHasPlan(s));
+  if(emptySlot !== undefined){
+    showView('tracker');
+    trkOpenManualEditor(emptySlot);
+  } else {
+    // All slots full — go to tracker so they can manage/delete a slot
+    showView('tracker');
+  }
+}
+function heroTabGoal(){ /* coming soon — disabled card, no action */ }
 
 function goStep(n){
   document.querySelectorAll('[id^="step-"]').forEach(el=>el.classList.add('hidden'));
@@ -4870,7 +4947,10 @@ function renderUnifiedPlanView(slot){
   // ── Back banner ─────────────────────────────────────────────────────
   html += `<div class="saved-plan-banner">
     <span>📋 <strong>${isManual ? splitLabel : 'Saved Plan'}</strong>${isManual ? ' — Custom plan from Tracker' : ' — viewing your saved plan'}</span>
-    <button class="btn btn-outline btn-sm" onclick="showView('tracker')" style="font-size:.72rem;padding:.28rem .75rem;flex-shrink:0">← Back to Tracker</button>
+    <div style="display:flex;gap:.4rem;flex-shrink:0;flex-wrap:wrap">
+      <button class="btn btn-outline btn-sm" onclick="showView('tracker');trkShowSlotSelector()" style="font-size:.72rem;padding:.28rem .75rem">📋 All Plans</button>
+      <button class="btn btn-outline btn-sm" onclick="showView('tracker')" style="font-size:.72rem;padding:.28rem .75rem">← Back to Tracker</button>
+    </div>
   </div>`;
 
   // ── Plan header card ─────────────────────────────────────────────────
@@ -4956,11 +5036,14 @@ function renderUnifiedPlanView(slot){
     if(day.type === 'cardio' && !isManual){
       const rpeTooltipHtml = `<span class="rpe-tooltip">${day.rpe||''} <span class="rpe-info-icon">ℹ</span><span class="rpe-tip"><strong>RPE — Rate of Perceived Exertion (1–10)</strong><br>1–2 Very easy · 3–4 Easy<br>5–6 Moderate · 7–8 Hard · 9–10 Max</span></span>`;
       html += `<div class="day-card">
-        <div class="day-hdr" style="background:${day.color}">
-          <h3>${day.icon||'🏃'} ${day.label}</h3>
-          <div class="day-meta">Day ${di+1} of ${days.length}<br><span style="font-size:.65rem">${day.desc||''}</span></div>
+        <div class="day-hdr" onclick="toggleDayCard(this)" style="background:${day.color}">
+          <div class="day-hdr-left"><h3>${day.icon||'🏃'} ${day.label}</h3></div>
+          <div style="display:flex;align-items:center;gap:.6rem">
+            <div class="day-meta" style="text-align:right">Day ${di+1} of ${days.length}<br><span style="font-size:.65rem">${day.desc||''}</span></div>
+            <span class="day-expand-chevron">▼</span>
+          </div>
         </div>
-        <div class="cardio-block">
+        <div class="day-card-body"><div class="cardio-block">
           <div class="cardio-zone-row">
             ${day.zone?`<span class="cardio-zone-pill">${day.zone}</span>`:''}
             <span class="cardio-rpe-pill">${rpeTooltipHtml}</span>
@@ -4972,7 +5055,7 @@ function renderUnifiedPlanView(slot){
             <div class="cardio-structure-hdr">📋 Session structure</div>
             ${(day.structure||[]).map((s,si)=>`<div class="cardio-step"><span class="cardio-step-n">${si+1}</span>${s}</div>`).join('')}
           </div>
-        </div>
+        </div></div>
       </div>`;
       return;
     }
@@ -5005,10 +5088,14 @@ function renderUnifiedPlanView(slot){
     ssPairs.forEach((group, gi) => group.forEach(idx => { ssGroupOf[idx] = gi; }));
 
     html += `<div class="day-card">
-      <div class="day-hdr" style="background:${hdrColor}">
-        <h3>${day.label||'Training Day'}${focusTag}</h3>
-        <div class="day-meta">Day ${di+1} of ${days.length}<br><span style="font-size:.65rem">${day.desc||''}</span></div>
-      </div>`;
+      <div class="day-hdr" onclick="toggleDayCard(this)" style="background:${hdrColor}">
+        <div class="day-hdr-left"><h3>${day.label||'Training Day'}${focusTag}</h3></div>
+        <div style="display:flex;align-items:center;gap:.6rem">
+          <div class="day-meta" style="text-align:right">Day ${di+1} of ${days.length}<br><span style="font-size:.65rem">${day.desc||''}</span></div>
+          <span class="day-expand-chevron">▼</span>
+        </div>
+      </div>
+      <div class="day-card-body">`;
 
     // Warm-up row — wizard plans use stored warmup; manual plans derive it
     if(!isManual && day.warmup){
@@ -5099,7 +5186,7 @@ function renderUnifiedPlanView(slot){
       });
     }
 
-    html += '</div>'; // close day-card
+    html += '</div></div>'; // close day-card-body + day-card
   });
 
   body.innerHTML = html;
@@ -5245,11 +5332,14 @@ function _buildBtypeDayCard(day, di, totalDays, wk){
   }
 
   return `<div class="day-card">
-    <div class="day-hdr" style="background:${day.color}">
-      <h3>${day.icon||''} ${day.label} <span style="font-size:.62rem;font-weight:700;background:rgba(255,255,255,.2);border-radius:4px;padding:.1rem .4rem;margin-left:.3rem">${sess.abbr}</span></h3>
-      <div class="day-meta">Day ${di+1} of ${totalDays}<br><span style="font-size:.65rem">${day.desc||''}</span></div>
+    <div class="day-hdr" onclick="toggleDayCard(this)" style="background:${day.color}">
+      <div class="day-hdr-left"><h3>${day.icon||''} ${day.label} <span style="font-size:.62rem;font-weight:700;background:rgba(255,255,255,.2);border-radius:4px;padding:.1rem .4rem;margin-left:.3rem">${sess.abbr}</span></h3></div>
+      <div style="display:flex;align-items:center;gap:.6rem">
+        <div class="day-meta" style="text-align:right">Day ${di+1} of ${totalDays}<br><span style="font-size:.65rem">${day.desc||''}</span></div>
+        <span class="day-expand-chevron">▼</span>
+      </div>
     </div>
-    <div class="mendo-block">
+    <div class="day-card-body"><div class="mendo-block">
       <div class="cardio-zone-row"><span class="cardio-rpe-pill">${rpeTooltipHtml}</span></div>
       ${day.keyRule?`<div class="mendo-key-rule">${day.keyRule}</div>`:''}
       ${day.warning?`<div class="mendo-warning">${day.warning}</div>`:''}
@@ -5259,7 +5349,7 @@ function _buildBtypeDayCard(day, di, totalDays, wk){
       <div class="cardio-structure"><div class="cardio-structure-hdr">📋 Session structure</div>
         ${(day.structure||[]).map((s,si)=>`<div class="cardio-step"><span class="cardio-step-n">${si+1}</span>${s}</div>`).join('')}
       </div>
-    </div>
+    </div></div>
   </div>`;
 }
 
@@ -7214,12 +7304,79 @@ function wizSetAnaerobicType(id){
   _dayWiz.anaerobicType = id;
   _dayWiz.selected = []; // reset selections when switching protocol
   _dayWiz.supersetPairs = [];
+  _dayWiz.anaerobicParams = {}; // reset protocol params when switching
   const inner = document.getElementById('wiz-inner');
   if(inner) inner.innerHTML = renderWizPickAnaerobic();
   else renderManualEditor();
 }
 
 // STEP 3: Configure
+// ── Protocol-specific card for Class B anaerobic sessions ─────────────
+// Returns HTML for a single-exercise configure block tuned to each B-type.
+// Stores params back to _dayWiz.anaerobicParams (shared across all exercises).
+function buildAnaerobicProtocolCard(sessId){
+  const sess = ENDO_SESSIONS[sessId];
+  if(!sess) return '';
+  const p = _dayWiz.anaerobicParams || {};
+  _dayWiz.anaerobicParams = p; // ensure exists
+
+  // Protocol-level colour
+  const col = {B1:'#7c3aed',B2:'#0369a1',B3:'#dc2626',B4:'#0891b2',B5:'#be185d',B6:'#059669',B7:'#d97706'}[sessId]||'#7c3aed';
+
+  // Slider helper: label, key, min, max, step, default, unit suffix
+  const slider = (label, key, min, max, step, def, unit='', hint='') => {
+    const val = p[key] !== undefined ? p[key] : def;
+    return `<div class="proto-param-row">
+      <div class="proto-param-label">${label} <span class="proto-param-val" id="ppv-${key}">${val}${unit}</span></div>
+      ${hint?`<div class="proto-param-hint">${hint}</div>`:''}
+      <input type="range" min="${min}" max="${max}" step="${step}" value="${val}"
+        oninput="document.getElementById('ppv-${key}').textContent=this.value+'${unit}';(_dayWiz.anaerobicParams=_dayWiz.anaerobicParams||{})['${key}']=+this.value;"
+        onchange="(_dayWiz.anaerobicParams=_dayWiz.anaerobicParams||{})['${key}']=+this.value;"
+        style="width:100%;accent-color:${col}">
+      <div class="proto-param-range">${min}${unit} <span style="margin-left:auto">${max}${unit}</span></div>
+    </div>`;
+  };
+
+  // Shared key rule banner
+  const keyRule = `<div class="proto-key-rule" style="border-left-color:${col}">${sess.keyRule||''}</div>`;
+
+  let paramsHtml = '';
+  if(sessId==='B1'){
+    paramsHtml = slider('Reps per set','reps',3,8,1,5,'','Keep well below failure — if you feel the burn, rest was too short')
+      + slider('Rounds per exercise','rounds_per_ex',2,6,1,3,'','Each exercise gets this many rounds before moving to the next')
+      + slider('Rest between rounds','rest_sec',60,180,15,120,' sec','Full recovery is the point — don\'t rush');
+  } else if(sessId==='B2'){
+    paramsHtml = slider('Reps per minute','reps',3,8,1,5,'','Each exercise gets 1 minute; rotate A→B→C→A…')
+      + slider('Total minutes','total_mins',6,20,1,10,' min','Each exercise appears every 3rd minute');
+  } else if(sessId==='B3'){
+    paramsHtml = slider('Work duration','work_sec',10,30,5,20,' sec','Truly all-out — if sustainable, go harder next time')
+      + slider('Rest duration','rest_sec',20,60,10,40,' sec','')
+      + slider('Number of repeats','rounds',3,12,1,5,'');
+  } else if(sessId==='B4'){
+    paramsHtml = slider('Reps per exercise','reps_per_ex',5,15,1,8,'','Pace yourself — consistent rounds beat a fast start')
+      + slider('Time cap','time_cap_min',5,20,1,10,' min','');
+  } else if(sessId==='B5'){
+    paramsHtml = slider('Rest between exercises','rest_between_sec',60,180,15,120,' sec','20s on / 10s off × 8 rounds per exercise is fixed');
+  } else if(sessId==='B6'){
+    paramsHtml = slider('Top rung (max reps)','top_rung',3,10,1,5,'','Climb 1→2→3…top rung. Rest as needed between rungs.');
+  } else if(sessId==='B7'){
+    paramsHtml = slider('Reps per exercise','reps_per_ex',6,15,1,10,'','Consistent pace every round')
+      + slider('Total rounds','rounds',3,10,1,5,'','Start your timer when you begin — record total time');
+  }
+
+  return `<div class="proto-card" style="--proto-col:${col}">
+    <div class="proto-card-hdr">
+      <span class="proto-card-icon">${sess.icon}</span>
+      <div>
+        <div class="proto-card-name">${sess.name}</div>
+        <div class="proto-card-desc">${sess.desc}</div>
+      </div>
+    </div>
+    ${keyRule}
+    <div class="proto-params">${paramsHtml}</div>
+  </div>`;
+}
+
 function renderWizConfigure(){
   const sel = _dayWiz.selected;
   if(!sel.length) return `<div style="color:var(--muted);font-size:.82rem;padding:.5rem 0">No exercises selected. <button class="btn btn-outline btn-sm" onclick="wizGoStep('pick')">← Back</button></div>`;
@@ -7291,18 +7448,16 @@ function renderWizConfigure(){
         ${_buildContinueButtons(i)}
       </div>`;
     } else if(ex.isAnaerobicEx){
-      // Anaerobic exercise — configure sets/reps within the protocol
+      const sessId = ex.anaerobicSessId || _dayWiz.anaerobicType;
+      const sess = sessId ? ENDO_SESSIONS[sessId] : null;
+      const isFirst = sel.filter(e => e.isAnaerobicEx).indexOf(ex) === 0;
       rows += `<div class="trk-ex-block" style="padding:.75rem .9rem">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.4rem;flex-wrap:wrap;margin-bottom:.5rem">
-          <div style="font-weight:700;font-size:.85rem">${ex.name} ${ssLabel}</div>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.4rem;flex-wrap:wrap;margin-bottom:.45rem">
+          <div style="font-weight:700;font-size:.85rem">${sess?sess.icon:''} ${ex.name}</div>
           <button class="trk-del-set" onclick="wizRemoveSelected(${i})" title="Remove">✕</button>
         </div>
-        <div style="font-size:.67rem;color:var(--muted);margin-bottom:.45rem">Equipment: ${(ex.muscles||'').replace('cardio','')}</div>
-        <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
-          <span style="font-size:.7rem;color:var(--muted);font-weight:700">Reps/set</span>
-          <input type="number" min="1" max="20" class="trk-input" style="width:3rem;text-align:center" value="${ex.reps||5}"
-            onchange="_dayWiz.selected[${i}].reps=this.value?+this.value:5">
-        </div>
+        <div style="font-size:.67rem;color:var(--text3);margin-bottom:.5rem">${(ex.muscles||'').replace('cardio','') || 'Equipment: as available'}</div>
+        ${isFirst && sessId ? buildAnaerobicProtocolCard(sessId) : (sessId ? `<div style="font-size:.72rem;color:var(--text3);font-style:italic">Protocol params set above ↑</div>` : '')}
         ${_buildContinueButtons(i)}
       </div>`;
     } else {
@@ -7508,6 +7663,10 @@ function wizConfirm(mode){
   _manualPlan.days[di].supersetPairs = (_dayWiz.supersetPairs||[]).map(g=>[...g]);
   _manualPlan.days[di].dayType  = _dayWiz.dayType;
   _manualPlan.days[di].anaerobicType = _dayWiz.anaerobicType||null;
+  // Store protocol-specific params so the plan view can show correct prescription
+  if(_dayWiz.anaerobicType && _dayWiz.anaerobicParams){
+    _manualPlan.days[di].anaerobicParams = {..._dayWiz.anaerobicParams};
+  }
   _dayWiz = null;
   if(mode==='add_next'){
     // Open a new day wizard immediately
