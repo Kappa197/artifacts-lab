@@ -747,7 +747,8 @@ body.wizard-active #wizardOverlay{display:block!important;}
       <div style="width:22px;height:22px;border:2.5px solid var(--border2);border-top-color:var(--green);border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0;"></div>
       <div>
         <div id="aiLoadingMsg" style="font-size:0.8rem;color:var(--text);margin-bottom:2px;">Gemini is reading your statement…</div>
-        <div style="font-family:var(--mono);font-size:0.65rem;color:var(--text3);">This takes 10–20 seconds. Please don't close the tab.</div>
+        <div id="aiProgressCounter" style="display:none;font-family:var(--mono);font-size:0.65rem;color:var(--amber2);margin-bottom:2px;"></div>
+        <div style="font-family:var(--mono);font-size:0.65rem;color:var(--text3);">This can take up to 1-2 minutes. Please don't close the tab.</div>
       </div>
     </div>
 
@@ -1077,7 +1078,7 @@ body.wizard-active #wizardOverlay{display:block!important;}
         <div style="width:36px;height:36px;border-radius:50%;background:var(--amber);color:#000;font-family:var(--mono);font-weight:700;font-size:0.9rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div>
         <div style="flex:1;">
           <div style="font-size:0.95rem;font-weight:600;color:var(--text);margin-bottom:6px;">Upload to AI Import &amp; review</div>
-          <div style="font-size:0.82rem;color:var(--text3);line-height:1.7;margin-bottom:12px;">Go to <strong style="color:var(--amber2);">Add / Import</strong>, select whose statement this is (Person 1 or 2), then drop your file into the <strong style="color:var(--green);">🤖 AI Statement Import</strong> card and click <strong style="color:var(--text2);">Process with AI</strong>. Gemini reads the statement, categorises every transaction, and loads them into a review table. Takes 10–25 seconds.</div>
+          <div style="font-size:0.82rem;color:var(--text3);line-height:1.7;margin-bottom:12px;">Go to <strong style="color:var(--amber2);">Add / Import</strong>, select whose statement this is (Person 1 or 2), then drop your file into the <strong style="color:var(--green);">🤖 AI Statement Import</strong> card and click <strong style="color:var(--text2);">Process with AI</strong>. Gemini reads the statement, categorises every transaction, and loads them into a review table. This might take up to 1-2 minutes.</div>
 
           <div style="background:var(--navy3);border:1px solid var(--border2);border-radius:10px;overflow:hidden;margin-bottom:12px;">
             <div style="padding:10px 16px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:0.62rem;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;">In the review table you can:</div>
@@ -3611,10 +3612,12 @@ async function processWithAI() {
   if (!_aiFile) return;
   const elId = id => document.getElementById(id);
   const loadingMsg = elId('aiLoadingMsg');
+  const loadingCounter = elId('aiProgressCounter');
 
   elId('aiImportActions').style.display = 'none';
   elId('aiImportLoading').style.display = 'flex';
   elId('aiImportError').style.display   = 'none';
+  if (loadingCounter) { loadingCounter.style.display = 'none'; loadingCounter.textContent = ''; }
 
   try {
     const { data: { session } } = await _supa.auth.getSession();
@@ -3636,10 +3639,12 @@ async function processWithAI() {
       if (isSearchable) {
         const chunkSize = 2; // pages per request
         const totalChunks = Math.ceil(numPages / chunkSize);
+        if (loadingCounter) loadingCounter.style.display = '';
         for (let c = 0; c < totalChunks; c++) {
           const pStart = c * chunkSize + 1;
           const pEnd = Math.min((c + 1) * chunkSize, numPages);
           if (loadingMsg) loadingMsg.textContent = `Gemini is analysing pages ${pStart}-${pEnd} of ${numPages}…`;
+          if (loadingCounter) loadingCounter.textContent = `Processed ${c + 1}/${totalChunks} chunks`;
           const chunkText = pages.slice(c * chunkSize, (c + 1) * chunkSize).join('\n\n');
           const fileToSend = new File(
             [chunkText],
@@ -3651,8 +3656,10 @@ async function processWithAI() {
         }
       } else {
         const pageImages = await renderPDFPagesAsImages(_aiFile);
+        if (loadingCounter) loadingCounter.style.display = '';
         for (let i = 0; i < pageImages.length; i++) {
           if (loadingMsg) loadingMsg.textContent = `Scanned PDF detected — processing page ${i + 1}/${pageImages.length}…`;
+          if (loadingCounter) loadingCounter.textContent = `Processed ${i + 1}/${pageImages.length} pages`;
           const rows = await callStatementAPI(session, pageImages[i], 'gemini-2.0-pro');
           allTransactions.push(...rows);
         }
@@ -3667,6 +3674,7 @@ async function processWithAI() {
       const rows = await callStatementAPI(session, fileToSend, 'gemini-2.0-pro');
       allTransactions.push(...rows);
     } else {
+      if (loadingCounter) loadingCounter.style.display = 'none';
       if (loadingMsg) loadingMsg.textContent = 'Gemini is analysing your transactions…';
       const rows = await callStatementAPI(session, _aiFile, 'gemini-2.0-pro');
       allTransactions.push(...rows);
