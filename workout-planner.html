@@ -2118,22 +2118,7 @@ const ENDO_SESSIONS = {
       deload:         {rounds:6,  repsPerEx:2, reps:4, rest:'2 min',  detail:'3 exercises × 2 rounds each — recovery volume, full rest between rounds'}
     },
     structure:['3 min general warm-up — light movement, joint circles','Main AGT block as prescribed — full rest between rounds','5 min easy movement + mobility — cool-down'],
-    exercisePool:[
-      {id:'agt_kb_swing',      name:'KB Swing',            eq:['kettlebells'],              eq_mode:'any', lv:'beginner',     note:'Hip drive — snap the hips, not the back'},
-      {id:'agt_db_swing',      name:'DB Swing',            eq:['dumbbells'],                eq_mode:'any', lv:'beginner',     note:'Same hip hinge pattern as KB swing'},
-      {id:'agt_goblet_squat',  name:'Goblet Squat',        eq:['kettlebells','dumbbells'],  eq_mode:'any', lv:'beginner',     note:'Chest up, elbows inside knees'},
-      {id:'agt_kb_push_press', name:'KB Push Press',       eq:['kettlebells'],              eq_mode:'any', lv:'intermediate', note:'Leg drive initiates — press locks out overhead'},
-      {id:'agt_db_push_press', name:'DB Push Press',       eq:['dumbbells'],                eq_mode:'any', lv:'beginner',     note:'Quarter squat dip then drive the dumbbells up'},
-      {id:'agt_db_pp_vest',    name:'Weighted Push Press', eq:['dumbbells','weight_vest'],  eq_mode:'any', lv:'intermediate', note:'Vest adds load to the whole system — brace hard'},
-      {id:'agt_devil_press',   name:'DB Devil Press',      eq:['dumbbells'],                eq_mode:'any', lv:'intermediate', note:'Burpee + clean + press — full body power chain'},
-      {id:'agt_bw_burpee',     name:'Burpee',              eq:['bodyweight'],               eq_mode:'any', lv:'beginner',     note:'Plank, chest to floor, jump and clap overhead'},
-      {id:'agt_w_burpee',      name:'Weighted Burpee',     eq:['dumbbells','weight_vest'],  eq_mode:'any', lv:'intermediate', note:'Hold dumbbells or wear vest — full burpee pattern'},
-      {id:'agt_bw_jump_squat', name:'Jump Squat',          eq:['bodyweight'],               eq_mode:'any', lv:'beginner',     note:'Land soft, absorb through hips and knees'},
-      {id:'agt_w_jump_squat',  name:'Weighted Jump Squat', eq:['dumbbells','weight_vest'],  eq_mode:'any', lv:'intermediate', note:'Hold DBs at sides or wear vest — explosive drive'},
-      {id:'agt_bw_jump_lunge', name:'Jump Lunge',          eq:['bodyweight'],               eq_mode:'any', lv:'beginner',     note:'Switch legs in the air — land in lunge position'},
-      {id:'agt_w_jump_lunge',  name:'Weighted Jump Lunge', eq:['dumbbells','weight_vest'],  eq_mode:'any', lv:'intermediate', note:'Vest or light DBs at sides — explosive alternating'}
-    ],
-    equipPriority:['kettlebells','dumbbells','weight_vest','bodyweight']
+    poolKey:'B1'
   },
 
   B2:{
@@ -2150,23 +2135,7 @@ const ENDO_SESSIONS = {
       deload:         {duration:'8 min',  totalMins:8,  reps:4, pct:'~65%', detail:'3 exercises rotating on the minute — short block, maintain quality'}
     },
     structure:['5 min warm-up — movement prep at light weight','EMOM block as prescribed — start each set on the minute','5 min mobility — cool-down'],
-    exercisePool:[
-      {id:'emom_kb_swing',      name:'KB Swing',            eq:['kettlebells'],             eq_mode:'any', lv:'beginner',     note:'Hip snap — powerful hinge every rep'},
-      {id:'emom_db_swing',      name:'DB Swing',            eq:['dumbbells'],               eq_mode:'any', lv:'beginner',     note:'DB variation of the hip hinge swing'},
-      {id:'emom_goblet_squat',  name:'Goblet Squat',        eq:['kettlebells','dumbbells'], eq_mode:'any', lv:'beginner',     note:'Full depth — stay tall through the torso'},
-      {id:'emom_kb_dl',         name:'KB Deadlift',         eq:['kettlebells'],             eq_mode:'any', lv:'beginner',     note:'Hip hinge — brace at the top before lowering'},
-      {id:'emom_db_dl',         name:'DB Deadlift',         eq:['dumbbells'],               eq_mode:'any', lv:'beginner',     note:'Maintain neutral spine through all reps'},
-      {id:'emom_kb_push_press', name:'KB Push Press',       eq:['kettlebells'],             eq_mode:'any', lv:'intermediate', note:'Generate power from the legs, lock out overhead'},
-      {id:'emom_db_push_press', name:'DB Push Press',       eq:['dumbbells'],               eq_mode:'any', lv:'beginner',     note:'Drive up with legs — control on the way down'},
-      {id:'emom_db_pp_vest',    name:'Weighted Push Press', eq:['dumbbells','weight_vest'], eq_mode:'any', lv:'intermediate', note:'Vest increases system load — brace hard on every rep'},
-      {id:'emom_bw_burpee',     name:'Burpee',              eq:['bodyweight'],              eq_mode:'any', lv:'beginner',     note:'Pace yourself — consistent reps, no burning out'},
-      {id:'emom_w_burpee',      name:'Weighted Burpee',     eq:['dumbbells','weight_vest'], eq_mode:'any', lv:'intermediate', note:'Vest or DBs — heavy enough to feel it on rep 5'},
-      {id:'emom_bw_jump_squat', name:'Jump Squat',          eq:['bodyweight'],              eq_mode:'any', lv:'beginner',     note:'Explode up, land soft — every rep the same'},
-      {id:'emom_w_jump_squat',  name:'Weighted Jump Squat', eq:['dumbbells','weight_vest'], eq_mode:'any', lv:'intermediate', note:'Add load — still must be explosive on every rep'},
-      {id:'emom_bw_jump_lunge', name:'Jump Lunge',          eq:['bodyweight'],              eq_mode:'any', lv:'beginner',     note:'Alternate legs — consistent depth and drive'},
-      {id:'emom_w_jump_lunge',  name:'Weighted Jump Lunge', eq:['dumbbells','weight_vest'], eq_mode:'any', lv:'intermediate', note:'Heavier — 5 reps per leg or 5 alternating'}
-    ],
-    equipPriority:['kettlebells','dumbbells','weight_vest','bodyweight']
+    poolKey:'B2'
   },
 
   B3:{
@@ -2184,21 +2153,9 @@ const ENDO_SESSIONS = {
       deload:         {rounds:3, workSec:20, restSec:60, detail:'3 repeats at 80% effort — extra rest, reduced output'}
     },
     structure:['10 min easy warm-up — include 3–4 light build-up efforts','GPR block as prescribed — true max effort on each','10 min easy cool-down + full body stretch'],
-    exercisePool:[
-      {id:'gpr_bike',         name:'Bike Sprint',           eq:['bike'],                    eq_mode:'any', lv:'beginner',     note:'Maximum resistance and cadence — all-out 20 seconds'},
-      {id:'gpr_row',          name:'Row Sprint',             eq:['rowing_machine'],          eq_mode:'any', lv:'beginner',     note:'Drive hard with legs, pull through, max stroke rate'},
-      {id:'gpr_run',          name:'Run Sprint ⚠️',          eq:['treadmill','outdoor'],     eq_mode:'any', lv:'intermediate', note:'Flat sprint — outdoor preferred for safety at max effort'},
-      {id:'gpr_bw_burpee',    name:'Burpee Sprint',          eq:['bodyweight'],              eq_mode:'any', lv:'beginner',     note:'Max speed burpees — as many reps as possible in 20s'},
-      {id:'gpr_w_burpee',     name:'Weighted Burpee Sprint', eq:['dumbbells','weight_vest'], eq_mode:'any', lv:'intermediate', note:'Vest or light DBs — still explosive, maximum reps'},
-      {id:'gpr_bw_jump_squat',name:'Jump Squat Sprint',      eq:['bodyweight'],              eq_mode:'any', lv:'beginner',     note:'Continuous explosive squats — maximum height each rep'},
-      {id:'gpr_w_jump_squat', name:'Wtd Jump Squat Sprint',  eq:['dumbbells','weight_vest'], eq_mode:'any', lv:'advanced',     note:'Loaded plyometric at max effort — right weight matters'},
-      {id:'gpr_bw_jump_lunge',name:'Jump Lunge Sprint',      eq:['bodyweight'],              eq_mode:'any', lv:'beginner',     note:'Alternating explosive lunges — maximum pace for 20s'},
-      {id:'gpr_w_jump_lunge', name:'Wtd Jump Lunge Sprint',  eq:['dumbbells','weight_vest'], eq_mode:'any', lv:'advanced',     note:'Add load — 20s is brutal at the right weight'}
-    ],
-    equipPriority:['bike','rowing_machine','treadmill','outdoor','dumbbells','weight_vest','bodyweight']
+    poolKey:'B3'
   },
 
-  // ── CLASS B: NEW PROTOCOLS ──────────────────────────────────────────────
   B4:{
     name:'AMRAP', abbr:'AMRAP', icon:'🔄', color:'#0891b2',
     category:'muscular',
@@ -2212,22 +2169,8 @@ const ENDO_SESSIONS = {
       peak:           {timeCap:'15 min', timeCapSec:900,  repsPerEx:10, detail:'3 exercises × 10 reps — 15-minute effort, log your rounds'},
       deload:         {timeCap:'8 min',  timeCapSec:480,  repsPerEx:6,  detail:'3 exercises × 6 reps — reduced volume, technical focus'}
     },
-    structure:['5 min warm-up — include movement prep for all 3 exercises','AMRAP block — move continuously, rest only when form breaks down','5 min easy movement + stretch — note your round count'],
-    exercisePool:[
-      {id:'amrap_bw_push_up',    name:'Push-Up',              eq:['bodyweight'],               eq_mode:'any', lv:'beginner',     note:'Full range — chest to floor, lock out at top'},
-      {id:'amrap_bw_squat',      name:'Air Squat',             eq:['bodyweight'],               eq_mode:'any', lv:'beginner',     note:'Hips below parallel — stand fully between reps'},
-      {id:'amrap_bw_burpee',     name:'Burpee',                eq:['bodyweight'],               eq_mode:'any', lv:'beginner',     note:'Pace these — they kill rounds if you go too hard early'},
-      {id:'amrap_bw_sit_up',     name:'Sit-Up',                eq:['bodyweight'],               eq_mode:'any', lv:'beginner',     note:'Full ROM — shoulder blades touch down, sit fully up'},
-      {id:'amrap_kb_swing',      name:'KB Swing',              eq:['kettlebells'],              eq_mode:'any', lv:'beginner',     note:'Hip snap — shoulders down, hinge clean'},
-      {id:'amrap_db_swing',      name:'DB Swing',              eq:['dumbbells'],                eq_mode:'any', lv:'beginner',     note:'Same pattern as KB swing — control the top position'},
-      {id:'amrap_goblet_squat',  name:'Goblet Squat',          eq:['kettlebells','dumbbells'],  eq_mode:'any', lv:'beginner',     note:'Load at chest — counterbalance for better depth'},
-      {id:'amrap_db_push_press', name:'DB Push Press',         eq:['dumbbells'],                eq_mode:'any', lv:'beginner',     note:'Leg drive up, controlled descent — protect the shoulder'},
-      {id:'amrap_bw_box_jump',   name:'Box Jump',              eq:['bodyweight'],               eq_mode:'any', lv:'intermediate', note:'Step down every rep — protect knees over volume'},
-      {id:'amrap_db_row',        name:'DB Bent-Over Row',      eq:['dumbbells'],                eq_mode:'any', lv:'beginner',     note:'Spine neutral — pull elbows high, slow negative'},
-      {id:'amrap_bw_lunge',      name:'Reverse Lunge',         eq:['bodyweight'],               eq_mode:'any', lv:'beginner',     note:'Step back, lower to floor, return — alternating legs'},
-      {id:'amrap_w_burpee',      name:'Weighted Burpee',       eq:['dumbbells','weight_vest'],  eq_mode:'any', lv:'intermediate', note:'Add vest or hold DBs — full burpee pattern maintained'}
-    ],
-    equipPriority:['kettlebells','dumbbells','bodyweight','weight_vest']
+    structure:['5 min warm-up — include movement prep for all exercises','AMRAP block — move continuously, rest only when form breaks down','5 min easy movement + stretch — note your round count'],
+    poolKey:'B4'
   },
 
   B5:{
@@ -2236,7 +2179,7 @@ const ENDO_SESSIONS = {
     rpe:'RPE 9–10 / 10 per block',
     rpeLabel:'Near-maximum — each 20s block should feel like you cannot maintain it',
     desc:'20s maximal effort / 10s rest × 8 rounds per exercise — peak metabolic stress',
-    keyRule:'🔥 Each 20s interval must be true max effort. If you can hold a conversation, go harder. 4 minutes per exercise — short but brutal.',
+    keyRule:'🔥 Each 20s interval must be true max effort. 4 minutes per exercise — short but brutal.',
     phases:{
       accumulation:   {exercises:2, roundsPerEx:8, workSec:20, restSec:10, restBetween:'2 min', detail:'2 exercises × 8 rounds (4 min each) — full 2 min rest between exercises'},
       intensification:{exercises:3, roundsPerEx:8, workSec:20, restSec:10, restBetween:'90s',  detail:'3 exercises × 8 rounds (4 min each) — 90s rest between exercises'},
@@ -2244,21 +2187,7 @@ const ENDO_SESSIONS = {
       deload:         {exercises:2, roundsPerEx:8, workSec:20, restSec:10, restBetween:'3 min', detail:'2 exercises × 8 rounds — full recovery, 75% effort only'}
     },
     structure:['5 min warm-up — build to moderate intensity, not cold Tabata','Tabata blocks as prescribed — 20s on / 10s off, 8 rounds each exercise','5 min easy movement — cool-down, this is important after Tabata'],
-    exercisePool:[
-      {id:'tab_bw_jump_squat',   name:'Jump Squat',            eq:['bodyweight'],               eq_mode:'any', lv:'beginner',     note:'Max height each rep — land soft and immediately reload'},
-      {id:'tab_bw_burpee',       name:'Burpee',                eq:['bodyweight'],               eq_mode:'any', lv:'beginner',     note:'Max reps per 20s — aggressive but controlled'},
-      {id:'tab_bw_push_up',      name:'Push-Up',               eq:['bodyweight'],               eq_mode:'any', lv:'beginner',     note:'Full ROM — modify to knees if form breaks'},
-      {id:'tab_bw_mt_climber',   name:'Mountain Climber',      eq:['bodyweight'],               eq_mode:'any', lv:'beginner',     note:'Drive knees to chest alternately — fast but controlled hips'},
-      {id:'tab_bw_jump_lunge',   name:'Jump Lunge',            eq:['bodyweight'],               eq_mode:'any', lv:'intermediate', note:'Explosive leg switch in the air — land in lunge, no pause'},
-      {id:'tab_kb_swing',        name:'KB Swing',              eq:['kettlebells'],              eq_mode:'any', lv:'beginner',     note:'Continuous hip hinge — don\'t let the hips drop between reps'},
-      {id:'tab_db_snatch',       name:'DB Snatch',             eq:['dumbbells'],                eq_mode:'any', lv:'intermediate', note:'Single DB, alternating arms — explosive pull, lock overhead'},
-      {id:'tab_bw_high_knees',   name:'High Knees',            eq:['bodyweight'],               eq_mode:'any', lv:'beginner',     note:'Drive knees to hip height — pump arms, stay on balls of feet'},
-      {id:'tab_bw_box_jump',     name:'Box Jump',              eq:['bodyweight'],               eq_mode:'any', lv:'intermediate', note:'Step down every rep during Tabata — protect knees'},
-      {id:'tab_w_jump_squat',    name:'Weighted Jump Squat',   eq:['dumbbells','weight_vest'],  eq_mode:'any', lv:'intermediate', note:'Hold DBs or wear vest — explosive despite the load'},
-      {id:'tab_gpr_row',         name:'Row Sprint',            eq:['rowing_machine'],           eq_mode:'any', lv:'beginner',     note:'Max stroke rate — legs drive, body opens, arms pull'},
-      {id:'tab_gpr_bike',        name:'Bike Sprint',           eq:['bike'],                     eq_mode:'any', lv:'beginner',     note:'Max cadence — stay seated, drive through full pedal stroke'}
-    ],
-    equipPriority:['bodyweight','kettlebells','dumbbells','weight_vest','rowing_machine','bike']
+    poolKey:'B5'
   },
 
   B6:{
@@ -2267,26 +2196,15 @@ const ENDO_SESSIONS = {
     rpe:'RPE 6–9 / 10 (climbs with rungs)',
     rpeLabel:'Starts easy, gets very hard — early rungs are warm-up, top rungs are maximal',
     desc:'Ascending rep scheme — reps increase each rung, building strength-endurance and mental toughness',
-    keyRule:'💡 Rest as needed between rungs — this is not for time. The challenge is completing the top rung, not speed.',
+    keyRule:'💡 Rest as needed between rungs. The challenge is completing the top rung, not speed.',
     phases:{
-      accumulation:   {topRung:5,  scheme:'1-2-3-4-5',        sets:1, rest:'as needed', detail:'Climb from 1 to 5 reps — rest as needed between rungs'},
-      intensification:{topRung:8,  scheme:'1-2-3-4-5-6-7-8',  sets:1, rest:'as needed', detail:'Climb from 1 to 8 — top rungs are near-maximal effort'},
-      peak:           {topRung:10, scheme:'1-2-3…10',          sets:1, rest:'as needed', detail:'Full 1–10 ladder — 55 total reps per exercise, serious volume'},
-      deload:         {topRung:4,  scheme:'1-2-3-4',           sets:1, rest:'as needed', detail:'Short ladder — 4-rung recovery block, full rest between rungs'}
+      accumulation:   {topRung:5,  scheme:'1-2-3-4-5',        rest:'as needed', detail:'Climb from 1 to 5 reps — rest as needed between rungs'},
+      intensification:{topRung:8,  scheme:'1-2-3-4-5-6-7-8',  rest:'as needed', detail:'Climb from 1 to 8 — top rungs are near-maximal effort'},
+      peak:           {topRung:10, scheme:'1-2-3…10',          rest:'as needed', detail:'Full 1–10 ladder — 55 total reps per exercise, serious volume'},
+      deload:         {topRung:4,  scheme:'1-2-3-4',           rest:'as needed', detail:'Short ladder — 4-rung recovery block, full rest between rungs'}
     },
     structure:['Light movement warm-up — 5 min, include exercise-specific mobility','Ladder as prescribed — rest fully between rungs, never rush','5 min mobility — cool-down, note your top completed rung'],
-    exercisePool:[
-      {id:'ldr_bw_pull_up',      name:'Pull-Up',               eq:['pullup_bar'],               eq_mode:'any', lv:'intermediate', note:'Full dead hang to chin over bar — no kipping'},
-      {id:'ldr_bw_push_up',      name:'Push-Up',               eq:['bodyweight'],               eq_mode:'any', lv:'beginner',     note:'Chest to floor every rep — build to high-rep rungs with control'},
-      {id:'ldr_bw_dip',          name:'Dip',                   eq:['bodyweight'],               eq_mode:'any', lv:'intermediate', note:'Full elbow extension at top — control the descent'},
-      {id:'ldr_kb_press',        name:'KB Press',              eq:['kettlebells'],              eq_mode:'any', lv:'beginner',     note:'Press to lockout — each rep stands alone, no rhythm cheating'},
-      {id:'ldr_db_press',        name:'DB Shoulder Press',     eq:['dumbbells'],                eq_mode:'any', lv:'beginner',     note:'Strict press — no leg drive, pure shoulder strength'},
-      {id:'ldr_bw_squat',        name:'Squat',                 eq:['bodyweight'],               eq_mode:'any', lv:'beginner',     note:'Hips below parallel — easy rungs build volume fast'},
-      {id:'ldr_kb_swing',        name:'KB Swing',              eq:['kettlebells'],              eq_mode:'any', lv:'beginner',     note:'Consistent power through all rungs — don\'t rush top rungs'},
-      {id:'ldr_db_row',          name:'DB Row',                eq:['dumbbells'],                eq_mode:'any', lv:'beginner',     note:'One arm at a time — spine neutral through the full ladder'},
-      {id:'ldr_bw_burpee',       name:'Burpee',                eq:['bodyweight'],               eq_mode:'any', lv:'beginner',     note:'Top rungs of a burpee ladder are very demanding — respect them'}
-    ],
-    equipPriority:['pullup_bar','kettlebells','dumbbells','bodyweight']
+    poolKey:'B6'
   },
 
   B7:{
@@ -2295,7 +2213,7 @@ const ENDO_SESSIONS = {
     rpe:'RPE 8–9 / 10 sustained',
     rpeLabel:'Hard sustained effort — find a pace you can hold for all rounds',
     desc:'Fixed rounds of a circuit, record total time — trains consistent pacing under fatigue',
-    keyRule:'⏱️ Start a timer when you begin. Note your total time — this is your benchmark to beat. Every rep counts.',
+    keyRule:'⏱️ Start a timer when you begin. Note your total time — this is your benchmark to beat.',
     phases:{
       accumulation:   {rounds:3, repsPerEx:10, detail:'3 rounds × 10 reps — establish your baseline time'},
       intensification:{rounds:5, repsPerEx:10, detail:'5 rounds × 10 reps — pace from round 1, don\'t positive-split'},
@@ -2303,22 +2221,240 @@ const ENDO_SESSIONS = {
       deload:         {rounds:3, repsPerEx:6,  detail:'3 rounds × 6 reps — reduced load, focus on movement quality'}
     },
     structure:['5 min warm-up — include the specific movements of your circuit','RFT block — start timer, go, stop timer — note total time','5 min easy movement + stretch — log your time'],
-    exercisePool:[
-      {id:'rft_bw_push_up',      name:'Push-Up',               eq:['bodyweight'],               eq_mode:'any', lv:'beginner',     note:'Maintain full ROM — no half reps when tired'},
-      {id:'rft_bw_squat',        name:'Air Squat',             eq:['bodyweight'],               eq_mode:'any', lv:'beginner',     note:'Depth consistent across all rounds — don\'t shorten it'},
-      {id:'rft_bw_sit_up',       name:'Sit-Up',                eq:['bodyweight'],               eq_mode:'any', lv:'beginner',     note:'Touch floor behind head each rep, sit fully upright'},
-      {id:'rft_bw_burpee',       name:'Burpee',                eq:['bodyweight'],               eq_mode:'any', lv:'beginner',     note:'Burpees dictate pace — pace them from round 1'},
-      {id:'rft_kb_swing',        name:'KB Swing',              eq:['kettlebells'],              eq_mode:'any', lv:'beginner',     note:'Hip snap — consistent height across all rounds'},
-      {id:'rft_db_push_press',   name:'DB Push Press',         eq:['dumbbells'],                eq_mode:'any', lv:'beginner',     note:'Leg drive takes pressure off shoulder over high reps'},
-      {id:'rft_bw_jump_squat',   name:'Jump Squat',            eq:['bodyweight'],               eq_mode:'any', lv:'beginner',     note:'Try to maintain height across all rounds — it degrades fast'},
-      {id:'rft_db_row',          name:'DB Row',                eq:['dumbbells'],                eq_mode:'any', lv:'beginner',     note:'Alternate arms or do all reps one side then other'},
-      {id:'rft_goblet_squat',    name:'Goblet Squat',          eq:['kettlebells','dumbbells'],  eq_mode:'any', lv:'beginner',     note:'Load at chest — depth stays good under fatigue'},
-      {id:'rft_w_burpee',        name:'Weighted Burpee',       eq:['dumbbells','weight_vest'],  eq_mode:'any', lv:'intermediate', note:'Vest or DBs add intensity — burpee pace becomes the limiter'},
-      {id:'rft_bw_pull_up',      name:'Pull-Up',               eq:['pullup_bar'],               eq_mode:'any', lv:'intermediate', note:'Break into small sets early — full dead hang each rep'}
-    ],
-    equipPriority:['bodyweight','kettlebells','dumbbells','weight_vest','pullup_bar']
+    poolKey:'B7'
   }
 };
+
+// =====================================================================
+// METCON POOL — unified exercise pool for all Class B endurance protocols
+// suitability: { B1:'tier1'|'tier2'|null, B2:..., B3:..., B4:..., B5:..., B6:..., B7:... }
+// tier1 = ideal for this protocol, tier2 = works well, null/absent = not recommended
+// exId = link to EX database entry (for form cues, swap logic)
+// =====================================================================
+const METCON_POOL = [
+  // ── Swings & Cleans ─────────────────────────────────────────────────
+  {id:'mc_kb_swing',       name:'KB Swing',              eq:['kettlebells'],              lv:'beginner',
+   note:'Hip snap — explosive hinge, shoulders packed, bell floats to shoulder height',
+   exId:'db_goblet', // nearest EX entry for cues fallback
+   suitability:{B1:'tier1',B2:'tier1',B3:'tier2',B4:'tier1',B5:'tier1',B6:'tier2',B7:'tier1'}},
+
+  {id:'mc_db_swing',       name:'DB Swing',              eq:['dumbbells'],                lv:'beginner',
+   note:'Hold one DB by the head — same hip hinge as KB swing',
+   suitability:{B1:'tier1',B2:'tier1',B3:'tier2',B4:'tier1',B5:'tier1',B6:'tier2',B7:'tier1'}},
+
+  {id:'mc_kb_clean',       name:'KB Clean',              eq:['kettlebells'],              lv:'intermediate',
+   note:'Pull the bell close, let it arc to rack position — don\'t muscle it up',
+   suitability:{B1:'tier1',B2:'tier2',B3:'tier2',B4:'tier2',B5:'tier2',B6:'tier1',B7:'tier2'}},
+
+  {id:'mc_db_snatch',      name:'DB Snatch',             eq:['dumbbells'],                lv:'intermediate',
+   note:'Single DB, alternating arms — explosive pull, punch to lockout overhead',
+   suitability:{B1:'tier2',B2:'tier2',B3:'tier1',B4:'tier2',B5:'tier1',B6:'tier2',B7:'tier2'}},
+
+  {id:'mc_kb_snatch',      name:'KB Snatch',             eq:['kettlebells'],              lv:'advanced',
+   note:'Full range — from hip to lockout in one movement, thread the hand around the bell at the top',
+   suitability:{B1:'tier1',B2:'tier2',B3:'tier1',B4:'tier2',B5:'tier2',B6:'tier1',B7:'tier2'}},
+
+  // ── Squats & Hinges ──────────────────────────────────────────────────
+  {id:'mc_goblet_squat',   name:'Goblet Squat',          eq:['kettlebells','dumbbells'],  lv:'beginner',
+   note:'Weight at chest — elbows inside knees, drive knees out, full depth',
+   exId:'db_goblet',
+   suitability:{B1:'tier1',B2:'tier1',B3:'tier2',B4:'tier1',B5:'tier2',B6:'tier1',B7:'tier1'}},
+
+  {id:'mc_kb_deadlift',    name:'KB Deadlift',           eq:['kettlebells'],              lv:'beginner',
+   note:'Hip hinge — pack the lats, brace at lockout before lowering',
+   suitability:{B1:'tier1',B2:'tier1',B3:'tier2',B4:'tier2',B5:'tier2',B6:'tier1',B7:'tier2'}},
+
+  {id:'mc_db_deadlift',    name:'DB Deadlift',           eq:['dumbbells'],                lv:'beginner',
+   note:'DBs at sides — maintain neutral spine through all reps',
+   suitability:{B1:'tier1',B2:'tier1',B3:'tier2',B4:'tier2',B5:'tier2',B6:'tier1',B7:'tier2'}},
+
+  {id:'mc_air_squat',      name:'Air Squat',             eq:['bodyweight'],               lv:'beginner',
+   note:'Hips below parallel — stand fully between reps, consistent depth throughout',
+   suitability:{B1:'tier2',B2:'tier2',B3:'tier2',B4:'tier1',B5:'tier2',B6:'tier1',B7:'tier1'}},
+
+  {id:'mc_db_thruster',    name:'DB Thruster',           eq:['dumbbells'],                lv:'intermediate',
+   note:'Squat to press in one movement — use leg drive to initiate the press, lock out overhead',
+   suitability:{B1:'tier2',B2:'tier1',B3:'tier2',B4:'tier1',B5:'tier2',B6:'tier2',B7:'tier1'}},
+
+  {id:'mc_kb_thruster',    name:'KB Thruster',           eq:['kettlebells'],              lv:'intermediate',
+   note:'Front rack squat into press — continuous hip drive, no pause at shoulder',
+   suitability:{B1:'tier2',B2:'tier1',B3:'tier2',B4:'tier1',B5:'tier2',B6:'tier2',B7:'tier1'}},
+
+  {id:'mc_jump_squat',     name:'Jump Squat',            eq:['bodyweight'],               lv:'beginner',
+   note:'Max height — land soft through heels and immediately reload into next rep',
+   suitability:{B1:'tier1',B2:'tier1',B3:'tier1',B4:'tier1',B5:'tier1',B6:'tier2',B7:'tier1'}},
+
+  {id:'mc_w_jump_squat',   name:'Weighted Jump Squat',  eq:['dumbbells','weight_vest'],  lv:'intermediate',
+   note:'Hold DBs at sides or wear vest — still explosive through the full rep',
+   suitability:{B1:'tier1',B2:'tier1',B3:'tier1',B4:'tier2',B5:'tier1',B6:'tier2',B7:'tier2'}},
+
+  {id:'mc_box_jump',       name:'Box Jump',              eq:['bodyweight'],               lv:'intermediate',
+   note:'Step down every rep to protect knees under fatigue — full extension at landing',
+   suitability:{B1:'tier2',B2:'tier2',B3:'tier1',B4:'tier2',B5:'tier1',B6:'tier2',B7:'tier2'}},
+
+  // ── Presses & Upper Pushing ──────────────────────────────────────────
+  {id:'mc_kb_push_press',  name:'KB Push Press',         eq:['kettlebells'],              lv:'beginner',
+   note:'Quarter-dip then drive — leg power initiates, press locks out, control the descent',
+   suitability:{B1:'tier1',B2:'tier1',B3:'tier2',B4:'tier1',B5:'tier2',B6:'tier1',B7:'tier1'}},
+
+  {id:'mc_db_push_press',  name:'DB Push Press',         eq:['dumbbells'],                lv:'beginner',
+   note:'Same pattern as KB — dip is a quarter squat only, full lockout overhead',
+   suitability:{B1:'tier1',B2:'tier1',B3:'tier2',B4:'tier1',B5:'tier2',B6:'tier1',B7:'tier1'}},
+
+  {id:'mc_w_push_press',   name:'Weighted Push Press',  eq:['dumbbells','weight_vest'],  lv:'intermediate',
+   note:'Vest or heavier DBs — same dip-drive pattern, brace hard throughout',
+   suitability:{B1:'tier1',B2:'tier1',B3:'tier2',B4:'tier2',B5:'tier2',B6:'tier1',B7:'tier2'}},
+
+  {id:'mc_push_up',        name:'Push-Up',               eq:['bodyweight'],               lv:'beginner',
+   note:'Full range — chest to floor, lock out at top, maintain plank position throughout',
+   suitability:{B1:'tier2',B2:'tier2',B3:'tier2',B4:'tier1',B5:'tier1',B6:'tier1',B7:'tier1'}},
+
+  // ── Pulls & Upper Pulling ────────────────────────────────────────────
+  {id:'mc_pull_up',        name:'Pull-Up',               eq:['pullup_bar'],               lv:'intermediate',
+   note:'Full dead hang to chin over bar — no kipping, control the descent',
+   exId:'bw_pull_up',
+   suitability:{B1:'tier2',B2:'tier2',B3:'tier2',B4:'tier2',B5:'tier2',B6:'tier1',B7:'tier1'}},
+
+  {id:'mc_db_row',         name:'DB Bent-Over Row',      eq:['dumbbells'],                lv:'beginner',
+   note:'Spine neutral — pull elbow to hip, squeeze at top, control the lowering',
+   exId:'db_bent_row',
+   suitability:{B1:'tier2',B2:'tier2',B3:'tier2',B4:'tier1',B5:'tier2',B6:'tier1',B7:'tier1'}},
+
+  {id:'mc_kb_row',         name:'KB Row',                eq:['kettlebells'],              lv:'beginner',
+   note:'Support on knee or free-standing — full ROM, don\'t rotate the torso',
+   suitability:{B1:'tier2',B2:'tier2',B3:'tier2',B4:'tier1',B5:'tier2',B6:'tier1',B7:'tier1'}},
+
+  {id:'mc_inverted_row',   name:'Inverted Row',          eq:['bodyweight'],               lv:'beginner',
+   note:'Feet on floor, body straight — pull chest to bar, control descent',
+   suitability:{B1:'tier2',B2:'tier2',B3:'tier2',B4:'tier2',B5:'tier2',B6:'tier1',B7:'tier2'}},
+
+  // ── Burpees & Full-Body Explosive ────────────────────────────────────
+  {id:'mc_burpee',         name:'Burpee',                eq:['bodyweight'],               lv:'beginner',
+   note:'Chest to floor, explosive hip extension at jump — pace these, they dominate fatigue',
+   suitability:{B1:'tier1',B2:'tier1',B3:'tier1',B4:'tier1',B5:'tier1',B6:'tier2',B7:'tier1'}},
+
+  {id:'mc_w_burpee',       name:'Weighted Burpee',       eq:['dumbbells','weight_vest'],  lv:'intermediate',
+   note:'Hold DBs or wear vest — full burpee pattern maintained, vest adds systemic load',
+   suitability:{B1:'tier1',B2:'tier1',B3:'tier1',B4:'tier1',B5:'tier1',B6:'tier2',B7:'tier2'}},
+
+  {id:'mc_devil_press',    name:'DB Devil Press',        eq:['dumbbells'],                lv:'intermediate',
+   note:'Burpee + DB clean + overhead press — full body power chain, brace at lockout',
+   suitability:{B1:'tier1',B2:'tier2',B3:'tier2',B4:'tier2',B5:'tier2',B6:'tier2',B7:'tier2'}},
+
+  {id:'mc_jump_lunge',     name:'Jump Lunge',            eq:['bodyweight'],               lv:'beginner',
+   note:'Switch legs in the air — land in lunge, no pause between reps',
+   suitability:{B1:'tier1',B2:'tier1',B3:'tier1',B4:'tier1',B5:'tier1',B6:'tier2',B7:'tier1'}},
+
+  {id:'mc_w_jump_lunge',   name:'Weighted Jump Lunge',  eq:['dumbbells','weight_vest'],  lv:'intermediate',
+   note:'Light DBs at sides or vest — explosive leg switch, land controlled',
+   suitability:{B1:'tier1',B2:'tier1',B3:'tier1',B4:'tier2',B5:'tier1',B6:'tier2',B7:'tier2'}},
+
+  // ── Core & Carries ────────────────────────────────────────────────────
+  {id:'mc_sit_up',         name:'Sit-Up',                eq:['bodyweight'],               lv:'beginner',
+   note:'Full ROM — shoulder blades touch down, sit fully upright, don\'t yank the neck',
+   suitability:{B1:'tier2',B2:'tier2',B3:'tier2',B4:'tier1',B5:'tier2',B6:'tier2',B7:'tier1'}},
+
+  {id:'mc_mt_climber',     name:'Mountain Climber',      eq:['bodyweight'],               lv:'beginner',
+   note:'Drive knees to chest alternately — hips stay level, fast but controlled',
+   suitability:{B1:'tier2',B2:'tier2',B3:'tier2',B4:'tier2',B5:'tier1',B6:'tier2',B7:'tier2'}},
+
+  {id:'mc_high_knees',     name:'High Knees',            eq:['bodyweight'],               lv:'beginner',
+   note:'Drive knees to hip height — pump arms, stay on balls of feet, consistent rhythm',
+   suitability:{B1:'tier2',B2:'tier2',B3:'tier2',B4:'tier2',B5:'tier1',B6:'tier2',B7:'tier2'}},
+
+  {id:'mc_farmers_carry',  name:'Farmers Carry',         eq:['dumbbells'],                lv:'beginner',
+   note:'Heavy load, tall posture, core braced — 20–30m per rep, shoulders packed',
+   exId:'db_farmers',
+   suitability:{B1:'tier2',B2:'tier2',B3:'tier2',B4:'tier2',B5:'tier2',B6:'tier1',B7:'tier2'}},
+
+  // ── Machine / Cardio ─────────────────────────────────────────────────
+  {id:'mc_bike_sprint',    name:'Bike Sprint',           eq:['bike'],                     lv:'beginner',
+   note:'Maximum resistance and cadence — all-out 20 seconds, seated',
+   suitability:{B1:'tier2',B2:'tier2',B3:'tier1',B4:'tier2',B5:'tier1',B6:'tier2',B7:'tier2'}},
+
+  {id:'mc_row_sprint',     name:'Row Sprint',            eq:['rowing_machine'],           lv:'beginner',
+   note:'Drive hard with legs, body opens, arms pull — max stroke rate, full compression',
+   suitability:{B1:'tier2',B2:'tier2',B3:'tier1',B4:'tier2',B5:'tier1',B6:'tier2',B7:'tier2'}},
+
+  {id:'mc_run_sprint',     name:'Run Sprint ⚠️',          eq:['treadmill','outdoor'],      lv:'intermediate',
+   note:'Flat sprint — outdoor preferred for safety at max effort. Treadmill: set speed before starting',
+   suitability:{B1:'tier2',B2:'tier2',B3:'tier1',B4:'tier2',B5:'tier1',B6:'tier2',B7:'tier2'}},
+
+  // ── Dips ─────────────────────────────────────────────────────────────
+  {id:'mc_dip',            name:'Dip',                   eq:['bodyweight'],               lv:'intermediate',
+   note:'Full elbow extension at top — control the descent, elbows track back not flared',
+   exId:'bw_dip',
+   suitability:{B1:'tier2',B2:'tier2',B3:'tier2',B4:'tier2',B5:'tier2',B6:'tier1',B7:'tier2'}},
+
+  {id:'mc_kb_press',       name:'KB Press',              eq:['kettlebells'],              lv:'beginner',
+   note:'Strict press — no leg drive, brace the glutes, lock out overhead cleanly',
+   suitability:{B1:'tier2',B2:'tier2',B3:'tier2',B4:'tier2',B5:'tier2',B6:'tier1',B7:'tier2'}},
+
+  {id:'mc_db_press',       name:'DB Shoulder Press',     eq:['dumbbells'],                lv:'beginner',
+   note:'Neutral or pronated grip — press to full lockout, elbows slightly forward',
+   suitability:{B1:'tier2',B2:'tier2',B3:'tier2',B4:'tier2',B5:'tier2',B6:'tier1',B7:'tier2'}},
+];
+
+// Backward-compat shim — maps old protocol-prefixed IDs to new mc_ IDs
+const METCON_ID_REMAP = {
+  agt_kb_swing:'mc_kb_swing', agt_db_swing:'mc_db_swing', agt_goblet_squat:'mc_goblet_squat',
+  agt_kb_push_press:'mc_kb_push_press', agt_db_push_press:'mc_db_push_press', agt_db_pp_vest:'mc_w_push_press',
+  agt_devil_press:'mc_devil_press', agt_bw_burpee:'mc_burpee', agt_w_burpee:'mc_w_burpee',
+  agt_bw_jump_squat:'mc_jump_squat', agt_w_jump_squat:'mc_w_jump_squat',
+  agt_bw_jump_lunge:'mc_jump_lunge', agt_w_jump_lunge:'mc_w_jump_lunge',
+  emom_kb_swing:'mc_kb_swing', emom_db_swing:'mc_db_swing', emom_goblet_squat:'mc_goblet_squat',
+  emom_kb_dl:'mc_kb_deadlift', emom_db_dl:'mc_db_deadlift',
+  emom_kb_push_press:'mc_kb_push_press', emom_db_push_press:'mc_db_push_press', emom_db_pp_vest:'mc_w_push_press',
+  emom_bw_burpee:'mc_burpee', emom_w_burpee:'mc_w_burpee',
+  emom_bw_jump_squat:'mc_jump_squat', emom_w_jump_squat:'mc_w_jump_squat',
+  emom_bw_jump_lunge:'mc_jump_lunge', emom_w_jump_lunge:'mc_w_jump_lunge',
+  gpr_bike:'mc_bike_sprint', gpr_row:'mc_row_sprint', gpr_run:'mc_run_sprint',
+  gpr_bw_burpee:'mc_burpee', gpr_w_burpee:'mc_w_burpee',
+  gpr_bw_jump_squat:'mc_jump_squat', gpr_w_jump_squat:'mc_w_jump_squat',
+  gpr_bw_jump_lunge:'mc_jump_lunge', gpr_w_jump_lunge:'mc_w_jump_lunge',
+  amrap_bw_push_up:'mc_push_up', amrap_bw_squat:'mc_air_squat', amrap_bw_burpee:'mc_burpee',
+  amrap_bw_sit_up:'mc_sit_up', amrap_kb_swing:'mc_kb_swing', amrap_db_swing:'mc_db_swing',
+  amrap_goblet_squat:'mc_goblet_squat', amrap_db_push_press:'mc_db_push_press',
+  amrap_bw_box_jump:'mc_box_jump', amrap_db_row:'mc_db_row', amrap_bw_lunge:'mc_jump_lunge',
+  amrap_w_burpee:'mc_w_burpee',
+  tab_bw_jump_squat:'mc_jump_squat', tab_bw_burpee:'mc_burpee', tab_bw_push_up:'mc_push_up',
+  tab_bw_mt_climber:'mc_mt_climber', tab_bw_jump_lunge:'mc_jump_lunge', tab_kb_swing:'mc_kb_swing',
+  tab_db_snatch:'mc_db_snatch', tab_bw_high_knees:'mc_high_knees', tab_bw_box_jump:'mc_box_jump',
+  tab_w_jump_squat:'mc_w_jump_squat', tab_gpr_row:'mc_row_sprint', tab_gpr_bike:'mc_bike_sprint',
+  ldr_bw_pull_up:'mc_pull_up', ldr_bw_push_up:'mc_push_up', ldr_bw_dip:'mc_dip',
+  ldr_kb_press:'mc_kb_press', ldr_db_press:'mc_db_press', ldr_bw_squat:'mc_air_squat',
+  ldr_kb_swing:'mc_kb_swing', ldr_db_row:'mc_db_row', ldr_bw_burpee:'mc_burpee',
+  rft_bw_push_up:'mc_push_up', rft_bw_squat:'mc_air_squat', rft_bw_sit_up:'mc_sit_up',
+  rft_bw_burpee:'mc_burpee', rft_kb_swing:'mc_kb_swing', rft_db_push_press:'mc_db_push_press',
+  rft_bw_jump_squat:'mc_jump_squat', rft_db_row:'mc_db_row', rft_goblet_squat:'mc_goblet_squat',
+  rft_w_burpee:'mc_w_burpee', rft_bw_pull_up:'mc_pull_up'
+};
+
+// Resolve an exercise ID — remap legacy IDs to mc_ IDs if needed
+function resolveMetconId(id){ return METCON_ID_REMAP[id] || id; }
+
+// Get METCON_POOL exercises for a protocol, filtered by equipment, sorted by tier then suitability
+function getMetconPool(sessId, equipment, level){
+  const lvIdx = LV_RANK[level]||1;
+  return METCON_POOL.filter(ex => {
+    if(LV_RANK[ex.lv] > lvIdx) return false;
+    if(equipment && !ex.eq.some(e => equipment.has(e))) return false;
+    return true;
+  }).sort((a,b) => {
+    const ta = a.suitability?.[sessId]||'tier3';
+    const tb = b.suitability?.[sessId]||'tier3';
+    const rank = {'tier1':0,'tier2':1,'tier3':2};
+    const rd = (rank[ta]||2) - (rank[tb]||2);
+    if(rd !== 0) return rd;
+    return a.name.localeCompare(b.name);
+  });
+}
+
+// Get a METCON_POOL exercise by ID (with legacy remap)
+function getMetconExById(id){
+  const resolved = resolveMetconId(id);
+  return METCON_POOL.find(e => e.id === resolved) || null;
+}
 
 // ── ENDURANCE WEEK SEQUENCES ────────────────────────────────────────
 // Each entry = array of weeks, each week = array of session IDs per endurance day slot
@@ -2407,55 +2543,27 @@ function getEndoPhaseInfo(sess, phase, level){
 
 // Helper: pick best exercise from B-type pool, rotating by week for variety
 const LV_RANK = {beginner:0, intermediate:1, advanced:2};
-function pickBtypeExercise(pool, equipment, level, weekNum=1, excludeIds=new Set()){
-  const lvIdx = LV_RANK[level]||1;
-  // Filter to equipment match + level gate
-  const valid = pool.filter(ex=>{
-    if(excludeIds.has(ex.id)) return false;
-    if(LV_RANK[ex.lv] > lvIdx) return false;
-    return ex.eq.some(e => equipment.has(e));
-  });
-  if(!valid.length) return pool[0]; // absolute fallback
-  // Sort deterministically: level desc, then name asc (stable order across all weeks)
-  valid.sort((a,b) => {
-    const lvDiff = LV_RANK[b.lv] - LV_RANK[a.lv];
-    return lvDiff !== 0 ? lvDiff : a.name.localeCompare(b.name);
-  });
-  // Rotate through valid pool by week — each week gets the next exercise in order
+// Pick a single exercise from METCON_POOL for a protocol, rotating by week
+function pickBtypeExercise(pool_unused, equipment, level, weekNum=1, excludeIds=new Set(), sessId='B1'){
+  const valid = getMetconPool(sessId, equipment, level).filter(ex => !excludeIds.has(ex.id));
+  if(!valid.length) return getMetconPool(sessId, null, 'beginner')[0] || METCON_POOL[0];
   return valid[(weekNum - 1) % valid.length];
 }
 
-// Pick N distinct exercises from B-type pool, rotating start offset by week
-function pickBtypeExercises(pool, equipment, level, weekNum=1, count=3){
-  const lvIdx = LV_RANK[level]||1;
-  const valid = pool.filter(ex=>{
-    if(LV_RANK[ex.lv] > lvIdx) return false;
-    return ex.eq.some(e => equipment.has(e));
-  });
-  if(!valid.length) return [pool[0]];
-  // Stable sort: level desc, name asc
-  valid.sort((a,b)=>{
-    const lvDiff = LV_RANK[b.lv] - LV_RANK[a.lv];
-    return lvDiff !== 0 ? lvDiff : a.name.localeCompare(b.name);
-  });
-  // Rotate start index by week so circuit changes each week
+// Pick N distinct exercises from METCON_POOL for a protocol, rotating start offset by week
+function pickBtypeExercises(pool_unused, equipment, level, weekNum=1, count=3, sessId='B1'){
+  const valid = getMetconPool(sessId, equipment, level);
+  if(!valid.length) return [METCON_POOL[0]];
   const n = Math.min(count, valid.length);
   const start = (weekNum - 1) % valid.length;
   const result = [];
-  for(let i=0; i<n; i++){
-    result.push(valid[(start + i) % valid.length]);
-  }
+  for(let i=0; i<n; i++) result.push(valid[(start + i) % valid.length]);
   return result;
 }
 
 function getBtypeAlternatives(sessId, currentExId, equipment, level){
-  const sess = ENDO_SESSIONS[sessId];
-  if(!sess || !sess.exercisePool) return [];
-  return sess.exercisePool.filter(ex => {
-    if(ex.id === currentExId) return false;
-    if(LV_RANK[ex.lv] > (LV_RANK[level]||1)) return false;
-    return ex.eq.some(e => equipment.has(e));
-  });
+  const resolved = resolveMetconId(currentExId);
+  return getMetconPool(sessId, equipment, level).filter(ex => ex.id !== resolved);
 }
 
 // Modality display helpers
@@ -3003,8 +3111,8 @@ function generatePlan(){
                         : sessId==='B6' ? 1
                         : 3;
           const exercises = exCount > 1
-            ? pickBtypeExercises(sess.exercisePool, S.equipment, S.level, w, exCount)
-            : [pickBtypeExercise(sess.exercisePool, S.equipment, S.level, w)];
+            ? pickBtypeExercises(null, S.equipment, S.level, w, exCount, sessId)
+            : [pickBtypeExercise(null, S.equipment, S.level, w, new Set(), sessId)];
           weekObj.days.push({
             key:sessId, label:`${sess.name}`, type:'muscular_endurance',
             desc:sess.desc, color:sess.color, icon:sess.icon,
@@ -3069,8 +3177,8 @@ function generatePlan(){
                          : sessId==='B6' ? 1
                          : 3;
           const exercises2 = exCount2 > 1
-            ? pickBtypeExercises(sess.exercisePool, S.equipment, S.level, w, exCount2)
-            : [pickBtypeExercise(sess.exercisePool, S.equipment, S.level, w)];
+            ? pickBtypeExercises(null, S.equipment, S.level, w, exCount2, sessId)
+            : [pickBtypeExercise(null, S.equipment, S.level, w, new Set(), sessId)];
           days[dayIdx] = {
             key:sessId, label:sess.name, type:'muscular_endurance',
             desc:sess.desc, color:sess.color, icon:sess.icon,
@@ -3955,15 +4063,16 @@ function toggleModality(el){
 let _mendoSwapCtx = null;
 function openMendoSwap(sessId, exIdx, dayIdx){
   const sess = ENDO_SESSIONS[sessId];
-  // Get the current exercise from the plan's exercises array
   const planDay = currentPlan && currentPlan[S.currentWeek-1] && currentPlan[S.currentWeek-1].days[dayIdx];
   const exArr = planDay ? (planDay.exercises || []) : [];
   const currentEx = exArr[exIdx] || {};
-  const currentExId = currentEx.id || '';
+  const currentExId = resolveMetconId(currentEx.id || '');
 
   _mendoSwapCtx = {sessId, exIdx, dayIdx};
 
   const alts = getBtypeAlternatives(sessId, currentExId, S.equipment, S.level);
+  const anaColors = {B1:'#7c3aed',B2:'#0369a1',B3:'#dc2626',B4:'#0891b2',B5:'#be185d',B6:'#059669',B7:'#d97706'};
+  const color = anaColors[sessId]||'#7c3aed';
 
   document.getElementById('swap-modal-title').textContent = `Swap ${sess.abbr} Exercise`;
   const slotLabel = sess.abbr === 'EMOM' ? ` — Slot ${'ABC'[exIdx]||exIdx+1}` : ` — Exercise ${exIdx+1}`;
@@ -3971,27 +4080,35 @@ function openMendoSwap(sessId, exIdx, dayIdx){
 
   const list = document.getElementById('swap-modal-list');
   let html = `<li class="swap-item swap-current"><div class="swap-item-name">${currentEx.name||'(none)'}</div><div class="swap-item-meta"><span>Current</span></div></li>`;
-  if(alts.length === 0){
+
+  if(!alts.length){
     html += `<li class="swap-none">No alternatives available for your equipment and level.</li>`;
   } else {
-    alts.forEach(ex=>{
-      const lvLabel = ex.lv.charAt(0).toUpperCase()+ex.lv.slice(1);
-      html+=`<li class="swap-item" onclick="applyMendoSwap('${ex.id}')">
-        <div class="swap-item-name">${ex.name}</div>
-        <div class="swap-item-meta"><span>${lvLabel}</span><span>${ex.eq.join(' / ')}</span></div>
-      </li>`;
-    });
+    const tier1 = alts.filter(e=>(e.suitability?.[sessId]||'tier3')==='tier1');
+    const tier2 = alts.filter(e=>(e.suitability?.[sessId]||'tier3')==='tier2');
+    const tier3 = alts.filter(e=>{const t=e.suitability?.[sessId]||'tier3'; return t!=='tier1'&&t!=='tier2';});
+    const tierHdr = (label, c) => `<li style="padding:.2rem .5rem;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:${c};background:${c}11;border-top:1px solid var(--border)">${label}</li>`;
+    if(tier1.length){ html+=tierHdr('⭐ Best for '+sess.abbr, color); tier1.forEach(ex=>{ html+=swapItem(ex,sessId); }); }
+    if(tier2.length){ html+=tierHdr('✓ Works well', '#6b7280'); tier2.forEach(ex=>{ html+=swapItem(ex,sessId); }); }
+    if(tier3.length){ html+=tierHdr('Full library', '#374151'); tier3.forEach(ex=>{ html+=swapItem(ex,sessId); }); }
   }
   list.innerHTML = html;
   document.getElementById('swap-modal').classList.remove('hidden');
   document.body.style.overflow = 'hidden';
 }
 
+function swapItem(ex, sessId){
+  const lvLabel = ex.lv.charAt(0).toUpperCase()+ex.lv.slice(1);
+  return `<li class="swap-item" onclick="applyMendoSwap('${ex.id}')">
+    <div class="swap-item-name">${ex.name}</div>
+    <div class="swap-item-meta"><span>${lvLabel}</span><span>${ex.eq.join(' / ')}</span></div>
+  </li>`;
+}
+
 function applyMendoSwap(newExId){
   if(!_mendoSwapCtx || !currentPlan) return;
   const {sessId, exIdx, dayIdx} = _mendoSwapCtx;
-  const sess = ENDO_SESSIONS[sessId];
-  const newEx = sess.exercisePool.find(e=>e.id===newExId);
+  const newEx = getMetconExById(newExId);
   if(!newEx) return;
   // Apply to ALL weeks at this day position and exercise slot
   currentPlan.forEach(week=>{
@@ -6980,17 +7097,13 @@ function renderWizPickCardio(){
   return html;
 }
 
-// Anaerobic pick — choose AGT / EMOM / GPR, then pick exercises from that pool
+// Anaerobic pick — choose protocol, then 3-tier exercise picker
 function renderWizPickAnaerobic(){
   const ANAEROBIC_IDS = ['B1','B2','B3','B4','B5','B6','B7'];
   const anaLabels = {
-    B1:'AGT — Anti-Glycolytic Training',
-    B2:'EMOM — Heavy',
-    B3:'GPR — Glycolytic Power Repeats',
-    B4:'AMRAP — As Many Rounds As Possible',
-    B5:'Tabata — 20s/10s Intervals',
-    B6:'Ladder — Ascending Reps',
-    B7:'RFT — Rounds For Time'
+    B1:'AGT — Anti-Glycolytic Training',B2:'EMOM — Heavy',B3:'GPR — Glycolytic Power Repeats',
+    B4:'AMRAP — As Many Rounds As Possible',B5:'Tabata — 20s/10s Intervals',
+    B6:'Ladder — Ascending Reps',B7:'RFT — Rounds For Time'
   };
   const anaColors = {B1:'#7c3aed',B2:'#0369a1',B3:'#dc2626',B4:'#0891b2',B5:'#be185d',B6:'#059669',B7:'#d97706'};
   const selSessId = _dayWiz.anaerobicType;
@@ -6998,6 +7111,7 @@ function renderWizPickAnaerobic(){
   let html = `<div style="margin-bottom:.75rem">
     <label class="fl" style="margin-bottom:.4rem">Choose Protocol</label>
     <div style="display:flex;flex-direction:column;gap:.4rem">`;
+
   ANAEROBIC_IDS.forEach(id => {
     const sess = ENDO_SESSIONS[id]; if(!sess) return;
     const isActive = selSessId===id;
@@ -7012,25 +7126,71 @@ function renderWizPickAnaerobic(){
   });
   html += `</div></div>`;
 
-  // If a protocol is selected, show its exercise pool for selection
+  // 3-tier exercise picker shown after protocol is selected
   if(selSessId){
     const sess = ENDO_SESSIONS[selSessId];
-    const pool = sess.exercisePool || [];
-    const selIds = new Set(_dayWiz.selected.map(e=>e.id));
-    html += `<div style="margin-top:.65rem">
-      <label class="fl" style="margin-bottom:.4rem">Select Exercises for ${sess.abbr} Circuit</label>
-      <div style="max-height:38vh;overflow-y:auto">`;
-    pool.forEach(ex => {
+    const selIds = new Set(_dayWiz.selected.map(e=>e.id).map(resolveMetconId));
+    // Get full METCON_POOL filtered by user equipment, sorted by tier
+    const equip = _dayWiz.equipFilter.length > 0
+      ? new Set(_dayWiz.equipFilter)
+      : null; // null = show all equipment
+    const allExes = getMetconPool(selSessId, equip, 'advanced'); // show all levels in picker
+
+    const tier1 = allExes.filter(e => (e.suitability?.[selSessId]||'tier3')==='tier1');
+    const tier2 = allExes.filter(e => (e.suitability?.[selSessId]||'tier3')==='tier2');
+    const tier3 = METCON_POOL.filter(e => {
+      if(equip && !e.eq.some(eq=>equip.has(eq))) return false;
+      const t = e.suitability?.[selSessId]||'tier3';
+      return t !== 'tier1' && t !== 'tier2';
+    });
+
+    const buildRow = (ex) => {
       const isSel = selIds.has(ex.id);
-      const exData = JSON.stringify({id:ex.id,name:ex.name,cat:'accessory',muscles:ex.eq?ex.eq.join(', '):'',fc:['endurance'],isEndo:false,isAnaerobicEx:true,anaerobicSessId:selSessId}).replace(/"/g,'&quot;');
-      html += `<div class="wiz-ex-row ${isSel?'selected':''}" onclick="wizToggleExercise(${exData})">
+      const exData = JSON.stringify({
+        id:ex.id, name:ex.name, cat:'accessory',
+        muscles:ex.eq?ex.eq.join(', '):'',
+        fc:['endurance'], isEndo:false, isAnaerobicEx:true,
+        anaerobicSessId:selSessId, note:ex.note||''
+      }).replace(/"/g,'&quot;');
+      return `<div class="wiz-ex-row ${isSel?'selected':''}" onclick="wizToggleExercise(${exData})">
         <div style="flex:1;min-width:0">
           <div style="font-weight:600;font-size:.82rem">${ex.name}</div>
-          <div style="font-size:.66rem;color:var(--muted)">${(ex.eq||[]).join(', ')} · ${ex.note||''}</div>
+          <div style="font-size:.66rem;color:var(--muted);margin-top:.05rem">${ex.eq.join(' / ')} · ${ex.note||''}</div>
         </div>
         <div style="flex-shrink:0;font-size:1.1rem">${isSel?'✅':'⬜'}</div>
       </div>`;
-    });
+    };
+
+    const tierBadge = (label, color, hint) =>
+      `<div style="display:flex;align-items:center;gap:.5rem;margin:.65rem 0 .3rem">
+        <span style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;background:${color}22;color:${color};border:1px solid ${color}44;border-radius:4px;padding:.1rem .38rem">${label}</span>
+        <span style="font-size:.63rem;color:var(--muted)">${hint}</span>
+      </div>`;
+
+    const color = anaColors[selSessId]||'#7c3aed';
+    html += `<div style="margin-top:.65rem">
+      <label class="fl" style="margin-bottom:.1rem">Select Exercises for ${sess.abbr}</label>
+      <div style="max-height:46vh;overflow-y:auto;padding-right:.2rem">`;
+
+    if(tier1.length){
+      html += tierBadge('⭐ Best for '+sess.abbr, color, 'Ideal for this protocol');
+      html += tier1.map(buildRow).join('');
+    }
+    if(tier2.length){
+      html += tierBadge('✓ Works well', '#6b7280', 'Compatible — good secondary choices');
+      html += tier2.map(buildRow).join('');
+    }
+    if(tier3.length){
+      // Tier 3: collapsed by default
+      const t3id = `t3-${selSessId}`;
+      html += `<div style="margin:.6rem 0 .2rem">
+        <button onclick="toggleMetconTier3('${t3id}')" style="font-size:.65rem;font-weight:700;color:var(--text3);background:var(--navy3);border:1px solid var(--border);border-radius:6px;padding:.22rem .65rem;cursor:pointer;width:100%;text-align:left">
+          ▶ Full library (${tier3.length} more) — advanced: pick if you know why
+        </button>
+        <div id="${t3id}" style="display:none">${tier3.map(buildRow).join('')}</div>
+      </div>`;
+    }
+
     html += `</div></div>`;
   }
 
@@ -7039,6 +7199,15 @@ function renderWizPickAnaerobic(){
     <button class="btn btn-primary" onclick="wizGoStep('configure')" ${(!selSessId||!_dayWiz.selected.length)?'disabled style="opacity:.4"':''}>Configure →</button>
   </div>`;
   return html;
+}
+
+function toggleMetconTier3(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+  const btn = el.previousElementSibling;
+  const isHidden = el.style.display === 'none';
+  el.style.display = isHidden ? 'block' : 'none';
+  if(btn) btn.textContent = btn.textContent.replace(isHidden?'▶':'▼', isHidden?'▼':'▶');
 }
 
 function wizSetAnaerobicType(id){
