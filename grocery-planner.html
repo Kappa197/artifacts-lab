@@ -967,6 +967,7 @@ function buildCan(tier){
 
 async function initTier(){
   document.getElementById('appLoader').style.display = 'flex';
+  var prefLang = null; // hoisted so accessible throughout
   try {
     if(!sb){ buildCan('free'); }
     else {
@@ -976,6 +977,7 @@ async function initTier(){
       else {
         var pr = await sb.from('profiles').select('tier, preferred_language').eq('id',user.id).single();
         buildCan((pr.data&&pr.data.tier)||'free');
+        prefLang = (pr.data&&pr.data.preferred_language) || null;
       }
     }
   } catch(e){ buildCan('free'); }
@@ -994,10 +996,7 @@ async function initTier(){
   init();
 
   // Auto-apply language preference
-  try {
-    var prefLang = (pr && pr.data && pr.data.preferred_language) ? pr.data.preferred_language : null;
-    if (prefLang && prefLang !== 'en') applyTranslation(prefLang);
-  } catch(e) {}
+  if (prefLang && prefLang !== 'en') applyTranslation(prefLang);
 }
 
 // ── State ──────────────────────────────────────────
