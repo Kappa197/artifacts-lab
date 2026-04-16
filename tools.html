@@ -447,6 +447,7 @@ footer {
       🌐 <span>Translate</span>
     </button>
     <div class="translate-dropdown" id="translateDropdown">
+      <button class="translate-option" onclick="resetTranslation()" style="border-bottom:1px solid var(--border); color:var(--text3); font-size:0.75rem;">🇬🇧 English (reset)</button>
       <button class="translate-option" onclick="translateTo('es')"><span class="tl-flag">🇪🇸</span> Spanish</button>
       <button class="translate-option" onclick="translateTo('fr')"><span class="tl-flag">🇫🇷</span> French</button>
       <button class="translate-option" onclick="translateTo('de')"><span class="tl-flag">🇩🇪</span> German</button>
@@ -868,21 +869,89 @@ window.addEventListener('scroll', () => {
   if (document.getElementById('mobileMenu').classList.contains('open')) closeMenu();
 });
 
-// ── Translate ──────────────────────────────────────
-function toggleTranslate() {
-  document.getElementById('translateWrap').classList.toggle('open');
+</script>
+
+<!-- Google Translate Widget — hidden div required by the API -->
+<div id="google_translate_element" style="display:none;"></div>
+
+<script>
+// ── Google Translate Widget (on-domain — localStorage + auth safe) ──
+
+// 1. Load Google's translate script silently
+function loadGTranslate() {
+  if (window._gtLoaded) return;
+  window._gtLoaded = true;
+  const s = document.createElement('script');
+  s.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+  s.async = true;
+  document.body.appendChild(s);
 }
+
+// 2. Callback Google calls when script is ready
+window.googleTranslateElementInit = function() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'en',
+    includedLanguages: 'es,fr,de,it,pt,zh-CN,ja,ar',
+    autoDisplay: false   // suppress Google's automatic top banner
+  }, 'google_translate_element');
+};
+
+// 3. Trigger translation using Google's internal function
 function translateTo(lang) {
-  const url = 'https://translate.google.com/translate?sl=en&tl=' + lang +
-              '&u=' + encodeURIComponent(window.location.href);
-  window.open(url, '_self');
+  // Load script on first use (lazy — don't slow down page load)
+  loadGTranslate();
+
+  // Wait for widget to be ready then fire
+  const attempt = setInterval(function() {
+    const combo = document.querySelector('.goog-te-combo');
+    if (combo) {
+      clearInterval(attempt);
+      combo.value = lang;
+      combo.dispatchEvent(new Event('change'));
+      // Close our dropdown
+      document.getElementById('translateWrap').classList.remove('open');
+    }
+  }, 100);
+
+  // Timeout after 5s
+  setTimeout(function() { clearInterval(attempt); }, 5000);
 }
-// Close dropdown when clicking outside
+
+// 4. Toggle our custom dropdown
+function toggleTranslate() {
+  const wrap = document.getElementById('translateWrap');
+  const isOpen = wrap.classList.contains('open');
+  wrap.classList.toggle('open');
+  // Load script as soon as user shows intent (before they pick a language)
+  if (!isOpen) loadGTranslate();
+}
+
+// 5. Reset to English
+function resetTranslation() {
+  const combo = document.querySelector('.goog-te-combo');
+  if (combo) {
+    combo.value = 'en';
+    combo.dispatchEvent(new Event('change'));
+  }
+  document.getElementById('translateWrap').classList.remove('open');
+}
+
+// 6. Close dropdown on outside click
 document.addEventListener('click', function(e) {
   const wrap = document.getElementById('translateWrap');
   if (wrap && !wrap.contains(e.target)) wrap.classList.remove('open');
 });
 
+// 7. Suppress Google's injected top banner via CSS
+const _gtStyle = document.createElement('style');
+_gtStyle.textContent = `
+  body { top: 0 !important; }
+  .goog-te-banner-frame { display: none !important; }
+  .skiptranslate { display: none !important; }
+  #goog-gt-tt { display: none !important; }
+`;
+document.head.appendChild(_gtStyle);
 </script>
+
 </body>
 </html>
