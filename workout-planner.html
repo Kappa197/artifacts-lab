@@ -5051,8 +5051,8 @@ function renderUnifiedPlanView(slot){
   days.forEach((day, di) => {
     if(!day) return;
 
-    // Cardio day (wizard-generated A-type) — unchanged
-    if(day.type === 'cardio' && !isManual){
+    // Cardio day (A-type — wizard or manual with enriched metadata)
+    if(day.type === 'cardio'){
       const rpeTooltipHtml = `<span class="rpe-tooltip">${day.rpe||''} <span class="rpe-info-icon">ℹ</span><span class="rpe-tip"><strong>RPE — Rate of Perceived Exertion (1–10)</strong><br>1–2 Very easy · 3–4 Easy<br>5–6 Moderate · 7–8 Hard · 9–10 Max</span></span>`;
       html += `<div class="day-card">
         <div class="day-hdr" onclick="toggleDayCard(this)" style="background:${day.color}">
@@ -5079,8 +5079,8 @@ function renderUnifiedPlanView(slot){
       return;
     }
 
-    // B-type muscular endurance (wizard only) — delegate to existing renderer
-    if(day.type === 'muscular_endurance' && !isManual){
+    // B-type muscular endurance (wizard or manual with enriched metadata)
+    if(day.type === 'muscular_endurance'){
       // Reuse the same block from renderPlan — build inline
       const sess = ENDO_SESSIONS[day.sessId];
       if(!sess){ return; }
@@ -7240,10 +7240,10 @@ function renderWizPickAnaerobic(){
   });
   html += `</div>`;
 
-  // ── If protocol selected: show protocol card + exercise select button ──
+  // ── If protocol selected: show lightweight header + select exercises button ──
   if(selSessId){
-    html += buildAnaerobicProtocolCard(selSessId);
-    html += `<button class="btn btn-outline" style="width:100%;margin-top:.6rem;justify-content:space-between;display:flex;align-items:center"
+    html += buildAnaerobicProtocolHeader(selSessId);
+    html += `<button class="btn btn-outline" style="width:100%;margin-top:.0rem;justify-content:space-between;display:flex;align-items:center"
       onclick="openAnaerobicPicker()">
       <span>🏋️ Select Exercises${selCount > 0 ? ` (${selCount} selected)` : ''}</span>
       <span style="font-size:.75rem;opacity:.7">→</span>
@@ -7394,6 +7394,23 @@ function wizSetAnaerobicType(id){
 }
 
 // STEP 3: Configure
+// ── Lightweight protocol header for the pick step (no sliders) ────────
+function buildAnaerobicProtocolHeader(sessId){
+  const sess = ENDO_SESSIONS[sessId];
+  if(!sess) return '';
+  const col = {B1:'#7c3aed',B2:'#0369a1',B3:'#dc2626',B4:'#0891b2',B5:'#be185d',B6:'#059669',B7:'#d97706'}[sessId]||'#7c3aed';
+  return `<div class="proto-card" style="--proto-col:${col};margin-bottom:.65rem">
+    <div class="proto-card-hdr">
+      <span class="proto-card-icon">${sess.icon}</span>
+      <div>
+        <div class="proto-card-name">${sess.name}</div>
+        <div class="proto-card-desc">${sess.desc}</div>
+      </div>
+    </div>
+    <div class="proto-key-rule" style="border-left-color:${col}">${sess.keyRule||''}</div>
+  </div>`;
+}
+
 // ── Protocol-specific card for Class B anaerobic sessions ─────────────
 // Returns HTML for a single-exercise configure block tuned to each B-type.
 // Stores params back to _dayWiz.anaerobicParams (shared across all exercises).
@@ -7465,13 +7482,46 @@ function renderWizConfigure(){
   if(!sel.length) return `<div style="color:var(--muted);font-size:.82rem;padding:.5rem 0">No exercises selected. <button class="btn btn-outline btn-sm" onclick="wizGoStep('pick')">← Back</button></div>`;
   if(!_dayWiz.supersetPairs) _dayWiz.supersetPairs = [];
 
+  const isAnaerobicDay = sel.some(e => e.isAnaerobicEx);
+  const sessId = isAnaerobicDay ? (sel.find(e=>e.isAnaerobicEx)?.anaerobicSessId || _dayWiz.anaerobicType) : null;
+
+  // ── Anaerobic day: protocol card with sliders at top, exercise pills below ──
+  if(isAnaerobicDay && sessId){
+    const exPills = sel.filter(e => e.isAnaerobicEx).map((ex, i) => {
+      const realIdx = sel.indexOf(ex);
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:.55rem .9rem;border-bottom:1px solid var(--border)">
+        <div style="display:flex;align-items:center;gap:.6rem">
+          <span style="font-family:var(--mono);font-size:.72rem;font-weight:700;color:var(--text3)">${i+1}</span>
+          <span style="font-weight:600;font-size:.85rem">${ex.name}</span>
+          <span style="font-size:.65rem;color:var(--text3)">${(ex.muscles||'').replace('cardio','')}</span>
+        </div>
+        <button class="trk-del-set" onclick="wizRemoveSelected(${realIdx})" title="Remove">✕</button>
+      </div>`;
+    }).join('');
+
+    return `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.65rem;flex-wrap:wrap;gap:.4rem">
+        <span style="font-size:.75rem;color:var(--muted)">${sel.length} exercise${sel.length!==1?'s':''}</span>
+        <button class="btn btn-outline btn-sm" onclick="wizGoStep('pick')">← Back</button>
+      </div>
+      ${buildAnaerobicProtocolCard(sessId)}
+      <div style="margin-top:.75rem">
+        <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:.35rem">Selected Exercises</div>
+        <div style="background:var(--navy3);border:1px solid var(--border);border-radius:10px;overflow:hidden">${exPills}</div>
+        <button class="btn btn-outline btn-sm" style="width:100%;margin-top:.5rem;font-size:.75rem" onclick="openAnaerobicPicker()">✏️ Change exercises</button>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:.5rem;margin-top:.85rem;padding-top:.65rem;border-top:1px solid var(--border)">
+        <button class="btn btn-primary" style="background:var(--green);box-shadow:0 2px 8px rgba(46,204,138,.3)" onclick="wizConfirm('finish')">✓ Day Complete</button>
+      </div>`;
+  }
+
+  // ── Non-anaerobic: original configure layout ──────────────────────────
   let rows = '';
   sel.forEach((ex, i) => {
     const isEndo = ex.isEndo || ex.isAnaerobicEx;
     const isCardioSession = ex.isEndo && !ex.isAnaerobicEx && !ex.isSprintSession;
     const isSprintSess = ex.isSprintSession;
 
-    // Superset membership — now supports N-way supersets (groups)
     const ssGroupIdx = _dayWiz.supersetPairs.findIndex(g => g.includes(i));
     const ssGroup = ssGroupIdx >= 0 ? _dayWiz.supersetPairs[ssGroupIdx] : null;
     const ssLetter = ssGroupIdx >= 0 ? String.fromCharCode(65+ssGroupIdx) : null;
@@ -7528,22 +7578,8 @@ function renderWizConfigure(){
             value="${ex.setsReps||''}" onchange="_dayWiz.selected[${i}].setsReps=this.value">
         </div>
       </div>`;
-    } else if(ex.isAnaerobicEx){
-      const sessId = ex.anaerobicSessId || _dayWiz.anaerobicType;
-      const sess = sessId ? ENDO_SESSIONS[sessId] : null;
-      const isFirst = sel.filter(e => e.isAnaerobicEx).indexOf(ex) === 0;
-      rows += `<div class="trk-ex-block" style="padding:.75rem .9rem">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.4rem;flex-wrap:wrap;margin-bottom:.45rem">
-          <div style="font-weight:700;font-size:.85rem">${sess?sess.icon:''} ${ex.name}</div>
-          <button class="trk-del-set" onclick="wizRemoveSelected(${i})" title="Remove">✕</button>
-        </div>
-        <div style="font-size:.67rem;color:var(--text3);margin-bottom:.5rem">${(ex.muscles||'').replace('cardio','') || 'Equipment: as available'}</div>
-        ${isFirst && sessId ? buildAnaerobicProtocolCard(sessId) : (sessId ? `<div style="font-size:.72rem;color:var(--text3);font-style:italic">Protocol params set above ↑</div>` : '')}
-      </div>`;
     } else {
-      // Standard gym exercise
       const canSS = _dayWiz.dayType === 'diy';
-      // Superset group: show multi-select checkboxes for other exercises
       let ssGroupHtml = '';
       if(canSS){
         const others = sel.map((e2,j) => j!==i ? {j, name:e2.name} : null).filter(Boolean);
@@ -7833,7 +7869,35 @@ function saveManualPlan(){
               rpe:   ENDO_SESSIONS[day.anaerobicType]?.rpe  || '',
               keyRule: ENDO_SESSIONS[day.anaerobicType]?.keyRule || '',
               structure: ENDO_SESSIONS[day.anaerobicType]?.structure || [] }
-          : {})
+          : {}),
+        // For A-type cardio days, enrich with ENDO_SESSIONS metadata so the
+        // cardio card renders identically to tool-generated plan cards.
+        ...((()=>{
+          const exes = day.exercises || [];
+          const cardioEx = exes.find(e => e.isEndo && !e.isAnaerobicEx && !e.isSprintSession);
+          if(!cardioEx || !cardioEx.sessId) return {};
+          const sessId = cardioEx.sessId;
+          const sess = ENDO_SESSIONS[sessId];
+          if(!sess || sess.category !== 'systemic') return {};
+          const modality = cardioEx.modality || 'run';
+          const phaseInfo = getEndoPhaseInfo(sess, 'accumulation', 'intermediate');
+          return {
+            type: 'cardio',
+            sessId,
+            color: sess.color || '#0e7490',
+            label: sess.name,
+            icon:  MODALITY_ICON[modality] || '🏃',
+            desc:  sess.desc || '',
+            rpe:   sess.rpe || '',
+            zone:  phaseInfo?.zone || sess.zone || '',
+            modalityLabel: MODALITY_LABEL[modality] || '🏃 Running',
+            phaseInfo: {
+              load:   phaseInfo?.load || '',
+              detail: phaseInfo?.detail || ''
+            },
+            structure: sess.structure || []
+          };
+        })())
       }))
     };
   });
