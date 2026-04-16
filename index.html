@@ -981,13 +981,66 @@ footer {
 .faq-answer.open { max-height: 400px; padding-bottom: 20px; }
 .faq-answer a { color: var(--amber2); text-decoration: underline; text-underline-offset: 3px; }
 
+
+/* ── Translate button ── */
+.translate-wrap {
+  position: relative; display: inline-block; flex-shrink: 0;
+}
+.translate-btn {
+  font-family: var(--mono); font-size: 0.62rem; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 7px 12px; border-radius: 6px;
+  background: transparent; border: 1px solid var(--border2);
+  color: var(--text3); cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; gap: 5px; white-space: nowrap;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.translate-btn:hover { border-color: var(--amber); color: var(--amber2); }
+.translate-dropdown {
+  display: none; position: absolute; top: calc(100% + 8px); right: 0;
+  background: var(--navy2); border: 1px solid var(--border2);
+  border-radius: 10px; overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4); min-width: 160px; z-index: 200;
+}
+.translate-wrap.open .translate-dropdown { display: block; }
+.translate-option {
+  display: flex; align-items: center; gap: 10px; padding: 11px 16px;
+  font-family: var(--body); font-size: 0.82rem; color: var(--text2);
+  background: none; border: none; width: 100%; text-align: left;
+  cursor: pointer; transition: all 0.15s;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.translate-option:hover { background: var(--amber-dim); color: var(--amber2); }
+.translate-option .tl-flag { font-size: 1rem; }
+.mobile-translate-section {
+  border-top: 1px solid rgba(42,59,85,0.4); padding: 10px 0 4px;
+}
+.mobile-translate-label {
+  font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--text3); padding: 6px 28px;
+}
+.mobile-translate-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 0; padding: 4px 16px 8px;
+}
+.mobile-translate-opt {
+  display: flex; align-items: center; gap: 7px; padding: 9px 12px;
+  font-family: var(--body); font-size: 0.8rem; color: var(--text2);
+  background: none; border: none; cursor: pointer;
+  border-radius: 6px; transition: all 0.15s;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.mobile-translate-opt:hover,
+.mobile-translate-opt:active { background: var(--amber-dim); color: var(--amber2); }
+@media (max-width: 900px) { .translate-wrap { display: none; } }
+
 </style>
 </head>
 <body>
 
 <!-- ═══════════════════════════════ NAV -->
 <div class="nav-backdrop" id="navBackdrop" onclick="closeMenu()"></div>
-<nav>
+<nav class="notranslate">
   <a href="#" class="nav-logo">
     <div class="nav-logo-icon">⚗️</div>
     <div class="nav-logo-text">The Artifacts Lab</div>
@@ -1000,6 +1053,22 @@ footer {
     <li><a href="#faq">FAQ</a></li>
     <li><a href="/blog">Blog</a></li>
   </ul>
+  <div class="translate-wrap" id="translateWrap">
+    <button class="translate-btn" onclick="toggleTranslate()" aria-label="Translate page">
+      🌐 <span>Translate</span>
+    </button>
+    <div class="translate-dropdown" id="translateDropdown">
+      <button class="translate-option" onclick="resetTranslation()" style="border-bottom:1px solid var(--border);color:var(--text3);font-size:0.75rem;"><span class="tl-flag">🇬🇧</span> English (reset)</button>
+      <button class="translate-option" onclick="translateTo('es')"><span class="tl-flag">🇪🇸</span> Spanish</button>
+      <button class="translate-option" onclick="translateTo('fr')"><span class="tl-flag">🇫🇷</span> French</button>
+      <button class="translate-option" onclick="translateTo('de')"><span class="tl-flag">🇩🇪</span> German</button>
+      <button class="translate-option" onclick="translateTo('it')"><span class="tl-flag">🇮🇹</span> Italian</button>
+      <button class="translate-option" onclick="translateTo('pt')"><span class="tl-flag">🇧🇷</span> Portuguese</button>
+      <button class="translate-option" onclick="translateTo('zh-CN')"><span class="tl-flag">🇨🇳</span> Chinese</button>
+      <button class="translate-option" onclick="translateTo('ja')"><span class="tl-flag">🇯🇵</span> Japanese</button>
+      <button class="translate-option" onclick="translateTo('ar')"><span class="tl-flag">🇸🇦</span> Arabic</button>
+    </div>
+  </div>
   <a href="login.html" class="nav-cta">Sign In / Join</a>
   <button class="nav-hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
     <span></span><span></span><span></span>
@@ -1007,7 +1076,7 @@ footer {
 </nav>
 
 <!-- Mobile dropdown menu -->
-<div class="nav-mobile-menu" id="mobileMenu">
+<div class="nav-mobile-menu notranslate" id="mobileMenu">
   <ul>
     <li><a href="#tools" onclick="closeMenu()">Tools <span class="menu-arrow">→</span></a></li>
     <li><a href="tools.html" onclick="closeMenu()">All Tools <span class="menu-arrow">→</span></a></li>
@@ -1016,6 +1085,22 @@ footer {
     <li><a href="#faq" onclick="closeMenu()">FAQ <span class="menu-arrow">→</span></a></li>
     <li><a href="/blog" onclick="closeMenu()">Blog <span class="menu-arrow">→</span></a></li>
   </ul>
+  <div class="mobile-translate-section">
+    <div class="mobile-translate-label">🌐 Translate</div>
+    <div class="mobile-translate-grid">
+      <button class="mobile-translate-opt" onclick="translateTo('es');closeMenu()">🇪🇸 Spanish</button>
+      <button class="mobile-translate-opt" onclick="translateTo('fr');closeMenu()">🇫🇷 French</button>
+      <button class="mobile-translate-opt" onclick="translateTo('de');closeMenu()">🇩🇪 German</button>
+      <button class="mobile-translate-opt" onclick="translateTo('it');closeMenu()">🇮🇹 Italian</button>
+      <button class="mobile-translate-opt" onclick="translateTo('pt');closeMenu()">🇧🇷 Portuguese</button>
+      <button class="mobile-translate-opt" onclick="translateTo('zh-CN');closeMenu()">🇨🇳 Chinese</button>
+      <button class="mobile-translate-opt" onclick="translateTo('ja');closeMenu()">🇯🇵 Japanese</button>
+      <button class="mobile-translate-opt" onclick="translateTo('ar');closeMenu()">🇸🇦 Arabic</button>
+    </div>
+    <div class="mobile-translate-grid" style="padding-top:0;">
+      <button class="mobile-translate-opt" onclick="resetTranslation()" style="color:var(--text3);font-size:0.75rem;">🇬🇧 Reset to English</button>
+    </div>
+  </div>
   <div class="nav-mobile-cta">
     <a href="login.html" onclick="closeMenu()">Sign In / Join →</a>
   </div>
@@ -1432,7 +1517,7 @@ footer {
 </section>
 
 <!-- ═══════════════════════════════ FOOTER -->
-<footer>
+<footer class="notranslate">
   <div class="footer-brand">
     The Artifacts Lab
     <span>theartifactslab.com · Est. 2026</span>
@@ -1599,5 +1684,62 @@ function toggleFaq(btn, event) {
   }
 }
 </script>
+
+<!-- Google Translate Widget -->
+<div id="google_translate_element" style="display:none;"></div>
+<script>
+function loadGTranslate() {
+  if (window._gtLoaded) return;
+  window._gtLoaded = true;
+  const s = document.createElement('script');
+  s.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+  s.async = true;
+  document.body.appendChild(s);
+}
+window.googleTranslateElementInit = function() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'en',
+    includedLanguages: 'es,fr,de,it,pt,zh-CN,ja,ar',
+    autoDisplay: false
+  }, 'google_translate_element');
+};
+function translateTo(lang) {
+  loadGTranslate();
+  const attempt = setInterval(function() {
+    const combo = document.querySelector('.goog-te-combo');
+    if (combo) {
+      clearInterval(attempt);
+      combo.value = lang;
+      combo.dispatchEvent(new Event('change'));
+      const wrap = document.getElementById('translateWrap');
+      if (wrap) wrap.classList.remove('open');
+    }
+  }, 100);
+  setTimeout(function() { clearInterval(attempt); }, 5000);
+}
+function toggleTranslate() {
+  const wrap = document.getElementById('translateWrap');
+  const isOpen = wrap.classList.contains('open');
+  wrap.classList.toggle('open');
+  if (!isOpen) loadGTranslate();
+}
+function resetTranslation() {
+  const domains = [location.hostname, '.' + location.hostname, ''];
+  const paths   = ['/', '/index.html', ''];
+  domains.forEach(d => paths.forEach(p => {
+    document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC;'
+      + (d ? ' domain=' + d + ';' : '') + ' path=' + (p || '/') + ';';
+  }));
+  const wrap = document.getElementById('translateWrap');
+  if (wrap) wrap.classList.remove('open');
+  window.location.reload();
+}
+document.addEventListener('click', function(e) {
+  const wrap = document.getElementById('translateWrap');
+  if (wrap && !wrap.contains(e.target)) wrap.classList.remove('open');
+});
+const _gtStyle = document.createElement('style');
+_gtStyle.textContent = 'body{top:0!important}.goog-te-banner-frame{display:none!important}.skiptranslate{display:none!important}#goog-gt-tt{display:none!important}';
+document.head.appendChild(_gtStyle);
+</script>
 </body>
-</html>
