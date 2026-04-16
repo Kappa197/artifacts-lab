@@ -1395,11 +1395,18 @@ async function initTier(){
       } else {
         const { data: profile, error: profileErr } = await sb
           .from('profiles')
-          .select('tier')
+          .select('tier, preferred_language')
           .eq('id', user.id)
           .single();
         var tier = (profile && !profileErr) ? (profile.tier || 'free') : 'free';
         buildCan(tier);
+        // Store preferred language for auto-apply after init
+        if (profile?.preferred_language && profile.preferred_language !== 'en') {
+          setTimeout(() => applyTranslation(profile.preferred_language), 500);
+        }
+        if (profile?.preferred_language && profile.preferred_language !== 'en') {
+          applyTranslation(profile.preferred_language);
+        }
       }
     }
   } catch(e){
@@ -1430,6 +1437,15 @@ async function initTier(){
 
   document.getElementById('appLoader').style.display = 'none';
   init();
+
+  // Auto-apply language preference
+  try {
+    const { data: { user: u } } = await sb.auth.getUser();
+    if (u) {
+      const { data: lp } = await sb.from('profiles').select('preferred_language').eq('id', u.id).single();
+      if (lp?.preferred_language && lp.preferred_language !== 'en') applyTranslation(lp.preferred_language);
+    }
+  } catch(e) { /* silent fail */ }
 }
 
 
@@ -3561,8 +3577,9 @@ window.addEventListener('load', initTier);
 <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
 
 
-<!-- Google Translate Widget -->
-<div id="google_translate_element" style="display:none;"></div>
+
+
+<!-- Auto-apply language preference -->
 <script>
 function loadGTranslate() {
   if (window._gtLoaded) return; window._gtLoaded = true;
@@ -3577,7 +3594,8 @@ window.googleTranslateElementInit = function() {
     autoDisplay: false
   }, 'google_translate_element');
 };
-function translateTo(lang) {
+function applyTranslation(lang) {
+  if (!lang || lang === 'en') return;
   loadGTranslate();
   const t = setInterval(function() {
     const combo = document.querySelector('.goog-te-combo');
@@ -3585,17 +3603,14 @@ function translateTo(lang) {
       clearInterval(t);
       combo.value = lang;
       combo.dispatchEvent(new Event('change'));
-      const w = document.getElementById('translateWrap');
-      if (w) w.classList.remove('open');
+      const btn = document.getElementById('translateBtn');
+      if (btn) btn.classList.add('active');
     }
   }, 100);
   setTimeout(function() { clearInterval(t); }, 5000);
 }
-function toggleTranslate() {
-  const w = document.getElementById('translateWrap');
-  w.classList.toggle('open');
-  if (w.classList.contains('open')) loadGTranslate();
-}
+// translateTo still needed for manual dropdown selections
+function translateTo(lang) { applyTranslation(lang); }
 function resetTranslation() {
   [location.hostname, '.'+location.hostname, ''].forEach(d =>
     ['/', window.location.pathname, ''].forEach(p => {
@@ -3603,9 +3618,13 @@ function resetTranslation() {
         + (d ? 'domain='+d+';' : '') + ' path='+(p||'/')+';';
     })
   );
-  const w = document.getElementById('translateWrap');
-  if (w) w.classList.remove('open');
   window.location.reload();
+}
+function toggleTranslate() {
+  const w = document.getElementById('translateWrap');
+  if (!w) return;
+  w.classList.toggle('open');
+  if (w.classList.contains('open')) loadGTranslate();
 }
 document.addEventListener('click', function(e) {
   const w = document.getElementById('translateWrap');
@@ -3615,4 +3634,6 @@ const _s = document.createElement('style');
 _s.textContent = 'body{top:0!important}.goog-te-banner-frame{display:none!important}.skiptranslate{display:none!important}#goog-gt-tt{display:none!important}';
 document.head.appendChild(_s);
 </script>
+<div id="google_translate_element" style="display:none;"></div>
+
 </body>

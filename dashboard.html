@@ -396,20 +396,86 @@ main {
 .h-install-btn:hover { background: var(--amber); color: var(--navy); }
 @media (max-width: 540px) { .h-install-btn span.h-install-label { display: none; } }
 
-/* ── Translate button ── */
-.translate-wrap {
-  position: relative; display: inline-block; flex-shrink: 0;
+/* ── Language preference ── */
+.lang-modal-backdrop {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7); z-index: 500;
+  align-items: center; justify-content: center;
+  backdrop-filter: blur(4px);
 }
+.lang-modal-backdrop.open { display: flex; }
+.lang-modal {
+  background: var(--navy2); border: 1px solid var(--border2);
+  border-radius: 18px; padding: 36px 32px; max-width: 480px; width: 90%;
+  position: relative;
+}
+.lang-modal-eyebrow {
+  font-family: var(--mono); font-size: 0.58rem; font-weight: 600;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--amber); margin-bottom: 10px;
+}
+.lang-modal-title {
+  font-family: var(--serif); font-size: 1.5rem; font-weight: 700;
+  color: var(--text); margin-bottom: 8px; line-height: 1.2;
+}
+.lang-modal-sub {
+  font-size: 0.85rem; color: var(--text2); line-height: 1.65;
+  margin-bottom: 24px;
+}
+.lang-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 8px; margin-bottom: 16px;
+}
+.lang-opt {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; border-radius: 9px;
+  background: var(--navy3); border: 1px solid var(--border);
+  font-family: var(--body); font-size: 0.85rem; color: var(--text2);
+  cursor: pointer; transition: all 0.15s;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.lang-opt:hover { border-color: var(--amber); color: var(--amber2); background: var(--amber-dim); }
+.lang-opt .lang-flag { font-size: 1.1rem; }
+.lang-skip {
+  width: 100%; padding: 10px; background: none; border: none;
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text3); cursor: pointer;
+  transition: color 0.2s; text-align: center; margin-top: 4px;
+}
+.lang-skip:hover { color: var(--text2); }
+
+/* Account language row */
+.ac-lang-select {
+  background: var(--navy3); border: 1px solid var(--border2);
+  border-radius: 6px; padding: 4px 8px; font-family: var(--body);
+  font-size: 0.8rem; color: var(--text); cursor: pointer;
+  outline: none; transition: border-color 0.2s;
+}
+.ac-lang-select:focus { border-color: var(--amber); }
+.ac-lang-save {
+  background: none; border: 1px solid var(--amber);
+  border-radius: 6px; padding: 4px 10px; font-family: var(--mono);
+  font-size: 0.55rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--amber); cursor: pointer; transition: all 0.2s;
+  display: none;
+}
+.ac-lang-save:hover { background: var(--amber-dim); }
+.ac-lang-saved {
+  font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--green); display: none;
+}
+
+/* Translate button in header */
+.translate-wrap { position: relative; display: inline-block; flex-shrink: 0; }
 .translate-btn {
   font-family: var(--mono); font-size: 0.6rem; font-weight: 600;
-  letter-spacing: 0.08em; text-transform: uppercase;
-  padding: 6px 10px; border-radius: 6px;
+  letter-spacing: 0.08em; padding: 6px 10px; border-radius: 6px;
   background: transparent; border: 1px solid var(--border2);
   color: var(--text3); cursor: pointer; transition: all 0.2s;
   display: flex; align-items: center; gap: 4px; white-space: nowrap;
   touch-action: manipulation; -webkit-tap-highlight-color: transparent;
 }
-.translate-btn:hover { border-color: var(--amber); color: var(--amber2); }
+.translate-btn:hover, .translate-btn.active { border-color: var(--amber); color: var(--amber2); }
 .translate-dropdown {
   display: none; position: absolute; top: calc(100% + 8px); right: 0;
   background: var(--navy2); border: 1px solid var(--border2);
@@ -440,17 +506,17 @@ main {
     <span class="h-email" id="hEmail">—</span>
     <button class="h-install-btn" onclick="installApp()">&#128242; <span class="h-install-label">Add to Home Screen</span></button>
 <div class="translate-wrap" id="translateWrap">
-    <button class="translate-btn" onclick="toggleTranslate()" aria-label="Translate page">🌐</button>
+    <button class="translate-btn" id="translateBtn" onclick="toggleTranslate()" aria-label="Translate">🌐</button>
     <div class="translate-dropdown">
-      <button class="translate-option" onclick="resetTranslation()" style="border-bottom:1px solid var(--border);color:var(--text3);font-size:0.75rem;"><span class="tl-flag">🇬🇧</span> English (reset)</button>
-      <button class="translate-option" onclick="translateTo('es')"><span class="tl-flag">🇪🇸</span> Spanish</button>
-      <button class="translate-option" onclick="translateTo('fr')"><span class="tl-flag">🇫🇷</span> French</button>
-      <button class="translate-option" onclick="translateTo('de')"><span class="tl-flag">🇩🇪</span> German</button>
-      <button class="translate-option" onclick="translateTo('it')"><span class="tl-flag">🇮🇹</span> Italian</button>
-      <button class="translate-option" onclick="translateTo('pt')"><span class="tl-flag">🇧🇷</span> Portuguese</button>
-      <button class="translate-option" onclick="translateTo('zh-CN')"><span class="tl-flag">🇨🇳</span> Chinese</button>
-      <button class="translate-option" onclick="translateTo('ja')"><span class="tl-flag">🇯🇵</span> Japanese</button>
-      <button class="translate-option" onclick="translateTo('ar')"><span class="tl-flag">🇸🇦</span> Arabic</button>
+      <button class="translate-option" onclick="saveLangPref('en')" style="border-bottom:1px solid var(--border);color:var(--text3);font-size:0.75rem;"><span class="tl-flag">🇬🇧</span> English (reset)</button>
+      <button class="translate-option" onclick="saveLangPref('es')"><span class="tl-flag">🇪🇸</span> Spanish</button>
+      <button class="translate-option" onclick="saveLangPref('fr')"><span class="tl-flag">🇫🇷</span> French</button>
+      <button class="translate-option" onclick="saveLangPref('de')"><span class="tl-flag">🇩🇪</span> German</button>
+      <button class="translate-option" onclick="saveLangPref('it')"><span class="tl-flag">🇮🇹</span> Italian</button>
+      <button class="translate-option" onclick="saveLangPref('pt')"><span class="tl-flag">🇧🇷</span> Portuguese</button>
+      <button class="translate-option" onclick="saveLangPref('zh-CN')"><span class="tl-flag">🇨🇳</span> Chinese</button>
+      <button class="translate-option" onclick="saveLangPref('ja')"><span class="tl-flag">🇯🇵</span> Japanese</button>
+      <button class="translate-option" onclick="saveLangPref('ar')"><span class="tl-flag">🇸🇦</span> Arabic</button>
     </div>
   </div>
       <button class="h-signout" onclick="signOut()">Sign Out</button>
@@ -661,6 +727,24 @@ main {
       <div class="ac-row"><span class="ac-key">Email</span><span class="ac-val" id="acEmail">—</span></div>
       <div class="ac-row"><span class="ac-key">Member since</span><span class="ac-val" id="acSince">—</span></div>
       <div class="ac-row"><span class="ac-key">Current plan</span><span class="ac-val amber" id="acPlan">Free</span></div>
+      <div class="ac-row">
+        <span class="ac-key">Language</span>
+        <span style="display:flex;align-items:center;gap:8px;">
+          <select class="ac-lang-select" id="acLangSelect" onchange="onLangSelectChange()">
+            <option value="en">🇬🇧 English</option>
+            <option value="es">🇪🇸 Spanish</option>
+            <option value="fr">🇫🇷 French</option>
+            <option value="de">🇩🇪 German</option>
+            <option value="it">🇮🇹 Italian</option>
+            <option value="pt">🇧🇷 Portuguese</option>
+            <option value="zh-CN">🇨🇳 Chinese</option>
+            <option value="ja">🇯🇵 Japanese</option>
+            <option value="ar">🇸🇦 Arabic</option>
+          </select>
+          <button class="ac-lang-save" id="acLangSave" onclick="saveAccountLang()">Save</button>
+          <span class="ac-lang-saved" id="acLangSaved">✓ Saved</span>
+        </span>
+      </div>
     </div>
     <div class="account-card">
       <div class="ac-title">Plan Includes</div>
@@ -746,7 +830,7 @@ async function init() {
   // Fetch profile in parallel with rendering skeleton
   const profilePromise = db
     .from('profiles')
-    .select('tier, tier_expiry, created_at')
+    .select('tier, tier_expiry, created_at, preferred_language')
     .eq('id', user.id)
     .single();
 
@@ -827,6 +911,21 @@ async function init() {
     `<span id="featExpense">${hasBasic ? yes : no}</span>`;
   document.getElementById('featWorkout').outerHTML =
     `<span id="featWorkout">${hasBasic ? yes : no}</span>`;
+
+  // ── Language preference ──
+  const savedLang = profile?.preferred_language;
+  const langSelect = document.getElementById('acLangSelect');
+  if (langSelect && savedLang) langSelect.value = savedLang;
+
+  if (!savedLang) {
+    // First visit — show language modal after short delay
+    setTimeout(() => {
+      document.getElementById('langModal').classList.add('open');
+    }, 1200);
+  } else if (savedLang !== 'en') {
+    // Returning user with non-English preference — auto-apply
+    applyTranslation(savedLang);
+  }
 }
 
 // ── MODAL ──
@@ -920,9 +1019,37 @@ async function installApp() {
 }
 </script>
 
+<!-- ── Language preference modal (first visit) ── -->
+<div class="lang-modal-backdrop" id="langModal">
+  <div class="lang-modal">
+    <div class="lang-modal-eyebrow">One quick question</div>
+    <div class="lang-modal-title">What's your preferred language?</div>
+    <div class="lang-modal-sub">We'll remember this and translate your dashboard and tools automatically on every visit.</div>
+    <div class="lang-grid">
+      <button class="lang-opt" onclick="saveLangPref('en')"><span class="lang-flag">🇬🇧</span> English</button>
+      <button class="lang-opt" onclick="saveLangPref('es')"><span class="lang-flag">🇪🇸</span> Spanish</button>
+      <button class="lang-opt" onclick="saveLangPref('fr')"><span class="lang-flag">🇫🇷</span> French</button>
+      <button class="lang-opt" onclick="saveLangPref('de')"><span class="lang-flag">🇩🇪</span> German</button>
+      <button class="lang-opt" onclick="saveLangPref('it')"><span class="lang-flag">🇮🇹</span> Italian</button>
+      <button class="lang-opt" onclick="saveLangPref('pt')"><span class="lang-flag">🇧🇷</span> Portuguese</button>
+      <button class="lang-opt" onclick="saveLangPref('zh-CN')"><span class="lang-flag">🇨🇳</span> Chinese</button>
+      <button class="lang-opt" onclick="saveLangPref('ja')"><span class="lang-flag">🇯🇵</span> Japanese</button>
+      <button class="lang-opt" onclick="saveLangPref('ar')"><span class="lang-flag">🇸🇦</span> Arabic</button>
+    </div>
+    <button class="lang-skip" onclick="saveLangPref('en')">Skip — keep English →</button>
+  </div>
+</div>
+
 <!-- Google Translate Widget -->
 <div id="google_translate_element" style="display:none;"></div>
+
 <script>
+// ── Language preference ─────────────────────────────────────────────
+const LANG_NAMES = {
+  en:'English', es:'Spanish', fr:'French', de:'German',
+  it:'Italian', pt:'Portuguese', 'zh-CN':'Chinese', ja:'Japanese', ar:'Arabic'
+};
+
 function loadGTranslate() {
   if (window._gtLoaded) return; window._gtLoaded = true;
   const s = document.createElement('script');
@@ -930,34 +1057,96 @@ function loadGTranslate() {
   s.async = true; document.body.appendChild(s);
 }
 window.googleTranslateElementInit = function() {
-  new google.translate.TranslateElement({ pageLanguage:'en', includedLanguages:'es,fr,de,it,pt,zh-CN,ja,ar', autoDisplay:false }, 'google_translate_element');
+  new google.translate.TranslateElement({
+    pageLanguage: 'en',
+    includedLanguages: 'es,fr,de,it,pt,zh-CN,ja,ar',
+    autoDisplay: false
+  }, 'google_translate_element');
 };
-function translateTo(lang) {
+
+function applyTranslation(lang) {
+  if (lang === 'en') { resetTranslation(false); return; }
   loadGTranslate();
   const t = setInterval(function() {
-    const c = document.querySelector('.goog-te-combo');
-    if (c) { clearInterval(t); c.value = lang; c.dispatchEvent(new Event('change')); const w=document.getElementById('translateWrap'); if(w) w.classList.remove('open'); }
+    const combo = document.querySelector('.goog-te-combo');
+    if (combo) {
+      clearInterval(t);
+      combo.value = lang;
+      combo.dispatchEvent(new Event('change'));
+      // Highlight translate button to show a preference is active
+      const btn = document.getElementById('translateBtn');
+      if (btn) btn.classList.add('active');
+    }
   }, 100);
   setTimeout(function() { clearInterval(t); }, 5000);
 }
-function toggleTranslate() {
-  const w = document.getElementById('translateWrap');
-  w.classList.toggle('open'); if (w.classList.contains('open')) loadGTranslate();
+
+async function saveLangPref(lang) {
+  // Close modal and dropdown
+  document.getElementById('langModal').classList.remove('open');
+  const wrap = document.getElementById('translateWrap');
+  if (wrap) wrap.classList.remove('open');
+
+  // Update account select
+  const sel = document.getElementById('acLangSelect');
+  if (sel) sel.value = lang;
+
+  // Save to Supabase
+  const { data: { session } } = await db.auth.getSession();
+  if (session) {
+    await db.from('profiles')
+      .update({ preferred_language: lang })
+      .eq('id', session.user.id);
+  }
+
+  // Apply translation
+  applyTranslation(lang);
+
+  // Update translate button indicator
+  const btn = document.getElementById('translateBtn');
+  if (btn) btn.classList.toggle('active', lang !== 'en');
 }
-function resetTranslation() {
+
+function onLangSelectChange() {
+  document.getElementById('acLangSave').style.display = 'inline-block';
+  document.getElementById('acLangSaved').style.display = 'none';
+}
+
+async function saveAccountLang() {
+  const lang = document.getElementById('acLangSelect').value;
+  await saveLangPref(lang);
+  document.getElementById('acLangSave').style.display = 'none';
+  document.getElementById('acLangSaved').style.display = 'inline';
+  setTimeout(() => {
+    document.getElementById('acLangSaved').style.display = 'none';
+  }, 2000);
+}
+
+function resetTranslation(reload = true) {
   [location.hostname, '.'+location.hostname, ''].forEach(d =>
     ['/', window.location.pathname, ''].forEach(p => {
-      document.cookie='googtrans=;expires=Thu, 01 Jan 1970 00:00:00 UTC;'+(d?'domain='+d+';':'')+' path='+(p||'/') +';';
+      document.cookie = 'googtrans=;expires=Thu, 01 Jan 1970 00:00:00 UTC;'
+        + (d ? 'domain='+d+';' : '') + ' path='+(p||'/')+';';
     })
   );
-  const w=document.getElementById('translateWrap'); if(w) w.classList.remove('open');
-  window.location.reload();
+  const btn = document.getElementById('translateBtn');
+  if (btn) btn.classList.remove('active');
+  if (reload) window.location.reload();
 }
+
+function toggleTranslate() {
+  const w = document.getElementById('translateWrap');
+  w.classList.toggle('open');
+  if (w.classList.contains('open')) loadGTranslate();
+}
+
 document.addEventListener('click', function(e) {
-  const w=document.getElementById('translateWrap'); if(w && !w.contains(e.target)) w.classList.remove('open');
+  const w = document.getElementById('translateWrap');
+  if (w && !w.contains(e.target)) w.classList.remove('open');
 });
-const _s=document.createElement('style');
-_s.textContent='body{top:0!important}.goog-te-banner-frame{display:none!important}.skiptranslate{display:none!important}#goog-gt-tt{display:none!important}';
+
+const _s = document.createElement('style');
+_s.textContent = 'body{top:0!important}.goog-te-banner-frame{display:none!important}.skiptranslate{display:none!important}#goog-gt-tt{display:none!important}';
 document.head.appendChild(_s);
 </script>
 </body>

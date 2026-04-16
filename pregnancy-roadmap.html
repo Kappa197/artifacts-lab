@@ -1474,8 +1474,11 @@ async function initTier() {
     const { data: { session } } = await db.auth.getSession();
 
     if (session?.user) {
-      const { data } = await db.from('profiles').select('tier').eq('id', session.user.id).single();
+      const { data } = await db.from('profiles').select('tier, preferred_language').eq('id', session.user.id).single();
       TIER = data?.tier || 'free';
+      if (data?.preferred_language && data.preferred_language !== 'en') {
+        applyTranslation(data.preferred_language);
+      }
     }
 
     // Change 3 — update nav tier badge
@@ -1500,6 +1503,10 @@ async function initTier() {
 
   can = buildCan(TIER);
   if (!document.getElementById('roadmap-screen').classList.contains('hidden')) renderTimeline();
+
+  // Auto-apply language preference
+  const prefLang = typeof data !== 'undefined' && data?.preferred_language;
+  if (prefLang && prefLang !== 'en') applyTranslation(prefLang);
 }
 
 window.addEventListener('load', initTier);
@@ -2934,8 +2941,9 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<!-- Google Translate Widget -->
-<div id="google_translate_element" style="display:none;"></div>
+
+
+<!-- Auto-apply language preference -->
 <script>
 function loadGTranslate() {
   if (window._gtLoaded) return; window._gtLoaded = true;
@@ -2950,7 +2958,8 @@ window.googleTranslateElementInit = function() {
     autoDisplay: false
   }, 'google_translate_element');
 };
-function translateTo(lang) {
+function applyTranslation(lang) {
+  if (!lang || lang === 'en') return;
   loadGTranslate();
   const t = setInterval(function() {
     const combo = document.querySelector('.goog-te-combo');
@@ -2958,17 +2967,14 @@ function translateTo(lang) {
       clearInterval(t);
       combo.value = lang;
       combo.dispatchEvent(new Event('change'));
-      const w = document.getElementById('translateWrap');
-      if (w) w.classList.remove('open');
+      const btn = document.getElementById('translateBtn');
+      if (btn) btn.classList.add('active');
     }
   }, 100);
   setTimeout(function() { clearInterval(t); }, 5000);
 }
-function toggleTranslate() {
-  const w = document.getElementById('translateWrap');
-  w.classList.toggle('open');
-  if (w.classList.contains('open')) loadGTranslate();
-}
+// translateTo still needed for manual dropdown selections
+function translateTo(lang) { applyTranslation(lang); }
 function resetTranslation() {
   [location.hostname, '.'+location.hostname, ''].forEach(d =>
     ['/', window.location.pathname, ''].forEach(p => {
@@ -2976,9 +2982,13 @@ function resetTranslation() {
         + (d ? 'domain='+d+';' : '') + ' path='+(p||'/')+';';
     })
   );
-  const w = document.getElementById('translateWrap');
-  if (w) w.classList.remove('open');
   window.location.reload();
+}
+function toggleTranslate() {
+  const w = document.getElementById('translateWrap');
+  if (!w) return;
+  w.classList.toggle('open');
+  if (w.classList.contains('open')) loadGTranslate();
 }
 document.addEventListener('click', function(e) {
   const w = document.getElementById('translateWrap');
@@ -2988,4 +2998,6 @@ const _s = document.createElement('style');
 _s.textContent = 'body{top:0!important}.goog-te-banner-frame{display:none!important}.skiptranslate{display:none!important}#goog-gt-tt{display:none!important}';
 document.head.appendChild(_s);
 </script>
+<div id="google_translate_element" style="display:none;"></div>
+
 </body>
