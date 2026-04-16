@@ -926,14 +926,18 @@ function toggleTranslate() {
   if (!isOpen) loadGTranslate();
 }
 
-// 5. Reset to English
+// 5. Reset to English — clear Google's translation cookie and reload
 function resetTranslation() {
-  const combo = document.querySelector('.goog-te-combo');
-  if (combo) {
-    combo.value = 'en';
-    combo.dispatchEvent(new Event('change'));
-  }
+  // Delete the googtrans cookie on all possible domain/path combos
+  const domains = [location.hostname, '.' + location.hostname, ''];
+  const paths   = ['/', '/tools.html', ''];
+  domains.forEach(d => paths.forEach(p => {
+    document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC;'
+      + (d ? ' domain=' + d + ';' : '')
+      + ' path=' + (p || '/') + ';';
+  }));
   document.getElementById('translateWrap').classList.remove('open');
+  window.location.reload();
 }
 
 // 6. Close dropdown on outside click
