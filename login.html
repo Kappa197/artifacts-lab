@@ -243,14 +243,61 @@ body::after {
   text-align: center; line-height: 1.6;
 }
 .free-note strong { color: var(--amber2); }
+
+/* ── Translate button ── */
+.translate-wrap {
+  position: relative; display: inline-block; flex-shrink: 0;
+}
+.translate-btn {
+  font-family: var(--mono); font-size: 0.6rem; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 6px 10px; border-radius: 6px;
+  background: transparent; border: 1px solid var(--border2);
+  color: var(--text3); cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; gap: 4px; white-space: nowrap;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.translate-btn:hover { border-color: var(--amber); color: var(--amber2); }
+.translate-dropdown {
+  display: none; position: absolute; top: calc(100% + 8px); right: 0;
+  background: var(--navy2); border: 1px solid var(--border2);
+  border-radius: 10px; overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4); min-width: 160px; z-index: 300;
+}
+.translate-wrap.open .translate-dropdown { display: block; }
+.translate-option {
+  display: flex; align-items: center; gap: 10px; padding: 11px 16px;
+  font-family: var(--body); font-size: 0.82rem; color: var(--text2);
+  background: none; border: none; width: 100%; text-align: left;
+  cursor: pointer; transition: all 0.15s;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.translate-option:hover { background: var(--amber-dim); color: var(--amber2); }
+.translate-option .tl-flag { font-size: 1rem; }
+
 </style>
 </head>
 <body>
 
 <div class="card">
   <div class="card-top">
-    <div class="logo-icon">⚗️</div>
+    <div class="logo-icon notranslate">⚗️</div>
     <div class="logo-text">The Artifacts Lab</div>
+    <div class="translate-wrap" id="translateWrap">
+    <button class="translate-btn" onclick="toggleTranslate()" aria-label="Translate page">🌐</button>
+    <div class="translate-dropdown">
+      <button class="translate-option" onclick="resetTranslation()" style="border-bottom:1px solid var(--border);color:var(--text3);font-size:0.75rem;"><span class="tl-flag">🇬🇧</span> English (reset)</button>
+      <button class="translate-option" onclick="translateTo('es')"><span class="tl-flag">🇪🇸</span> Spanish</button>
+      <button class="translate-option" onclick="translateTo('fr')"><span class="tl-flag">🇫🇷</span> French</button>
+      <button class="translate-option" onclick="translateTo('de')"><span class="tl-flag">🇩🇪</span> German</button>
+      <button class="translate-option" onclick="translateTo('it')"><span class="tl-flag">🇮🇹</span> Italian</button>
+      <button class="translate-option" onclick="translateTo('pt')"><span class="tl-flag">🇧🇷</span> Portuguese</button>
+      <button class="translate-option" onclick="translateTo('zh-CN')"><span class="tl-flag">🇨🇳</span> Chinese</button>
+      <button class="translate-option" onclick="translateTo('ja')"><span class="tl-flag">🇯🇵</span> Japanese</button>
+      <button class="translate-option" onclick="translateTo('ar')"><span class="tl-flag">🇸🇦</span> Arabic</button>
+    </div>
+  </div>
+  
   </div>
 
   <!-- TABS -->
@@ -426,5 +473,45 @@ document.addEventListener('keydown', e => {
   else if (document.getElementById('formForgot').style.display !== 'none') resetPassword();
 });
 </script>
+
+<!-- Google Translate Widget -->
+<div id="google_translate_element" style="display:none;"></div>
+<script>
+function loadGTranslate() {
+  if (window._gtLoaded) return; window._gtLoaded = true;
+  const s = document.createElement('script');
+  s.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+  s.async = true; document.body.appendChild(s);
+}
+window.googleTranslateElementInit = function() {
+  new google.translate.TranslateElement({ pageLanguage:'en', includedLanguages:'es,fr,de,it,pt,zh-CN,ja,ar', autoDisplay:false }, 'google_translate_element');
+};
+function translateTo(lang) {
+  loadGTranslate();
+  const t = setInterval(function() {
+    const c = document.querySelector('.goog-te-combo');
+    if (c) { clearInterval(t); c.value = lang; c.dispatchEvent(new Event('change')); const w=document.getElementById('translateWrap'); if(w) w.classList.remove('open'); }
+  }, 100);
+  setTimeout(function() { clearInterval(t); }, 5000);
+}
+function toggleTranslate() {
+  const w = document.getElementById('translateWrap');
+  w.classList.toggle('open'); if (w.classList.contains('open')) loadGTranslate();
+}
+function resetTranslation() {
+  [location.hostname, '.'+location.hostname, ''].forEach(d =>
+    ['/', window.location.pathname, ''].forEach(p => {
+      document.cookie='googtrans=;expires=Thu, 01 Jan 1970 00:00:00 UTC;'+(d?'domain='+d+';':'')+' path='+(p||'/') +';';
+    })
+  );
+  const w=document.getElementById('translateWrap'); if(w) w.classList.remove('open');
+  window.location.reload();
+}
+document.addEventListener('click', function(e) {
+  const w=document.getElementById('translateWrap'); if(w && !w.contains(e.target)) w.classList.remove('open');
+});
+const _s=document.createElement('style');
+_s.textContent='body{top:0!important}.goog-te-banner-frame{display:none!important}.skiptranslate{display:none!important}#goog-gt-tt{display:none!important}';
+document.head.appendChild(_s);
+</script>
 </body>
-</html>
