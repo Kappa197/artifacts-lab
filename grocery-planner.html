@@ -402,11 +402,40 @@ input[type=range]:active::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(212,146
 
 .basket-add-btn{width:100%;margin-top:8px;padding:8px;border-radius:8px;border:1.5px dashed var(--border2);background:transparent;color:var(--text3);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;}
 .basket-add-btn:hover{border-color:var(--green);color:var(--green);}
+
+    /* ── Translate button ── */
+    .translate-wrap { position: relative; display: inline-block; flex-shrink: 0; }
+    .translate-btn {
+      font-family: var(--mono); font-size: 0.6rem; font-weight: 600;
+      letter-spacing: 0.08em; padding: 6px 10px; border-radius: 6px;
+      background: transparent; border: 1px solid var(--border2);
+      color: var(--text3); cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; gap: 4px; white-space: nowrap;
+      touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+    }
+    .translate-btn:hover, .translate-btn.active { border-color: var(--amber); color: var(--amber2); }
+    .translate-dropdown {
+      display: none; position: absolute; top: calc(100% + 8px); right: 0;
+      background: var(--navy2); border: 1px solid var(--border2);
+      border-radius: 10px; overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4); min-width: 160px; z-index: 300;
+    }
+    .translate-wrap.open .translate-dropdown { display: block; }
+    .translate-option {
+      display: flex; align-items: center; gap: 10px; padding: 11px 16px;
+      font-family: var(--body); font-size: 0.82rem; color: var(--text2);
+      background: none; border: none; width: 100%; text-align: left;
+      cursor: pointer; transition: all 0.15s;
+      touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+    }
+    .translate-option:hover { background: var(--amber-dim); color: var(--amber2); }
+    .translate-option .tl-flag { font-size: 1rem; }
+
 </style>
 </head>
 <body>
 
-<header class="tool-header" id="toolHeader">
+<header class="tool-header notranslate" id="toolHeader">
   <a href="javascript:void(0)" class="tool-nav-logo" id="logoLink">
     <div class="tool-nav-icon">&#127803;</div>
     <div class="tool-nav-brand">The Artifacts Lab</div>
@@ -414,6 +443,20 @@ input[type=range]:active::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(212,146
     <div class="tool-nav-title">Grocery Planner</div>
   </a>
   <div class="tool-nav-right">
+    <div class="translate-wrap" id="translateWrap">
+      <button class="translate-btn" id="translateBtn" onclick="toggleTranslate()" aria-label="Translate">🌐</button>
+      <div class="translate-dropdown">
+        <button class="translate-option" onclick="resetTranslation()" style="border-bottom:1px solid var(--border);color:var(--text3);font-size:0.75rem;"><span class="tl-flag">🇬🇧</span> English (reset)</button>
+        <button class="translate-option" onclick="applyTranslation('es')"><span class="tl-flag">🇪🇸</span> Spanish</button>
+        <button class="translate-option" onclick="applyTranslation('fr')"><span class="tl-flag">🇫🇷</span> French</button>
+        <button class="translate-option" onclick="applyTranslation('de')"><span class="tl-flag">🇩🇪</span> German</button>
+        <button class="translate-option" onclick="applyTranslation('it')"><span class="tl-flag">🇮🇹</span> Italian</button>
+        <button class="translate-option" onclick="applyTranslation('pt')"><span class="tl-flag">🇧🇷</span> Portuguese</button>
+        <button class="translate-option" onclick="applyTranslation('zh-CN')"><span class="tl-flag">🇨🇳</span> Chinese</button>
+        <button class="translate-option" onclick="applyTranslation('ja')"><span class="tl-flag">🇯🇵</span> Japanese</button>
+        <button class="translate-option" onclick="applyTranslation('ar')"><span class="tl-flag">🇸🇦</span> Arabic</button>
+      </div>
+    </div>
     <div class="tool-tier-badge" id="toolTierBadge">Free</div>
     <a href="javascript:void(0)" class="tool-nav-back" id="backBtn">&#8592; Dashboard</a>
   </div>
@@ -931,7 +974,7 @@ async function initTier(){
       var user = res.data && res.data.user;
       if(!user){ buildCan('free'); }
       else {
-        var pr = await sb.from('profiles').select('tier').eq('id',user.id).single();
+        var pr = await sb.from('profiles').select('tier, preferred_language').eq('id',user.id).single();
         buildCan((pr.data&&pr.data.tier)||'free');
       }
     }
@@ -949,6 +992,12 @@ async function initTier(){
   }
   document.getElementById('appLoader').style.display='none';
   init();
+
+  // Auto-apply language preference
+  try {
+    var prefLang = (pr && pr.data && pr.data.preferred_language) ? pr.data.preferred_language : null;
+    if (prefLang && prefLang !== 'en') applyTranslation(prefLang);
+  } catch(e) {}
 }
 
 // ── State ──────────────────────────────────────────
@@ -6312,5 +6361,55 @@ window.regenChangePrefs = function(){
 
 window.addEventListener('load', initTier);
 </script>
+
+<!-- Google Translate Widget -->
+<div id="google_translate_element" style="display:none;"></div>
+<script>
+function loadGTranslate() {
+  if (window._gtLoaded) return; window._gtLoaded = true;
+  const s = document.createElement('script');
+  s.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+  s.async = true; document.body.appendChild(s);
+}
+window.googleTranslateElementInit = function() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'en', includedLanguages: 'es,fr,de,it,pt,zh-CN,ja,ar', autoDisplay: false
+  }, 'google_translate_element');
+};
+function applyTranslation(lang) {
+  if (!lang || lang === 'en') return;
+  loadGTranslate();
+  const t = setInterval(function() {
+    const combo = document.querySelector('.goog-te-combo');
+    if (combo) {
+      clearInterval(t); combo.value = lang; combo.dispatchEvent(new Event('change'));
+      const btn = document.getElementById('translateBtn');
+      if (btn) btn.classList.add('active');
+    }
+  }, 100);
+  setTimeout(function() { clearInterval(t); }, 5000);
+}
+function resetTranslation() {
+  [location.hostname, '.'+location.hostname, ''].forEach(d =>
+    ['/', window.location.pathname, ''].forEach(p => {
+      document.cookie = 'googtrans=;expires=Thu, 01 Jan 1970 00:00:00 UTC;'
+        + (d ? 'domain='+d+';' : '') + ' path='+(p||'/')+';';
+    })
+  );
+  window.location.reload();
+}
+function toggleTranslate() {
+  const w = document.getElementById('translateWrap');
+  if (!w) return;
+  w.classList.toggle('open');
+  if (w.classList.contains('open')) loadGTranslate();
+}
+document.addEventListener('click', function(e) {
+  const w = document.getElementById('translateWrap');
+  if (w && !w.contains(e.target)) w.classList.remove('open');
+});
+const _s = document.createElement('style');
+_s.textContent = 'body{top:0!important}.goog-te-banner-frame{display:none!important}.skiptranslate{display:none!important}#goog-gt-tt{display:none!important}';
+document.head.appendChild(_s);
+</script>
 </body>
-</html>
