@@ -425,6 +425,45 @@ footer {
   .translate-wrap { display: none; }
 }
 
+
+/* ── Mobile translate submenu ── */
+.mobile-translate-section {
+  border-top: 1px solid rgba(42,59,85,0.4);
+  padding: 10px 0 4px;
+}
+.mobile-translate-label {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text3);
+  padding: 6px 28px;
+}
+.mobile-translate-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  padding: 4px 16px 8px;
+}
+.mobile-translate-opt {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 12px;
+  font-family: var(--body);
+  font-size: 0.8rem;
+  color: var(--text2);
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.15s;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.mobile-translate-opt:hover,
+.mobile-translate-opt:active { background: var(--amber-dim); color: var(--amber2); }
+
 </style>
 </head>
 <body>
@@ -473,6 +512,22 @@ footer {
     <li><a href="/blog" onclick="closeMenu()">Blog <span class="menu-arrow">→</span></a></li>
     <li><a href="/roadmap" onclick="closeMenu()">Roadmap <span class="menu-arrow">→</span></a></li>
   </ul>
+  <div class="mobile-translate-section">
+    <div class="mobile-translate-label">🌐 Translate</div>
+    <div class="mobile-translate-grid">
+      <button class="mobile-translate-opt" onclick="translateTo('es');closeMenu()">🇪🇸 Spanish</button>
+      <button class="mobile-translate-opt" onclick="translateTo('fr');closeMenu()">🇫🇷 French</button>
+      <button class="mobile-translate-opt" onclick="translateTo('de');closeMenu()">🇩🇪 German</button>
+      <button class="mobile-translate-opt" onclick="translateTo('it');closeMenu()">🇮🇹 Italian</button>
+      <button class="mobile-translate-opt" onclick="translateTo('pt');closeMenu()">🇧🇷 Portuguese</button>
+      <button class="mobile-translate-opt" onclick="translateTo('zh-CN');closeMenu()">🇨🇳 Chinese</button>
+      <button class="mobile-translate-opt" onclick="translateTo('ja');closeMenu()">🇯🇵 Japanese</button>
+      <button class="mobile-translate-opt" onclick="translateTo('ar');closeMenu()">🇸🇦 Arabic</button>
+    </div>
+    <div class="mobile-translate-grid" style="padding-top:0;">
+      <button class="mobile-translate-opt" onclick="resetTranslation()" style="color:var(--text3);font-size:0.75rem;">🇬🇧 Reset to English</button>
+    </div>
+  </div>
   <div class="nav-mobile-cta">
     <a href="login.html" onclick="closeMenu()">Sign In / Join →</a>
   </div>
