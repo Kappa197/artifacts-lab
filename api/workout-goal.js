@@ -49,13 +49,13 @@ async function getAvailableGeminiModels(apiKey) {
 function buildModelPreferenceList(requestedModel, availableModels) {
   const preferredShort = [
     requestedModel || '',
-    // Stable, generally available newer models
-    'gemini-2.5-pro',
+    // Flash first — far more stable, lower latency, avoids 503s on preview endpoints
     'gemini-2.5-flash',
-    // Older ones (kept only as fallback; may be absent from availableModels)
-    'gemini-2.0-pro',
-    'gemini-1.5-pro',
+    'gemini-2.0-flash',
     'gemini-1.5-flash',
+    // Pro as fallback only
+    'gemini-2.5-pro',
+    'gemini-1.5-pro',
   ].filter(Boolean);
 
   // If we have availableModels, only try those.
@@ -141,13 +141,14 @@ async function callGemini(parts, apiKey, requestedModel, temperature) {
       },
     };
 
-    const res = await fetchGeminiWithRetry(url, requestPayload, model, 2);
+    const res = await fetchGeminiWithRetry(url, requestPayload, model, 3);
     if (!res.ok) {
       lastStatus = res.status;
       lastBody = await res.text();
 
-      // Try next model on "model not found/unavailable" style errors.
-      if (res.status === 404 || res.status === 400 || res.status === 403) continue;
+      // Continue to next model on "not found / unavailable / overloaded" errors.
+      // 404/400/403 = model not available for this key; 429/500/502/503/504 = transient overload.
+      if ([400, 403, 404, 429, 500, 502, 503, 504].includes(res.status)) continue;
       throw new Error(`Gemini request failed (${res.status}).`);
     }
 
@@ -188,7 +189,7 @@ export default async function handler(req, res) {
   try {
     const temperature = mode === 'intake' ? 0.15 : 0.2;
     const effectiveRequestedModel =
-      requestedModel || (mode === 'intake' ? 'gemini-2.5-flash' : 'gemini-2.5-pro');
+      requestedModel || 'gemini-2.5-flash'; // flash first for both modes; pro is in fallback list
 
     const text = await callGemini([{ text: prompt }], apiKey, effectiveRequestedModel, temperature);
     const data = extractJsonPayload(text);
