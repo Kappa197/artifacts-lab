@@ -361,6 +361,70 @@ footer {
   .tools-grid { grid-template-columns: 1fr; }
   .cta-strip { padding: 28px 24px; }
 }
+
+/* ── Translate button ── */
+.translate-wrap {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.translate-btn {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 7px 12px;
+  border-radius: 6px;
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--text3);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.translate-btn:hover { border-color: var(--amber); color: var(--amber2); }
+.translate-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: var(--navy2);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  min-width: 160px;
+  z-index: 200;
+}
+.translate-wrap.open .translate-dropdown { display: block; }
+.translate-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 16px;
+  font-family: var(--body);
+  font-size: 0.82rem;
+  color: var(--text2);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+.translate-option:hover { background: var(--amber-dim); color: var(--amber2); }
+.translate-option .tl-flag { font-size: 1rem; }
+@media (max-width: 900px) {
+  .translate-wrap { display: none; }
+}
+
 </style>
 </head>
 <body>
@@ -378,6 +442,21 @@ footer {
     <li><a href="/blog">Blog</a></li>
     <li><a href="/roadmap">Roadmap</a></li>
   </ul>
+  <div class="translate-wrap" id="translateWrap">
+    <button class="translate-btn" onclick="toggleTranslate()" aria-label="Translate page">
+      🌐 <span>Translate</span>
+    </button>
+    <div class="translate-dropdown" id="translateDropdown">
+      <button class="translate-option" onclick="translateTo('es')"><span class="tl-flag">🇪🇸</span> Spanish</button>
+      <button class="translate-option" onclick="translateTo('fr')"><span class="tl-flag">🇫🇷</span> French</button>
+      <button class="translate-option" onclick="translateTo('de')"><span class="tl-flag">🇩🇪</span> German</button>
+      <button class="translate-option" onclick="translateTo('it')"><span class="tl-flag">🇮🇹</span> Italian</button>
+      <button class="translate-option" onclick="translateTo('pt')"><span class="tl-flag">🇧🇷</span> Portuguese</button>
+      <button class="translate-option" onclick="translateTo('zh-CN')"><span class="tl-flag">🇨🇳</span> Chinese</button>
+      <button class="translate-option" onclick="translateTo('ja')"><span class="tl-flag">🇯🇵</span> Japanese</button>
+      <button class="translate-option" onclick="translateTo('ar')"><span class="tl-flag">🇸🇦</span> Arabic</button>
+    </div>
+  </div>
   <a href="login.html" class="nav-cta">Sign In / Join</a>
   <button class="nav-hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
     <span></span><span></span><span></span>
@@ -539,10 +618,11 @@ footer {
           <span class="tc-feat">Weekly Marcos needs</span>
           <span class="tc-feat">Grocery list</span>
           <span class="tc-feat">Full week meal prepping</span>
-          <span class="tc-feat">24 batch recipes</span>
+          <span class="tc-feat">32 batch recipes</span>
         </div>
         <div class="tc-actions">
-          <a href="grocery-planner.html" class="btn-try">Try Free &#8594;</a>
+          <a href="login.html" class="btn-try">Get Basic &#8594;</a>
+          <a href="index.html#pricing" class="btn-learn">Pricing</a>
         </div>
       </div>
 
@@ -787,6 +867,22 @@ window.addEventListener('scroll', () => {
   document.querySelector('nav').style.boxShadow = window.scrollY > 20 ? '0 4px 32px rgba(0,0,0,0.4)' : 'none';
   if (document.getElementById('mobileMenu').classList.contains('open')) closeMenu();
 });
+
+// ── Translate ──────────────────────────────────────
+function toggleTranslate() {
+  document.getElementById('translateWrap').classList.toggle('open');
+}
+function translateTo(lang) {
+  const url = 'https://translate.google.com/translate?sl=en&tl=' + lang +
+              '&u=' + encodeURIComponent(window.location.href);
+  window.open(url, '_self');
+}
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+  const wrap = document.getElementById('translateWrap');
+  if (wrap && !wrap.contains(e.target)) wrap.classList.remove('open');
+});
+
 </script>
 </body>
 </html>
