@@ -878,6 +878,7 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
   <button id="nav-wizard"  onclick="showView('wizard')"  class="active">Setup</button>
   <button id="nav-plan"    onclick="showView('plan')">My Plan</button>
   <button id="nav-tracker" onclick="showView('tracker')">Tracker</button>
+  <button id="nav-goal"    onclick="showView('goal')">My Goal</button>
   <button id="nav-manual"  onclick="showView('manual')">Manual</button>
   <button id="nav-faq"     onclick="showView('faq')">FAQ</button>
 </nav>
@@ -886,6 +887,7 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 
 <!-- ==================== WIZARD ==================== -->
 <div class="view active" id="view-wizard">
+
 
   <!-- SETUP PROGRESS BAR — desktop (hidden on step-0 hero, shown steps 1–4) -->
   <div class="setup-progress" id="setupProgress" style="display:none">
@@ -905,6 +907,7 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
     <div class="spm-bar"><div class="spm-bar-fill" id="spmBarFill" style="width:25%"></div></div>
     <div class="spm-steps-row" id="spmDotsRow"></div>
   </div>
+
 
   <!-- Step 0: Welcome -->
   <div id="step-0">
@@ -928,7 +931,7 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
           <div class="hero-card-title">Build the plan</div>
           <div class="hero-card-sub">Let the tool guide you to build the best plan</div>
         </div>
-        <div class="hero-card" onclick="heroTabGoal()">
+        <div class="hero-card" onclick="showView('goal')">
           <div class="hero-card-title">Set a specific goal</div>
           <div class="hero-card-sub">Let the tool bring you to your goal</div>
         </div>
@@ -1350,113 +1353,117 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
   </div>
 </div>
 
+<!-- ==================== GOAL WIZARD ==================== -->
+
+
+<div class="view hidden" id="view-goal">
+
+  <!-- GOAL PROGRESS BAR — desktop -->
+  <div class="setup-progress hidden" id="goalProgress">
+    <div class="sp-top">
+      <div class="sp-tool-name">Workout Planner — Set Your Goal</div>
+      <div class="sp-fraction">Step <span id="gpCurrentNum">1</span> of 3</div>
+    </div>
+    <div class="sp-steps" id="gpSteps"></div>
+  </div>
+
+  <!-- GOAL PROGRESS BAR — mobile -->
+  <div class="setup-progress-mobile hidden" id="goalProgressMobile">
+    <div class="spm-row">
+      <div class="spm-label" id="gpmLabel">Your Goal</div>
+      <div class="spm-fraction">Step <span id="gpmNum">1</span> of 3</div>
+    </div>
+    <div class="spm-bar"><div class="spm-bar-fill" id="gpmBarFill" style="width:33%"></div></div>
+    <div class="spm-steps-row" id="gpmDotsRow"></div>
+  </div>
+
+
+  <!-- STEP 1 — Describe goal -->
+  <div id="gstep-1" class="wizard">
+    <div class="card">
+      <div class="step-title">Set Your Goal</div>
+      <div class="step-sub">Describe what you want to achieve and when. Be specific — the more precise the target, the better the roadmap.</div>
+
+      <div class="goal-form-grid" style="margin-bottom:1.2rem">
+        <div class="goal-field">
+          <label class="goal-field-label" for="goal-input">Your goal</label>
+          <input id="goal-input" class="goal-input" type="text"
+            placeholder="e.g. Run HYROX under 1h30, do 10 strict pull-ups, bench 100kg"
+            onkeydown="if(event.key==='Enter')generateGoalQuestions()">
+        </div>
+        <div class="goal-field">
+          <label class="goal-field-label" for="goal-timeline-input">Target timeline <span class="hint">— optional</span></label>
+          <input id="goal-timeline-input" class="goal-input" type="text"
+            placeholder="e.g. 6 months, by November, in 10 weeks"
+            onkeydown="if(event.key==='Enter')generateGoalQuestions()">
+        </div>
+      </div>
+
+      <div class="goal-tip-list" style="margin-bottom:1.4rem">
+        <div class="goal-tip">
+          <span style="font-family:var(--mono);font-weight:700;color:var(--amber2);flex-shrink:0">1</span>
+          <div><strong>Be specific</strong> — Use a measurable target like a time, rep count, load, or event date.</div>
+        </div>
+        <div class="goal-tip">
+          <span style="font-family:var(--mono);font-weight:700;color:var(--amber2);flex-shrink:0">2</span>
+          <div><strong>Set a real timeline</strong> — The tool will flag timelines that look too aggressive.</div>
+        </div>
+        <div class="goal-tip">
+          <span style="font-family:var(--mono);font-weight:700;color:var(--amber2);flex-shrink:0">3</span>
+          <div><strong>Use it as strategy</strong> — This creates milestones and structure, not a medical prescription.</div>
+        </div>
+      </div>
+
+      <div id="gstep1-status" class="secondary-note hidden" style="margin-bottom:1rem"></div>
+
+      <div class="step-nav" style="justify-content:flex-end">
+        <button class="btn btn-primary" id="goal-generate-questions-btn" onclick="generateGoalQuestions()">
+          Next — Intake Questions →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2 — Answer intake questions -->
+  <div id="gstep-2" class="wizard hidden">
+    <div class="card">
+      <div class="step-title">Intake Questions</div>
+      <div class="step-sub">Answer these questions so the roadmap can be tailored to your starting point.</div>
+
+      <div id="goal-feasibility" class="goal-feasibility-box hidden" style="margin-bottom:1rem"></div>
+      <div id="goal-questions-form" class="goal-questions-grid" style="margin-bottom:1.2rem"></div>
+      <div id="gstep2-status" class="secondary-note hidden" style="margin-bottom:1rem"></div>
+
+      <div class="step-nav">
+        <button class="btn btn-outline" onclick="goalGoStep(1)">← Back</button>
+        <button class="btn btn-primary" id="goal-generate-plan-btn" onclick="generateGoalPlan()">
+          Build Goal Roadmap →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3 — Roadmap output -->
+  <div id="gstep-3" class="wizard hidden">
+    <div class="card" style="padding:0;overflow:hidden">
+      <div style="padding:1.4rem 1.5rem 1rem;border-bottom:1px solid var(--border)">
+        <div class="step-title">Your Goal Roadmap</div>
+        <div class="step-sub" id="goal-roadmap-subtitle">Your personalised milestone plan.</div>
+      </div>
+      <div style="padding:1.2rem 1.5rem">
+        <div id="goal-plan-output"></div>
+      </div>
+    </div>
+    <div style="max-width:580px;margin:.75rem auto 1.5rem;display:flex;gap:.6rem">
+      <button class="btn btn-outline" onclick="goalGoStep(2)">← Back to Questions</button>
+      <button class="btn btn-outline" onclick="goalGoStep(1)">↩ Start Over</button>
+    </div>
+  </div>
+
+</div><!-- /view-goal -->
+
 </div><!-- /container -->
 
-<!-- EXECUTION CUES MODAL -->
-<div class="modal-overlay hidden" id="cues-modal" onclick="closeCuesModal(event)">
-  <div class="modal-box" onclick="event.stopPropagation()">
-    <div class="modal-hdr">
-      <div>
-        <h3 id="modal-ex-name">Exercise</h3>
-        <div class="modal-cat" id="modal-ex-cat"></div>
-      </div>
-      <button class="modal-close" onclick="closeCuesModal()">✕</button>
-    </div>
-    <div class="modal-body">
-      <ul id="modal-cues-list"></ul>
-    </div>
-  </div>
-</div>
-
-<!-- SWAP EXERCISE MODAL -->
-<div class="modal-overlay hidden" id="swap-modal" onclick="closeSwapModal(event)">
-  <div class="modal-box" onclick="event.stopPropagation()" style="max-width:460px">
-    <div class="modal-hdr">
-      <div>
-        <h3 id="swap-modal-title">Swap Exercise</h3>
-        <div class="modal-cat" id="swap-modal-sub"></div>
-      </div>
-      <button class="modal-close" onclick="closeSwapModal()">✕</button>
-    </div>
-    <div class="modal-body" style="padding:.75rem 1rem 1rem">
-      <ul class="swap-modal-list" id="swap-modal-list"></ul>
-    </div>
-  </div>
-</div>
-
-<!-- SPECIFIC GOAL MODAL -->
-<div class="modal-overlay hidden" id="goal-modal" onclick="closeGoalModal(event)">
-  <div class="modal-box" onclick="event.stopPropagation()" style="max-width:760px">
-    <div class="modal-head">
-      <div>
-        <h3 id="goal-modal-title">Set A Specific Goal</h3>
-        <div class="modal-sub" style="color:var(--muted);font-size:.78rem">Gemini-assisted intake and milestone plan</div>
-      </div>
-      <button class="modal-close" onclick="closeGoalModal()">✕</button>
-    </div>
-    <div class="modal-body" style="padding:1rem;max-height:75vh;overflow:auto">
-      <div class="goal-wizard-shell">
-        <div class="goal-intro">
-          <div class="goal-intro-card">
-            <h4>Turn a target into a training roadmap</h4>
-            <p>Describe the result you want, answer a few context questions, and get a practical progression outline you can translate into your workout blocks.</p>
-          </div>
-          <div class="goal-tip-list">
-            <div class="goal-tip"><div>1.</div><div><strong>Be specific</strong>Use a measurable target like a time, rep count, load, or event date.</div></div>
-            <div class="goal-tip"><div>2.</div><div><strong>Set a real timeline</strong>The tool will flag timelines that look too aggressive.</div></div>
-            <div class="goal-tip"><div>3.</div><div><strong>Use it as strategy</strong>This creates milestones and structure, not a diagnosis or medical prescription.</div></div>
-          </div>
-        </div>
-
-        <div class="goal-stepper" id="goal-stepper">
-          <div class="goal-step active" id="goal-step-intake">
-            <div class="goal-step-num">1</div>
-            <div class="goal-step-title">Describe the goal</div>
-            <div class="goal-step-sub">Add the outcome and target date or timeframe.</div>
-          </div>
-          <div class="goal-step" id="goal-step-questions">
-            <div class="goal-step-num">2</div>
-            <div class="goal-step-title">Answer intake questions</div>
-            <div class="goal-step-sub">Gemini tailors the questions to your target.</div>
-          </div>
-          <div class="goal-step" id="goal-step-plan">
-            <div class="goal-step-num">3</div>
-            <div class="goal-step-title">Review your roadmap</div>
-            <div class="goal-step-sub">See timeline guidance, phases, and key warnings.</div>
-          </div>
-        </div>
-
-        <div class="goal-form-grid">
-          <div class="goal-field">
-            <label class="goal-field-label" for="goal-input">Goal</label>
-            <input id="goal-input" class="goal-input" type="text" placeholder="e.g. Run HYROX under 1h30, or do 10 strict pull-ups">
-          </div>
-          <div class="goal-field">
-            <label class="goal-field-label" for="goal-timeline-input">Target timeline <span class="hint">optional</span></label>
-            <input id="goal-timeline-input" class="goal-input" type="text" placeholder="e.g. 6 months, by November, in 10 weeks">
-          </div>
-        </div>
-
-        <div class="goal-actions">
-          <button class="btn btn-primary" id="goal-generate-questions-btn" onclick="generateGoalQuestions()">Generate Intake Questions</button>
-          <button class="btn btn-outline" id="goal-generate-plan-btn" onclick="generateGoalPlan()">Build Goal Plan</button>
-          <div id="goal-stage-pill" class="goal-status-pill">Waiting for goal details</div>
-        </div>
-
-        <div id="goal-status" class="secondary-note hidden"></div>
-        <div id="goal-feasibility" class="goal-feasibility-box hidden"></div>
-        <div id="goal-questions-wrap" class="hidden">
-          <label class="fl">Answer these questions</label>
-          <div id="goal-questions-form" class="goal-questions-grid"></div>
-        </div>
-        <div id="goal-plan-wrap" class="hidden">
-          <label class="fl">Goal roadmap</label>
-          <div id="goal-plan-output"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
 <script>
 // ─────────────────────────────────────────────────────────────────────
@@ -4015,35 +4022,70 @@ function adjustPlan(){
 // Steps: 1=Schedule, 2=Equipment, 3=Your Goal — maps to bar labels
 // Step 0 = welcome hero (no bar). "Your Plan" activates on buildAndShow.
 // =====================================================================
-const SP_STEPS = [
-  { label: 'Schedule',   tooltip: 'How many days, how long, and how many weeks — your training blueprint.' },
-  { label: 'Equipment',  tooltip: 'Select everything available to you — the plan matches exercises to your kit.' },
-  { label: 'Your Goal',  tooltip: 'Set a training focus for each session — strength, size, endurance, or power.' },
-  { label: 'Your Plan',  tooltip: 'Your personalised periodised programme — ready to save and start tracking.' },
+// ── Goal wizard progress bar ──────────────────────────────────────────
+const GP_STEPS = [
+  { label: 'Your Goal',  tooltip: 'Describe your target outcome and timeline.' },
+  { label: 'Questions',  tooltip: 'Answer intake questions tailored to your goal.' },
+  { label: 'Roadmap',    tooltip: 'Your personalised milestone and phase plan.' },
 ];
 
-// ── Hero tab handlers ──────────────────────────────────────────────────
-function heroTabCreateOwn(){
-  // Find first empty slot and open manual editor; if all full, use slot picker
-  const emptySlot = [0,1,2].find(s => !trkSlotHasPlan(s));
-  if(emptySlot !== undefined){
-    showView('tracker');
-    trkOpenManualEditor(emptySlot);
-  } else {
-    // All slots full — go to tracker so they can manage/delete a slot
-    showView('tracker');
-  }
-}
-function heroTabGoal(){
-  resetGoalWizardView();
-  document.getElementById('goal-modal')?.classList.remove('hidden');
-  document.body.style.overflow = 'hidden';
+function goalGoStep(n){
+  [1,2,3].forEach(i => {
+    const el = document.getElementById(`gstep-${i}`);
+    if(el) el.classList.toggle('hidden', i !== n);
+  });
+  const pb  = document.getElementById('goalProgress');
+  const pbm = document.getElementById('goalProgressMobile');
+  if(pb)  pb.classList.remove('hidden');
+  if(pbm) pbm.classList.remove('hidden');
+  renderGoalProgress(n);
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
-function closeGoalModal(e){
-  if(e && e.target !== document.getElementById('goal-modal')) return;
-  document.getElementById('goal-modal')?.classList.add('hidden');
-  document.body.style.overflow = '';
+function renderGoalProgress(step){
+  const activeIdx = step - 1;
+  const container = document.getElementById('gpSteps');
+  if(container){
+    container.innerHTML = '';
+    GP_STEPS.forEach((s, i) => {
+      const isDone   = i < activeIdx;
+      const isActive = i === activeIdx;
+      const isLast   = i === GP_STEPS.length - 1;
+      if(i > 0){
+        const conn = document.createElement('div');
+        conn.className = 'sp-connector';
+        conn.innerHTML = `<div class="sp-connector-fill" style="width:${isDone?100:0}%"></div>`;
+        container.appendChild(conn);
+      }
+      const el = document.createElement('div');
+      el.className = `sp-step${isDone?' done':isActive?' active':''}`;
+      if(isDone) el.onclick = () => goalGoStep(i + 1);
+      const innerContent = isActive && isLast
+        ? `<span style="font-size:.65rem;color:var(--amber2);line-height:1">✦</span>`
+        : `<div class="sp-dot-inner"></div>`;
+      el.innerHTML = `
+        <div class="sp-dot">${innerContent}</div>
+        <div class="sp-label">${s.label}</div>
+        ${isDone ? `<div class="sp-tooltip"><div class="sp-tooltip-title">${s.label}</div>${s.tooltip}</div>` : ''}
+      `;
+      container.appendChild(el);
+    });
+    const frac = document.getElementById('gpCurrentNum');
+    if(frac) frac.textContent = Math.min(step, GP_STEPS.length);
+  }
+  // Mobile
+  const pct = (step / GP_STEPS.length) * 100;
+  const mBar  = document.getElementById('gpmBarFill');
+  const mLbl  = document.getElementById('gpmLabel');
+  const mNum  = document.getElementById('gpmNum');
+  const mDots = document.getElementById('gpmDotsRow');
+  if(mBar)  mBar.style.width   = pct + '%';
+  if(mLbl)  mLbl.textContent   = GP_STEPS[Math.min(activeIdx, GP_STEPS.length-1)].label;
+  if(mNum)  mNum.textContent   = Math.min(step, GP_STEPS.length);
+  if(mDots) mDots.innerHTML    = GP_STEPS.map((_,i) => {
+    const cls = i < activeIdx ? 'done' : i === activeIdx ? 'active' : '';
+    return `<div class="spm-step-dot ${cls}"></div>`;
+  }).join('');
 }
 
 const GOAL_ALLOWED_TOPICS = ['Experience Level','Available Equipment','Weekly Commitment','Current Baseline','Injury History'];
@@ -4072,77 +4114,23 @@ function setGoalButtonsBusy(isBusy, mode){
   if(pBtn) pBtn.disabled = !!isBusy || mode === 'questions';
 }
 
-function setGoalStage(stage, tone){
-  const pill = document.getElementById('goal-stage-pill');
-  const stepIntake = document.getElementById('goal-step-intake');
-  const stepQuestions = document.getElementById('goal-step-questions');
-  const stepPlan = document.getElementById('goal-step-plan');
-  if(pill){
-    pill.className = `goal-status-pill${tone ? ` ${tone}` : ''}`;
-  }
-
-  [stepIntake, stepQuestions, stepPlan].forEach(el=>{
-    if(!el) return;
-    el.classList.remove('active','done');
-  });
-
-  if(stage === 'idle'){
-    if(pill) pill.textContent = 'Waiting for goal details';
-    stepIntake?.classList.add('active');
-    return;
-  }
-  if(stage === 'questions-loading'){
-    if(pill) pill.textContent = 'Generating intake questions';
-    stepIntake?.classList.add('done');
-    stepQuestions?.classList.add('active');
-    return;
-  }
-  if(stage === 'questions-ready'){
-    if(pill) pill.textContent = 'Questions ready';
-    stepIntake?.classList.add('done');
-    stepQuestions?.classList.add('active');
-    return;
-  }
-  if(stage === 'plan-loading'){
-    if(pill) pill.textContent = 'Building goal roadmap';
-    stepIntake?.classList.add('done');
-    stepQuestions?.classList.add('done');
-    stepPlan?.classList.add('active');
-    return;
-  }
-  if(stage === 'plan-ready'){
-    if(pill) pill.textContent = 'Roadmap ready';
-    stepIntake?.classList.add('done');
-    stepQuestions?.classList.add('done');
-    stepPlan?.classList.add('done');
-    return;
-  }
-  if(stage === 'error'){
-    if(pill) pill.textContent = 'Action needed';
-    if(goalIntakeState.questions?.length){
-      stepIntake?.classList.add('done');
-      stepQuestions?.classList.add('active');
-    }else{
-      stepIntake?.classList.add('active');
-    }
-  }
+function setGoalStage(stage){ /* legacy shim — goalGoStep() drives navigation now */
+  if(stage==='questions-loading'||stage==='questions-ready') return;
+  if(stage==='plan-loading'||stage==='plan-ready') return;
 }
 
 function resetGoalWizardView(){
   goalIntakeState = { goal:'', timeline:'', questions:[], feasibility:null, rawStep1:null };
-  const idsToHide = ['goal-status','goal-feasibility','goal-questions-wrap','goal-plan-wrap'];
-  idsToHide.forEach(id => document.getElementById(id)?.classList.add('hidden'));
+  // Clear form and output
   const form = document.getElementById('goal-questions-form');
-  const out = document.getElementById('goal-plan-output');
-  if(form){
-    form.innerHTML = '';
-    form.removeAttribute('data-injury-answer');
-  }
-  if(out) out.innerHTML = '';
-  const injury = document.getElementById('injury-detail-input');
-  if(injury) injury.value = '';
+  const out  = document.getElementById('goal-plan-output');
+  const feas = document.getElementById('goal-feasibility');
+  if(form){ form.innerHTML=''; form.removeAttribute('data-injury-answer'); }
+  if(out)  out.innerHTML='';
+  if(feas) feas.classList.add('hidden');
+  ['gstep1-status','gstep2-status'].forEach(id=>document.getElementById(id)?.classList.add('hidden'));
+  const injury=document.getElementById('injury-detail-input'); if(injury) injury.value='';
   setGoalButtonsBusy(false, null);
-  setGoalStage('idle', null);
 }
 
 function extractJsonPayload(text){
@@ -4285,10 +4273,9 @@ function setInjuryAnswer(val, btn){
 async function generateGoalQuestions(){
   const goal = (document.getElementById('goal-input')?.value || '').trim();
   const timeline = (document.getElementById('goal-timeline-input')?.value || '').trim();
-  if(!goal){ goalSetStatus('Please enter a specific goal first.', true); return; }
+  if(!goal){ const st=document.getElementById('gstep1-status'); if(st){st.classList.remove('hidden');st.textContent='Please enter a specific goal first.';} return; }
   setGoalButtonsBusy(true, 'questions');
-  setGoalStage('questions-loading', 'loading');
-  goalSetStatus('Generating structured intake questions with Gemini...', false);
+  const btn1=document.getElementById('goal-generate-questions-btn'); if(btn1){btn1.textContent='Generating…';btn1.disabled=true;}
   try{
     const step1 = await callGoalApiJson(buildStep1Prompt(goal, timeline), 'intake');
     const questions = normaliseStep1Questions(step1);
@@ -4302,13 +4289,13 @@ async function generateGoalQuestions(){
         feas.innerHTML = `<strong>Timeline sanity check:</strong> ${step1.goalFeasibility.reason || 'Goal may be unrealistic in current timeline.'}<br><strong>Suggested timeline:</strong> ${step1.goalFeasibility.suggestedTimeline || 'Please adjust your timeline.'}`;
       }
     }
-    goalSetStatus('Questions ready. Answer them, then click "Build Goal Plan".', false);
-    setGoalStage('questions-ready', 'success');
+    goalGoStep(2); // advance to questions screen
   }catch(err){
-    goalSetStatus(err.message || 'Failed to generate questions.', true);
-    setGoalStage('error', 'error');
+    // Show error on step 1
+    const st=document.getElementById('gstep1-status'); if(st){st.classList.remove('hidden');st.textContent=err.message||'Failed to generate questions.';}
   }finally{
     setGoalButtonsBusy(false, null);
+    const btn1=document.getElementById('goal-generate-questions-btn'); if(btn1){btn1.textContent='Next — Intake Questions →';btn1.disabled=false;}
   }
 }
 
@@ -4371,9 +4358,8 @@ function escapeHtml(str){
 }
 
 function renderGoalPlan(step2){
-  const planWrap = document.getElementById('goal-plan-wrap');
   const out = document.getElementById('goal-plan-output');
-  if(!planWrap || !out) return;
+  if(!out) return;
 
   const phases = Array.isArray(step2?.phases) ? step2.phases : [];
   const weeklyStructure = Array.isArray(step2?.weeklyStructure) ? step2.weeklyStructure : [];
@@ -4447,13 +4433,11 @@ function renderGoalPlan(step2){
       <div class="goal-plan-list">${phaseHtml}</div>
     </div>
   `;
-  planWrap.classList.remove('hidden');
 }
 
 async function generateGoalPlan(){
   if(!goalIntakeState.questions?.length){
-    goalSetStatus('Generate intake questions first.', true);
-    return;
+    const st=document.getElementById('gstep2-status'); if(st){st.classList.remove('hidden');st.textContent='Please go back and generate intake questions first.';} return;
   }
   const answers = collectGoalAnswers();
   const injuries = answers[GOAL_FIXED_SAFETY_QUESTION.id] || {};
@@ -4468,19 +4452,17 @@ async function generateGoalPlan(){
     answers,
     injuryInstruction
   };
+  const planBtn=document.getElementById('goal-generate-plan-btn'); if(planBtn){planBtn.textContent='Building…';planBtn.disabled=true;}
   setGoalButtonsBusy(true, 'plan');
-  setGoalStage('plan-loading', 'loading');
-  goalSetStatus('Building personalised goal plan with Gemini...', false);
   try{
     const step2 = await callGoalApiJson(buildStep2Prompt(payload), 'plan');
     renderGoalPlan(step2);
-    goalSetStatus('Goal plan ready. You can now map these milestones into your workout blocks.', false);
-    setGoalStage('plan-ready', 'success');
+    goalGoStep(3); // advance to roadmap screen
   }catch(err){
-    goalSetStatus(err.message || 'Failed to build goal plan.', true);
-    setGoalStage('error', 'error');
+    const st=document.getElementById('gstep2-status'); if(st){st.classList.remove('hidden');st.textContent=err.message||'Failed to build goal plan.';}
   }finally{
     setGoalButtonsBusy(false, null);
+    const planBtn2=document.getElementById('goal-generate-plan-btn'); if(planBtn2){planBtn2.textContent='Build Goal Roadmap →';planBtn2.disabled=false;}
   }
 }
 
@@ -4913,13 +4895,38 @@ function showView(name){
   document.getElementById(`nav-${name}`).classList.add('active');
   if(name==='tracker') initTracker();
   if(name==='plan') refreshPlanEmptyState();
-  // When returning to wizard, always reset to step 0 (hero) — hide progress bar
+
+  // Setup progress bar — show only inside wizard (not on step-0 hero)
+  const spb  = document.getElementById('setupProgress');
+  const spbm = document.getElementById('setupProgressMobile');
+  // Goal progress bar — show only inside goal view
+  const gpb  = document.getElementById('goalProgress');
+  const gpbm = document.getElementById('goalProgressMobile');
+
   if(name==='wizard'){
+    // Reset wizard to hero step, hide progress bar
     document.querySelectorAll('[id^="step-"]').forEach(el=>el.classList.add('hidden'));
     const s0=document.getElementById('step-0'); if(s0) s0.classList.remove('hidden');
-    const pb=document.getElementById('setupProgress'); if(pb) pb.style.display='none';
-    const pbm=document.getElementById('setupProgressMobile'); if(pbm) pbm.style.display='none';
+    if(spb)  spb.style.display='none';
+    if(spbm) spbm.style.display='none';
+    if(gpb)  gpb.classList.add('hidden');
+    if(gpbm) gpbm.classList.add('hidden');
+  } else if(name==='goal'){
+    // Show goal progress bar, hide setup bar, land on step 1
+    if(spb)  spb.style.display='none';
+    if(spbm) spbm.style.display='none';
+    if(gpb)  gpb.classList.remove('hidden');
+    if(gpbm) gpbm.classList.remove('hidden');
+    resetGoalWizardView();
+    goalGoStep(1);
+  } else {
+    // Any other view: hide both progress bars
+    if(spb)  spb.style.display='none';
+    if(spbm) spbm.style.display='none';
+    if(gpb)  gpb.classList.add('hidden');
+    if(gpbm) gpbm.classList.add('hidden');
   }
+
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
