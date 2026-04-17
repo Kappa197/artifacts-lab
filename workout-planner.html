@@ -1410,19 +1410,23 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 
   <!-- SAVED GOAL PANEL — shown when a confirmed goal exists in localStorage -->
   <div id="goal-saved-panel" class="wizard hidden">
-    <div class="card" style="padding:0;overflow:hidden">
-      <div style="padding:1rem 1.4rem .85rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:.8rem;flex-wrap:wrap">
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:.8rem;flex-wrap:wrap;margin-bottom:1rem">
         <div>
-          <div style="font-family:var(--mono);font-size:.58rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--green);margin-bottom:.2rem">✓ Saved Goal</div>
-          <div id="goal-saved-title" style="font-size:1rem;font-weight:800;color:var(--text)"></div>
-          <div id="goal-saved-meta" style="font-size:.72rem;color:var(--text3);margin-top:.2rem"></div>
+          <div class="step-title" style="margin-bottom:.1rem">My Goals</div>
+          <div id="goal-usage-label" style="font-size:.75rem;color:var(--text3)"></div>
         </div>
-        <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-          <button class="btn btn-primary" onclick="goalShowSaved()">📋 View Roadmap</button>
-          <button class="btn btn-outline" onclick="goalClearSaved()">↩ Set New Goal</button>
-        </div>
+        <button class="btn btn-primary" id="goal-new-btn" onclick="goalStartNew()">+ Set a New Goal</button>
       </div>
-      <div id="goal-saved-output" class="hidden" style="padding:1.2rem 1.4rem"></div>
+      <div id="goal-slots-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.7rem"></div>
+      <!-- Expanded roadmap output -->
+      <div id="goal-saved-output" class="hidden" style="margin-top:1.2rem;padding-top:1.2rem;border-top:1px solid var(--border)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem">
+          <div id="goal-saved-title" style="font-weight:700;font-size:.9rem;color:var(--text)"></div>
+          <button class="btn-adjust" onclick="goalHideSaved()">✕ Close</button>
+        </div>
+        <div id="goal-saved-plan-output"></div>
+      </div>
     </div>
   </div>
 
@@ -4025,24 +4029,36 @@ function updateWpwLockZone(maxDays){
 }
 
 function buildAndShow(){
-  // Tier enforcement — hard caps in case HTML was manipulated
-  const maxDays = can.sixSessionMax ? 6 : can.fiveSessionMax ? 5 : 3;
-  if(!can.longerPlans && S.weeks !== 4) S.weeks = 4;
-  if(!can.priority) S.priority = [];
-  if(!can.supersets) S.superset = false;
-  // Revert any advanced focus to hypertrophy for free users
-  if(!can.advancedGoals){
-    const advFoci = ['strength','power_speed'];
-    for(let i=0;i<S.wpw;i++){
-      if(advFoci.includes(S.dayFocus[i])) S.dayFocus[i]='hypertrophy';
+  try {
+    // Tier enforcement — hard caps in case HTML was manipulated
+    const maxDays = can.sixSessionMax ? 6 : can.fiveSessionMax ? 5 : 3;
+    if(S.wpw > maxDays) S.wpw = maxDays;
+    if(!can.longerPlans && S.weeks !== 4) S.weeks = 4;
+    if(!can.priority) S.priority = [];
+    if(!can.supersets) S.superset = false;
+    // Revert any advanced focus to hypertrophy for free users
+    if(!can.advancedGoals){
+      const advFoci = ['strength','power_speed'];
+      for(let i=0;i<S.wpw;i++){
+        if(advFoci.includes(S.dayFocus[i])) S.dayFocus[i]='hypertrophy';
+      }
     }
-  }
 
-  computeFocusSummary();
-  currentPlan=generatePlan();
-  S.currentWeek=1;
-  S.completedWeeks=new Set();
-  renderPlan();
+    computeFocusSummary();
+    currentPlan = generatePlan();
+    if(!currentPlan || !currentPlan.length){
+      console.error('generatePlan returned empty plan');
+      return;
+    }
+    S.currentWeek = 1;
+    S.completedWeeks = new Set();
+    S._viewingSaved = false;
+    S._viewingManual = false;
+    renderPlan();
+  } catch(err) {
+    console.error('buildAndShow error:', err);
+    return;
+  }
   // Activate step 4 "Your Plan" on the progress bar — all 3 input steps done
   const pb  = document.getElementById('setupProgress');
   const pbm = document.getElementById('setupProgressMobile');
@@ -4103,19 +4119,49 @@ const GP_STEPS = [
 ];
 
 function confirmGoalPlan(){
-  // Store the goal plan in localStorage so it persists across sessions
+  // ── Monthly usage check ───────────────────────────────────────────────
+  const now  = new Date();
+  const usageKey = 'wpt_goal_usage';
+  let usage = { month:0, year:0, count:0 };
+  try { usage = JSON.parse(localStorage.getItem(usageKey)||'{}'); } catch{}
+  // Reset counter if we're in a new month
+  if(usage.month !== now.getMonth() || usage.year !== now.getFullYear()){
+    usage = { month: now.getMonth(), year: now.getFullYear(), count: 0 };
+  }
+  if(usage.count >= 3){
+    alert('You have used all 3 AI goal generations this month. Your allowance resets on the 1st of next month.');
+    return;
+  }
+
+  // ── Slot check ────────────────────────────────────────────────────────
+  const goals = goalLoadAll();
+  if(goals.length >= 3){
+    alert('You already have 3 saved goals. Delete one before adding a new one.');
+    return;
+  }
+
+  // ── Save ──────────────────────────────────────────────────────────────
   const plan = {
+    id:         Date.now(),
     goal:       goalIntakeState.goal,
     timeline:   goalIntakeState.timeline,
-    savedAt:    new Date().toISOString(),
+    savedAt:    now.toISOString(),
     planOutput: document.getElementById('goal-plan-output')?.innerHTML || ''
   };
-  try { localStorage.setItem('wpt_goal_plan', JSON.stringify(plan)); } catch(e){}
+  goals.push(plan);
+  try { localStorage.setItem('wpt_goals', JSON.stringify(goals)); } catch(e){}
+
+  // Increment usage counter
+  usage.count++;
+  try { localStorage.setItem(usageKey, JSON.stringify(usage)); } catch{}
+
   // Visual feedback
   const btn = document.querySelector('.goal-confirm-btn');
-  if(btn){ btn.textContent = '✓ Saved to My Goals'; btn.style.background='var(--green)'; btn.style.color='var(--navy)'; btn.disabled=true; }
-  // Update progress bar to show all done
+  if(btn){ btn.textContent='✓ Saved to My Goals'; btn.style.background='var(--green)'; btn.style.color='var(--navy)'; btn.disabled=true; }
   renderGoalProgress(3);
+
+  // After short delay, go back to the goals panel
+  setTimeout(() => showView('goal'), 1200);
 }
 
 function goalGoStep(n){
@@ -4132,39 +4178,110 @@ function goalGoStep(n){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-// ── Saved goal display ────────────────────────────────────────────────
-function goalLoadSaved(){
-  try { return JSON.parse(localStorage.getItem('wpt_goal_plan')||'null'); } catch { return null; }
+// ── Goal storage helpers (3-slot array) ───────────────────────────────
+function goalLoadAll(){
+  try {
+    const arr = JSON.parse(localStorage.getItem('wpt_goals')||'[]');
+    return Array.isArray(arr) ? arr : [];
+  } catch { return []; }
 }
+function goalDeleteSlot(id){
+  if(!confirm('Delete this saved goal?')) return;
+  const goals = goalLoadAll().filter(g => g.id !== id);
+  try { localStorage.setItem('wpt_goals', JSON.stringify(goals)); } catch{}
+  goalShowSavedPanel();
+}
+function goalShowSaved(id){
+  const goal = goalLoadAll().find(g => g.id === id);
+  const out  = document.getElementById('goal-saved-plan-output');
+  const wrap = document.getElementById('goal-saved-output');
+  const title = document.getElementById('goal-saved-title');
+  if(!goal || !out || !wrap) return;
+  out.innerHTML = goal.planOutput || '<p style="color:var(--muted)">No plan data.</p>';
+  if(title) title.textContent = goal.goal;
+  wrap.classList.remove('hidden');
+  wrap.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+function goalHideSaved(){
+  document.getElementById('goal-saved-output')?.classList.add('hidden');
+}
+function goalStartNew(){
+  const goals = goalLoadAll();
+  if(goals.length >= 3){
+    alert('You already have 3 saved goals. Delete one before adding a new one.'); return;
+  }
+  const usageKey = 'wpt_goal_usage';
+  const now = new Date();
+  let usage = { month:0, year:0, count:0 };
+  try { usage = JSON.parse(localStorage.getItem(usageKey)||'{}'); } catch{}
+  if(usage.month !== now.getMonth() || usage.year !== now.getFullYear()){
+    usage = { month: now.getMonth(), year: now.getFullYear(), count: 0 };
+  }
+  if(usage.count >= 3){
+    alert('You have used all 3 AI goal generations this month. Your allowance resets on the 1st of next month.'); return;
+  }
+  resetGoalWizardView();
+  goalGoStep(1);
+}
+
+// ── Saved goals panel renderer ────────────────────────────────────────
 function goalShowSavedPanel(){
-  const saved = goalLoadSaved();
   const panel = document.getElementById('goal-saved-panel');
-  if(!saved || !panel) return false;
-  document.getElementById('goal-saved-title').textContent = saved.goal || 'Saved Goal';
-  const d = saved.savedAt ? new Date(saved.savedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '';
-  const tl = saved.timeline ? ` · ${saved.timeline}` : '';
-  document.getElementById('goal-saved-meta').textContent = `Saved ${d}${tl}`;
+  if(!panel) return false;
+
+  const goals = goalLoadAll();
+  const grid  = document.getElementById('goal-slots-grid');
+  const usageLbl = document.getElementById('goal-usage-label');
+  const newBtn   = document.getElementById('goal-new-btn');
+
+  // Usage counter
+  const now = new Date();
+  let usage = { month:0, year:0, count:0 };
+  try { usage = JSON.parse(localStorage.getItem('wpt_goal_usage')||'{}'); } catch{}
+  const thisMonth = (usage.month === now.getMonth() && usage.year === now.getFullYear());
+  const usedThisMonth = thisMonth ? (usage.count||0) : 0;
+  const remaining = 3 - usedThisMonth;
+  if(usageLbl) usageLbl.textContent = `${usedThisMonth}/3 AI generations used this month · ${remaining} remaining`;
+  if(newBtn){
+    const blocked = goals.length >= 3 || remaining <= 0;
+    newBtn.disabled = blocked;
+    newBtn.style.opacity = blocked ? '0.4' : '';
+    newBtn.title = goals.length >= 3 ? 'Delete a goal to add a new one'
+                 : remaining <= 0 ? 'Monthly limit reached — resets on 1st'
+                 : '';
+  }
+
+  // Build slot cards
+  if(!grid) return goals.length > 0;
+  let html = '';
+  goals.forEach(g => {
+    const d = g.savedAt ? new Date(g.savedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '';
+    const tl = g.timeline ? ` · ${g.timeline}` : '';
+    html += `<div style="background:var(--navy3);border:1px solid var(--border);border-radius:12px;padding:.9rem 1rem">
+      <div style="font-family:var(--mono);font-size:.55rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--green);margin-bottom:.25rem">✓ Saved Goal</div>
+      <div style="font-size:.88rem;font-weight:700;color:var(--text);margin-bottom:.18rem;line-height:1.35">${g.goal||'Goal'}</div>
+      <div style="font-size:.7rem;color:var(--text3);margin-bottom:.75rem">Saved ${d}${tl}</div>
+      <div style="display:flex;gap:.45rem;flex-wrap:wrap">
+        <button class="btn btn-outline btn-sm" style="font-size:.7rem;padding:.28rem .7rem" onclick="goalShowSaved(${g.id})">📋 View</button>
+        <button class="btn btn-outline btn-sm" style="font-size:.7rem;padding:.28rem .7rem;border-color:var(--red);color:var(--red)" onclick="goalDeleteSlot(${g.id})">🗑 Delete</button>
+      </div>
+    </div>`;
+  });
+  // Empty slots
+  for(let i=goals.length; i<3; i++){
+    html += `<div style="background:var(--navy3);border:1px dashed var(--border);border-radius:12px;padding:.9rem 1rem;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.4rem;min-height:120px;opacity:.55">
+      <div style="font-size:1.4rem">🎯</div>
+      <div style="font-size:.75rem;color:var(--text3);font-weight:600">Empty slot ${i+1}</div>
+    </div>`;
+  }
+  grid.innerHTML = html;
+
   panel.classList.remove('hidden');
-  // Hide wizard steps + progress bar while showing saved panel
+  // Hide wizard steps + progress bar
   [1,2,3].forEach(i => document.getElementById(`gstep-${i}`)?.classList.add('hidden'));
   document.getElementById('goalProgress')?.classList.add('hidden');
   document.getElementById('goalProgressMobile')?.classList.add('hidden');
-  return true;
-}
-function goalShowSaved(){
-  const saved = goalLoadSaved();
-  const out = document.getElementById('goal-saved-output');
-  if(!saved || !out) return;
-  out.innerHTML = saved.planOutput || '<p style="color:var(--muted)">No plan data found.</p>';
-  out.classList.remove('hidden');
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-function goalClearSaved(){
-  if(!confirm('Remove your saved goal and start a new one?')) return;
-  try { localStorage.removeItem('wpt_goal_plan'); } catch {}
-  document.getElementById('goal-saved-panel')?.classList.add('hidden');
-  resetGoalWizardView();
-  goalGoStep(1);
+  return goals.length > 0;
 }
 
 function renderGoalProgress(step){
@@ -5062,17 +5179,10 @@ function showView(name){
     if(gpb)  gpb.classList.add('hidden');
     if(gpbm) gpbm.classList.add('hidden');
   } else if(name==='goal'){
-    // Show goal progress bar, hide setup bar
     if(spb)  spb.style.display='none';
     if(spbm) spbm.style.display='none';
-    // If a saved goal exists, show it; otherwise start wizard at step 1
     resetGoalWizardView();
-    const hasSaved = goalShowSavedPanel();
-    if(!hasSaved){
-      if(gpb)  gpb.classList.remove('hidden');
-      if(gpbm) gpbm.classList.remove('hidden');
-      goalGoStep(1);
-    }
+    goalShowSavedPanel(); // always show the panel — it renders all 3 slots + empty states
   } else {
     // Any other view: hide both progress bars
     if(spb)  spb.style.display='none';
@@ -5795,9 +5905,16 @@ function renderUnifiedPlanView(slot){
     // Cardio day (A-type — wizard or manual with enriched metadata)
     if(day.type === 'cardio'){
       const rpeTooltipHtml = `<span class="rpe-tooltip">${day.rpe||''} <span class="rpe-info-icon">ℹ</span><span class="rpe-tip"><strong>RPE — Rate of Perceived Exertion (1–10)</strong><br>1–2 Very easy · 3–4 Easy<br>5–6 Moderate · 7–8 Hard · 9–10 Max</span></span>`;
+      const hdrBg = day.color || '#0e7490';
+      // For manual plans without enriched metadata, build a simple exercise list instead
+      const hasEnrichedData = !!(day.phaseInfo?.load || day.structure?.length);
+      if(!hasEnrichedData && isManual){
+        html += _buildFallbackDayCard(day, di, days.length, wk, isManual, slot);
+        return;
+      }
       html += `<div class="day-card">
-        <div class="day-hdr" onclick="toggleDayCard(this)" style="background:${day.color}">
-          <div class="day-hdr-left"><h3>${day.icon||'🏃'} ${day.label}</h3></div>
+        <div class="day-hdr" onclick="toggleDayCard(this)" style="background:${hdrBg}">
+          <div class="day-hdr-left"><h3>${day.icon||'🏃'} ${day.label||'Cardio'}</h3></div>
           <div style="display:flex;align-items:center;gap:.6rem">
             <div class="day-meta" style="text-align:right">Day ${di+1} of ${days.length}<br><span style="font-size:.65rem">${day.desc||''}</span></div>
             <span class="day-expand-chevron">▼</span>
@@ -5822,10 +5939,13 @@ function renderUnifiedPlanView(slot){
 
     // B-type muscular endurance (wizard or manual with enriched metadata)
     if(day.type === 'muscular_endurance'){
-      // Reuse the same block from renderPlan — build inline
       const sess = ENDO_SESSIONS[day.sessId];
-      if(!sess){ return; }
-      html += _buildBtypeDayCard(day, di, days.length, wk);
+      if(sess){
+        html += _buildBtypeDayCard(day, di, days.length, wk);
+      } else {
+        // Fallback: manual endurance day without sessId — render as simple gym day
+        html += _buildFallbackDayCard(day, di, days.length, wk, isManual, slot);
+      }
       return;
     }
 
@@ -5997,6 +6117,39 @@ function _buildManualExRow(ex, ei, day, dayProto, dayRepsStr, isManual, wk, slot
     <div class="rest-time">${restDisp}</div>
     ${badge?`<div class="rm-badge" style="background:${badge.color}" title="${badge.title}">${badge.text}</div>`:''}
   </div></div>`;
+}
+
+// ── Fallback day card for manual plans with cardio/endurance days ──────
+// Used when a manual plan has type='cardio' or 'muscular_endurance' but
+// lacks the enriched ENDO_SESSIONS metadata. Renders exercises like a gym day.
+function _buildFallbackDayCard(day, di, totalDays, wk, isManual, slot){
+  const styleM = MANUAL_STYLE_META?.[deriveDayStyle(day)] || MANUAL_STYLE_META?.hypertrophy || {};
+  const hdrColor = day.color || styleM.color || '#0e7490';
+  const label = day.label || 'Training Day';
+  const icon  = day.icon || (day.type==='cardio'?'🏃':'💪');
+  const dayProto = day.proto || wk?.proto || {};
+  const dayRepsStr = '—';
+  const exercises = day.exercises || [];
+
+  let exHtml = '';
+  if(!exercises.length){
+    exHtml = `<div style="padding:1rem 1.1rem;color:var(--muted);font-size:.83rem;font-style:italic">No exercises recorded.</div>`;
+  } else {
+    exercises.forEach((ex, ei) => {
+      exHtml += _buildManualExRow(ex, ei, day, dayProto, dayRepsStr, true, wk||{weekNum:1,isDeload:false}, slot);
+    });
+  }
+
+  return `<div class="day-card">
+    <div class="day-hdr" onclick="toggleDayCard(this)" style="background:${hdrColor}">
+      <div class="day-hdr-left"><h3>${icon} ${label}</h3></div>
+      <div style="display:flex;align-items:center;gap:.6rem">
+        <div class="day-meta" style="text-align:right">Day ${di+1} of ${totalDays}</div>
+        <span class="day-expand-chevron">▼</span>
+      </div>
+    </div>
+    <div class="day-card-body">${exHtml}</div>
+  </div>`;
 }
 
 // ── B-type muscular endurance day card builder (wizard only) ──────────

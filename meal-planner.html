@@ -719,18 +719,6 @@ body.shop-open .shop-fab{display:none!important;}
     .translate-option .tl-flag { font-size: 1rem; }
 
 </style>
-
-<!-- Early language apply — must be in <head> before page renders -->
-<script>
-(function() {
-  var lang = localStorage.getItem('tal_lang');
-  if (lang && lang !== 'en') {
-    // Set googtrans cookie so Google Translate auto-applies on load
-    document.cookie = 'googtrans=/en/' + lang + '; path=/';
-    document.cookie = 'googtrans=/en/' + lang + '; domain=' + location.hostname + '; path=/';
-  }
-})();
-</script>
 </head>
 <body>
 
