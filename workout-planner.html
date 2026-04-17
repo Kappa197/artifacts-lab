@@ -4056,7 +4056,11 @@ function buildAndShow(){
     S._viewingManual = false;
     renderPlan();
   } catch(err) {
-    console.error('buildAndShow error:', err);
+    console.error('buildAndShow error:', err, err.stack);
+    // Show error visibly on the plan view so it's not silent
+    const el = document.getElementById('plan-content');
+    if(el) el.innerHTML = `<div class="card" style="border-color:var(--red)"><div style="color:var(--red);font-weight:700;margin-bottom:.5rem">⚠️ Plan generation error</div><div style="font-size:.82rem;color:var(--text2);font-family:var(--mono)">${err.message}</div></div>`;
+    showView('plan');
     return;
   }
   // Activate step 4 "Your Plan" on the progress bar — all 3 input steps done
@@ -5778,11 +5782,13 @@ function derivePlanLevel(days){
 
 // ── Unified plan view — handles both wizard and manual plans ───────────
 function renderUnifiedPlanView(slot){
+  try {
   window._uvActiveSlot = slot; // so toggleVolCard knows to re-render here
   const plan = trkGetPlan(slot);
-  if(!plan) return;
+  if(!plan){ console.warn('renderUnifiedPlanView: no plan for slot', slot); return; }
   const isManual = !!plan.isManual;
   const m = plan.meta || {};
+  if(!plan.weeks || !plan.weeks.length){ console.warn('renderUnifiedPlanView: plan.weeks empty'); return; }
   const numWeeks = plan.weeks.length;
 
   // State for week navigation
@@ -6071,6 +6077,9 @@ function renderUnifiedPlanView(slot){
 
   body.innerHTML = html;
   showView('plan');
+  } catch(err) {
+    console.error('renderUnifiedPlanView error:', err, err.stack);
+  }
 }
 
 // ── Helper: build one exercise row (manual or wizard standard) ─────────
