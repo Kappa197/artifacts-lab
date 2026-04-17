@@ -432,6 +432,9 @@ input[type=range]:active::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(212,146
     .translate-option .tl-flag { font-size: 1rem; }
 
 </style>
+
+<!-- Google Translate — loaded eagerly so widget is ready on page load -->
+<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async defer></script>
 </head>
 <body>
 
@@ -6384,7 +6387,6 @@ window.googleTranslateElementInit = function() {
 };
 function applyTranslation(lang) {
   if (!lang || lang === 'en') return;
-  loadGTranslate();
   const t = setInterval(function() {
     const combo = document.querySelector('.goog-te-combo');
     if (combo) {
@@ -6393,7 +6395,7 @@ function applyTranslation(lang) {
       if (btn) btn.classList.add('active');
     }
   }, 100);
-  setTimeout(function() { clearInterval(t); }, 10000);
+  setTimeout(function() { clearInterval(t); }, 15000);
 }
 function resetTranslation() {
   [location.hostname, '.'+location.hostname, ''].forEach(d =>

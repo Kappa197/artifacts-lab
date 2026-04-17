@@ -719,6 +719,9 @@ body.shop-open .shop-fab{display:none!important;}
     .translate-option .tl-flag { font-size: 1rem; }
 
 </style>
+
+<!-- Google Translate — loaded eagerly so widget is ready on page load -->
+<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async defer></script>
 </head>
 <body>
 
@@ -3599,7 +3602,6 @@ window.googleTranslateElementInit = function() {
 };
 function applyTranslation(lang) {
   if (!lang || lang === 'en') return;
-  loadGTranslate();
   const t = setInterval(function() {
     const combo = document.querySelector('.goog-te-combo');
     if (combo) {
@@ -3610,7 +3612,7 @@ function applyTranslation(lang) {
       if (btn) btn.classList.add('active');
     }
   }, 100);
-  setTimeout(function() { clearInterval(t); }, 5000);
+  setTimeout(function() { clearInterval(t); }, 15000);
 }
 // translateTo still needed for manual dropdown selections
 function translateTo(lang) { applyTranslation(lang); }
