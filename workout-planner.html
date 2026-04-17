@@ -253,18 +253,18 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 /* Weekly session cards */
 .goal-week-section{margin-bottom:1.2rem}
 .goal-week-hdr{font-family:var(--mono);font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--amber2);margin-bottom:.5rem;padding:.25rem 0;border-bottom:1px solid var(--border)}
-.goal-sessions-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.6rem}
-.goal-session-card{background:var(--navy3);border:1px solid var(--border);border-radius:10px;overflow:hidden}
-.goal-session-hdr{padding:.5rem .7rem;display:flex;align-items:center;justify-content:space-between;gap:.4rem}
-.goal-session-day{font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3)}
-.goal-session-type{font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:.1rem .38rem;border-radius:4px}
-.goal-session-body{padding:.5rem .7rem .7rem}
-.goal-session-title{font-size:.8rem;font-weight:700;color:var(--text);margin-bottom:.35rem}
-.goal-ex-row{font-size:.74rem;color:var(--text2);padding:.18rem 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:baseline;gap:.4rem;line-height:1.4}
+.goal-sessions-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:.6rem}
+.goal-session-card{background:var(--navy3);border:1px solid var(--border);border-radius:10px;overflow:hidden;display:flex;flex-direction:column}
+.goal-session-hdr{padding:.5rem .7rem;display:flex;align-items:flex-start;justify-content:space-between;gap:.4rem;flex-wrap:wrap}
+.goal-session-day{font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);flex-shrink:0}
+.goal-session-type{font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:.1rem .38rem;border-radius:4px;flex-shrink:0}
+.goal-session-body{padding:.5rem .7rem .7rem;flex:1;min-width:0}
+.goal-session-title{font-size:.8rem;font-weight:700;color:var(--text);margin-bottom:.35rem;line-height:1.3}
+.goal-ex-row{font-size:.74rem;color:var(--text2);padding:.22rem 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem;line-height:1.45}
 .goal-ex-row:last-child{border-bottom:none}
-.goal-ex-name{color:var(--text);font-weight:600}
-.goal-ex-spec{font-family:var(--mono);font-size:.67rem;color:var(--amber2);flex-shrink:0}
-.goal-session-note{font-size:.7rem;color:var(--muted);font-style:italic;margin-top:.45rem;line-height:1.45;padding-top:.35rem;border-top:1px solid var(--border)}
+.goal-ex-name{color:var(--text);font-weight:600;flex:1;min-width:0;word-break:break-word}
+.goal-ex-spec{font-family:var(--mono);font-size:.66rem;color:var(--amber2);flex-shrink:0;text-align:right;max-width:45%;word-break:break-word}
+.goal-session-note{font-size:.7rem;color:var(--muted);font-style:italic;margin-top:.5rem;line-height:1.5;padding-top:.4rem;border-top:1px solid var(--border);word-break:break-word}
 /* AI loading bar */
 .goal-ai-loading{display:none;flex-direction:column;align-items:center;gap:.75rem;padding:1.8rem 1rem;text-align:center}
 .goal-ai-loading.visible{display:flex}
@@ -1408,8 +1408,26 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
   </div>
 
 
+  <!-- SAVED GOAL PANEL — shown when a confirmed goal exists in localStorage -->
+  <div id="goal-saved-panel" class="wizard hidden">
+    <div class="card" style="padding:0;overflow:hidden">
+      <div style="padding:1rem 1.4rem .85rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:.8rem;flex-wrap:wrap">
+        <div>
+          <div style="font-family:var(--mono);font-size:.58rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--green);margin-bottom:.2rem">✓ Saved Goal</div>
+          <div id="goal-saved-title" style="font-size:1rem;font-weight:800;color:var(--text)"></div>
+          <div id="goal-saved-meta" style="font-size:.72rem;color:var(--text3);margin-top:.2rem"></div>
+        </div>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="goalShowSaved()">📋 View Roadmap</button>
+          <button class="btn btn-outline" onclick="goalClearSaved()">↩ Set New Goal</button>
+        </div>
+      </div>
+      <div id="goal-saved-output" class="hidden" style="padding:1.2rem 1.4rem"></div>
+    </div>
+  </div>
+
   <!-- STEP 1 — Describe goal -->
-  <div id="gstep-1" class="wizard">
+  <div id="gstep-1" class="wizard hidden">
     <div class="card">
       <div class="step-title">Set Your Goal</div>
       <div class="step-sub">Describe what you want to achieve and when. Be specific — the more precise the target, the better the roadmap.</div>
@@ -4065,6 +4083,18 @@ function adjustPlan(){
 // Steps: 1=Schedule, 2=Equipment, 3=Your Goal — maps to bar labels
 // Step 0 = welcome hero (no bar). "Your Plan" activates on buildAndShow.
 // =====================================================================
+// ── Hero tab handlers ─────────────────────────────────────────────────
+function heroTabCreateOwn(){
+  // Find first empty slot; if all full, go to tracker slot selector
+  const emptySlot = [0,1,2].find(s => !trkSlotHasPlan(s));
+  if(emptySlot !== undefined){
+    showView('tracker');
+    trkOpenManualEditor(emptySlot);
+  } else {
+    showView('tracker');
+  }
+}
+
 // ── Goal wizard progress bar ──────────────────────────────────────────
 const GP_STEPS = [
   { label: 'Your Goal',  tooltip: 'Describe your target outcome and timeline.' },
@@ -4089,6 +4119,7 @@ function confirmGoalPlan(){
 }
 
 function goalGoStep(n){
+  document.getElementById('goal-saved-panel')?.classList.add('hidden');
   [1,2,3].forEach(i => {
     const el = document.getElementById(`gstep-${i}`);
     if(el) el.classList.toggle('hidden', i !== n);
@@ -4099,6 +4130,41 @@ function goalGoStep(n){
   if(pbm) pbm.classList.remove('hidden');
   renderGoalProgress(n);
   window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── Saved goal display ────────────────────────────────────────────────
+function goalLoadSaved(){
+  try { return JSON.parse(localStorage.getItem('wpt_goal_plan')||'null'); } catch { return null; }
+}
+function goalShowSavedPanel(){
+  const saved = goalLoadSaved();
+  const panel = document.getElementById('goal-saved-panel');
+  if(!saved || !panel) return false;
+  document.getElementById('goal-saved-title').textContent = saved.goal || 'Saved Goal';
+  const d = saved.savedAt ? new Date(saved.savedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '';
+  const tl = saved.timeline ? ` · ${saved.timeline}` : '';
+  document.getElementById('goal-saved-meta').textContent = `Saved ${d}${tl}`;
+  panel.classList.remove('hidden');
+  // Hide wizard steps + progress bar while showing saved panel
+  [1,2,3].forEach(i => document.getElementById(`gstep-${i}`)?.classList.add('hidden'));
+  document.getElementById('goalProgress')?.classList.add('hidden');
+  document.getElementById('goalProgressMobile')?.classList.add('hidden');
+  return true;
+}
+function goalShowSaved(){
+  const saved = goalLoadSaved();
+  const out = document.getElementById('goal-saved-output');
+  if(!saved || !out) return;
+  out.innerHTML = saved.planOutput || '<p style="color:var(--muted)">No plan data found.</p>';
+  out.classList.remove('hidden');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function goalClearSaved(){
+  if(!confirm('Remove your saved goal and start a new one?')) return;
+  try { localStorage.removeItem('wpt_goal_plan'); } catch {}
+  document.getElementById('goal-saved-panel')?.classList.add('hidden');
+  resetGoalWizardView();
+  goalGoStep(1);
 }
 
 function renderGoalProgress(step){
@@ -4996,13 +5062,17 @@ function showView(name){
     if(gpb)  gpb.classList.add('hidden');
     if(gpbm) gpbm.classList.add('hidden');
   } else if(name==='goal'){
-    // Show goal progress bar, hide setup bar, land on step 1
+    // Show goal progress bar, hide setup bar
     if(spb)  spb.style.display='none';
     if(spbm) spbm.style.display='none';
-    if(gpb)  gpb.classList.remove('hidden');
-    if(gpbm) gpbm.classList.remove('hidden');
+    // If a saved goal exists, show it; otherwise start wizard at step 1
     resetGoalWizardView();
-    goalGoStep(1);
+    const hasSaved = goalShowSavedPanel();
+    if(!hasSaved){
+      if(gpb)  gpb.classList.remove('hidden');
+      if(gpbm) gpbm.classList.remove('hidden');
+      goalGoStep(1);
+    }
   } else {
     // Any other view: hide both progress bars
     if(spb)  spb.style.display='none';
