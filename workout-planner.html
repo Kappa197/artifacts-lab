@@ -231,6 +231,7 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 .goal-select,.goal-textarea{width:100%;padding:.72rem .8rem;border-radius:10px;border:1px solid var(--border2);background:var(--navy3);color:var(--text)}
 .goal-textarea{min-height:88px;resize:vertical}
 .goal-feasibility-box{border:1px solid var(--warn);background:var(--warn-l);padding:.8rem .9rem;border-radius:12px;font-size:.82rem;color:#f59e0b;line-height:1.6}
+/* Plan output cards */
 .goal-plan-card{background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:1rem}
 .goal-plan-head{display:flex;align-items:flex-start;justify-content:space-between;gap:.8rem;flex-wrap:wrap;margin-bottom:.85rem}
 .goal-plan-title{font-size:.95rem;font-weight:800;color:var(--text)}
@@ -249,9 +250,38 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 .goal-phase-focus{font-size:.78rem;color:var(--text2);line-height:1.55;margin-bottom:.45rem}
 .goal-plan-bullets{margin:0;padding-left:1.05rem;color:var(--text2);font-size:.78rem;line-height:1.6}
 .goal-plan-bullets li+li{margin-top:.18rem}
+/* Weekly session cards */
+.goal-week-section{margin-bottom:1.2rem}
+.goal-week-hdr{font-family:var(--mono);font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--amber2);margin-bottom:.5rem;padding:.25rem 0;border-bottom:1px solid var(--border)}
+.goal-sessions-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.6rem}
+.goal-session-card{background:var(--navy3);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.goal-session-hdr{padding:.5rem .7rem;display:flex;align-items:center;justify-content:space-between;gap:.4rem}
+.goal-session-day{font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3)}
+.goal-session-type{font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:.1rem .38rem;border-radius:4px}
+.goal-session-body{padding:.5rem .7rem .7rem}
+.goal-session-title{font-size:.8rem;font-weight:700;color:var(--text);margin-bottom:.35rem}
+.goal-ex-row{font-size:.74rem;color:var(--text2);padding:.18rem 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:baseline;gap:.4rem;line-height:1.4}
+.goal-ex-row:last-child{border-bottom:none}
+.goal-ex-name{color:var(--text);font-weight:600}
+.goal-ex-spec{font-family:var(--mono);font-size:.67rem;color:var(--amber2);flex-shrink:0}
+.goal-session-note{font-size:.7rem;color:var(--muted);font-style:italic;margin-top:.45rem;line-height:1.45;padding-top:.35rem;border-top:1px solid var(--border)}
+/* AI loading bar */
+.goal-ai-loading{display:none;flex-direction:column;align-items:center;gap:.75rem;padding:1.8rem 1rem;text-align:center}
+.goal-ai-loading.visible{display:flex}
+.goal-ai-bar{width:100%;max-width:300px;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.goal-ai-bar-fill{height:100%;width:0;background:linear-gradient(90deg,var(--primary),var(--amber));border-radius:2px;transition:width .4s ease}
+.goal-ai-bar-fill.indeterminate{width:40%;animation:goalBarPulse 1.4s ease-in-out infinite}
+@keyframes goalBarPulse{0%{transform:translateX(-100%)}100%{transform:translateX(350%)}}
+.goal-ai-label{font-size:.8rem;color:var(--text2);font-weight:500}
+/* Spacing between progress bar and card */
+#view-goal .wizard{padding-top:1.2rem}
+/* Confirm & Add to Goals button */
+.goal-confirm-btn{background:linear-gradient(135deg,var(--amber),var(--amber2));color:#1c1100;border:none;border-radius:10px;padding:.72rem 1.4rem;font-weight:800;font-size:.85rem;cursor:pointer;font-family:var(--jb);letter-spacing:.04em;transition:all .18s;box-shadow:0 3px 14px rgba(212,146,10,.35)}
+.goal-confirm-btn:hover{transform:translateY(-2px);box-shadow:0 6px 22px rgba(212,146,10,.5)}
 @media(max-width:760px){
   .goal-intro,.goal-form-grid,.goal-plan-grid{grid-template-columns:1fr}
   .goal-stepper{grid-template-columns:1fr}
+  .goal-sessions-grid{grid-template-columns:1fr}
 }
 
 /* FOCUS SUMMARY PANEL */
@@ -1416,6 +1446,12 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 
       <div id="gstep1-status" class="secondary-note hidden" style="margin-bottom:1rem"></div>
 
+      <!-- AI loading bar — shown while generating questions -->
+      <div id="gstep1-loading" class="goal-ai-loading">
+        <div class="goal-ai-bar"><div class="goal-ai-bar-fill indeterminate" id="gstep1-bar-fill"></div></div>
+        <div class="goal-ai-label" id="gstep1-bar-label">Analysing your goal…</div>
+      </div>
+
       <div class="step-nav" style="justify-content:flex-end">
         <button class="btn btn-primary" id="goal-generate-questions-btn" onclick="generateGoalQuestions()">
           Next — Intake Questions →
@@ -1434,6 +1470,12 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
       <div id="goal-questions-form" class="goal-questions-grid" style="margin-bottom:1.2rem"></div>
       <div id="gstep2-status" class="secondary-note hidden" style="margin-bottom:1rem"></div>
 
+      <!-- AI loading bar — shown while building plan -->
+      <div id="gstep2-loading" class="goal-ai-loading">
+        <div class="goal-ai-bar"><div class="goal-ai-bar-fill indeterminate" id="gstep2-bar-fill"></div></div>
+        <div class="goal-ai-label" id="gstep2-bar-label">Building your goal roadmap…</div>
+      </div>
+
       <div class="step-nav">
         <button class="btn btn-outline" onclick="goalGoStep(1)">← Back</button>
         <button class="btn btn-primary" id="goal-generate-plan-btn" onclick="generateGoalPlan()">
@@ -1448,13 +1490,14 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
     <div class="card" style="padding:0;overflow:hidden">
       <div style="padding:1.4rem 1.5rem 1rem;border-bottom:1px solid var(--border)">
         <div class="step-title">Your Goal Roadmap</div>
-        <div class="step-sub" id="goal-roadmap-subtitle">Your personalised milestone plan.</div>
+        <div class="step-sub" id="goal-roadmap-subtitle">Your personalised milestone plan — review it below.</div>
       </div>
       <div style="padding:1.2rem 1.5rem">
         <div id="goal-plan-output"></div>
       </div>
     </div>
-    <div style="max-width:580px;margin:.75rem auto 1.5rem;display:flex;gap:.6rem">
+    <div style="max-width:580px;margin:.75rem auto 1.5rem;display:flex;gap:.6rem;flex-wrap:wrap">
+      <button class="goal-confirm-btn" onclick="confirmGoalPlan()">✦ Confirm &amp; Add to My Goals</button>
       <button class="btn btn-outline" onclick="goalGoStep(2)">← Back to Questions</button>
       <button class="btn btn-outline" onclick="goalGoStep(1)">↩ Start Over</button>
     </div>
@@ -4029,6 +4072,22 @@ const GP_STEPS = [
   { label: 'Roadmap',    tooltip: 'Your personalised milestone and phase plan.' },
 ];
 
+function confirmGoalPlan(){
+  // Store the goal plan in localStorage so it persists across sessions
+  const plan = {
+    goal:       goalIntakeState.goal,
+    timeline:   goalIntakeState.timeline,
+    savedAt:    new Date().toISOString(),
+    planOutput: document.getElementById('goal-plan-output')?.innerHTML || ''
+  };
+  try { localStorage.setItem('wpt_goal_plan', JSON.stringify(plan)); } catch(e){}
+  // Visual feedback
+  const btn = document.querySelector('.goal-confirm-btn');
+  if(btn){ btn.textContent = '✓ Saved to My Goals'; btn.style.background='var(--green)'; btn.style.color='var(--navy)'; btn.disabled=true; }
+  // Update progress bar to show all done
+  renderGoalProgress(3);
+}
+
 function goalGoStep(n){
   [1,2,3].forEach(i => {
     const el = document.getElementById(`gstep-${i}`);
@@ -4189,12 +4248,10 @@ Return ONLY valid JSON matching this exact schema:
 }
 
 Rules:
-1) Ask MAX 5 dynamic questions in "questions".
+1) Ask EXACTLY 5 questions. You MUST include at least one "Available Equipment" question and one "Weekly Commitment" question — these are required for plan building.
 2) Use ONLY these topics: Experience Level, Available Equipment, Weekly Commitment, Current Baseline, Injury History.
-3) Sanity check required:
-   - If the goal is physiologically impossible or dangerous in the requested timeline, set goalFeasibility.status="unrealistic".
-   - In that case, question q1 MUST be a polite timeline-adjustment suggestion.
-4) Keep questions concrete and technical for plan building.
+3) Sanity check: if the goal is physiologically impossible or dangerous in the requested timeline, set goalFeasibility.status="unrealistic".
+4) Keep questions concrete — they will be used to build a specific weekly training plan with exercises and sets.
 5) Do not include any extra keys. Do not output markdown.
 
 User goal: "${goal}"
@@ -4216,10 +4273,8 @@ function normaliseStep1Questions(step1){
 }
 
 function renderGoalQuestions(questions){
-  const wrap = document.getElementById('goal-questions-wrap');
   const form = document.getElementById('goal-questions-form');
-  if(!wrap || !form) return;
-  wrap.classList.remove('hidden');
+  if(!form) return;
   form.innerHTML = questions.map((q, i)=>{
     const idx = i + 1;
     if(q.id === GOAL_FIXED_SAFETY_QUESTION.id){
@@ -4274,8 +4329,15 @@ async function generateGoalQuestions(){
   const goal = (document.getElementById('goal-input')?.value || '').trim();
   const timeline = (document.getElementById('goal-timeline-input')?.value || '').trim();
   if(!goal){ const st=document.getElementById('gstep1-status'); if(st){st.classList.remove('hidden');st.textContent='Please enter a specific goal first.';} return; }
+
+  // Show loading bar, hide any prior status
+  const loading = document.getElementById('gstep1-loading');
+  const st1 = document.getElementById('gstep1-status');
+  if(loading) loading.classList.add('visible');
+  if(st1) st1.classList.add('hidden');
   setGoalButtonsBusy(true, 'questions');
-  const btn1=document.getElementById('goal-generate-questions-btn'); if(btn1){btn1.textContent='Generating…';btn1.disabled=true;}
+  const btn1=document.getElementById('goal-generate-questions-btn');
+  if(btn1){ btn1.textContent='Generating…'; btn1.disabled=true; }
   try{
     const step1 = await callGoalApiJson(buildStep1Prompt(goal, timeline), 'intake');
     const questions = normaliseStep1Questions(step1);
@@ -4289,13 +4351,13 @@ async function generateGoalQuestions(){
         feas.innerHTML = `<strong>Timeline sanity check:</strong> ${step1.goalFeasibility.reason || 'Goal may be unrealistic in current timeline.'}<br><strong>Suggested timeline:</strong> ${step1.goalFeasibility.suggestedTimeline || 'Please adjust your timeline.'}`;
       }
     }
-    goalGoStep(2); // advance to questions screen
+    goalGoStep(2);
   }catch(err){
-    // Show error on step 1
-    const st=document.getElementById('gstep1-status'); if(st){st.classList.remove('hidden');st.textContent=err.message||'Failed to generate questions.';}
+    if(st1){ st1.classList.remove('hidden'); st1.textContent = err.message||'Failed to generate questions.'; }
   }finally{
+    if(loading) loading.classList.remove('visible');
     setGoalButtonsBusy(false, null);
-    const btn1=document.getElementById('goal-generate-questions-btn'); if(btn1){btn1.textContent='Next — Intake Questions →';btn1.disabled=false;}
+    if(btn1){ btn1.textContent='Next — Intake Questions →'; btn1.disabled=false; }
   }
 }
 
@@ -4315,36 +4377,56 @@ function collectGoalAnswers(){
 }
 
 function buildStep2Prompt(payload){
-  return `You are an elite strength & conditioning planner.
-Return ONLY JSON with this schema:
+  return `You are an elite strength & conditioning planner. Produce a detailed, actionable weekly training plan.
+Return ONLY valid JSON with EXACTLY this schema — no extra keys, no markdown:
+
 {
-  "disclaimer": "string",
-  "planSummary": "string",
+  "planSummary": "string — 1-2 sentence overview",
+  "disclaimer": "string — safety/medical disclaimer",
   "timelineRecommendation": "string",
-  "assumptions": ["string"],
   "confidence": "low" | "medium" | "high",
+  "keyWarnings": ["string"],
   "phases": [
     {
-      "name": "string",
-      "durationWeeks": "number",
-      "weeklyFrequency": "string",
-      "focus": "string",
+      "name": "string — e.g. Base, Build, Peak, Race",
+      "durationWeeks": number,
+      "focus": "string — primary training focus for this phase",
       "progressionRate": "string",
-      "milestones": ["string"]
+      "milestones": ["string"],
+      "sampleWeek": {
+        "label": "string — e.g. Week 1 (typical)",
+        "sessions": [
+          {
+            "day": "string — e.g. Monday",
+            "type": "string — e.g. Strength, Endurance, HYROX Sim, Recovery, Rest",
+            "typeColor": "string — hex colour for this type",
+            "title": "string — e.g. Lower Body Strength",
+            "durationMin": number,
+            "exercises": [
+              {
+                "name": "string",
+                "spec": "string — e.g. 4×8 @ RPE 7, or 3×12 @ 60%, or 5km @ Z2"
+              }
+            ],
+            "notes": "string — coaching notes, pacing cues, what to focus on"
+          }
+        ]
+      }
     }
-  ],
-  "weeklyStructure": ["string"],
-  "keyWarnings": ["string"]
+  ]
 }
 
-Hard rules:
-1) Build realistic progression toward the user goal with phased milestones (e.g. 3 / 6 / 12 months where relevant).
-2) Use user constraints exactly (experience, equipment, commitment, baseline, timeline).
-3) If injury answer is Yes, adjust plan to low-impact alternatives and include a doctor-consult disclaimer.
-4) No diagnosis, no unsafe prescription, no impossible claims.
-5) Keep plan practical and specific.
+RULES:
+1. Generate 3–4 phases covering the full training timeline.
+2. Each phase must have a sampleWeek with 4–6 sessions (including at least 1 rest/recovery day).
+3. Exercises must be specific: name + sets×reps or duration + RPE or % of max. Use the user's available equipment.
+4. Match session types to the goal (e.g. for HYROX: HYROX Simulation, Strength, Aerobic Base, Recovery).
+5. Progression must be realistic (5–10% volume increase per phase).
+6. If injury reported, substitute high-impact exercises with alternatives.
+7. typeColor: use distinctive hex colours per session type (e.g. strength=#7c3aed, endurance=#0369a1, simulation=#dc2626, recovery=#059669).
+8. No diagnosis, no medical claims. Include disclaimer.
 
-User payload JSON:
+User payload:
 ${JSON.stringify(payload)}`;
 }
 
@@ -4361,78 +4443,80 @@ function renderGoalPlan(step2){
   const out = document.getElementById('goal-plan-output');
   if(!out) return;
 
-  const phases = Array.isArray(step2?.phases) ? step2.phases : [];
-  const weeklyStructure = Array.isArray(step2?.weeklyStructure) ? step2.weeklyStructure : [];
-  const assumptions = Array.isArray(step2?.assumptions) ? step2.assumptions : [];
+  const phases     = Array.isArray(step2?.phases) ? step2.phases : [];
   const keyWarnings = Array.isArray(step2?.keyWarnings) ? step2.keyWarnings : [];
 
-  const phaseHtml = phases.length
-    ? phases.map(phase => `
-      <div class="goal-phase-card">
-        <div class="goal-phase-top">
-          <div class="goal-phase-name">${escapeHtml(phase?.name || 'Training phase')}</div>
-          <div class="goal-phase-duration">${escapeHtml(String(phase?.durationWeeks || '?'))} week block</div>
-        </div>
-        <div class="goal-phase-focus">${escapeHtml(phase?.focus || '')}</div>
-        <div class="goal-plan-grid" style="margin-bottom:.55rem">
-          <div class="goal-plan-stat">
-            <div class="goal-plan-stat-label">Weekly frequency</div>
-            <div class="goal-plan-stat-value">${escapeHtml(phase?.weeklyFrequency || 'Not specified')}</div>
-          </div>
-          <div class="goal-plan-stat">
-            <div class="goal-plan-stat-label">Progression rate</div>
-            <div class="goal-plan-stat-value">${escapeHtml(phase?.progressionRate || 'Not specified')}</div>
-          </div>
-        </div>
-        <ul class="goal-plan-bullets">${(Array.isArray(phase?.milestones) ? phase.milestones : []).map(item => `<li>${escapeHtml(item)}</li>`).join('') || '<li>No milestones returned.</li>'}</ul>
-      </div>
-    `).join('')
-    : '<div class="goal-phase-card"><div class="goal-phase-name">No phases returned</div></div>';
-
-  const bulletList = (items, emptyText) =>
-    items.length
-      ? `<ul class="goal-plan-bullets">${items.map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul>`
-      : `<div class="goal-plan-sub">${escapeHtml(emptyText)}</div>`;
-
-  out.innerHTML = `
-    <div class="goal-plan-card">
+  // ── Plan header ───────────────────────────────────────────────────────
+  let html = `
+    <div class="goal-plan-card" style="margin-bottom:1rem">
       <div class="goal-plan-head">
         <div>
           <div class="goal-plan-title">${escapeHtml(step2?.planSummary || 'Goal roadmap')}</div>
-          <div class="goal-plan-sub">${escapeHtml(step2?.disclaimer || 'Use this roadmap as training guidance and adapt it to your real recovery, technique, and schedule.')}</div>
+          <div class="goal-plan-sub">${escapeHtml(step2?.disclaimer || 'Use this as guidance — adapt to your recovery, technique, and schedule.')}</div>
         </div>
         <div class="goal-badge-row">
           <div class="goal-badge">Confidence: ${escapeHtml(step2?.confidence || 'n/a')}</div>
-          <div class="goal-badge">Goal: ${escapeHtml(goalIntakeState.goal || 'Custom')}</div>
+          <div class="goal-badge">🎯 ${escapeHtml(goalIntakeState.goal || 'Custom goal')}</div>
         </div>
       </div>
-
       <div class="goal-plan-grid">
         <div class="goal-plan-stat">
-          <div class="goal-plan-stat-label">Timeline recommendation</div>
-          <div class="goal-plan-stat-value">${escapeHtml(step2?.timelineRecommendation || 'Not provided')}</div>
+          <div class="goal-plan-stat-label">Timeline</div>
+          <div class="goal-plan-stat-value">${escapeHtml(step2?.timelineRecommendation || '—')}</div>
         </div>
         <div class="goal-plan-stat">
-          <div class="goal-plan-stat-label">Weekly structure</div>
-          <div class="goal-plan-stat-value">${weeklyStructure.length ? weeklyStructure.map(escapeHtml).join('<br>') : 'Not provided'}</div>
+          <div class="goal-plan-stat-label">Phases</div>
+          <div class="goal-plan-stat-value">${phases.length} training phases</div>
         </div>
       </div>
+      ${keyWarnings.length ? `<div class="goal-plan-stat" style="margin-top:.6rem">
+        <div class="goal-plan-stat-label">⚠️ Key warnings</div>
+        <ul class="goal-plan-bullets">${keyWarnings.map(w=>`<li>${escapeHtml(w)}</li>`).join('')}</ul>
+      </div>` : ''}
+    </div>`;
 
-      <div class="goal-plan-list" style="margin-bottom:.8rem">
-        <div class="goal-plan-stat">
-          <div class="goal-plan-stat-label">Assumptions</div>
-          ${bulletList(assumptions, 'No explicit assumptions returned.')}
+  // ── Phase sections with session cards ─────────────────────────────────
+  phases.forEach(phase => {
+    const sessions = Array.isArray(phase?.sampleWeek?.sessions) ? phase.sampleWeek.sessions : [];
+    const weekLabel = phase?.sampleWeek?.label || 'Sample week';
+
+    const sessionCards = sessions.map(sess => {
+      const exercises = Array.isArray(sess?.exercises) ? sess.exercises : [];
+      const color = sess?.typeColor || '#334466';
+      const exRows = exercises.map(ex =>
+        `<div class="goal-ex-row">
+          <span class="goal-ex-name">${escapeHtml(ex?.name || '')}</span>
+          <span class="goal-ex-spec">${escapeHtml(ex?.spec || '')}</span>
+        </div>`).join('');
+      return `<div class="goal-session-card">
+        <div class="goal-session-hdr" style="background:${color}22;border-bottom:2px solid ${color}">
+          <span class="goal-session-day">${escapeHtml(sess?.day || '')}</span>
+          <span class="goal-session-type" style="color:${color};background:${color}22">${escapeHtml(sess?.type || '')}</span>
         </div>
-        <div class="goal-plan-stat">
-          <div class="goal-plan-stat-label">Key warnings</div>
-          ${bulletList(keyWarnings, 'No special warnings returned.')}
+        <div class="goal-session-body">
+          <div class="goal-session-title">${escapeHtml(sess?.title || '')}</div>
+          ${sess?.durationMin ? `<div style="font-size:.68rem;color:var(--text3);margin-bottom:.4rem">⏱ ${escapeHtml(String(sess.durationMin))} min</div>` : ''}
+          ${exRows}
+          ${sess?.notes ? `<div class="goal-session-note">💡 ${escapeHtml(sess.notes)}</div>` : ''}
         </div>
+      </div>`;
+    }).join('');
+
+    html += `<div class="goal-week-section">
+      <div style="margin-bottom:.65rem">
+        <div class="goal-phase-top">
+          <div class="goal-phase-name">${escapeHtml(phase?.name || 'Phase')}</div>
+          <div class="goal-phase-duration">${escapeHtml(String(phase?.durationWeeks || '?'))} weeks</div>
+        </div>
+        <div class="goal-phase-focus">${escapeHtml(phase?.focus || '')}</div>
+        ${phase?.milestones?.length ? `<ul class="goal-plan-bullets" style="margin-bottom:.5rem">${phase.milestones.map(m=>`<li>${escapeHtml(m)}</li>`).join('')}</ul>` : ''}
       </div>
+      <div class="goal-week-hdr">${escapeHtml(weekLabel)}</div>
+      <div class="goal-sessions-grid">${sessionCards}</div>
+    </div>`;
+  });
 
-      <div class="goal-plan-title" style="margin-bottom:.55rem">Phased progression</div>
-      <div class="goal-plan-list">${phaseHtml}</div>
-    </div>
-  `;
+  out.innerHTML = html;
 }
 
 async function generateGoalPlan(){
@@ -4444,25 +4528,25 @@ async function generateGoalPlan(){
   const injuryInstruction = String(injuries.answer || '').toLowerCase() === 'yes'
     ? `The user has injury/limitations: ${injuries.detail || 'Not specified'}. Adjust the plan to be low-impact and include a disclaimer to consult a doctor.`
     : 'No injury limitations reported.';
-  const payload = {
-    goal: goalIntakeState.goal,
-    requestedTimeline: goalIntakeState.timeline || null,
-    safetyFlag: 'HIGH',
-    feasibility: goalIntakeState.feasibility,
-    answers,
-    injuryInstruction
-  };
-  const planBtn=document.getElementById('goal-generate-plan-btn'); if(planBtn){planBtn.textContent='Building…';planBtn.disabled=true;}
+  const payload = { goal:goalIntakeState.goal, requestedTimeline:goalIntakeState.timeline||null, safetyFlag:'HIGH', feasibility:goalIntakeState.feasibility, answers, injuryInstruction };
+
+  const loading = document.getElementById('gstep2-loading');
+  const st2 = document.getElementById('gstep2-status');
+  if(loading) loading.classList.add('visible');
+  if(st2) st2.classList.add('hidden');
+  const planBtn = document.getElementById('goal-generate-plan-btn');
+  if(planBtn){ planBtn.textContent='Building…'; planBtn.disabled=true; }
   setGoalButtonsBusy(true, 'plan');
   try{
     const step2 = await callGoalApiJson(buildStep2Prompt(payload), 'plan');
     renderGoalPlan(step2);
-    goalGoStep(3); // advance to roadmap screen
+    goalGoStep(3);
   }catch(err){
-    const st=document.getElementById('gstep2-status'); if(st){st.classList.remove('hidden');st.textContent=err.message||'Failed to build goal plan.';}
+    if(st2){ st2.classList.remove('hidden'); st2.textContent = err.message||'Failed to build goal plan.'; }
   }finally{
+    if(loading) loading.classList.remove('visible');
     setGoalButtonsBusy(false, null);
-    const planBtn2=document.getElementById('goal-generate-plan-btn'); if(planBtn2){planBtn2.textContent='Build Goal Roadmap →';planBtn2.disabled=false;}
+    if(planBtn){ planBtn.textContent='Build Goal Roadmap →'; planBtn.disabled=false; }
   }
 }
 
