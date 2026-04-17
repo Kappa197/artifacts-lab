@@ -1443,7 +1443,13 @@ async function initTier(){
     const { data: { user: u } } = await sb.auth.getUser();
     if (u) {
       const { data: lp } = await sb.from('profiles').select('preferred_language').eq('id', u.id).single();
-      if (lp?.preferred_language && lp.preferred_language !== 'en') applyTranslation(lp.preferred_language);
+      // Supabase first, localStorage fallback
+      var mlLang = lp?.preferred_language || localStorage.getItem('tal_lang');
+      if (lp?.preferred_language) localStorage.setItem('tal_lang', lp.preferred_language);
+      if (mlLang && mlLang !== 'en') {
+        loadGTranslate();
+        setTimeout(function() { applyTranslation(mlLang); }, 1500);
+      }
     }
   } catch(e) { /* silent fail */ }
 }

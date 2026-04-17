@@ -914,17 +914,25 @@ async function init() {
 
   // ── Language preference ──
   const savedLang = profile?.preferred_language;
+  const cachedLang = localStorage.getItem('tal_lang');
   const langSelect = document.getElementById('acLangSelect');
+
+  // Sync localStorage with Supabase (Supabase is the source of truth)
+  if (savedLang) localStorage.setItem('tal_lang', savedLang);
   if (langSelect && savedLang) langSelect.value = savedLang;
 
-  if (!savedLang) {
+  // Determine which lang to apply — Supabase first, localStorage fallback
+  const langToApply = savedLang || cachedLang;
+
+  if (!savedLang && !cachedLang) {
     // First visit — show language modal after short delay
     setTimeout(() => {
       document.getElementById('langModal').classList.add('open');
     }, 1200);
-  } else if (savedLang !== 'en') {
-    // Returning user with non-English preference — auto-apply
-    applyTranslation(savedLang);
+  } else if (langToApply && langToApply !== 'en') {
+    // Eager load + delayed apply for reliable cross-device behaviour
+    loadGTranslate();
+    setTimeout(() => applyTranslation(langToApply), 1500);
   }
 }
 
@@ -1078,7 +1086,7 @@ function applyTranslation(lang) {
       if (btn) btn.classList.add('active');
     }
   }, 100);
-  setTimeout(function() { clearInterval(t); }, 5000);
+  setTimeout(function() { clearInterval(t); }, 10000);
 }
 
 async function saveLangPref(lang) {
@@ -1091,7 +1099,8 @@ async function saveLangPref(lang) {
   const sel = document.getElementById('acLangSelect');
   if (sel) sel.value = lang;
 
-  // Save to Supabase
+  // Save to Supabase + localStorage (localStorage as fast local cache)
+  localStorage.setItem('tal_lang', lang);
   const { data: { session } } = await db.auth.getSession();
   if (session) {
     await db.from('profiles')

@@ -995,8 +995,13 @@ async function initTier(){
   document.getElementById('appLoader').style.display='none';
   init();
 
-  // Auto-apply language preference
-  if (prefLang && prefLang !== 'en') applyTranslation(prefLang);
+  // Auto-apply language preference — Supabase first, localStorage fallback
+  var langToApply = prefLang || localStorage.getItem('tal_lang');
+  if (prefLang) localStorage.setItem('tal_lang', prefLang); // keep cache in sync
+  if (langToApply && langToApply !== 'en') {
+    loadGTranslate();
+    setTimeout(function() { applyTranslation(langToApply); }, 1500);
+  }
 }
 
 // ── State ──────────────────────────────────────────
@@ -6386,7 +6391,7 @@ function applyTranslation(lang) {
       if (btn) btn.classList.add('active');
     }
   }, 100);
-  setTimeout(function() { clearInterval(t); }, 5000);
+  setTimeout(function() { clearInterval(t); }, 10000);
 }
 function resetTranslation() {
   [location.hostname, '.'+location.hostname, ''].forEach(d =>

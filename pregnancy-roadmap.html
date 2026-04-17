@@ -1506,7 +1506,13 @@ async function initTier() {
 
   // Auto-apply language preference
   const prefLang = typeof data !== 'undefined' && data?.preferred_language;
-  if (prefLang && prefLang !== 'en') applyTranslation(prefLang);
+  // Supabase first, localStorage fallback
+  var prLang = prefLang || localStorage.getItem('tal_lang');
+  if (prefLang) localStorage.setItem('tal_lang', prefLang);
+  if (prLang && prLang !== 'en') {
+    loadGTranslate();
+    setTimeout(function() { applyTranslation(prLang); }, 1500);
+  }
 }
 
 window.addEventListener('load', initTier);
