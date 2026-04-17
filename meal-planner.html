@@ -1436,11 +1436,20 @@ async function initTier(){
   document.getElementById('appLoader').style.display = 'none';
   init();
 
-  // Trigger Google Translate AFTER content is visible (appLoader is now hidden)
+  // Trigger Google Translate AFTER content is visible — only if cookie not already set
   var mlCachedLang = localStorage.getItem('tal_lang');
   if (mlCachedLang && mlCachedLang !== 'en') {
-    loadGTranslate();
-    setTimeout(function() { applyTranslation(mlCachedLang); }, 800);
+    var currentCookie = document.cookie.split('; ').find(function(r){ return r.startsWith('googtrans='); });
+    var expectedValue = '/en/' + mlCachedLang;
+    if (!currentCookie || !currentCookie.includes(expectedValue)) {
+      loadGTranslate();
+      setTimeout(function() { applyTranslation(mlCachedLang); }, 800);
+    } else {
+      // Cookie already set — just ensure button is highlighted
+      loadGTranslate();
+      var btn = document.getElementById('translateBtn');
+      if (btn) btn.classList.add('active');
+    }
   }
 
   // Auto-apply language preference
@@ -3602,12 +3611,16 @@ window.googleTranslateElementInit = function() {
 };
 function applyTranslation(lang) {
   if (!lang || lang === 'en') return;
+  loadGTranslate();
   const t = setInterval(function() {
     const combo = document.querySelector('.goog-te-combo');
     if (combo) {
       clearInterval(t);
-      combo.value = lang;
-      combo.dispatchEvent(new Event('change'));
+      // Only fire change if not already translated to this language
+      if (combo.value !== lang) {
+        combo.value = lang;
+        combo.dispatchEvent(new Event('change'));
+      }
       const btn = document.getElementById('translateBtn');
       if (btn) btn.classList.add('active');
     }
