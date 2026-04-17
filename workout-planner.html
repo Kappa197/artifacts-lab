@@ -4115,6 +4115,14 @@ function heroTabCreateOwn(){
   }
 }
 
+// ── Setup wizard progress bar steps ──────────────────────────────────
+const SP_STEPS = [
+  { label: 'Schedule',  tooltip: 'How many days, how long, and how many weeks — your training blueprint.' },
+  { label: 'Equipment', tooltip: 'Select everything available to you — the plan matches exercises to your kit.' },
+  { label: 'Your Goal', tooltip: 'Set a training focus for each session — strength, size, endurance, or power.' },
+  { label: 'Your Plan', tooltip: 'Your personalised periodised programme — ready to save and start tracking.' },
+];
+
 // ── Goal wizard progress bar ──────────────────────────────────────────
 const GP_STEPS = [
   { label: 'Your Goal',  tooltip: 'Describe your target outcome and timeline.' },
