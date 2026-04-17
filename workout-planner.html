@@ -3659,7 +3659,7 @@ function renderPlan(){
           <div class="cardio-detail">${day.phaseInfo.detail}</div>
           <div class="cardio-structure">
             <div class="cardio-structure-hdr">📋 Session structure</div>
-            ${day.structure.map((s,si)=>`<div class="cardio-step"><span class="cardio-step-n">${si+1}</span>${s}</div>`).join('')}
+            ${(Array.isArray(day.structure)?day.structure:[]).map((s,si)=>`<div class="cardio-step"><span class="cardio-step-n">${si+1}</span>${s}</div>`).join('')}
           </div>
         </div></div>
       </div>`;
@@ -3775,7 +3775,7 @@ function renderPlan(){
           ${exRows}
           <div class="cardio-structure">
             <div class="cardio-structure-hdr">📋 Session structure</div>
-            ${day.structure.map((s,si)=>`<div class="cardio-step"><span class="cardio-step-n">${si+1}</span>${s}</div>`).join('')}
+            ${(Array.isArray(day.structure)?day.structure:[]).map((s,si)=>`<div class="cardio-step"><span class="cardio-step-n">${si+1}</span>${s}</div>`).join('')}
           </div>
         </div></div>
       </div>`;
@@ -5921,7 +5921,7 @@ function renderUnifiedPlanView(slot){
       const rpeTooltipHtml = `<span class="rpe-tooltip">${day.rpe||''} <span class="rpe-info-icon">ℹ</span><span class="rpe-tip"><strong>RPE — Rate of Perceived Exertion (1–10)</strong><br>1–2 Very easy · 3–4 Easy<br>5–6 Moderate · 7–8 Hard · 9–10 Max</span></span>`;
       const hdrBg = day.color || '#0e7490';
       // For manual plans without enriched metadata, build a simple exercise list instead
-      const hasEnrichedData = !!(day.phaseInfo?.load || day.structure?.length);
+      const hasEnrichedData = !!(day.phaseInfo?.load || (Array.isArray(day.structure) && day.structure.length));
       if(!hasEnrichedData && isManual){
         html += _buildFallbackDayCard(day, di, days.length, wk, isManual, slot);
         return;
@@ -5944,7 +5944,7 @@ function renderUnifiedPlanView(slot){
           <div class="cardio-detail">${day.phaseInfo?.detail||''}</div>
           <div class="cardio-structure">
             <div class="cardio-structure-hdr">📋 Session structure</div>
-            ${(day.structure||[]).map((s,si)=>`<div class="cardio-step"><span class="cardio-step-n">${si+1}</span>${s}</div>`).join('')}
+            ${(Array.isArray(day.structure)?day.structure:[]).map((s,si)=>`<div class="cardio-step"><span class="cardio-step-n">${si+1}</span>${s}</div>`).join('')}
           </div>
         </div></div>
       </div>`;
@@ -6285,7 +6285,7 @@ function _buildBtypeDayCard(day, di, totalDays, wk){
       <div class="cardio-detail" style="margin-bottom:.75rem">${pd.detail||''}</div>
       ${emomNote}${exRows}
       <div class="cardio-structure"><div class="cardio-structure-hdr">📋 Session structure</div>
-        ${(day.structure||[]).map((s,si)=>`<div class="cardio-step"><span class="cardio-step-n">${si+1}</span>${s}</div>`).join('')}
+        ${(Array.isArray(day.structure)?day.structure:[]).map((s,si)=>`<div class="cardio-step"><span class="cardio-step-n">${si+1}</span>${s}</div>`).join('')}
       </div>
     </div></div>
   </div>`;
