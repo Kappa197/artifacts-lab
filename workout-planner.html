@@ -90,17 +90,32 @@ body::before{
 .hero-pills{display:flex;flex-wrap:wrap;gap:.45rem;justify-content:center;margin-bottom:2rem}
 .hero-pill{background:var(--primary-l);color:var(--primary);font-size:.76rem;font-weight:600;padding:.28rem .85rem;border-radius:999px}
 /* Hero entry cards */
-.hero-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:.85rem;margin-top:1.8rem;text-align:left}
-.hero-card{background:var(--amber);border-radius:18px;padding:1.3rem 1.15rem 1.5rem;cursor:pointer;transition:all .18s;position:relative;overflow:hidden;min-height:160px;display:flex;flex-direction:column;gap:.6rem}
-.hero-card:hover{background:var(--amber2);transform:translateY(-3px);box-shadow:0 10px 32px rgba(212,146,10,.4)}
-.hero-card.disabled{background:var(--navy3);border:1px solid var(--border);cursor:default}
-.hero-card.disabled:hover{transform:none;box-shadow:none}
-.hero-card-title{font-family:var(--serif);font-size:1.15rem;font-weight:700;color:#1c1100;line-height:1.2}
-.hero-card.disabled .hero-card-title{color:var(--text2)}
-.hero-card-sub{font-size:.8rem;color:#3d2600;line-height:1.5}
-.hero-card.disabled .hero-card-sub{color:var(--text3)}
+.hero-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:.9rem;margin-top:2rem}
+.hero-card{background:var(--navy2);border:1px solid var(--border);border-radius:20px;padding:1.5rem 1.25rem 1.6rem;cursor:pointer;transition:all .22s;position:relative;overflow:hidden;min-height:192px;display:flex;flex-direction:column;gap:.5rem}
+.hero-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .22s;border-radius:20px}
+.hero-card:nth-child(1)::before{background:linear-gradient(135deg,rgba(212,146,10,.12),rgba(212,146,10,.04))}
+.hero-card:nth-child(2)::before{background:linear-gradient(135deg,rgba(59,130,246,.12),rgba(59,130,246,.04))}
+.hero-card:nth-child(3)::before{background:linear-gradient(135deg,rgba(16,185,129,.12),rgba(16,185,129,.04))}
+.hero-card:hover::before{opacity:1}
+.hero-card:hover{transform:translateY(-4px);box-shadow:0 14px 40px rgba(0,0,0,.35)}
+.hero-card:nth-child(1):hover{border-color:rgba(212,146,10,.5);box-shadow:0 14px 40px rgba(212,146,10,.18)}
+.hero-card:nth-child(2):hover{border-color:rgba(59,130,246,.4);box-shadow:0 14px 40px rgba(59,130,246,.15)}
+.hero-card:nth-child(3):hover{border-color:rgba(16,185,129,.4);box-shadow:0 14px 40px rgba(16,185,129,.15)}
+.hero-card-icon{font-size:2.1rem;margin-bottom:.2rem;line-height:1;filter:drop-shadow(0 2px 8px rgba(0,0,0,.3))}
+.hero-card-tag{font-family:var(--mono);font-size:.52rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:.18rem .55rem;border-radius:999px;align-self:flex-start;margin-bottom:.15rem}
+.hero-card:nth-child(1) .hero-card-tag{color:var(--amber2);background:rgba(212,146,10,.12);border:1px solid rgba(212,146,10,.2)}
+.hero-card:nth-child(2) .hero-card-tag{color:#60a5fa;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2)}
+.hero-card:nth-child(3) .hero-card-tag{color:#34d399;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2)}
+.hero-card-title{font-family:var(--serif);font-size:1.1rem;font-weight:700;color:var(--text);line-height:1.25;margin:0}
+.hero-card-sub{font-size:.78rem;color:var(--text3);line-height:1.55;margin-top:.1rem;flex:1}
+.hero-card-arrow{font-size:.8rem;color:var(--text3);margin-top:.6rem;transition:transform .2s,color .2s;align-self:flex-end}
+.hero-card:hover .hero-card-arrow{transform:translateX(4px)}
+.hero-card:nth-child(1):hover .hero-card-arrow{color:var(--amber2)}
+.hero-card:nth-child(2):hover .hero-card-arrow{color:#60a5fa}
+.hero-card:nth-child(3):hover .hero-card-arrow{color:#34d399}
+.hero-card.disabled{opacity:.45;cursor:default;pointer-events:none}
 .hero-card-soon{position:absolute;top:.75rem;right:.75rem;font-family:var(--mono);font-size:.5rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;background:var(--border);color:var(--text3);border-radius:999px;padding:.2rem .55rem}
-@media(max-width:560px){.hero-cards{grid-template-columns:1fr;max-width:340px;margin-left:auto;margin-right:auto}}
+@media(max-width:620px){.hero-cards{grid-template-columns:1fr;max-width:360px;margin-left:auto;margin-right:auto}}
 
 /* WIZARD */
 .wizard{max-width:580px;margin:0 auto}
@@ -954,16 +969,25 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
       </div>
       <div class="hero-cards">
         <div class="hero-card" onclick="heroTabCreateOwn()">
-          <div class="hero-card-title">Create your workout</div>
-          <div class="hero-card-sub">Don't need help?<br>Do it yourself</div>
+          <div class="hero-card-icon">✏️</div>
+          <div class="hero-card-tag">Custom Build</div>
+          <div class="hero-card-title">Design It Yourself</div>
+          <div class="hero-card-sub">Take the lead and design every aspect from scratch — full control over every exercise, set, and session.</div>
+          <div class="hero-card-arrow">→</div>
         </div>
         <div class="hero-card" onclick="goStep(1)">
-          <div class="hero-card-title">Build the plan</div>
-          <div class="hero-card-sub">Let the tool guide you to build the best plan</div>
+          <div class="hero-card-icon">⚙️</div>
+          <div class="hero-card-tag">Smart Plan Builder</div>
+          <div class="hero-card-title">Build My Programme</div>
+          <div class="hero-card-sub">Let our engine structure the perfect routine — tell us your schedule and goals, we'll do the rest.</div>
+          <div class="hero-card-arrow">→</div>
         </div>
         <div class="hero-card" onclick="showView('goal')">
-          <div class="hero-card-title">Set a specific goal</div>
-          <div class="hero-card-sub">Let the tool bring you to your goal</div>
+          <div class="hero-card-icon">🎯</div>
+          <div class="hero-card-tag">Goal Crusher</div>
+          <div class="hero-card-title">Crush a Specific Goal</div>
+          <div class="hero-card-sub">Tell us your goal — HYROX, a lift PB, lose weight, get stronger. We'll build the exact path to get you there.</div>
+          <div class="hero-card-arrow">→</div>
         </div>
       </div>
     </div>
@@ -1782,6 +1806,21 @@ const EX = [
 {id:'bn_squat',name:'Band Squat',primary:['quads','glutes'],secondary:['hamstrings','core'],eq:['bands'],lv:'beginner',fc:['endurance'],cat:'compound',fam:'band_squat',region:'Lower',pp:'Push',plane:'Vertical',scaled:'BW Squat',bw_basic:true,avoid:[],safe:['knee','lower_back'],note:'Band under feet, over shoulders — high-rep conditioning'},
 {id:'bn_glute_kick',name:'Band Glute Kickback',primary:['glutes'],secondary:['hamstrings'],eq:['bands'],lv:'beginner',fc:['hypertrophy','endurance'],cat:'isolation',fam:'hip_abduct',region:'Lower',pp:'Push',plane:'Horizontal',scaled:'BW Glute Bridge',avoid:[],safe:['lower_back','knee'],note:'Anchor low, kick back with control — squeeze at full extension'},
 {id:'bn_pallof',name:'Pallof Press',primary:['core'],secondary:['shoulders'],eq:['bands'],lv:'beginner',fc:['strength','endurance'],cat:'core',fam:'core_rotation',region:'Core',pp:'Neither',plane:'Neither',scaled:'N/A',avoid:[],safe:['lower_back','hip','shoulder'],note:"Anti-rotation — resist the pull, don't rotate. Great for spinal stability"},
+{id:'bw_crunch',name:'Crunch',primary:['core'],secondary:[],eq:['bodyweight'],lv:'beginner',fc:['endurance','hypertrophy'],cat:'core',fam:'core_crunch',region:'Core',pp:'Neither',plane:'Neither',scaled:'N/A',avoid:[],safe:['lower_back','knee'],note:'Feet flat, lower back stays on floor — curl shoulder blades up, squeeze at top'},
+{id:'bw_sit_up',name:'Sit-Up',primary:['core'],secondary:['hip_flexors'],eq:['bodyweight'],lv:'beginner',fc:['endurance','hypertrophy'],cat:'core',fam:'core_crunch',region:'Core',pp:'Neither',plane:'Neither',scaled:'Crunch',avoid:['lower_back'],safe:['knee'],note:'Full ROM sit-up — hands at temples, controlled descent on the way down'},
+{id:'bw_leg_raise',name:'Lying Leg Raise',primary:['core'],secondary:['hip_flexors'],eq:['bodyweight'],lv:'beginner',fc:['hypertrophy','strength'],cat:'core',fam:'core_crunch',region:'Core',pp:'Neither',plane:'Neither',scaled:'Bent-Knee Leg Raise',avoid:[],safe:['lower_back','knee'],note:'Lower back pressed to floor — lower legs slowly, stop before arch appears'},
+{id:'bw_hollow_hold',name:'Hollow Body Hold',primary:['core'],secondary:[],eq:['bodyweight'],lv:'intermediate',fc:['strength','endurance'],cat:'core',fam:'plank',region:'Core',pp:'Neither',plane:'Neither',scaled:'Tuck Hollow Hold',avoid:[],safe:['lower_back','shoulder'],note:'Lower back pressed flat — arms extended overhead, legs straight and low. Build time from 10 to 45s'},
+{id:'bw_hollow_rock',name:'Hollow Rock',primary:['core'],secondary:[],eq:['bodyweight'],lv:'intermediate',fc:['strength','endurance'],cat:'core',fam:'plank',region:'Core',pp:'Neither',plane:'Neither',scaled:'Hollow Hold',avoid:[],safe:['lower_back'],note:'Maintain rigid hollow position throughout the rock — no breaking at hips'},
+{id:'bw_rkc_plank',name:'RKC Plank',primary:['core'],secondary:['glutes','shoulders'],eq:['bodyweight'],lv:'intermediate',fc:['strength','endurance'],cat:'core',fam:'plank',region:'Core',pp:'Neither',plane:'Neither',scaled:'Plank',avoid:[],safe:['lower_back','shoulder'],note:'Squeeze everything — fists, glutes, quads. Posterior tilt pelvis, pull elbows toward feet. 10–20s max effort'},
+{id:'bw_copenhagen',name:'Copenhagen Plank',primary:['core'],secondary:['adductors','glutes'],eq:['bodyweight'],lv:'advanced',fc:['strength','endurance'],cat:'core',fam:'plank',region:'Core',pp:'Neither',plane:'Neither',scaled:'Side Plank',avoid:['hip'],safe:['lower_back'],note:'Top foot on bench, bottom leg hovering — straight line head to heels. Adductor+core anti-lateral flexion'},
+{id:'bw_toes_bar',name:'Toes to Bar',primary:['core'],secondary:['hip_flexors','back'],eq:['pullup_bar'],lv:'advanced',fc:['strength','hypertrophy'],cat:'core',fam:'core_crunch',region:'Core',pp:'Neither',plane:'Neither',scaled:'Hanging Knee Raise',avoid:['shoulder','wrist_elbow'],safe:[],note:'Control the kip — touch toes to bar simultaneously, lower under control with no swing'},
+{id:'bw_ab_wheel',name:'Ab Wheel Rollout',primary:['core'],secondary:['shoulders','lower_back'],eq:['bodyweight'],lv:'intermediate',fc:['strength','hypertrophy'],cat:'core',fam:'core_stability',region:'Core',pp:'Neither',plane:'Neither',scaled:'Kneeling Ab Wheel',avoid:['lower_back','shoulder','wrist_elbow'],safe:[],note:'Hips do NOT drop — brace hard, roll out only as far as lower back stays flat. Start kneeling'},
+{id:'bw_v_up',name:'V-Up',primary:['core'],secondary:['hip_flexors'],eq:['bodyweight'],lv:'intermediate',fc:['hypertrophy','strength'],cat:'core',fam:'core_crunch',region:'Core',pp:'Neither',plane:'Neither',scaled:'Sit-Up',avoid:['lower_back'],safe:[],note:'Meet hands to feet at the top — keep legs straight, control the descent'},
+{id:'bw_russian_twist',name:'Russian Twist',primary:['core'],secondary:[],eq:['bodyweight'],lv:'beginner',fc:['hypertrophy','endurance'],cat:'core',fam:'core_rotation',region:'Core',pp:'Neither',plane:'Neither',scaled:'Seated Rotation',avoid:['lower_back'],safe:['knee'],note:'Rotate from thoracic spine — feet off floor for more challenge. Add plate/DB for load'},
+{id:'bw_l_sit',name:'L-Sit Hold',primary:['core'],secondary:['shoulders','triceps'],eq:['bodyweight'],lv:'advanced',fc:['strength','endurance'],cat:'core',fam:'plank',region:'Core',pp:'Neither',plane:'Neither',scaled:'Tuck L-Sit',avoid:['shoulder','wrist_elbow'],safe:[],note:'Depress scapulae, press down hard. Hold 5–10s, accumulate 30s total. Parallettes help wrist comfort'},
+{id:'cb_cable_crunch_kneeling',name:'Kneeling Cable Crunch',primary:['core'],secondary:[],eq:['cables'],lv:'beginner',fc:['hypertrophy','endurance'],cat:'core',fam:'core_crunch',region:'Core',pp:'Neither',plane:'Neither',scaled:'Crunch',avoid:['lower_back'],safe:['knee'],note:'Loaded abs — hips stay still, round spine pulling elbows toward knees. Full stretch at top'},
+{id:'bw_dead_bug_loaded',name:'Dead Bug with Reach',primary:['core'],secondary:[],eq:['bodyweight'],lv:'intermediate',fc:['strength','endurance'],cat:'core',fam:'core_stability',region:'Core',pp:'Neither',plane:'Neither',scaled:'Dead Bug',avoid:[],safe:['lower_back','shoulder','hip'],note:'Opposite arm and leg extend simultaneously — lower back must stay flat. 3–5s per rep'},
+{id:'bw_dragon_flag',name:'Dragon Flag',primary:['core'],secondary:['shoulders','lower_back'],eq:['bodyweight'],lv:'advanced',fc:['strength','hypertrophy'],cat:'core',fam:'core_stability',region:'Core',pp:'Neither',plane:'Neither',scaled:'Lying Leg Raise',avoid:['lower_back','neck'],safe:[],note:'Grip bench overhead, keep body rigid and lower slowly — do NOT hyperextend lower back at bottom'},
 {id:'bn_face_pull',name:'Band Face Pull',primary:['shoulders'],secondary:['back'],eq:['bands'],lv:'beginner',fc:['hypertrophy','endurance'],cat:'accessory',fam:'rear_delt',region:'Upper',pp:'Pull',plane:'Horizontal',scaled:'DB Rear Delt Fly',avoid:[],safe:['shoulder','neck'],note:'Anchor at head height — pull to forehead with external rotation'},
 {id:'ps_broad_jump',name:'Broad Jump',primary:['quads','glutes'],secondary:['calves','core'],eq:['bodyweight'],lv:'beginner',fc:['power_speed'],cat:'explosive',fam:'jump',region:'Lower',pp:'Push',plane:'Vertical',scaled:'Box Jump',avoid:['knee','ankle_foot'],safe:[],note:'Max horizontal distance — soft two-foot landing, absorb with hips'},
 {id:'ps_box_jump',name:'Box Jump',primary:['quads','glutes'],secondary:['calves','core'],eq:['bodyweight'],lv:'intermediate',fc:['power_speed'],cat:'explosive',fam:'jump',region:'Lower',pp:'Push',plane:'Vertical',scaled:'Step-Up Jump',avoid:['knee','ankle_foot'],safe:[],note:'Explode onto box — step down, never jump down'},
@@ -2851,24 +2890,78 @@ const ENDURANCE_GYM_TMPL = {
 };
 
 const WARMUPS = {
-  legs: ['Hip circles — 10 each side','Leg swings — 10 each leg','Bodyweight squat × 12','Hip flexor stretch — 20s each'],
-  push: ['Arm circles — 10 each dir','Band pull-aparts × 15 (or light row)','Light push-up × 10','Shoulder rotation × 10'],
-  pull: ['Band pull-aparts × 15','Lat stretch — 20s each side','Scapular pull-up × 10','Dead hang — 20s'],
-  full: ['Light jog / march — 2 min','Hip circles × 10','Arm circles × 10','Bodyweight squat × 10']
+  // Upper body — push-focused (chest/shoulder/triceps days)
+  upper_push: [
+    'Arm circles — 10 forward + 10 backward each arm',
+    'Band pull-aparts × 15 (or light cable face pull)',
+    'Wall slides × 10 — shoulder blades retract + elevate',
+    'Light push-up × 12 — pause 1s at bottom stretch',
+    'Shoulder CARs × 5 each — full controlled articular rotation'
+  ],
+  // Upper body — pull-focused (back/biceps days)
+  upper_pull: [
+    'Band pull-aparts × 15',
+    'Lat stretch — 20s each side (door frame or rack)',
+    'Scapular pull-ups × 10 — no elbow bend',
+    'Dead hang — 20–30s, breathe steadily',
+    'Thoracic rotation — 8 each side on hands + knees'
+  ],
+  // Lower body — squat/hinge/legs days
+  lower: [
+    'Hip circles — 10 each direction',
+    'Leg swings — forward/back 10 each, lateral 10 each',
+    'Glute bridge × 15 — pause 2s at top, activate glutes',
+    'Bodyweight squat × 12 — slow descent, pause at depth',
+    'Hip flexor stretch — 20s each side in lunge stance',
+    'Ankle rolls × 10 each — full ROM'
+  ],
+  // Full body / mixed days
+  full: [
+    'Light jog or march in place — 2 min',
+    'Hip circles × 10 each direction',
+    'Arm circles × 10 each direction',
+    'Bodyweight squat × 12',
+    'Inchworm × 5 — walk out to push-up, walk back'
+  ],
+  // Endurance A — steady-state / zone 2 cardio sessions
+  endurance_a: [
+    '5 min easy walk or very light jog — RPE 2',
+    'Leg swings — forward/back and lateral × 10 each',
+    'Hip circles × 10 each direction',
+    'Calf raises × 15 — slow and controlled',
+    'Dynamic quad stretch — walking lunge × 8 each leg'
+  ],
+  // Endurance B — AGT / EMOM / metcon / muscular endurance sessions
+  endurance_b: [
+    '3 min easy movement — row, bike, or march',
+    'Inchworm × 5 — walk out, shoulder tap × 4, walk back',
+    'Hip flexor lunge stretch — 20s each side',
+    'Bodyweight squat × 10 — controlled',
+    'Arm circles + shoulder rolls — 10 each direction',
+    'Practice movement pattern at 30% effort × 5 reps'
+  ]
 };
 
 function warmupKey(dayKey){
-  if(dayKey.toLowerCase().includes('push'))return'push';
-  if(dayKey.toLowerCase().includes('pull'))return'pull';
-  if(dayKey.toLowerCase().includes('leg')||dayKey.toLowerCase().includes('lower')||dayKey.toLowerCase().includes('squat')||dayKey.toLowerCase().includes('hinge'))return'legs';
-  return'full';
+  const k = dayKey.toLowerCase();
+  if(k.includes('push') || k.includes('chest') || k.includes('shoulder') || k.includes('tricep')) return 'upper_push';
+  if(k.includes('pull') || k.includes('back') || k.includes('bicep') || k.includes('row')) return 'upper_pull';
+  if(k.includes('leg') || k.includes('lower') || k.includes('squat') || k.includes('hinge') || k.includes('glute') || k.includes('hamstring') || k.includes('quad')) return 'lower';
+  if(k.includes('upper')) return 'upper_push'; // generic upper → push warmup
+  if(k.includes('endurance') || k.includes('cardio') || k.includes('aerobic') || k.includes('run') || k.includes('zone')) return 'endurance_a';
+  if(k.includes('agt') || k.includes('emom') || k.includes('metcon') || k.includes('circuit') || k.includes('class b')) return 'endurance_b';
+  return 'full';
 }
 
 // Derive warmup key for a manual day from its label and primary muscles
 function manualWarmupKey(day){
-  // First try label keywords (user-named, most informative)
+  // Endurance/cardio days — check type first
+  if(day.type === 'cardio') return 'endurance_a';
+  if(day.type === 'muscular_endurance') return 'endurance_b';
+
+  // First try label keywords
   const key = warmupKey(day.label||'');
-  if(key !== 'full') return key; // got a specific match from the label
+  if(key !== 'full') return key;
 
   // Fall back to primary muscles of exercises
   const muscles = (day.exercises||[]).flatMap(ex => {
@@ -2877,9 +2970,9 @@ function manualWarmupKey(day){
     return dbEx ? dbEx.primary : (ex.muscles||'').split(',').map(m=>m.trim().toLowerCase());
   });
 
-  const lowerMuscles = new Set(['quads','hamstrings','glutes','calves']);
-  const pushMuscles  = new Set(['chest','shoulders','triceps']);
-  const pullMuscles  = new Set(['back','biceps']);
+  const lowerMuscles  = new Set(['quads','hamstrings','glutes','calves','hip_flexors']);
+  const pushMuscles   = new Set(['chest','shoulders','triceps']);
+  const pullMuscles   = new Set(['back','biceps','lats']);
 
   let lower=0, push=0, pull=0;
   muscles.forEach(m => {
@@ -2890,9 +2983,9 @@ function manualWarmupKey(day){
 
   const max = Math.max(lower, push, pull);
   if(max === 0) return 'full';
-  if(lower === max) return 'legs';
-  if(push  === max) return 'push';
-  return 'pull';
+  if(lower === max) return 'lower';
+  if(push  === max) return 'upper_push';
+  return 'upper_pull';
 }
 
 // =====================================================================
@@ -3442,7 +3535,8 @@ function generatePlan(){
             desc:sess.desc, color:sess.color, icon:sess.icon,
             zone:sess.zone, rpe:sess.rpe, rpeLabel:sess.rpeLabel,
             modality, modalityLabel:MODALITY_LABEL[modality]||modality,
-            phaseInfo, structure:structureArr
+            phaseInfo, structure:structureArr,
+            warmup: WARMUPS['endurance_a']
           };
         } else {
           const phaseData2 = sess.phases[phaseKey] || sess.phases.accumulation;
@@ -3458,7 +3552,8 @@ function generatePlan(){
             desc:sess.desc, color:sess.color, icon:sess.icon,
             rpe:sess.rpe, rpeLabel:sess.rpeLabel,
             keyRule:sess.keyRule, warning:sess.warning||null,
-            phaseData:phaseData2, structure:sess.structure, exercises:exercises2, sessId
+            phaseData:phaseData2, structure:sess.structure, exercises:exercises2, sessId,
+            warmup: WARMUPS['endurance_b']
           };
         }
       });
@@ -3649,7 +3744,9 @@ function renderPlan(){
           <h3>${day.icon} ${day.label}</h3>
           <div class="day-meta">Day ${di+1} of ${week.days.length}<br><span style="font-size:.65rem">${day.desc}</span></div>
         </div>
-        <div class="day-card-body"><div class="cardio-block">
+        <div class="day-card-body">
+          ${day.warmup && day.warmup.length ? `<div class="warmup-row"><span class="warmup-lbl">🔥 Warm-Up</span><span class="warmup-txt">${day.warmup.join(' · ')}</span></div>` : ''}
+          <div class="cardio-block">
           <div class="cardio-zone-row">
             ${day.zone ? `<span class="cardio-zone-pill">${day.zone}</span>` : ''}
             <span class="cardio-rpe-pill">${rpeTooltipHtml}</span>
@@ -3763,7 +3860,9 @@ function renderPlan(){
           <h3>${day.icon} ${day.label} <span style="font-size:.62rem;font-weight:700;background:rgba(255,255,255,.2);border-radius:4px;padding:.1rem .4rem;margin-left:.3rem">${sess.abbr}</span>${estBadge}</h3>
           <div class="day-meta">Day ${di+1} of ${week.days.length}<br><span style="font-size:.65rem">${day.desc}</span></div>
         </div>
-        <div class="day-card-body"><div class="mendo-block">
+        <div class="day-card-body">
+          ${day.warmup && day.warmup.length ? `<div class="warmup-row"><span class="warmup-lbl">🔥 Warm-Up</span><span class="warmup-txt">${day.warmup.join(' · ')}</span></div>` : ''}
+          <div class="mendo-block">
           <div class="cardio-zone-row">
             <span class="cardio-rpe-pill">${rpeTooltipHtml}</span>
           </div>
@@ -5992,11 +6091,11 @@ function renderUnifiedPlanView(slot){
       <div class="day-card-body">`;
 
     // Warm-up row — wizard plans use stored warmup; manual plans derive it
-    if(!isManual && day.warmup){
+    if(!isManual && day.warmup && day.warmup.length){
       html += `<div class="warmup-row"><span class="warmup-lbl">🔥 Warm-Up</span><span class="warmup-txt">${day.warmup.join(' · ')}</span></div>`;
-    } else if(isManual && day.type !== 'cardio'){
+    } else if(isManual){
       const wuKey  = manualWarmupKey(day);
-      const wuList = WARMUPS[wuKey] || WARMUPS.full;
+      const wuList = WARMUPS[wuKey] || WARMUPS['full'];
       html += `<div class="warmup-row"><span class="warmup-lbl">🔥 Warm-Up</span><span class="warmup-txt">${wuList.join(' · ')}</span></div>`;
     }
 
