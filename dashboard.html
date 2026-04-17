@@ -494,6 +494,18 @@ main {
 .translate-option .tl-flag { font-size: 1rem; }
 
 </style>
+
+<!-- Early language apply — must be in <head> before page renders -->
+<script>
+(function() {
+  var lang = localStorage.getItem('tal_lang');
+  if (lang && lang !== 'en') {
+    // Set googtrans cookie so Google Translate auto-applies on load
+    document.cookie = 'googtrans=/en/' + lang + '; path=/';
+    document.cookie = 'googtrans=/en/' + lang + '; domain=' + location.hostname + '; path=/';
+  }
+})();
+</script>
 </head>
 <body>
 
@@ -930,9 +942,8 @@ async function init() {
       document.getElementById('langModal').classList.add('open');
     }, 1200);
   } else if (langToApply && langToApply !== 'en') {
-    // Eager load + delayed apply for reliable cross-device behaviour
+    // Cookie set in <head> handles translation — just ensure widget loads
     loadGTranslate();
-    setTimeout(() => applyTranslation(langToApply), 1500);
   }
 }
 

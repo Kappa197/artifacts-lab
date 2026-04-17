@@ -836,6 +836,18 @@
     .translate-option .tl-flag { font-size: 1rem; }
 
     </style>
+
+<!-- Early language apply — must be in <head> before page renders -->
+<script>
+(function() {
+  var lang = localStorage.getItem('tal_lang');
+  if (lang && lang !== 'en') {
+    // Set googtrans cookie so Google Translate auto-applies on load
+    document.cookie = 'googtrans=/en/' + lang + '; path=/';
+    document.cookie = 'googtrans=/en/' + lang + '; domain=' + location.hostname + '; path=/';
+  }
+})();
+</script>
 </head>
 <body>
 
@@ -1506,13 +1518,8 @@ async function initTier() {
 
   // Auto-apply language preference
   const prefLang = typeof data !== 'undefined' && data?.preferred_language;
-  // Supabase first, localStorage fallback
-  var prLang = prefLang || localStorage.getItem('tal_lang');
+  // Sync Supabase → localStorage silently (cookie applied in <head>)
   if (prefLang) localStorage.setItem('tal_lang', prefLang);
-  if (prLang && prLang !== 'en') {
-    loadGTranslate();
-    setTimeout(function() { applyTranslation(prLang); }, 1500);
-  }
 }
 
 window.addEventListener('load', initTier);

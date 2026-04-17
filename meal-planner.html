@@ -719,6 +719,18 @@ body.shop-open .shop-fab{display:none!important;}
     .translate-option .tl-flag { font-size: 1rem; }
 
 </style>
+
+<!-- Early language apply — must be in <head> before page renders -->
+<script>
+(function() {
+  var lang = localStorage.getItem('tal_lang');
+  if (lang && lang !== 'en') {
+    // Set googtrans cookie so Google Translate auto-applies on load
+    document.cookie = 'googtrans=/en/' + lang + '; path=/';
+    document.cookie = 'googtrans=/en/' + lang + '; domain=' + location.hostname + '; path=/';
+  }
+})();
+</script>
 </head>
 <body>
 
@@ -1400,13 +1412,8 @@ async function initTier(){
           .single();
         var tier = (profile && !profileErr) ? (profile.tier || 'free') : 'free';
         buildCan(tier);
-        // Store preferred language for auto-apply after init
-        if (profile?.preferred_language && profile.preferred_language !== 'en') {
-          setTimeout(() => applyTranslation(profile.preferred_language), 500);
-        }
-        if (profile?.preferred_language && profile.preferred_language !== 'en') {
-          applyTranslation(profile.preferred_language);
-        }
+        // Sync Supabase → localStorage silently (cookie applied in <head>)
+        if (profile?.preferred_language) localStorage.setItem('tal_lang', profile.preferred_language);
       }
     }
   } catch(e){
@@ -1443,13 +1450,8 @@ async function initTier(){
     const { data: { user: u } } = await sb.auth.getUser();
     if (u) {
       const { data: lp } = await sb.from('profiles').select('preferred_language').eq('id', u.id).single();
-      // Supabase first, localStorage fallback
-      var mlLang = lp?.preferred_language || localStorage.getItem('tal_lang');
+      // Sync Supabase → localStorage silently (cookie applied in <head>)
       if (lp?.preferred_language) localStorage.setItem('tal_lang', lp.preferred_language);
-      if (mlLang && mlLang !== 'en') {
-        loadGTranslate();
-        setTimeout(function() { applyTranslation(mlLang); }, 1500);
-      }
     }
   } catch(e) { /* silent fail */ }
 }
