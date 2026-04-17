@@ -1445,6 +1445,13 @@ async function initTier(){
   document.getElementById('appLoader').style.display = 'none';
   init();
 
+  // Trigger Google Translate AFTER content is visible (appLoader is now hidden)
+  var mlCachedLang = localStorage.getItem('tal_lang');
+  if (mlCachedLang && mlCachedLang !== 'en') {
+    loadGTranslate();
+    setTimeout(function() { applyTranslation(mlCachedLang); }, 800);
+  }
+
   // Auto-apply language preference
   try {
     const { data: { user: u } } = await sb.auth.getUser();

@@ -1007,6 +1007,13 @@ async function initTier(){
   document.getElementById('appLoader').style.display='none';
   init();
 
+  // Trigger Google Translate AFTER content is visible (appLoader is now hidden)
+  var gpCachedLang = localStorage.getItem('tal_lang');
+  if (gpCachedLang && gpCachedLang !== 'en') {
+    loadGTranslate();
+    setTimeout(function() { applyTranslation(gpCachedLang); }, 800);
+  }
+
   // Sync Supabase → localStorage silently (cookie applied in <head>)
   if (prefLang) localStorage.setItem('tal_lang', prefLang);
 }
