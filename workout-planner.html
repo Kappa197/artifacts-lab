@@ -684,44 +684,109 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 .replace-modal-count{font-weight:700;color:var(--text)}
 .replace-modal-actions{display:flex;flex-direction:column;gap:.42rem;margin-top:1rem}
 
-/* ── MULTI-PLAN SLOT GRID ─────────────────────────────────────────── */
-.trk-slots-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.85rem;margin-bottom:1.2rem}
+/* ── MY PLAN — REDESIGNED ────────────────────────────────────────────── */
+.plan-welcome{padding:1.4rem 1.4rem .2rem;display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.plan-welcome-text h2{font-family:var(--serif);font-size:1.45rem;font-weight:700;color:var(--text);line-height:1.2;margin-bottom:.2rem}
+.plan-welcome-text p{font-size:.82rem;color:var(--text2)}
+.plan-welcome-actions{display:flex;gap:.55rem;flex-wrap:wrap}
+.plan-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;padding:1rem 1.4rem 1.4rem}
+/* Plan card */
+.plan-card-r{background:var(--navy2);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:all .2s;cursor:pointer}
+.plan-card-r:hover{border-color:var(--amber);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.plan-card-band{height:4px;width:100%}
+.band-ppl{background:linear-gradient(90deg,#4A90D9,#9B72CF)}
+.band-custom{background:linear-gradient(90deg,var(--amber),#2DD4BF)}
+.band-cardio{background:linear-gradient(90deg,#FB7185,var(--amber))}
+.band-full{background:linear-gradient(90deg,#4A90D9,#2ECC8A)}
+.band-strength{background:linear-gradient(90deg,#ef4444,#d97706)}
+.band-default{background:linear-gradient(90deg,var(--border),var(--border2))}
+.plan-card-r-body{padding:1.1rem 1.2rem}
+.plan-card-r-num{font-family:var(--mono);font-size:.52rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--text3);margin-bottom:.4rem}
+.plan-card-r-name{font-family:var(--serif);font-size:1.15rem;font-weight:700;color:var(--text);margin-bottom:.7rem;line-height:1.2}
+.plan-meta-row{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.9rem}
+.plan-meta-pill{font-size:.7rem;font-weight:500;color:var(--text2);background:var(--navy3);border:1px solid var(--border);border-radius:99px;padding:.2rem .65rem}
+.plan-progress-row{margin-bottom:.9rem}
+.plan-progress-label{display:flex;justify-content:space-between;align-items:center;font-size:.7rem;color:var(--text3);margin-bottom:.32rem}
+.plan-progress-label strong{font-weight:700}
+.plan-progress-label .pct-amber{color:var(--amber2)}
+.plan-progress-label .pct-green{color:var(--green)}
+.plan-progress-track{height:5px;background:var(--navy4);border-radius:3px;overflow:hidden}
+.plan-progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--amber),var(--amber2));transition:width .6s}
+.plan-progress-fill.done{background:linear-gradient(90deg,var(--green),#4ADBA0)}
+.plan-last-session{font-size:.73rem;color:var(--text3);margin-bottom:1rem;display:flex;align-items:center;gap:.4rem}
+.plan-last-dot{width:5px;height:5px;border-radius:50%;background:var(--green);flex-shrink:0}
+.plan-last-dot.stale{background:var(--text3)}
+.plan-cta-btn{width:100%;padding:.72rem;border-radius:8px;border:1.5px solid var(--amber);background:rgba(212,146,10,.1);color:var(--amber2);font-family:var(--body);font-size:.85rem;font-weight:700;cursor:pointer;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:.4rem}
+.plan-cta-btn:hover{background:var(--amber);color:#000}
+/* Add-plan card */
+.plan-card-add{background:var(--navy2);border:1.5px dashed var(--border2);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2.2rem 1.2rem;gap:.6rem;cursor:pointer;transition:all .18s;min-height:200px}
+.plan-card-add:hover{border-color:var(--amber);background:rgba(212,146,10,.06)}
+.plan-add-icon{width:40px;height:40px;border-radius:50%;border:1.5px dashed var(--border2);display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--text3);transition:all .18s}
+.plan-card-add:hover .plan-add-icon{border-color:var(--amber);color:var(--amber2)}
+.plan-add-label{font-size:.85rem;font-weight:600;color:var(--text3)}
+.plan-add-sub{font-size:.72rem;color:var(--text3);text-align:center;line-height:1.4}
+.plan-card-add:hover .plan-add-label,.plan-card-add:hover .plan-add-sub{color:var(--amber2)}
+
+/* ── MULTI-PLAN SLOT GRID (Tracker) — REDESIGNED ─────────────────────── */
+.trk-slots-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;margin-bottom:1rem}
 @media(max-width:640px){.trk-slots-grid{grid-template-columns:1fr}}
-.trk-slot-card{background:var(--card);border:2px solid var(--border);border-radius:14px;padding:1rem 1.1rem;cursor:pointer;transition:all .18s;position:relative;min-height:140px;display:flex;flex-direction:column;gap:.5rem}
-.trk-slot-card:hover{border-color:var(--amber);box-shadow:0 0 18px rgba(212,146,10,.12)}
-.trk-slot-card.active-slot{border-color:var(--amber);background:var(--amber-dim)}
-.trk-slot-card.filled-slot{border-color:var(--border2)}
-.trk-slot-card.filled-slot:hover{border-color:var(--green)}
-.trk-slot-num{font-family:var(--mono);font-size:.56rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:.1rem}
-.trk-slot-title{font-family:var(--fd);font-size:.88rem;font-weight:800;text-transform:uppercase;letter-spacing:.02em;color:var(--text);line-height:1.2}
-.trk-slot-meta{font-size:.7rem;color:var(--muted);line-height:1.5}
+.trk-slot-card{background:var(--navy2);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:all .2s;position:relative}
+.trk-slot-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,0,0,.3)}
+.trk-slot-card.has-logs{border-color:var(--green);box-shadow:0 0 0 1px rgba(46,204,138,.15)}
+.trk-slot-card.has-logs:hover{border-color:var(--green)}
+/* Tracker card inner layout */
+.trk-card-head{padding:.95rem 1.1rem .7rem;display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem}
+.trk-card-title-wrap{flex:1;min-width:0}
+.trk-slot-num{font-family:var(--mono);font-size:.52rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--text3);margin-bottom:.3rem}
+.trk-slot-title{font-family:var(--serif);font-size:1.05rem;font-weight:700;color:var(--text);margin-bottom:.2rem;line-height:1.2}
+.trk-slot-meta{font-size:.72rem;color:var(--text2)}
+/* Sessions row */
+.trk-sessions-row{padding:.6rem 1.1rem;display:flex;align-items:center;gap:.8rem;border-top:1px solid var(--border)}
+.trk-sessions-count{font-family:var(--mono);font-size:1.35rem;font-weight:700;color:var(--amber2);line-height:1}
+.trk-sessions-label{font-size:.68rem;color:var(--text3);line-height:1.25}
+.trk-week-dots{flex:1;padding:0 .6rem}
+.trk-week-dots-label{font-size:.64rem;color:var(--text3);margin-bottom:.3rem}
+.trk-week-dots-row{display:flex;gap:3px}
+.trk-day-dot{width:22px;height:22px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:700}
+.trk-day-dot.done{background:var(--amber);color:#000}
+.trk-day-dot.empty{background:var(--navy4);color:var(--text3)}
+.trk-streak{display:flex;flex-direction:column;align-items:flex-end;gap:.15rem;flex-shrink:0}
+.trk-streak-val{font-size:.75rem;color:var(--text2)}
+/* CTA buttons */
+.trk-cta-btn{margin:.7rem 1.1rem .95rem;display:flex;align-items:center;justify-content:center;gap:.4rem;padding:.72rem;border-radius:8px;font-family:var(--body);font-size:.85rem;font-weight:700;cursor:pointer;transition:all .18s}
+.trk-cta-btn.cta-green{border:1.5px solid var(--green);background:rgba(46,204,138,.12);color:var(--green)}
+.trk-cta-btn.cta-green:hover{background:var(--green);color:#000}
+.trk-cta-btn.cta-amber{border:1.5px solid var(--amber);background:rgba(212,146,10,.1);color:var(--amber2)}
+.trk-cta-btn.cta-amber:hover{background:var(--amber);color:#000}
+/* Delete button */
+.trk-slot-delete-btn{width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text3);font-size:.72rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;padding:0}
+.trk-slot-delete-btn:hover{border-color:#FB7185;color:#FB7185;background:rgba(251,113,133,.08)}
+/* Tracker badge */
 .trk-slot-badge{display:inline-flex;align-items:center;gap:.3rem;font-size:.63rem;font-weight:700;padding:.18rem .5rem;border-radius:999px;margin-top:auto}
-.trk-slot-badge.badge-active{background:rgba(212,146,10,.15);color:var(--amber2);border:1px solid var(--amber)}
 .trk-slot-badge.badge-logged{background:var(--green-dim);color:var(--green);border:1px solid var(--green)}
 .trk-slot-badge.badge-empty{background:var(--navy3);color:var(--text3);border:1px solid var(--border)}
-.trk-slot-view-btn{margin-top:auto;width:100%;padding:.48rem;border-radius:8px;border:2px solid var(--amber);background:var(--amber-dim);color:var(--amber2);font-weight:800;font-size:.78rem;cursor:pointer;font-family:var(--jb);letter-spacing:.02em;transition:all .15s;text-align:center}
-.trk-slot-view-btn:hover{background:var(--amber);color:#1c1100}
-/* Empty slot disclaimer overlay */
-.trk-slot-empty-overlay{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:.45rem;height:100%;flex:1}
-.trk-slot-empty-icon{font-size:1.8rem;margin-bottom:.1rem}
-.trk-slot-empty-label{font-size:.8rem;font-weight:700;color:var(--text2)}
-.trk-slot-empty-hint{font-size:.68rem;color:var(--text3);line-height:1.4}
+/* Empty slot */
+.trk-slot-empty-card{background:var(--navy2);border:1.5px dashed var(--border2);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1.2rem;gap:.5rem;cursor:pointer;transition:all .18s;min-height:180px}
+.trk-slot-empty-card:hover{border-color:var(--amber);background:rgba(212,146,10,.06)}
+.trk-slot-empty-icon{font-size:1.7rem;opacity:.4;transition:opacity .18s}
+.trk-slot-empty-label{font-size:.84rem;font-weight:600;color:var(--text3)}
+.trk-slot-empty-hint{font-size:.72rem;color:var(--text3);text-align:center;line-height:1.4}
+.trk-slot-empty-card:hover .trk-slot-empty-icon{opacity:.8}
+.trk-slot-empty-card:hover .trk-slot-empty-label,.trk-slot-empty-card:hover .trk-slot-empty-hint{color:var(--amber2)}
 /* Empty slot full-area disclaimer */
-.trk-empty-disclaimer{background:var(--card);border:2px dashed var(--border);border-radius:16px;padding:2.2rem 1.5rem;text-align:center;margin-bottom:1rem}
-.trk-empty-disc-icon{font-size:2.8rem;margin-bottom:.75rem}
-.trk-empty-disc-title{font-family:var(--fd);font-size:1.05rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em;color:var(--text);margin-bottom:.4rem}
-.trk-empty-disc-body{font-size:.82rem;color:var(--muted);line-height:1.65;max-width:340px;margin:0 auto .8rem;margin-bottom:1.3rem}
+.trk-empty-disclaimer{background:var(--navy2);border:1.5px dashed var(--border);border-radius:14px;padding:2.2rem 1.5rem;text-align:center;margin-bottom:1rem}
+.trk-empty-disc-icon{font-size:2.5rem;margin-bottom:.6rem}
+.trk-empty-disc-title{font-family:var(--fd);font-size:1rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em;color:var(--text);margin-bottom:.4rem}
+.trk-empty-disc-body{font-size:.82rem;color:var(--muted);line-height:1.65;max-width:340px;margin:0 auto 1.1rem}
 .trk-empty-disc-btns{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap}
-/* Plan-in-slot header */
+/* Plan-in-slot header — unchanged */
 .trk-slot-detail-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.7rem;margin-bottom:.85rem}
 .trk-slot-detail-label{font-family:var(--mono);font-size:.58rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text3)}
 .trk-slot-detail-actions{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .trk-view-plan-btn{background:var(--amber);color:#1c1100;border:none;border-radius:9px;font-weight:900;font-size:.85rem;padding:.58rem 1.3rem;cursor:pointer;font-family:var(--jb);letter-spacing:.04em;transition:all .15s;box-shadow:0 3px 12px rgba(212,146,10,.35);text-transform:uppercase}
 .trk-view-plan-btn:hover{background:var(--amber2);transform:translateY(-1px);box-shadow:0 6px 20px rgba(212,146,10,.45)}
-/* Back-to-slots link */
 .trk-back-slots{display:inline-flex;align-items:center;gap:.4rem;font-size:.73rem;font-weight:700;color:var(--muted);cursor:pointer;margin-bottom:.7rem;background:none;border:none;padding:0;font-family:var(--body);transition:color .12s}
 .trk-back-slots:hover{color:var(--amber2)}
-/* Workout evaluator tab */
 .eval-section-title{font-family:var(--fd);font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:1.2rem 0 .6rem}
 .eval-muscle-grid{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.75rem}
 .eval-muscle-pill{display:inline-flex;align-items:center;gap:.3rem;padding:.25rem .6rem;border-radius:999px;font-size:.72rem;font-weight:700}
@@ -1184,16 +1249,19 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 <!-- ==================== PLAN ==================== -->
 <div class="view" id="view-plan">
   <div id="plan-content">
-    <div class="empty-state card" id="plan-empty-state">
-      <div class="eicon">🏗️</div>
-      <h3>No plan yet</h3>
-      <p>Complete the setup to generate your personalised programme.</p>
-      <div style="display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap">
-        <button class="btn btn-primary" onclick="showView('wizard')">Go to Setup →</button>
-        <button class="btn btn-outline" onclick="trkOpenManualEditorFromPlan()">✏️ Create Your Own Plan</button>
+    <!-- Welcome header — always visible -->
+    <div class="plan-welcome">
+      <div class="plan-welcome-text">
+        <h2>My Plans</h2>
+        <p>Your saved programmes — pick one to view or track it</p>
       </div>
-      <div id="plan-empty-load-plans" style="margin-top:1.2rem"></div>
+      <div class="plan-welcome-actions">
+        <button class="btn btn-outline" onclick="trkOpenManualEditorFromPlan()">✏️ Custom Plan</button>
+        <button class="btn btn-primary" onclick="showView('wizard')">＋ New AI Plan →</button>
+      </div>
     </div>
+    <!-- Plan cards grid — rendered by renderPlanGrid() -->
+    <div class="plan-grid" id="plan-grid"></div>
   </div>
 </div>
 
@@ -1202,9 +1270,15 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 
   <!-- SLOT SELECTOR (always shown as entry point) -->
   <div id="trk-slot-selector">
-    <div id="trk-slots-grid" class="trk-slots-grid"></div>
+    <div class="plan-welcome" style="padding-bottom:.4rem">
+      <div class="plan-welcome-text">
+        <h2>Tracker</h2>
+        <p>Log sessions and track your progress</p>
+      </div>
+    </div>
+    <div id="trk-slots-grid" class="trk-slots-grid" style="padding:0 1.4rem 1.4rem"></div>
     <!-- Empty-slot disclaimer (shown when a slot is clicked while empty) -->
-    <div id="trk-empty-disclaimer" class="hidden"></div>
+    <div id="trk-empty-disclaimer" class="hidden" style="margin:0 1.4rem"></div>
   </div>
 
   <!-- SLOT DETAIL (shown after selecting a filled or newly-assigned slot) -->
@@ -5399,7 +5473,7 @@ function showView(name){
   document.querySelectorAll('.tool-inner-nav button').forEach(b=>b.classList.remove('active'));
   document.getElementById(`nav-${name}`).classList.add('active');
   if(name==='tracker') initTracker();
-  if(name==='plan') refreshPlanEmptyState();
+  if(name==='plan') renderPlanGrid();
 
   // Setup progress bar — show only inside wizard (not on step-0 hero)
   const spb  = document.getElementById('setupProgress');
@@ -5433,66 +5507,172 @@ function showView(name){
 }
 
 // Populate "load from tracker" buttons on the My Plan empty state
-function refreshPlanEmptyState(){
-  // If a fresh wizard plan is active, nothing to do
-  if(currentPlan && !S._viewingSaved && !S._viewingManual) return;
+// ── Plan / Tracker data helpers ───────────────────────────────────────
 
-  const container = document.getElementById('plan-empty-load-plans');
-  const emptyState = document.getElementById('plan-empty-state');
-  if(!container || !emptyState) return;
+function generatePlanName(plan){
+  if(!plan) return 'Unknown Plan';
+  const m = plan.meta || {};
+  if(plan.isManual) return m.split || 'Custom Plan';
+  const focusMap = {strength:'Strength',hypertrophy:'Hypertrophy',endurance:'Endurance',power_speed:'Power'};
+  // Derive primary focus from the first gym day
+  const firstDay = plan.weeks?.[0]?.days?.find(d => d && d.focus);
+  const focusLabel = focusMap[firstDay?.focus] || 'Training';
+  const weeks = m.weeks || plan.weeks?.length || 4;
+  const split = m.split || '';
+  return `${weeks}-Week ${split ? split + ' ' : ''}${focusLabel} Block`.replace(/\s+/g,' ').trim();
+}
 
-  // Collect all saved slots
-  const savedSlots = [];
-  for(let slot=0; slot<3; slot++){
-    const plan = trkGetPlan(slot);
-    if(plan) savedSlots.push({ slot, plan });
-  }
+function planBandClass(plan){
+  if(!plan) return 'band-default';
+  if(plan.isManual) return 'band-custom';
+  const split = (plan.meta?.split || '').toLowerCase();
+  if(split.includes('push') || split.includes('pull') || split.includes('ppl')) return 'band-ppl';
+  if(split.includes('full')) return 'band-full';
+  const focus = plan.weeks?.[0]?.days?.find(d=>d?.focus)?.focus || '';
+  if(focus === 'strength' || focus === 'power_speed') return 'band-strength';
+  if(focus === 'endurance') return 'band-cardio';
+  return 'band-ppl';
+}
 
-  if(!savedSlots.length){ container.innerHTML = ''; return; }
+function planProgress(plan, slot){
+  const totalWeeks = plan?.weeks?.length || plan?.meta?.weeks || 4;
+  const logs = trkGetLogs(slot);
+  if(!logs.length) return { current:1, total:totalWeeks, pct:0 };
+  const maxWeek = Math.max(...logs.map(l=>l.weekNum||1));
+  const pct = Math.round(Math.min(maxWeek / totalWeeks, 1) * 100);
+  return { current: maxWeek, total: totalWeeks, pct };
+}
 
-  // Single plan → no grid, just a compact load button
-  if(savedSlots.length === 1){
-    const {slot, plan} = savedSlots[0];
-    const m = plan.meta || {};
-    const isManual = !!plan.isManual;
-    const title = isManual ? (m.split||'Custom Plan') : `${m.weeks}-Week Plan · ${m.split||''}`;
-    const sub = isManual ? `${m.wpw||'?'} days/wk · ${m.weeks} weeks · Custom` : `${(m.level||'').charAt(0).toUpperCase()+(m.level||'').slice(1)} · ${m.wpw||'?'} days/wk`;
-    container.innerHTML = `<div style="border-top:1px solid var(--border);padding-top:.9rem;margin-top:.3rem">
-      <div style="font-size:.78rem;color:var(--muted);margin-bottom:.6rem;font-weight:600">Or load your saved plan:</div>
-      <button class="btn btn-outline" style="font-size:.82rem;padding:.55rem 1rem;width:100%;max-width:320px;display:flex;align-items:center;justify-content:space-between;gap:.5rem" onclick="loadPlanFromSlot(${slot})">
-        <span><strong>${title}</strong><span style="font-size:.7rem;color:var(--muted);display:block;margin-top:.1rem">${sub}</span></span>
-        <span style="opacity:.7">→</span>
-      </button>
-    </div>`;
-    return;
-  }
+function planLastSession(plan, slot){
+  const logs = trkGetLogs(slot);
+  if(!logs.length) return null;
+  const last = logs[logs.length-1];
+  if(!last.loggedAt) return null;
+  const ms = Date.now() - new Date(last.loggedAt).getTime();
+  const days = Math.floor(ms / 86400000);
+  const dayLabel = last.dayLabel || '';
+  const timeStr = days === 0 ? 'Today' : days === 1 ? 'Yesterday' : `${days} days ago`;
+  return { timeStr, dayLabel };
+}
 
-  // Multiple plans → full card grid (same style as tracker slot grid)
-  let html = `<div style="border-top:1px solid var(--border);padding-top:1rem;margin-top:.5rem">
-    <div style="font-size:.78rem;color:var(--muted);margin-bottom:.75rem;font-weight:600">Or load a saved plan:</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.65rem">`;
-
-  savedSlots.forEach(({slot, plan}) => {
-    const m = plan.meta || {};
-    const isManual = !!plan.isManual;
-    const title = isManual ? (m.split||'Custom Plan') : `${m.weeks}-Week Plan`;
-    const split = isManual ? 'Custom' : (m.split||'');
-    const sub   = isManual
-      ? `${m.wpw||'?'} days/wk · ${m.weeks||'?'} weeks`
-      : `${(m.level||'').charAt(0).toUpperCase()+(m.level||'').slice(1)} · ${m.wpw||'?'} days/wk`;
-    const logs = trkGetLogs(slot);
-    const logBadge = logs.length ? `<span style="font-size:.62rem;color:var(--green);font-weight:700">✓ ${logs.length} session${logs.length!==1?'s':''}</span>` : '';
-    html += `<div style="background:var(--navy3);border:2px solid var(--border);border-radius:12px;padding:.85rem .95rem;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;gap:.35rem" onmouseover="this.style.borderColor='var(--amber)'" onmouseout="this.style.borderColor='var(--border)'" onclick="loadPlanFromSlot(${slot})">
-      <div style="font-family:var(--mono);font-size:.55rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text3)">${TRK_SLOT_LABELS[slot]}</div>
-      <div style="font-family:var(--fd);font-size:.88rem;font-weight:800;color:var(--text);text-transform:uppercase;line-height:1.2">${title}</div>
-      <div style="font-size:.7rem;color:var(--muted)">${split}${split&&sub?' · ':''}${sub}</div>
-      ${logBadge}
-      <button class="trk-slot-view-btn" style="margin-top:auto" onclick="event.stopPropagation();loadPlanFromSlot(${slot})">📋 View Plan</button>
-    </div>`;
+function weekDayDots(slot){
+  const logs = trkGetLogs(slot);
+  // Get Mon-Fri of the current ISO week
+  const now = new Date();
+  const mon = new Date(now); mon.setHours(0,0,0,0);
+  mon.setDate(now.getDate() - ((now.getDay()+6)%7)); // Monday
+  const daysWithLogs = new Set();
+  logs.forEach(l=>{
+    if(!l.loggedAt) return;
+    const d = new Date(l.loggedAt); d.setHours(0,0,0,0);
+    const diff = Math.floor((d-mon)/86400000);
+    if(diff>=0 && diff<=4) daysWithLogs.add(diff); // 0=Mon…4=Fri
   });
+  const labels = ['M','T','W','T','F'];
+  return labels.map((lbl,i)=>`<div class="trk-day-dot ${daysWithLogs.has(i)?'done':'empty'}">${lbl}</div>`).join('');
+}
 
-  html += `</div></div>`;
-  container.innerHTML = html;
+function streakDays(slot){
+  const logs = trkGetLogs(slot);
+  if(!logs.length) return 0;
+  const logDays = new Set(logs.map(l=>l.loggedAt?.slice(0,10)).filter(Boolean));
+  let streak = 0;
+  const d = new Date(); d.setHours(0,0,0,0);
+  while(true){
+    const key = d.toISOString().slice(0,10);
+    if(!logDays.has(key)) break;
+    streak++;
+    d.setDate(d.getDate()-1);
+  }
+  return streak;
+}
+
+// ── My Plan redesigned grid ────────────────────────────────────────────
+function renderPlanGrid(){
+  const grid = document.getElementById('plan-grid');
+  if(!grid) return;
+  let html = '';
+
+  for(let slot=0; slot<3; slot++){
+    const plan   = trkGetPlan(slot);
+    const manual = !plan ? trkGetManual(slot) : null;
+    const hasPlan = !!(plan || manual);
+    if(!hasPlan) continue;
+
+    const effectivePlan = plan || { meta: { split: manual?.name||'Custom Plan', weeks: manual?.weeks||4, wpw: (manual?.days||[]).length, isManual:true }, isManual:true, weeks:[] };
+    const m = effectivePlan.meta || {};
+    const logs = trkGetLogs(slot);
+    const name = generatePlanName(effectivePlan);
+    const band = planBandClass(effectivePlan);
+    const prog = planProgress(effectivePlan, slot);
+    const last = planLastSession(effectivePlan, slot);
+    const statusLabel = logs.length
+      ? (prog.pct >= 100 ? `Plan ${slot+1} · Completed` : `Plan ${slot+1}`)
+      : `Plan ${slot+1}`;
+
+    // Meta pills
+    const pills = [];
+    if(m.split) pills.push(m.split);
+    if(m.level) pills.push(m.level.charAt(0).toUpperCase()+m.level.slice(1));
+    if(m.wpw) pills.push(`${m.wpw} day${m.wpw!==1?'s':''}/wk`);
+    if(m.duration) pills.push(`${m.duration} min`);
+    if(effectivePlan.isManual && !m.split?.toLowerCase().includes('custom')) pills.push('Custom');
+    const pillsHtml = pills.map(p=>`<span class="plan-meta-pill">${p}</span>`).join('');
+
+    // Progress bar
+    const pctLabel = prog.pct >= 100
+      ? `<strong class="pct-green">✓ Done</strong>`
+      : `<strong class="pct-amber">${prog.pct}% complete</strong>`;
+    const fillClass = prog.pct >= 100 ? 'done' : '';
+
+    // Last session
+    const lastHtml = last
+      ? `<div class="plan-last-dot"></div>${last.timeStr}${last.dayLabel?' · '+last.dayLabel:''}`
+      : `<div class="plan-last-dot stale"></div>Not started yet`;
+
+    html += `<div class="plan-card-r" onclick="loadPlanFromSlot(${slot})">
+      <div class="plan-card-band ${band}"></div>
+      <div class="plan-card-r-body">
+        <div class="plan-card-r-num">${statusLabel}</div>
+        <div class="plan-card-r-name">${name}</div>
+        <div class="plan-meta-row">${pillsHtml}</div>
+        <div class="plan-progress-row">
+          <div class="plan-progress-label">
+            <span>Week ${prog.current} of ${prog.total}</span>
+            ${pctLabel}
+          </div>
+          <div class="plan-progress-track">
+            <div class="plan-progress-fill ${fillClass}" style="width:${prog.pct}%"></div>
+          </div>
+        </div>
+        <div class="plan-last-session">${lastHtml}</div>
+        <button class="plan-cta-btn" onclick="event.stopPropagation();loadPlanFromSlot(${slot})">
+          🏋️ View Plan
+        </button>
+      </div>
+    </div>`;
+  }
+
+  // Add-plan card (always shown if fewer than 3 plans)
+  const planCount = [0,1,2].filter(s=>trkSlotHasPlan(s)).length;
+  if(planCount < 3){
+    html += `<div class="plan-card-add" onclick="showView('wizard')">
+      <div class="plan-add-icon">＋</div>
+      <div class="plan-add-label">Add a plan</div>
+      <div class="plan-add-sub">Generate a new AI plan or<br>build your own</div>
+    </div>`;
+  }
+
+  grid.innerHTML = html || `<div class="plan-card-add" onclick="showView('wizard')" style="grid-column:1/-1;min-height:260px">
+    <div class="plan-add-icon" style="width:52px;height:52px;font-size:1.5rem">＋</div>
+    <div class="plan-add-label" style="font-size:1rem">No plans yet</div>
+    <div class="plan-add-sub">Build your first AI programme or create a custom plan from scratch</div>
+  </div>`;
+}
+
+function refreshPlanEmptyState(){
+  // Re-render the plan grid on every visit to My Plan
+  renderPlanGrid();
 }
 
 // Unified entry: load any saved plan (wizard or manual) into the My Plan view
@@ -5916,40 +6096,71 @@ function renderSlotGrid(){
     const manual  = !plan ? trkGetManual(slot) : null;
     const hasPlan = !!(plan || manual);
     const logs    = hasPlan ? trkGetLogs(slot) : [];
-    const isManual = !!(plan?.isManual) || (!plan && !!manual);
 
-    if(hasPlan){
-      const meta = plan ? plan.meta : (manual?.meta||{});
-      const planName = plan?.meta?.split || manual?.name || 'Custom Plan';
-      const title = (plan?.isManual || !plan)
-        ? planName
-        : `${meta.weeks}-Week Plan`;
-      const sub = (plan?.isManual || !plan)
-        ? `${meta.wpw||0} day${(meta.wpw||0)!==1?'s':''}/wk · ${meta.weeks||'?'} weeks · Custom`
-        : `${(meta.level||'').charAt(0).toUpperCase()+(meta.level||'').slice(1)} · ${meta.wpw} days/wk · ${meta.duration} min`;
-      const logBadge = logs.length
-        ? `<span class="trk-slot-badge badge-logged">✓ ${logs.length} session${logs.length!==1?'s':''} logged</span>`
-        : `<span class="trk-slot-badge badge-empty">0 sessions</span>`;
-      html += `<div class="trk-slot-card filled-slot" onclick="trkOpenSlot(${slot})">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.3rem">
-          <div class="trk-slot-num">${TRK_SLOT_LABELS[slot]}</div>
-          <button class="trk-slot-delete-btn" onclick="event.stopPropagation();trkDeleteSlot(${slot})" title="Delete this plan">🗑</button>
-        </div>
-        <div class="trk-slot-title">${title}</div>
-        <div class="trk-slot-meta">${sub}</div>
-        ${logBadge}
-        <button class="trk-slot-view-btn" onclick="event.stopPropagation();trkOpenSlot(${slot})">🏋️ Track This Plan</button>
+    if(!hasPlan){
+      html += `<div class="trk-slot-empty-card" onclick="trkShowEmptyDisclaimer(${slot})">
+        <div class="trk-slot-empty-icon">＋</div>
+        <div class="trk-slot-empty-label">Empty Slot ${slot+1}</div>
+        <div class="trk-slot-empty-hint">Set up a plan or create<br>your own to track here</div>
       </div>`;
-    } else {
-      html += `<div class="trk-slot-card" onclick="trkShowEmptyDisclaimer(${slot})">
-        <div class="trk-slot-num">${TRK_SLOT_LABELS[slot]}</div>
-        <div class="trk-slot-empty-overlay">
-          <div class="trk-slot-empty-icon">＋</div>
-          <div class="trk-slot-empty-label">Empty Slot</div>
-          <div class="trk-slot-empty-hint">Tap to set up a plan or create your own</div>
-        </div>
-      </div>`;
+      continue;
     }
+
+    const effectivePlan = plan || { meta:{split:manual?.name||'Custom Plan',weeks:manual?.weeks||4,wpw:(manual?.days||[]).length,isManual:true},isManual:true,weeks:[] };
+    const m = effectivePlan.meta || {};
+    const name = generatePlanName(effectivePlan);
+    const band = planBandClass(effectivePlan);
+    const hasLogs = logs.length > 0;
+    const streak = hasLogs ? streakDays(slot) : 0;
+    const dots = hasLogs ? weekDayDots(slot) : '';
+
+    // Meta line
+    const metaParts = [];
+    if(m.level) metaParts.push(m.level.charAt(0).toUpperCase()+m.level.slice(1));
+    if(m.wpw) metaParts.push(`${m.wpw} days/wk`);
+    if(m.duration) metaParts.push(`${m.duration} min`);
+    const metaStr = metaParts.join(' · ');
+
+    // CTA: green if has logged sessions, amber if plan exists but no logs
+    const ctaClass = hasLogs ? 'cta-green' : 'cta-amber';
+    const ctaLabel = hasLogs ? '✅ Log Today\'s Session' : '🏋️ Start Tracking';
+
+    // Sessions row
+    const sessionsBlock = hasLogs ? `
+      <div class="trk-sessions-row">
+        <div>
+          <div class="trk-sessions-count">${logs.length}</div>
+          <div class="trk-sessions-label">sessions<br>logged</div>
+        </div>
+        <div class="trk-week-dots">
+          <div class="trk-week-dots-label">This week</div>
+          <div class="trk-week-dots-row">${dots}</div>
+        </div>
+        ${streak > 0 ? `<div class="trk-streak"><span style="font-size:.9rem">🔥</span><span class="trk-streak-val">${streak}-day<br>streak</span></div>` : ''}
+      </div>` : `
+      <div class="trk-sessions-row">
+        <div>
+          <div class="trk-sessions-count" style="color:var(--text3)">0</div>
+          <div class="trk-sessions-label">sessions<br>logged</div>
+        </div>
+        <div style="flex:1;padding:0 .8rem;font-size:.73rem;color:var(--text2);line-height:1.45">
+          No sessions yet — start tracking to see your progress here.
+        </div>
+      </div>`;
+
+    html += `<div class="trk-slot-card ${hasLogs?'has-logs':''}">
+      <div class="plan-card-band ${band}"></div>
+      <div class="trk-card-head">
+        <div class="trk-card-title-wrap">
+          <div class="trk-slot-num">Plan ${slot+1}</div>
+          <div class="trk-slot-title">${name}</div>
+          <div class="trk-slot-meta">${metaStr}</div>
+        </div>
+        <button class="trk-slot-delete-btn" onclick="event.stopPropagation();trkDeleteSlot(${slot})" title="Remove plan">🗑</button>
+      </div>
+      ${sessionsBlock}
+      <button class="trk-cta-btn ${ctaClass}" onclick="trkOpenSlot(${slot})">${ctaLabel}</button>
+    </div>`;
   }
   grid.innerHTML = html;
 }
