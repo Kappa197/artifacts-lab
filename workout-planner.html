@@ -609,45 +609,80 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 .trk-tabs{display:flex;gap:.5rem;margin-bottom:.9rem}
 .trk-tab{flex:1;padding:.5rem 1rem;border-radius:8px;border:1.5px solid var(--border);background:var(--card);color:var(--muted);font-size:.82rem;font-weight:700;cursor:pointer;transition:all .15s;text-align:center;font-family:var(--jb)}
 .trk-tab.active{border-color:var(--primary);color:var(--primary);background:var(--primary-l)}
-.trk-week-nav{display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.85rem}
-.trk-wbtn{padding:.26rem .55rem;border-radius:6px;border:1.5px solid var(--border);background:var(--card);color:var(--muted);font-size:.73rem;font-weight:700;cursor:pointer;font-family:var(--jb);transition:all .15s}
-.trk-wbtn.active{border-color:var(--primary);color:var(--primary);background:var(--primary-l)}
-.trk-wbtn.all-logged{border-color:var(--ok);color:var(--ok)}
-.trk-wbtn.partial{border-color:var(--warn);color:var(--warn)}
-.trk-phase-label{font-size:.73rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.6rem}
-/* Day cards */
-.trk-day-card{background:var(--card);border-radius:12px;margin-bottom:.65rem;overflow:hidden;border:1.5px solid var(--border);transition:border-color .15s}
-.trk-day-card.logged{border-color:rgba(34,197,94,.35)}
-.trk-day-card.partial{border-color:rgba(245,158,11,.35)}
-.trk-day-hdr{display:flex;justify-content:space-between;align-items:center;padding:.7rem 1rem;cursor:pointer;gap:.5rem;flex-wrap:wrap;user-select:none}
-.trk-day-label{font-weight:700;font-size:.88rem;display:flex;align-items:center;gap:.4rem}
-.trk-day-right{display:flex;align-items:center;gap:.4rem;flex-shrink:0;flex-wrap:wrap}
-.trk-status{font-size:.66rem;font-weight:700;padding:.15rem .45rem;border-radius:999px;white-space:nowrap}
-.trk-status.logged{background:rgba(34,197,94,.15);color:#22c55e}
-.trk-status.partial{background:rgba(245,158,11,.15);color:#f59e0b}
-.trk-status.empty{background:var(--primary-l);color:var(--primary)}
-.trk-log-btn{font-size:.7rem;font-weight:700;padding:.2rem .6rem;border-radius:6px;border:1.5px solid var(--primary);background:transparent;color:var(--primary);cursor:pointer;transition:all .12s;font-family:var(--jb);white-space:nowrap}
-.trk-log-btn:hover{background:var(--primary-l)}
-.trk-log-btn.edit{border-color:var(--ok);color:var(--ok)}
-.trk-log-btn.edit:hover{background:rgba(34,197,94,.1)}
-/* Inline log form */
-.trk-form{padding:.15rem 1rem 1rem;border-top:1px solid var(--border)}
-.trk-prefill-note{font-size:.7rem;color:var(--primary);background:var(--primary-l);border-radius:7px;padding:.38rem .65rem;margin:.6rem 0 .5rem;line-height:1.5}
-.trk-ex-block{margin-bottom:.9rem;padding-bottom:.9rem;border-bottom:1px solid var(--border)}
-.trk-ex-block:last-of-type{border-bottom:none}
-.trk-ex-name{font-weight:700;font-size:.82rem;margin-bottom:.2rem}
+/* ── Tracker week nav — redesigned ──────────────────────────────── */
+.trk-week-nav{margin-bottom:1rem}
+.trk-week-nav-label{font-size:.72rem;color:var(--text3);margin-bottom:.5rem}
+.trk-week-nav-scroll{display:flex;gap:.4rem;overflow-x:auto;padding-bottom:3px;scrollbar-width:none}
+.trk-week-nav-scroll::-webkit-scrollbar{display:none}
+.trk-wbtn{flex-shrink:0;min-width:52px;padding:.5rem .55rem .45rem;border-radius:8px;border:1.5px solid var(--border);background:var(--navy2);display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;transition:all .15s;position:relative}
+.trk-wbtn-num{font-family:var(--mono);font-size:.72rem;font-weight:700;color:var(--text2);line-height:1}
+.trk-wbtn-dots{display:flex;gap:2px;margin-top:2px}
+.trk-wdot{width:5px;height:5px;border-radius:50%;background:var(--border2)}
+.trk-wdot.done{background:var(--green)}
+.trk-wdot.part{background:var(--amber)}
+.trk-wbtn.active{border-color:var(--amber);background:var(--amber-dim)}
+.trk-wbtn.active .trk-wbtn-num{color:var(--amber2)}
+.trk-wbtn.all-logged{border-color:var(--green)}
+.trk-wbtn.all-logged .trk-wbtn-num{color:var(--green)}
+.trk-wbtn.partial{border-color:var(--amber)}
+.trk-wbtn-today{position:absolute;top:-7px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:.45rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:var(--amber);color:#000;padding:1px 5px;border-radius:3px;white-space:nowrap}
+/* Context strip */
+.trk-context-strip{background:var(--navy2);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:10px;padding:.85rem 1rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.7rem}
+.trk-ctx-left{display:flex;align-items:center;gap:.7rem}
+.trk-ctx-icon{font-size:1.3rem}
+.trk-ctx-title{font-size:.88rem;font-weight:700;color:var(--text);margin-bottom:.1rem}
+.trk-ctx-sub{font-size:.72rem;color:var(--text2)}
+.trk-ctx-btn{padding:.4rem .9rem;border-radius:6px;font-size:.78rem;font-weight:700;cursor:pointer;border:none;transition:all .15s;font-family:var(--body)}
+.trk-ctx-btn-primary{background:var(--amber);color:#000}
+.trk-ctx-btn-primary:hover{background:var(--amber2)}
+/* Phase label */
+.trk-phase-label{font-size:.74rem;color:var(--text2);font-weight:600;margin-bottom:.75rem;display:flex;align-items:center;gap:.4rem}
+/* Day card — redesigned */
+.trk-day-card{background:var(--navy2);border-radius:12px;margin-bottom:.65rem;overflow:hidden;border:1.5px solid var(--border);transition:border-color .2s}
+.trk-day-card.logged{border-color:rgba(46,204,138,.4)}
+.trk-day-card.partial{border-color:rgba(245,166,35,.4)}
+.trk-day-card.is-today{border-color:var(--amber);box-shadow:0 0 0 1px rgba(212,146,10,.15)}
+.trk-day-hdr{display:flex;justify-content:space-between;align-items:center;padding:.88rem 1rem;cursor:pointer;gap:.6rem;user-select:none}
+.trk-day-left{display:flex;align-items:center;gap:.65rem;flex:1;min-width:0}
+.trk-day-icon{width:34px;height:34px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.95rem;background:var(--navy3)}
+.trk-day-card.is-today .trk-day-icon{background:var(--amber-dim)}
+.trk-day-card.logged .trk-day-icon{background:var(--green-dim)}
+.trk-day-label{font-weight:700;font-size:.88rem;color:var(--text);line-height:1.2}
+.trk-day-meta{font-size:.7rem;color:var(--text2);margin-top:.12rem}
+.trk-day-right{display:flex;align-items:center;gap:.5rem;flex-shrink:0}
+.trk-status{font-size:.7rem;font-weight:600;padding:.25rem .65rem;border-radius:99px;white-space:nowrap}
+.trk-status.logged{background:var(--green-dim);color:var(--green);border:1px solid rgba(46,204,138,.3)}
+.trk-status.partial{background:rgba(245,166,35,.12);color:#f59e0b;border:1px solid rgba(245,166,35,.3)}
+.trk-status.empty{background:var(--navy3);color:var(--text3);border:1px solid var(--border)}
+.trk-status.today-status{background:var(--amber-dim);color:var(--amber2);border:1px solid rgba(212,146,10,.3)}
+.trk-expand-icon{font-size:.7rem;color:var(--text3);transition:transform .2s;width:18px;text-align:center;flex-shrink:0}
+.trk-day-card.open .trk-expand-icon{transform:rotate(180deg)}
+/* Log form — redesigned */
+.trk-form{padding:.9rem 1rem 1.1rem;border-top:1px solid var(--border)}
+.trk-prefill-note{display:flex;align-items:flex-start;gap:.55rem;background:rgba(212,146,10,.05);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:8px;padding:.65rem .85rem;margin-bottom:1rem;font-size:.78rem;color:var(--text2);line-height:1.5}
+.trk-prefill-icon{font-size:.88rem;flex-shrink:0;margin-top:.05rem}
+/* Exercise block */
+.trk-ex-block{margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
+.trk-ex-block:last-of-type{border-bottom:none;margin-bottom:.5rem;padding-bottom:0}
+.trk-ex-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.55rem;gap:.8rem}
+.trk-ex-name{font-weight:700;font-size:.88rem;color:var(--text);margin-bottom:.15rem}
 .trk-ex-prescribed{font-size:.7rem;color:var(--muted);margin-bottom:.4rem}
 /* ── Rest timer ─────────────────────────────────────────────────── */
-.rest-timer-bar{position:sticky;bottom:0;left:0;right:0;background:var(--navy2);border-top:2px solid var(--amber);padding:.65rem 1rem;display:flex;align-items:center;gap:.75rem;z-index:200;animation:slideUp .2s ease}
+.rest-timer-bar{position:fixed;bottom:0;left:0;right:0;background:var(--navy2);border-top:2px solid var(--amber);padding:.8rem 1.2rem;display:flex;align-items:center;gap:.8rem;z-index:300;animation:slideUp .2s ease;box-shadow:0 -4px 24px rgba(0,0,0,.4)}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .rest-timer-bar.green{border-top-color:var(--green)}
-.rest-timer-countdown{font-family:var(--mono);font-size:1.5rem;font-weight:800;color:var(--amber2);min-width:3rem;text-align:center;line-height:1}
+.rest-timer-countdown{font-family:var(--mono);font-size:1.6rem;font-weight:800;color:var(--amber2);min-width:3.5rem;text-align:center;line-height:1}
 .rest-timer-bar.green .rest-timer-countdown{color:var(--green)}
-.rest-timer-label{font-size:.72rem;color:var(--text2);flex:1;line-height:1.35}
-.rest-timer-track{position:absolute;bottom:0;left:0;height:3px;background:var(--amber);transition:width .98s linear;border-radius:0}
-.rest-timer-bar.green .rest-timer-track{background:var(--green)}
-.rest-timer-skip{font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.06em;padding:.28rem .7rem;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;white-space:nowrap;transition:all .15s}
+.rest-timer-info{flex:1}
+.rest-timer-title{font-size:.82rem;font-weight:700;color:var(--text);margin-bottom:.1rem}
+.rest-timer-sub{font-size:.7rem;color:var(--text2)}
+.rest-timer-actions{display:flex;gap:.4rem}
+.rest-timer-add{padding:.42rem .8rem;border-radius:7px;border:1px solid var(--amber);background:var(--amber-dim);color:var(--amber2);font-family:var(--body);font-size:.78rem;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap}
+.rest-timer-add:hover{background:var(--amber);color:#000}
+.rest-timer-skip{padding:.42rem .8rem;border-radius:7px;border:1px solid var(--border2);background:transparent;color:var(--text3);font-family:var(--body);font-size:.78rem;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
 .rest-timer-skip:hover{border-color:var(--amber);color:var(--amber2)}
+.rest-timer-track{position:absolute;bottom:0;left:0;height:3px;background:var(--amber);transition:width .98s linear}
+.rest-timer-bar.green .rest-timer-track{background:var(--green)}
 /* Rest preference modal */
 .rest-pref-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:600;display:flex;align-items:flex-end;justify-content:center;padding:1rem;animation:fadeIn .15s ease}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
@@ -661,32 +696,68 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 .rest-pref-no-timer{width:100%;padding:.55rem;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text3);font-size:.78rem;cursor:pointer;transition:all .15s}
 .rest-pref-no-timer:hover{color:var(--text2)}
 .trk-set-rows{display:flex;flex-direction:column;gap:.28rem;margin-bottom:.3rem}
-.trk-set-row{display:flex;align-items:center;gap:.35rem;flex-wrap:wrap}
-.trk-set-num{font-size:.66rem;color:var(--muted);font-weight:700;width:2.1rem;text-align:right;flex-shrink:0;font-family:var(--jb)}
-.trk-input{background:var(--bg);border:1.5px solid var(--border);border-radius:6px;color:var(--text);font-size:.78rem;padding:.28rem .38rem;text-align:center;font-family:var(--jb);transition:border-color .12s;min-width:0}
-.trk-input:focus{outline:none;border-color:var(--primary)}
-.trk-w-input{width:4.2rem}
-.trk-r-input{width:3rem}
-.trk-rpe-sel{width:3.8rem}
-.trk-input-lbl{font-size:.63rem;color:var(--muted);font-family:var(--jb);white-space:nowrap;flex-shrink:0}
-.trk-del-set{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.85rem;padding:.1rem .15rem;border-radius:4px;line-height:1;flex-shrink:0}
-.trk-del-set:hover{color:#ef4444}
-.trk-add-set{background:none;border:1px dashed var(--border);border-radius:6px;color:var(--muted);font-size:.7rem;cursor:pointer;padding:.22rem .55rem;margin-top:.15rem;transition:all .12s;font-family:var(--jb)}
-.trk-add-set:hover{border-color:var(--primary);color:var(--primary)}
-.trk-btype-exrow{display:flex;align-items:center;gap:.5rem;margin-bottom:.45rem;flex-wrap:wrap}
-.trk-btype-exname{font-weight:700;font-size:.8rem}
-.trk-cardio-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.45rem;flex-wrap:wrap}
-/* Overall RPE picker */
-.trk-overall-rpe{margin:.7rem 0 .6rem;background:var(--bg);border-radius:8px;padding:.6rem .8rem}
-.trk-overall-rpe-lbl{font-size:.76rem;font-weight:700;margin-bottom:.38rem;display:block}
-.trk-rpe-btns{display:flex;gap:.18rem;flex-wrap:wrap}
-.trk-rpe-btn{width:2rem;height:2rem;border-radius:6px;border:1.5px solid var(--border);background:var(--card);color:var(--muted);font-size:.7rem;font-weight:700;cursor:pointer;transition:all .12s;font-family:var(--jb)}
-.trk-rpe-btn.sel{border-color:var(--primary);background:var(--primary);color:#fff}
-.trk-rpe-btn.trk-rpe-sm{width:1.6rem;height:1.6rem;font-size:.62rem;border-radius:5px}
-.trk-notes-lbl{font-size:.73rem;font-weight:700;display:block;margin-bottom:.28rem}
-.trk-notes{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-size:.78rem;padding:.45rem .65rem;resize:vertical;min-height:3.2rem;font-family:var(--outfit),sans-serif;margin-bottom:.6rem;box-sizing:border-box}
-.trk-notes:focus{outline:none;border-color:var(--primary)}
-.trk-form-actions{display:flex;gap:.45rem;justify-content:flex-end}
+/* Set table */
+.trk-set-table{width:100%;border-collapse:collapse;margin-bottom:.4rem}
+.trk-set-table thead th{font-size:.68rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;padding:0 6px 5px;text-align:left}
+.trk-set-table thead th:last-child{text-align:right}
+.trk-set-table tbody tr{border-top:1px solid var(--border)}
+.trk-set-table tbody tr:first-child{border-top:none}
+.trk-set-num-cell{font-family:var(--mono);font-size:.7rem;font-weight:700;color:var(--text3);padding:5px 6px;width:38px;white-space:nowrap}
+.trk-set-input-cell{padding:4px 6px}
+.trk-input{width:100%;background:var(--navy3);border:1.5px solid var(--border);border-radius:7px;color:var(--text);font-family:var(--mono);font-size:.88rem;font-weight:600;text-align:center;padding:7px 5px;outline:none;transition:border-color .12s;min-height:40px}
+.trk-input:focus{border-color:var(--amber);background:var(--navy2)}
+.trk-del-cell{padding:4px 3px;text-align:right}
+.trk-del-set{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text3);font-size:.8rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;padding:0;line-height:1}
+.trk-del-set:hover{border-color:#FB7185;color:#FB7185;background:rgba(251,113,133,.1)}
+.trk-add-set{display:flex;align-items:center;gap:.35rem;padding:6px 10px;border-radius:7px;border:1.5px dashed var(--border2);background:transparent;color:var(--text3);font-family:var(--body);font-size:.78rem;font-weight:500;cursor:pointer;transition:all .15s;margin-top:4px}
+.trk-add-set:hover{border-color:var(--amber);color:var(--amber2)}
+/* Exercise RPE — collapsed, 26px buttons with colour coding */
+.trk-ex-rpe-wrap{flex-shrink:0}
+.trk-ex-rpe-toggle{font-size:.7rem;color:var(--text3);background:none;border:1px solid var(--border);border-radius:5px;padding:.18rem .5rem;cursor:pointer;transition:all .12s;font-family:var(--body);white-space:nowrap}
+.trk-ex-rpe-toggle:hover{border-color:var(--amber);color:var(--amber2)}
+.trk-ex-rpe-toggle.has-rpe{border-color:var(--amber);color:var(--amber2)}
+.trk-ex-rpe-panel{display:none;margin-top:.5rem}
+.trk-ex-rpe-panel.open{display:block}
+.trk-rpe-btns{display:flex;gap:3px;flex-wrap:wrap}
+.trk-rpe-btn{width:28px;height:28px;border-radius:5px;border:1.5px solid var(--border);background:var(--navy3);color:var(--text3);font-family:var(--mono);font-size:.68rem;font-weight:700;cursor:pointer;transition:all .12s;display:flex;align-items:center;justify-content:center}
+.trk-rpe-btn:hover{border-color:var(--amber);color:var(--amber2)}
+.trk-rpe-btn.sel-easy{border-color:var(--green);background:var(--green-dim);color:var(--green)}
+.trk-rpe-btn.sel-medium{border-color:var(--amber);background:var(--amber-dim);color:var(--amber2)}
+.trk-rpe-btn.sel-hard{border-color:#FB7185;background:rgba(251,113,133,.12);color:#FB7185}
+/* Session footer — overall RPE + notes */
+.trk-session-footer{background:var(--navy3);border:1px solid var(--border);border-radius:10px;padding:.9rem 1rem;margin-top:.5rem;margin-bottom:1rem}
+.trk-sf-label{font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:.65rem}
+.trk-sf-label span{font-weight:400;color:var(--text2);margin-left:.3rem}
+.trk-orpe-row{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:.9rem}
+.trk-orpe-btn{flex:1;min-width:34px;max-width:50px;height:44px;border-radius:8px;border:1.5px solid var(--border);background:var(--navy2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;cursor:pointer;transition:all .15s;padding:0}
+.trk-orpe-btn .on{font-family:var(--mono);font-size:.85rem;font-weight:800;color:var(--text2)}
+.trk-orpe-btn .ol{font-size:.48rem;color:var(--text3);font-family:var(--body)}
+.trk-orpe-btn:hover{border-color:var(--amber)}
+.trk-orpe-btn.sel-easy{border-color:var(--green);background:var(--green-dim)}
+.trk-orpe-btn.sel-easy .on{color:var(--green)}
+.trk-orpe-btn.sel-medium{border-color:var(--amber);background:var(--amber-dim)}
+.trk-orpe-btn.sel-medium .on{color:var(--amber2)}
+.trk-orpe-btn.sel-hard{border-color:#FB7185;background:rgba(251,113,133,.12)}
+.trk-orpe-btn.sel-hard .on{color:#FB7185}
+.trk-notes{width:100%;background:var(--navy2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--body);font-size:.85rem;padding:.65rem .8rem;resize:vertical;min-height:60px;transition:border-color .15s;outline:none;line-height:1.55;box-sizing:border-box}
+.trk-notes:focus{border-color:var(--amber)}
+.trk-notes::placeholder{color:var(--text3)}
+/* Form actions — Save is hero */
+.trk-form-actions{display:flex;gap:.6rem;align-items:center;margin-top:1rem}
+.trk-btn-save{flex:1;padding:.88rem 1.2rem;border-radius:10px;border:none;background:var(--green);color:#000;font-family:var(--body);font-size:1rem;font-weight:800;cursor:pointer;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:.4rem;letter-spacing:.01em}
+.trk-btn-save:hover{background:#4ADBA0;transform:translateY(-1px);box-shadow:0 4px 14px rgba(46,204,138,.3)}
+.trk-btn-cancel{padding:.88rem .9rem;border-radius:10px;border:1.5px solid var(--border2);background:transparent;color:var(--text3);font-family:var(--body);font-size:.88rem;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap}
+.trk-btn-cancel:hover{border-color:#FB7185;color:#FB7185}
+/* Success state */
+.trk-session-saved{background:var(--green-dim);border:1.5px solid rgba(46,204,138,.4);border-radius:12px;padding:1.2rem 1.2rem;display:flex;align-items:center;gap:.9rem;margin-bottom:1rem}
+.trk-saved-icon{width:42px;height:42px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:1.25rem;flex-shrink:0}
+.trk-saved-title{font-family:var(--serif);font-size:1rem;font-weight:700;color:var(--text);margin-bottom:.2rem}
+.trk-saved-sub{font-size:.78rem;color:var(--text2);line-height:1.45}
+.trk-saved-actions{margin-top:.65rem;display:flex;gap:.5rem}
+.trk-saved-btn{padding:.45rem .9rem;border-radius:7px;font-family:var(--body);font-size:.78rem;font-weight:600;cursor:pointer;transition:all .15s}
+.trk-saved-btn-green{background:var(--green);border:none;color:#000}
+.trk-saved-btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--text2)}
+.trk-saved-btn-ghost:hover{border-color:var(--amber);color:var(--amber2)}
 /* History */
 .trk-download-bar{display:flex;gap:.5rem;justify-content:flex-end;margin-bottom:.7rem;flex-wrap:wrap}
 .trk-hist-week{background:var(--card);border-radius:12px;margin-bottom:.65rem;overflow:hidden;border:1.5px solid var(--border)}
@@ -6231,6 +6302,14 @@ function trkOpenSlot(slot){
     document.getElementById('trk-view-progress').classList.add('hidden');
     renderTrkHeader(plan);
     renderTrkLog(plan);
+    // Auto-jump to today's week+day on open
+    const todayCtx = getTodayPlanContext(plan, trkGetLogs(slot));
+    if(todayCtx){
+      trkState.week    = todayCtx.weekNum;
+      trkState.openDay = todayCtx.dayIdx;
+      renderTrkLog(plan);
+      setTimeout(()=>{ document.getElementById(`trk-day-${todayCtx.dayIdx}`)?.scrollIntoView({behavior:'smooth',block:'nearest'}); }, 120);
+    }
   } else if(trkSlotIsManual(slot)){
     // Unsaved manual draft — open the editor
     document.getElementById('trk-main').classList.add('hidden');
@@ -6861,13 +6940,56 @@ function switchTrkWeek(w){
 // =====================================================================
 // TRACKER — Log Session sub-view
 // =====================================================================
+// ── Auto-navigate to today ─────────────────────────────────────────────
+function getTodayPlanContext(plan, logs){
+  if(!plan?.weeks?.length) return null;
+  // Use plan.savedAt as origin date; fall back to first log date
+  const originIso = plan.savedAt || plan.meta?.createdAt || logs?.[0]?.loggedAt;
+  if(!originIso) return null;
+  const origin = new Date(originIso); origin.setHours(0,0,0,0);
+  const today  = new Date();         today.setHours(0,0,0,0);
+  const daysSinceOrigin = Math.floor((today - origin) / 86400000);
+  if(daysSinceOrigin < 0) return null;
+
+  // Walk through each week's days in order to find which one maps to today
+  let cursor = 0;
+  for(const wk of plan.weeks){
+    const days = (wk.days||[]).filter(Boolean);
+    if(!days.length) continue;
+    // Each day in the week occupies one calendar day
+    for(const day of days){
+      if(cursor === daysSinceOrigin){
+        const phaseLbl = wk.phase==='custom'?'':((wk.phase||'').charAt(0).toUpperCase()+(wk.phase||'').slice(1));
+        return { weekNum: wk.weekNum, dayIdx: day.dayIdx, dayLabel: day.label||'Session', phase: phaseLbl };
+      }
+      cursor++;
+    }
+    // Rest days within the week cycle (7-day week - days.length)
+    const restDays = 7 - days.length;
+    cursor += restDays;
+  }
+  return null; // plan period has elapsed
+}
+
+function trkJumpToToday(){
+  const slot = trkState.activeSlot || 0;
+  const plan = trkGetPlan(slot);
+  if(!plan) return;
+  const today = getTodayPlanContext(plan, trkGetLogs(slot));
+  if(!today) return;
+  _resetRestTimer();
+  trkState.week    = today.weekNum;
+  trkState.openDay = today.dayIdx;
+  renderTrkLog(plan);
+  setTimeout(()=>{ document.getElementById(`trk-day-${today.dayIdx}`)?.scrollIntoView({behavior:'smooth',block:'nearest'}); }, 80);
+}
+
 function renderTrkLog(plan){
   const slot = trkState.activeSlot || 0;
   const logs = trkGetLogs(slot);
   const el = document.getElementById('trk-view-log');
   if(!plan||!plan.weeks||!plan.weeks.length){ el.innerHTML=''; return; }
 
-  // ── Basic tier: show premium feature card instead of empty tracker ──
   if(!can.sessionLogging){
     el.innerHTML = `<div class="premium-feature-card">
       <span class="pfc-lock">🔒</span>
@@ -6885,43 +7007,95 @@ function renderTrkLog(plan){
     return;
   }
 
-  // Week nav
-  let html = '<div class="trk-week-nav">';
+  // ── Context strip — "Today: Week N · Day label" ──────────────────────
+  const todayInfo = getTodayPlanContext(plan, logs);
+  let html = '';
+  if(todayInfo){
+    const dow = new Date().toLocaleDateString('en-GB',{weekday:'long'});
+    html += `<div class="trk-context-strip">
+      <div class="trk-ctx-left">
+        <div class="trk-ctx-icon">📅</div>
+        <div>
+          <div class="trk-ctx-title">Today — ${dow}, Week ${todayInfo.weekNum}</div>
+          <div class="trk-ctx-sub">${todayInfo.dayLabel}${todayInfo.phase?' · '+todayInfo.phase:''}</div>
+        </div>
+      </div>
+      <button class="trk-ctx-btn trk-ctx-btn-primary" onclick="trkJumpToToday()">Log Today →</button>
+    </div>`;
+  }
+
+  // ── Week nav — scrollable with 5-dot progress strips ─────────────────
+  html += `<div class="trk-week-nav">
+    <div class="trk-week-nav-label">Jump to another week</div>
+    <div class="trk-week-nav-scroll">`;
   plan.weeks.forEach(w=>{
-    const wLogs  = logs.filter(l=>l.weekNum===w.weekNum);
-    const wDays  = (w.days||[]).filter(Boolean);
-    const allDone= wDays.length>0 && wLogs.length>=wDays.length;
-    const hasAny = wLogs.length>0 && !allDone;
-    const cls = w.weekNum===trkState.week ? 'active' : allDone ? 'all-logged' : hasAny ? 'partial' : '';
-    html+=`<button class="trk-wbtn ${cls}" onclick="switchTrkWeek(${w.weekNum})">W${w.weekNum}${allDone?' ✓':''}</button>`;
+    const wLogs = logs.filter(l=>l.weekNum===w.weekNum);
+    const wDays = (w.days||[]).filter(Boolean);
+    const allDone = wDays.length>0 && wLogs.length>=wDays.length;
+    const hasAny  = wLogs.length>0 && !allDone;
+    const isActive = w.weekNum===trkState.week;
+    const isTodayWeek = todayInfo?.weekNum === w.weekNum;
+    let cls = isActive ? 'active' : allDone ? 'all-logged' : hasAny ? 'partial' : '';
+    // Per-day dots
+    const dots = wDays.map(d=>{
+      const dLog = wLogs.find(l=>l.dayIdx===d.dayIdx);
+      const dPart = trkGetPartial(w.weekNum, d.dayIdx, slot);
+      const cls = dLog ? 'done' : dPart ? 'part' : '';
+      return `<div class="trk-wdot ${cls}"></div>`;
+    }).join('');
+    const todayBadge = isTodayWeek ? `<div class="trk-wbtn-today">Today</div>` : '';
+    const deloadBadge = w.isDeload ? ' 🔄' : '';
+    html += `<div class="trk-wbtn ${cls}" onclick="switchTrkWeek(${w.weekNum})" style="${isTodayWeek?'padding-top:18px':''}">
+      ${todayBadge}
+      <div class="trk-wbtn-num">W${w.weekNum}${deloadBadge}</div>
+      <div class="trk-wbtn-dots">${dots}</div>
+    </div>`;
   });
-  html+='</div>';
+  html += `</div></div>`;
 
   const wk = plan.weeks.find(w=>w.weekNum===trkState.week);
   if(!wk){ el.innerHTML=html; return; }
-  const phaseLbl = wk.phase === 'custom' ? '' : ((wk.phase||'').charAt(0).toUpperCase()+(wk.phase||'').slice(1));
-  html+=`<div class="trk-phase-label">Week ${trkState.week}${phaseLbl ? ' · '+phaseLbl : ''}${wk.isDeload?' · 🔄 Deload':''}</div>`;
+  const phaseLbl = wk.phase==='custom' ? '' : ((wk.phase||'').charAt(0).toUpperCase()+(wk.phase||'').slice(1));
+  html+=`<div class="trk-phase-label">Week ${trkState.week}${phaseLbl ? ` · <strong style="color:var(--amber2)">${phaseLbl}</strong>` : ''}${wk.isDeload?' · 🔄 Deload':''}</div>`;
 
+  // ── Day cards ─────────────────────────────────────────────────────────
+  const _bIcons = {B1:'🛡️',B2:'⏲️',B3:'🔥',B4:'🔄',B5:'⚡',B6:'🪜',B7:'🏁'};
   (wk.days||[]).filter(Boolean).forEach(day=>{
-    const log     = logs.find(l=>l.weekNum===trkState.week&&l.dayIdx===day.dayIdx);
-    const partial = trkGetPartial(trkState.week, day.dayIdx, slot);
-    const isLogged  = !!log;
-    const isPartial = !isLogged && !!partial;
-    const cardCls   = isLogged?'logged':isPartial?'partial':'';
-    const statusCls = isLogged?'logged':isPartial?'partial':'empty';
-    const statusTxt = isLogged?`✓ ${formatLogDate(log.loggedAt)}`:isPartial?'⏸ Partial':'Not logged';
-    const btnTxt  = isLogged?'✏️ Edit':'📝 Log';
-    const btnCls  = isLogged?'edit':'';
-    const isOpen  = trkState.openDay===day.dayIdx;
-    const _bIcons = {B1:'🛡️',B2:'⏲️',B3:'🔥',B4:'🔄',B5:'⚡',B6:'🪜',B7:'🏁'};
-    const typeIcon= day.type==='cardio'?'🏃':day.type==='muscular_endurance'?(_bIcons[day.sessId]||'💪'):'🏋️';
+    const log      = logs.find(l=>l.weekNum===trkState.week&&l.dayIdx===day.dayIdx);
+    const partial  = trkGetPartial(trkState.week, day.dayIdx, slot);
+    const isLogged = !!log;
+    const isPartial= !isLogged && !!partial;
+    const isToday  = todayInfo?.weekNum===trkState.week && todayInfo?.dayIdx===day.dayIdx;
+    const isOpen   = trkState.openDay===day.dayIdx;
+    const typeIcon = day.type==='cardio'?'🏃':day.type==='muscular_endurance'?(_bIcons[day.sessId]||'💪'):'🏋️';
+
+    // Muscle/focus meta line
+    const tmpl = window.DAY_TMPL?.[day.key];
+    const muscles = tmpl?.muscles?.slice(0,3).map(m=>m.charAt(0).toUpperCase()+m.slice(1)).join(' · ') || '';
+    const metaStr = [muscles, day.type==='gym' ? `${(day.exercises||[]).length} exercises` : ''].filter(Boolean).join(' · ');
+
+    // Status pill
+    let statusCls, statusTxt;
+    if(isLogged){ statusCls='logged'; statusTxt=`✓ ${formatLogDate(log.loggedAt)}`; }
+    else if(isPartial){ statusCls='partial'; statusTxt='⏸ Partial'; }
+    else if(isToday){ statusCls='today-status'; statusTxt='Log session'; }
+    else{ statusCls='empty'; statusTxt='Not logged'; }
+
+    const cardCls = [isLogged?'logged':'', isPartial?'partial':'', isToday?'is-today':'', isOpen?'open':''].filter(Boolean).join(' ');
+    const todayTag = isToday ? `<span style="font-size:.65rem;background:var(--amber);color:#000;padding:1px 5px;border-radius:4px;margin-left:6px;font-weight:700">TODAY</span>` : '';
 
     html+=`<div class="trk-day-card ${cardCls}" id="trk-day-${day.dayIdx}">
       <div class="trk-day-hdr" onclick="toggleLogSession(${day.dayIdx})">
-        <div class="trk-day-label">${typeIcon} ${day.label||'Session'}</div>
+        <div class="trk-day-left">
+          <div class="trk-day-icon">${typeIcon}</div>
+          <div>
+            <div class="trk-day-label">${day.label||'Session'}${todayTag}</div>
+            ${metaStr ? `<div class="trk-day-meta">${metaStr}</div>` : ''}
+          </div>
+        </div>
         <div class="trk-day-right">
           <span class="trk-status ${statusCls}">${statusTxt}</span>
-          <button class="trk-log-btn ${btnCls}" onclick="event.stopPropagation();toggleLogSession(${day.dayIdx})">${btnTxt}</button>
+          <div class="trk-expand-icon">▾</div>
         </div>
       </div>
       ${isOpen ? buildLogForm(plan, day, trkState.week, log, partial) : ''}
@@ -6957,33 +7131,38 @@ function buildLogForm(plan, day, weekNum, existingLog, partial){
 
   // Pre-fill / restore note
   if(partial && !existingLog){
-    html+=`<div class="trk-prefill-note">⏸ Restoring your partial save — your progress has been kept</div>`;
+    html+=`<div class="trk-prefill-note"><span class="trk-prefill-icon">⏸</span><span>Restoring your partial save — your progress has been kept.</span></div>`;
   } else if(!initData && day.type==='gym'){
     const hasPrev = getLastWeightForDay(day.dayIdx, weekNum);
-    if(hasPrev) html+=`<div class="trk-prefill-note">💡 Weights pre-filled from your previous session — adjust as needed<br><span style="font-size:.64rem;opacity:.8">⚠️ This is a suggestion only. Always load what feels right for you today.</span></div>`;
+    if(hasPrev) html+=`<div class="trk-prefill-note"><span class="trk-prefill-icon">💡</span><span>Weights pre-filled from your last session — adjust if today feels different. <strong>Always load what's right for you today.</strong></span></div>`;
   }
 
   if(day.type==='gym')               html += buildGymForm(plan, day, weekNum, initData, u, kgToUnit);
   else if(day.type==='cardio')        html += buildCardioForm(day, weekNum, initData);
   else if(day.type==='muscular_endurance') html += buildBtypeForm(day, weekNum, initData, u, kgToUnit);
 
-  // Overall session RPE
+  // Session footer — overall RPE + notes
   const selRPE = initData?.sessionRPE||null;
-  html+=`<div class="trk-overall-rpe">
-    <span class="trk-overall-rpe-lbl">Overall session effort (RPE 1–10)</span>
-    <div class="trk-rpe-btns" id="trk-orpe-${weekNum}-${day.dayIdx}" data-selected="${selRPE||''}">
-      ${[1,2,3,4,5,6,7,8,9,10].map(n=>`<button class="trk-rpe-btn ${selRPE===n?'sel':''}" onclick="selectOverallRPE(${weekNum},${day.dayIdx},${n})" type="button">${n}</button>`).join('')}
-    </div>
-  </div>`;
+  const rpeZone = n => n<=4?'easy':n<=7?'medium':'hard';
+  const orpeBtns = [1,2,3,4,5,6,7,8,9,10].map(n=>{
+    const zone = rpeZone(n);
+    const lbl = n===1?'easy':n===4?'mod.':n===7?'hard':n===10?'max':'';
+    const selCls = selRPE===n ? `sel-${zone}` : '';
+    return `<button class="trk-orpe-btn ${selCls}" onclick="selectOverallRPE(${weekNum},${day.dayIdx},${n},'${zone}')" type="button"><div class="on">${n}</div><div class="ol">${lbl}</div></button>`;
+  }).join('');
 
   const notesVal = (initData?.notes||'').replace(/"/g,'&quot;');
-  html+=`<span class="trk-notes-lbl">Notes <span style="font-weight:400;color:var(--muted)">(optional)</span></span>
-  <textarea class="trk-notes" id="trk-notes-${weekNum}-${day.dayIdx}"
-    oninput="trkAutoSavePartial(${weekNum},${day.dayIdx})"
-    placeholder="PRs, form notes, how you felt…">${initData?.notes||''}</textarea>
+  html+=`<div class="trk-session-footer">
+    <div class="trk-sf-label">How hard was this session overall? <span>(optional)</span></div>
+    <div class="trk-orpe-row" id="trk-orpe-${weekNum}-${day.dayIdx}">${orpeBtns}</div>
+    <div class="trk-sf-label" style="margin-bottom:.4rem">Session notes <span>(optional)</span></div>
+    <textarea class="trk-notes" id="trk-notes-${weekNum}-${day.dayIdx}"
+      oninput="trkAutoSavePartial(${weekNum},${day.dayIdx})"
+      placeholder="PRs, form notes, how you felt…">${initData?.notes||''}</textarea>
+  </div>
   <div class="trk-form-actions">
-    <button class="btn btn-outline btn-sm" onclick="cancelLogSession()">Cancel</button>
-    <button class="btn btn-primary btn-sm" onclick="saveSessionLog(${weekNum},${day.dayIdx})">✓ Save Session</button>
+    <button class="trk-btn-cancel" onclick="cancelLogSession()">Cancel</button>
+    <button class="trk-btn-save" onclick="saveSessionLog(${weekNum},${day.dayIdx})">✓ Save Session</button>
   </div></div>`;
   return html;
 }
@@ -6993,11 +7172,9 @@ function buildGymForm(plan, day, weekNum, initData, u, kgToUnit){
   let html = '';
   const proto = day.proto || {};
 
-  // ── Week-accurate prescribed sets & reps (undulation applied) ─────────
   const wk = plan?.weeks?.find(w => w.weekNum === weekNum);
   const isDeload = wk?.isDeload || false;
   const wip = wk?.weekInPhase || null;
-  // undulateReps applies the 5%/10% load-drop rep bump per week in phase
   const undulatedProto = (proto.rmin && !isDeload && wip) ? undulateReps(proto, wip) : proto;
   const prescSets = isDeload ? Math.max(2,(proto.sets||3)-1) : (proto.sets||3);
   const prescReps = undulatedProto.rmin === undulatedProto.rmax
@@ -7010,20 +7187,39 @@ function buildGymForm(plan, day, weekNum, initData, u, kgToUnit){
     const lastW  = (!initData) ? getLastWeightForEx(ex.id, day.dayIdx, weekNum) : null;
     const sets   = exLog?.sets || Array.from({length:prescSets},(_,si)=>({setNum:si+1,weight:lastW||null,reps:null}));
     const exRpe  = exLog?.rpe ?? null;
+    const rpeZone = n => n<=4?'easy':n<=7?'medium':'hard';
+    const hasRpe = exRpe !== null;
+
+    const rpeId = `trk-exrpe-${weekNum}-${day.dayIdx}-${exi}`;
+    const rpeBtns = [1,2,3,4,5,6,7,8,9,10].map(n=>{
+      const zone = rpeZone(n);
+      const selCls = exRpe===n ? `sel-${zone}` : '';
+      return `<button class="trk-rpe-btn ${selCls}" onclick="selectExRPE(${weekNum},${day.dayIdx},${exi},${n})" type="button">${n}</button>`;
+    }).join('');
+
+    const tableRows = sets.map((s,si)=>buildSetRow(weekNum,day.dayIdx,exi,si,s,u,kgToUnit,prescRest)).join('');
+
     html+=`<div class="trk-ex-block" id="trk-ex-${weekNum}-${day.dayIdx}-${exi}">
-      <div class="trk-ex-name">${ex.name}</div>
-      <div class="trk-ex-prescribed">Prescribed: ${prescSets} sets × ${prescReps} reps${prescRest?' · '+prescRest:''}</div>
-      <div class="trk-set-rows" id="trk-sets-${weekNum}-${day.dayIdx}-${exi}">
-        ${sets.map((s,si)=>buildSetRow(weekNum,day.dayIdx,exi,si,s,u,kgToUnit,prescRest)).join('')}
-      </div>
-      <div style="display:flex;align-items:center;gap:.5rem;margin-top:.3rem;flex-wrap:wrap">
-        <button class="trk-add-set" onclick="addSetRow(${weekNum},${day.dayIdx},${exi})" type="button" style="margin-top:0">+ Add set</button>
-        <div style="flex:1"></div>
-        <span class="trk-input-lbl" style="white-space:nowrap">RPE for exercise:</span>
-        <div class="trk-rpe-btns" id="trk-exrpe-${weekNum}-${day.dayIdx}-${exi}" data-selected="${exRpe||''}">
-          ${[1,2,3,4,5,6,7,8,9,10].map(n=>`<button class="trk-rpe-btn trk-rpe-sm ${exRpe===n?'sel':''}" onclick="selectExRPE(${weekNum},${day.dayIdx},${exi},${n})" type="button">${n}</button>`).join('')}
+      <div class="trk-ex-header">
+        <div>
+          <div class="trk-ex-name">${ex.name}</div>
+          <div class="trk-ex-prescribed">Prescribed: ${prescSets} sets × ${prescReps} reps${prescRest?' · '+prescRest:''}</div>
+        </div>
+        <div class="trk-ex-rpe-wrap">
+          <button class="trk-ex-rpe-toggle ${hasRpe?'has-rpe':''}" id="trk-rpetog-${weekNum}-${day.dayIdx}-${exi}"
+            onclick="toggleExRpePanel(${weekNum},${day.dayIdx},${exi})" type="button">
+            ${hasRpe ? `RPE ${exRpe}` : 'Add RPE →'}
+          </button>
         </div>
       </div>
+      <div class="trk-ex-rpe-panel ${hasRpe?'open':''}" id="${rpeId}">
+        <div class="trk-rpe-btns" style="margin-bottom:.5rem">${rpeBtns}</div>
+      </div>
+      <table class="trk-set-table">
+        <thead><tr><th></th><th>Weight (${u})</th><th>Reps</th><th></th></tr></thead>
+        <tbody id="trk-sets-${weekNum}-${day.dayIdx}-${exi}">${tableRows}</tbody>
+      </table>
+      <button class="trk-add-set" onclick="addSetRow(${weekNum},${day.dayIdx},${exi})" type="button">＋ Add set</button>
     </div>`;
   });
   return html;
@@ -7031,19 +7227,24 @@ function buildGymForm(plan, day, weekNum, initData, u, kgToUnit){
 
 function buildSetRow(weekNum,dayIdx,exi,si,s,u,kgToUnit,prescRest=''){
   const wVal = s.weight!=null ? kgToUnit(s.weight) : '';
+  const rVal = s.reps!=null ? s.reps : '';
   const restArg = prescRest ? `'${prescRest.replace(/'/g,"\\'")}'` : "''";
-  return `<div class="trk-set-row" id="trk-set-row-${weekNum}-${dayIdx}-${exi}-${si}">
-    <span class="trk-set-num">Set ${si+1}</span>
-    <input class="trk-input trk-w-input" type="number" min="0" step="0.5" placeholder="—"
-      value="${wVal}" id="trk-w-${weekNum}-${dayIdx}-${exi}-${si}"
-      oninput="trkAutoSavePartial(${weekNum},${dayIdx})">
-    <span class="trk-input-lbl">${u}</span>
-    <input class="trk-input trk-r-input" type="number" min="0" max="999" step="1" placeholder="reps"
-      value="${s.reps!=null?s.reps:''}" id="trk-r-${weekNum}-${dayIdx}-${exi}-${si}"
-      oninput="trkAutoSavePartial(${weekNum},${dayIdx});trkOnRepsInput(this,${weekNum},${dayIdx},${exi},${si},${restArg})">
-    <span class="trk-input-lbl">reps</span>
-    <button class="trk-del-set" onclick="delSetRow(${weekNum},${dayIdx},${exi},${si})" type="button" title="Remove set">×</button>
-  </div>`;
+  return `<tr id="trk-set-row-${weekNum}-${dayIdx}-${exi}-${si}">
+    <td class="trk-set-num-cell">Set ${si+1}</td>
+    <td class="trk-set-input-cell">
+      <input class="trk-input" type="number" min="0" step="0.5" placeholder="—" inputmode="decimal"
+        value="${wVal}" id="trk-w-${weekNum}-${dayIdx}-${exi}-${si}"
+        oninput="trkAutoSavePartial(${weekNum},${dayIdx})">
+    </td>
+    <td class="trk-set-input-cell">
+      <input class="trk-input" type="number" min="0" max="999" step="1" placeholder="—" inputmode="numeric"
+        value="${rVal}" id="trk-r-${weekNum}-${dayIdx}-${exi}-${si}"
+        oninput="trkAutoSavePartial(${weekNum},${dayIdx});trkOnRepsInput(this,${weekNum},${dayIdx},${exi},${si},${restArg})">
+    </td>
+    <td class="trk-del-cell">
+      <button class="trk-del-set" onclick="delSetRow(${weekNum},${dayIdx},${exi},${si})" type="button" title="Remove set">×</button>
+    </td>
+  </tr>`;
 }
 
 // ─── Cardio form ───────────────────────────────────────────────────────
@@ -7325,20 +7526,32 @@ function exArr_desc(day){
 }
 
 // ─── RPE picker ────────────────────────────────────────────────────────
-function selectOverallRPE(weekNum, dayIdx, val){
+function selectOverallRPE(weekNum, dayIdx, val, zone){
   const container = document.getElementById(`trk-orpe-${weekNum}-${dayIdx}`);
   if(!container) return;
-  container.dataset.selected = val;
-  container.querySelectorAll('.trk-rpe-btn').forEach((b,i)=>b.classList.toggle('sel',i+1===val));
+  container.querySelectorAll('.trk-orpe-btn').forEach(b=>b.classList.remove('sel-easy','sel-medium','sel-hard'));
+  const btn = container.querySelectorAll('.trk-orpe-btn')[val-1];
+  if(btn) btn.classList.add(`sel-${zone||'medium'}`);
   trkAutoSavePartial(weekNum, dayIdx);
 }
 
 function selectExRPE(weekNum, dayIdx, exi, val){
-  const container = document.getElementById(`trk-exrpe-${weekNum}-${dayIdx}-${exi}`);
-  if(!container) return;
-  container.dataset.selected = val;
-  container.querySelectorAll('.trk-rpe-btn').forEach((b,i)=>b.classList.toggle('sel',i+1===val));
+  const panelId = `trk-exrpe-${weekNum}-${dayIdx}-${exi}`;
+  const panel = document.getElementById(panelId);
+  if(!panel) return;
+  const zone = val<=4?'easy':val<=7?'medium':'hard';
+  panel.querySelectorAll('.trk-rpe-btn').forEach(b=>b.classList.remove('sel-easy','sel-medium','sel-hard'));
+  const btn = panel.querySelectorAll('.trk-rpe-btn')[val-1];
+  if(btn) btn.classList.add(`sel-${zone}`);
+  // Update toggle label
+  const tog = document.getElementById(`trk-rpetog-${weekNum}-${dayIdx}-${exi}`);
+  if(tog){ tog.textContent=`RPE ${val}`; tog.classList.add('has-rpe'); }
   trkAutoSavePartial(weekNum, dayIdx);
+}
+
+function toggleExRpePanel(weekNum, dayIdx, exi){
+  const panel = document.getElementById(`trk-exrpe-${weekNum}-${dayIdx}-${exi}`);
+  if(panel) panel.classList.toggle('open');
 }
 
 // ─── Dynamic set rows ─────────────────────────────────────────────────
@@ -7429,7 +7642,6 @@ function _selectRestPref(secs){
 }
 
 function _startRestCountdown(totalSecs, prescRest){
-  // Clear any running timer
   if(_restTimer.interval) clearInterval(_restTimer.interval);
   _restTimer.active    = true;
   _restTimer.total     = totalSecs;
@@ -7440,13 +7652,31 @@ function _startRestCountdown(totalSecs, prescRest){
     if(_restTimer.remaining <= 0){
       clearInterval(_restTimer.interval);
       _restTimer.active = false;
-      _renderRestBar(0, totalSecs, true); // done state
-      // Auto-remove after 2.5s when done
-      setTimeout(()=>{ document.getElementById('rest-timer-bar')?.remove(); }, 2500);
+      _renderRestBar(0, totalSecs, true);
+      _playAlarm();
+      setTimeout(()=>{ document.getElementById('rest-timer-bar')?.remove(); }, 3000);
     } else {
       _renderRestBar(_restTimer.remaining, totalSecs);
     }
   }, 1000);
+}
+
+function _playAlarm(){
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    // Two short beeps
+    [0, 0.35].forEach(offset => {
+      const osc  = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.value = 880;
+      gain.gain.setValueAtTime(0.45, ctx.currentTime + offset);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + offset + 0.3);
+      osc.start(ctx.currentTime + offset);
+      osc.stop(ctx.currentTime + offset + 0.3);
+    });
+  } catch(e){}
 }
 
 function _renderRestBar(remaining, total, done=false){
@@ -7454,20 +7684,40 @@ function _renderRestBar(remaining, total, done=false){
   if(!bar){
     bar = document.createElement('div');
     bar.id = 'rest-timer-bar';
-    // Attach to the open log form
-    const form = document.querySelector('.trk-form');
-    if(form) form.appendChild(bar);
-    else document.body.appendChild(bar);
+    document.body.appendChild(bar); // fixed to viewport
   }
   const pct = total > 0 ? Math.round((1 - remaining/total)*100) : 100;
-  const cls = done ? 'rest-timer-bar green' : 'rest-timer-bar';
-  const label = done ? '✓ Rest done — start your next set!' : `Rest · ${_fmtSecs(remaining)} remaining`;
-  bar.className = cls;
-  bar.innerHTML = `
-    <div class="rest-timer-countdown">${done ? '✓' : _fmtSecs(remaining)}</div>
-    <div class="rest-timer-label">${label}</div>
-    <button class="rest-timer-skip" onclick="_skipRestTimer()">Skip ×</button>
-    <div class="rest-timer-track" style="width:${pct}%"></div>`;
+  bar.className = done ? 'rest-timer-bar green' : 'rest-timer-bar';
+
+  if(done){
+    bar.innerHTML = `
+      <div class="rest-timer-countdown">✓</div>
+      <div class="rest-timer-info">
+        <div class="rest-timer-title">Rest complete — start your next set!</div>
+      </div>
+      <div class="rest-timer-actions">
+        <button class="rest-timer-skip" onclick="_skipRestTimer()">OK</button>
+      </div>
+      <div class="rest-timer-track" style="width:100%"></div>`;
+  } else {
+    bar.innerHTML = `
+      <div class="rest-timer-countdown">${_fmtSecs(remaining)}</div>
+      <div class="rest-timer-info">
+        <div class="rest-timer-title">Rest</div>
+        <div class="rest-timer-sub">${_fmtSecs(remaining)} remaining</div>
+      </div>
+      <div class="rest-timer-actions">
+        <button class="rest-timer-add" onclick="_addRestTime(30)">+30s</button>
+        <button class="rest-timer-skip" onclick="_skipRestTimer()">Skip</button>
+      </div>
+      <div class="rest-timer-track" style="width:${pct}%"></div>`;
+  }
+}
+
+function _addRestTime(secs){
+  _restTimer.remaining = Math.min(_restTimer.remaining + secs, 599);
+  _restTimer.total     = Math.max(_restTimer.total, _restTimer.remaining);
+  _renderRestBar(_restTimer.remaining, _restTimer.total);
 }
 
 function _skipRestTimer(){
@@ -7497,7 +7747,7 @@ function delSetRow(weekNum, dayIdx, exi, si){
   const row = document.getElementById(`trk-set-row-${weekNum}-${dayIdx}-${exi}-${si}`);
   if(row) row.remove();
   const container = document.getElementById(`trk-sets-${weekNum}-${dayIdx}-${exi}`);
-  if(container) container.querySelectorAll('.trk-set-num').forEach((el,i)=>el.textContent=`Set ${i+1}`);
+  if(container) container.querySelectorAll('.trk-set-num-cell').forEach((el,i)=>el.textContent=`Set ${i+1}`);
   trkAutoSavePartial(weekNum, dayIdx);
 }
 
@@ -7523,7 +7773,8 @@ function collectFormData(weekNum, dayIdx){
   const toKg = v => (v!=null && v!=='' && u==='lbs') ? Math.round(v/2.2046*10)/10 : (v!=null&&v!==''?parseFloat(v):null);
 
   const rpeContainer = document.getElementById(`trk-orpe-${weekNum}-${dayIdx}`);
-  const sessionRPE   = rpeContainer?.dataset?.selected ? parseInt(rpeContainer.dataset.selected) : null;
+  const selOrpeBtn   = rpeContainer?.querySelector('.trk-orpe-btn[class*="sel-"]');
+  const sessionRPE   = selOrpeBtn ? parseInt(selOrpeBtn.querySelector('.on')?.textContent) : null;
   const notes        = document.getElementById(`trk-notes-${weekNum}-${dayIdx}`)?.value||'';
 
   let exercises = [];
@@ -7532,14 +7783,15 @@ function collectFormData(weekNum, dayIdx){
     (day.exercises||[]).forEach((ex,exi)=>{
       const cont = document.getElementById(`trk-sets-${weekNum}-${dayIdx}-${exi}`);
       const sets = [];
-      if(cont) cont.querySelectorAll('.trk-set-row').forEach((row,si)=>{
+      if(cont) cont.querySelectorAll('tr').forEach((row,si)=>{
         const w = parseFloat(document.getElementById(`trk-w-${weekNum}-${dayIdx}-${exi}-${si}`)?.value);
         const r = parseInt(document.getElementById(`trk-r-${weekNum}-${dayIdx}-${exi}-${si}`)?.value);
         sets.push({setNum:si+1, weight:!isNaN(w)?toKg(w):null, reps:!isNaN(r)?r:null});
       });
-      const rpeContainer = document.getElementById(`trk-exrpe-${weekNum}-${dayIdx}-${exi}`);
-      const exRpe = rpeContainer?.dataset?.selected ? parseInt(rpeContainer.dataset.selected) : null;
-      exercises.push({id:ex.id, name:ex.name, sets, rpe:!isNaN(exRpe)?exRpe:null});
+      const rpePanel = document.getElementById(`trk-exrpe-${weekNum}-${dayIdx}-${exi}`);
+      const selExRpeBtn = rpePanel?.querySelector('.trk-rpe-btn[class*="sel-"]');
+      const exRpe = selExRpeBtn ? parseInt(selExRpeBtn.textContent) : null;
+      exercises.push({id:ex.id, name:ex.name, sets, rpe:!isNaN(exRpe)&&exRpe!==null?exRpe:null});
     });
   } else if(day.type==='cardio'){
     const dur = parseFloat(document.getElementById(`trk-cardio-dur-${weekNum}-${dayIdx}`)?.value);
@@ -7598,10 +7850,39 @@ function saveSessionLog(weekNum, dayIdx){
   logs.push(data);
   trkSetLogs(logs, slot);
   trkSetPartial(weekNum, dayIdx, null, slot);
+  _skipRestTimer();
   trkState.openDay = null;
   const plan = trkGetPlan(slot);
   renderTrkHeader(plan);
   renderTrkLog(plan);
+
+  // Success card — inject at top of log view
+  const el = document.getElementById('trk-view-log');
+  if(!el) return;
+  const savedLog  = data;
+  const exCount   = (savedLog.exercises||[]).length;
+  const setCount  = (savedLog.exercises||[]).reduce((s,e)=>s+(e.sets||[]).filter(x=>x.reps).length, 0);
+  const heaviest  = (savedLog.exercises||[]).reduce((max,e)=>{
+    const w = Math.max(...(e.sets||[]).map(s=>s.weight||0));
+    return w>max ? w : max;
+  }, 0);
+  const rpeStr    = savedLog.sessionRPE ? ` · RPE ${savedLog.sessionRPE}` : '';
+  const wk        = plan?.weeks?.find(w=>w.weekNum===weekNum);
+  const day       = wk?.days?.find(d=>d&&d.dayIdx===dayIdx);
+  const heavyStr  = heaviest > 0 ? ` · ${trkState.unit==='lbs'?Math.round(heaviest*2.2046):heaviest}${trkState.unit} top set` : '';
+
+  const successHtml = `<div class="trk-session-saved" id="trk-success-card">
+    <div class="trk-saved-icon">✅</div>
+    <div style="flex:1">
+      <div class="trk-saved-title">Session saved — great work!</div>
+      <div class="trk-saved-sub">${day?.label||''} · Week ${weekNum}${rpeStr} · ${setCount} sets logged${heavyStr}</div>
+      <div class="trk-saved-actions">
+        <button class="trk-saved-btn trk-saved-btn-green" onclick="switchTrkTab('history')">View History</button>
+        <button class="trk-saved-btn trk-saved-btn-ghost" onclick="document.getElementById('trk-success-card')?.remove()">← Back to log</button>
+      </div>
+    </div>
+  </div>`;
+  el.insertAdjacentHTML('afterbegin', successHtml);
 }
 
 function cancelLogSession(){ trkState.openDay=null; renderTrkLog(trkGetPlan(trkState.activeSlot||0)); }
