@@ -388,7 +388,7 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 .day-hdr-left{display:flex;align-items:center;gap:.55rem;flex:1;min-width:0}
 .day-expand-chevron{font-size:.75rem;opacity:.75;transition:transform .2s;flex-shrink:0;margin-left:.5rem}
 .day-card.expanded .day-expand-chevron{transform:rotate(180deg)}
-.day-hdr h3{font-family:var(--fd);font-size:1.05rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;flex:1;min-width:0;word-break:break-word;line-height:1.2}
+.day-hdr h3{font-family:var(--fd);font-size:1.05rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;flex:1;min-width:0;overflow-wrap:break-word;line-height:1.2}
 .day-hdr .day-meta{font-size:.7rem;opacity:.8;text-align:right;flex-shrink:0;margin-left:.5rem}
 .warmup-row{background:var(--ok-l);padding:.52rem 1.1rem;border-bottom:1px solid #d1fae5;display:flex;align-items:baseline;gap:.5rem;flex-wrap:wrap}
 .warmup-lbl{font-size:.67rem;font-weight:700;color:var(--ok);text-transform:uppercase;letter-spacing:.06em;flex-shrink:0}
@@ -1585,6 +1585,38 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 </div><!-- /view-goal -->
 
 </div><!-- /container -->
+
+<!-- EXECUTION CUES MODAL -->
+<div class="modal-overlay hidden" id="cues-modal" onclick="closeCuesModal(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-hdr">
+      <div>
+        <h3 id="modal-ex-name">Exercise</h3>
+        <div class="modal-cat" id="modal-ex-cat"></div>
+      </div>
+      <button class="modal-close" onclick="closeCuesModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <ul id="modal-cues-list"></ul>
+    </div>
+  </div>
+</div>
+
+<!-- SWAP EXERCISE MODAL -->
+<div class="modal-overlay hidden" id="swap-modal" onclick="closeSwapModal(event)">
+  <div class="modal-box" onclick="event.stopPropagation()" style="max-width:460px">
+    <div class="modal-hdr">
+      <div>
+        <h3 id="swap-modal-title">Swap Exercise</h3>
+        <div class="modal-cat" id="swap-modal-sub"></div>
+      </div>
+      <button class="modal-close" onclick="closeSwapModal()">✕</button>
+    </div>
+    <div class="modal-body" style="padding:.75rem 1rem 1rem">
+      <ul class="swap-modal-list" id="swap-modal-list"></ul>
+    </div>
+  </div>
+</div>
 
 
 <script>
@@ -5146,8 +5178,16 @@ function toggleModality(el){
 let _mendoSwapCtx = null;
 function openMendoSwap(sessId, exIdx, dayIdx){
   const sess = ENDO_SESSIONS[sessId];
-  const planDay = currentPlan && currentPlan[S.currentWeek-1] && currentPlan[S.currentWeek-1].days[dayIdx];
-  const exArr = planDay ? (planDay.exercises || []) : [];
+  // Find exercises from saved slot plan or wizard currentPlan
+  let exArr = [];
+  if(window._uvActiveSlot != null){
+    const plan = trkGetPlan(window._uvActiveSlot);
+    const refDay = plan?.weeks?.[0]?.days?.[dayIdx];
+    exArr = refDay?.exercises || [];
+  } else if(currentPlan){
+    const planDay = currentPlan[S.currentWeek-1]?.days[dayIdx];
+    exArr = planDay?.exercises || [];
+  }
   const currentEx = exArr[exIdx] || {};
   const currentExId = resolveMetconId(currentEx.id || '');
 
@@ -5189,11 +5229,29 @@ function swapItem(ex, sessId){
 }
 
 function applyMendoSwap(newExId){
-  if(!_mendoSwapCtx || !currentPlan) return;
+  if(!_mendoSwapCtx) return;
   const {sessId, exIdx, dayIdx} = _mendoSwapCtx;
   const newEx = getMetconExById(newExId);
   if(!newEx) return;
-  // Apply to ALL weeks at this day position and exercise slot
+
+  if(window._uvActiveSlot != null){
+    const slot = window._uvActiveSlot;
+    const plan = trkGetPlan(slot);
+    if(!plan || !plan.weeks) return;
+    plan.weeks.forEach(week=>{
+      const day = week.days[dayIdx];
+      if(day && day.type==='muscular_endurance' && day.sessId===sessId){
+        if(!day.exercises) day.exercises = [];
+        day.exercises[exIdx] = { ...newEx };
+      }
+    });
+    trkSetPlan(plan, slot);
+    closeSwapModal();
+    renderUnifiedPlanView(slot);
+    return;
+  }
+
+  if(!currentPlan) return;
   currentPlan.forEach(week=>{
     const day = week.days[dayIdx];
     if(day && day.type==='muscular_endurance' && day.sessId===sessId){
