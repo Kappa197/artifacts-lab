@@ -388,18 +388,19 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 .day-hdr-left{display:flex;align-items:center;gap:.55rem;flex:1;min-width:0}
 .day-expand-chevron{font-size:.75rem;opacity:.75;transition:transform .2s;flex-shrink:0;margin-left:.5rem}
 .day-card.expanded .day-expand-chevron{transform:rotate(180deg)}
-.day-hdr h3{font-family:var(--fd);font-size:1.05rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
-.day-hdr .day-meta{font-size:.7rem;opacity:.8;text-align:right}
+.day-hdr h3{font-family:var(--fd);font-size:1.05rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;flex:1;min-width:0;word-break:break-word;line-height:1.2}
+.day-hdr .day-meta{font-size:.7rem;opacity:.8;text-align:right;flex-shrink:0;margin-left:.5rem}
 .warmup-row{background:var(--ok-l);padding:.52rem 1.1rem;border-bottom:1px solid #d1fae5;display:flex;align-items:baseline;gap:.5rem;flex-wrap:wrap}
 .warmup-lbl{font-size:.67rem;font-weight:700;color:var(--ok);text-transform:uppercase;letter-spacing:.06em;flex-shrink:0}
 .warmup-txt{font-size:.75rem;color:#065f46;line-height:1.5}
 
 /* EXERCISE ROW */
-.ex-row{display:grid;grid-template-columns:1fr auto;padding:.72rem 1.1rem;border-bottom:1px solid var(--border);gap:.65rem;align-items:start}
+.ex-row{display:grid;grid-template-columns:1fr auto;padding:.75rem 1.1rem;border-bottom:1px solid var(--border);gap:.5rem;align-items:start}
 .ex-row:last-child{border-bottom:none}
 .ex-row:nth-child(even){background:rgba(255,255,255,0.03)}
+@media(max-width:500px){.ex-row{grid-template-columns:1fr}.ex-params{text-align:left;display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;margin-top:.25rem}}
 .ex-num{font-family:var(--fd);font-size:.9rem;font-weight:700;color:#cbd5e1;margin-right:.35rem}
-.ex-name{font-weight:600;font-size:.9rem;color:var(--text);display:flex;align-items:center;gap:.3rem;flex-wrap:wrap}
+.ex-name{font-weight:600;font-size:.88rem;color:var(--text);display:flex;align-items:center;gap:.3rem;flex-wrap:wrap;line-height:1.4}
 .ex-cat{font-size:.61rem;font-weight:700;padding:.1rem .36rem;border-radius:3px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
 .cat-compound{background:#dbeafe;color:#1e40af}
 .cat-explosive{background:#fef3c7;color:#92400e}
@@ -3777,8 +3778,9 @@ function renderPlan(){
       const rpeTooltipHtml = `<span class="rpe-tooltip">${day.rpe} <span class="rpe-info-icon">ℹ</span><span class="rpe-tip"><strong>RPE — Rate of Perceived Exertion (1–10)</strong><br>1–2 Very easy · 3–4 Easy, conversational<br>5–6 Moderate, short sentences only<br>7–8 Hard, few words only<br>9 Very hard, cannot speak<br>10 Maximum — unsustainable beyond 20–30s</span></span>`;
       html+=`<div class="day-card">
         <div class="day-hdr" onclick="toggleDayCard(this)" style="background:${day.color}">
-          <h3>${day.icon} ${day.label}</h3>
-          <div class="day-meta">Day ${di+1} of ${week.days.length}<br><span style="font-size:.65rem">${day.desc}</span></div>
+          <div class="day-hdr-left"><h3>${day.icon} ${day.label}</h3></div>
+          <div class="day-meta" style="flex-shrink:0;margin-left:.5rem">Day ${di+1} of ${week.days.length}<br><span style="font-size:.65rem">${day.desc}</span></div>
+          <span class="day-expand-chevron">▼</span>
         </div>
         <div class="day-card-body">
           ${day.warmup && day.warmup.length ? `<div class="warmup-row"><span class="warmup-lbl">🔥 Warm-Up</span><span class="warmup-txt">${day.warmup.join(' · ')}</span></div>` : ''}
@@ -3893,8 +3895,9 @@ function renderPlan(){
 
       html+=`<div class="day-card">
         <div class="day-hdr" onclick="toggleDayCard(this)" style="background:${day.color}">
-          <h3>${day.icon} ${day.label} <span style="font-size:.62rem;font-weight:700;background:rgba(255,255,255,.2);border-radius:4px;padding:.1rem .4rem;margin-left:.3rem">${sess.abbr}</span>${estBadge}</h3>
-          <div class="day-meta">Day ${di+1} of ${week.days.length}<br><span style="font-size:.65rem">${day.desc}</span></div>
+          <div class="day-hdr-left"><h3>${day.icon} ${day.label} <span style="font-size:.62rem;font-weight:700;background:rgba(255,255,255,.2);border-radius:4px;padding:.1rem .4rem;margin-left:.3rem">${sess.abbr}</span>${estBadge}</h3></div>
+          <div class="day-meta" style="flex-shrink:0;margin-left:.5rem">Day ${di+1} of ${week.days.length}<br><span style="font-size:.65rem">${day.desc}</span></div>
+          <span class="day-expand-chevron">▼</span>
         </div>
         <div class="day-card-body">
           ${day.warmup && day.warmup.length ? `<div class="warmup-row"><span class="warmup-lbl">🔥 Warm-Up</span><span class="warmup-txt">${day.warmup.join(' · ')}</span></div>` : ''}
@@ -3922,8 +3925,9 @@ function renderPlan(){
     const dayRepsStr = undulatedDay.rmin===undulatedDay.rmax ? `${undulatedDay.rmin} reps` : `${undulatedDay.rmin}–${undulatedDay.rmax} reps`;
     html+=`<div class="day-card">
       <div class="day-hdr" onclick="toggleDayCard(this)" style="background:${day.color}">
-        <h3>${day.label}${day.dayFocusLabel ? `<span class="day-focus-tag">${day.dayFocusLabel}</span>` : ''}</h3>
-        <div class="day-meta">Day ${di+1} of ${week.days.length}<br><span style="font-size:.65rem">${day.desc}</span></div>
+        <div class="day-hdr-left"><h3>${day.label}${day.dayFocusLabel ? `<span class="day-focus-tag">${day.dayFocusLabel}</span>` : ''}</h3></div>
+        <div class="day-meta" style="flex-shrink:0;margin-left:.5rem">Day ${di+1} of ${week.days.length}<br><span style="font-size:.65rem">${day.desc}</span></div>
+        <span class="day-expand-chevron">▼</span>
       </div>
       <div class="day-card-body"><div class="warmup-row"><span class="warmup-lbl">🔥 Warm-Up</span><span class="warmup-txt">${day.warmup.join(' · ')}</span></div>`;
 
@@ -5473,7 +5477,7 @@ function closeCuesModal(e){
 }
 
 document.addEventListener('keydown', e=>{
-  if(e.key==='Escape'){ closeCuesModal(); closeSwapModal(); closeGoalModal(); }
+  if(e.key==='Escape'){ closeCuesModal(); closeSwapModal(); }
 });
 // initTier() fetches Supabase tier, builds can, then calls initUI()
 window.addEventListener('load', initTier);
@@ -5701,7 +5705,11 @@ function showSwapModal(daySlotIdx, exIdx, exId){
   if(!ex) return;
 
   // Collect all exercises in this day (from week 1 as reference)
-  const refWeek = currentPlan ? currentPlan[0] : null;
+  // If viewing a saved slot plan, use that plan; else use currentPlan
+  const activePlan = (window._uvActiveSlot != null)
+    ? trkGetPlan(window._uvActiveSlot)
+    : (currentPlan ? { weeks: currentPlan } : null);
+  const refWeek = activePlan ? (activePlan.weeks ? activePlan.weeks[0] : activePlan[0]) : null;
   const refDay  = refWeek ? refWeek.days[daySlotIdx] : null;
   const dayExercises = (refDay && refDay.exercises) ? refDay.exercises : [];
 
@@ -5757,13 +5765,29 @@ function applySwap(newExId){
   const newEx = EX.find(e=>e.id===newExId);
   if(!newEx) return;
 
-  // Apply to ALL weeks at the same daySlotIdx + exIdx
+  // If viewing a saved slot plan, mutate that plan in localStorage
+  if(window._uvActiveSlot != null){
+    const slot = window._uvActiveSlot;
+    const plan = trkGetPlan(slot);
+    if(!plan || !plan.weeks) return;
+    plan.weeks.forEach(week => {
+      const day = week.days[daySlotIdx];
+      if(!day || !day.exercises || !day.exercises[exIdx]) return;
+      day.exercises[exIdx] = { ...newEx };
+      if(day.supersets) day.supersets = buildSupersets(day.exercises);
+    });
+    trkSetPlan(plan, slot);
+    closeSwapModal();
+    renderUnifiedPlanView(slot);
+    return;
+  }
+
+  // Wizard-generated plan in currentPlan
   if(!currentPlan) return;
   currentPlan.forEach(week=>{
     const day = week.days[daySlotIdx];
     if(!day || !day.exercises || !day.exercises[exIdx]) return;
     day.exercises[exIdx] = newEx;
-    // Rebuild supersets for this day if supersets are active
     if(day.supersets) day.supersets = buildSupersets(day.exercises);
   });
 
