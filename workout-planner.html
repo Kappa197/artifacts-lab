@@ -637,6 +637,29 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 .trk-ex-block:last-of-type{border-bottom:none}
 .trk-ex-name{font-weight:700;font-size:.82rem;margin-bottom:.2rem}
 .trk-ex-prescribed{font-size:.7rem;color:var(--muted);margin-bottom:.4rem}
+/* ── Rest timer ─────────────────────────────────────────────────── */
+.rest-timer-bar{position:sticky;bottom:0;left:0;right:0;background:var(--navy2);border-top:2px solid var(--amber);padding:.65rem 1rem;display:flex;align-items:center;gap:.75rem;z-index:200;animation:slideUp .2s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.rest-timer-bar.green{border-top-color:var(--green)}
+.rest-timer-countdown{font-family:var(--mono);font-size:1.5rem;font-weight:800;color:var(--amber2);min-width:3rem;text-align:center;line-height:1}
+.rest-timer-bar.green .rest-timer-countdown{color:var(--green)}
+.rest-timer-label{font-size:.72rem;color:var(--text2);flex:1;line-height:1.35}
+.rest-timer-track{position:absolute;bottom:0;left:0;height:3px;background:var(--amber);transition:width .98s linear;border-radius:0}
+.rest-timer-bar.green .rest-timer-track{background:var(--green)}
+.rest-timer-skip{font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.06em;padding:.28rem .7rem;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;white-space:nowrap;transition:all .15s}
+.rest-timer-skip:hover{border-color:var(--amber);color:var(--amber2)}
+/* Rest preference modal */
+.rest-pref-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:600;display:flex;align-items:flex-end;justify-content:center;padding:1rem;animation:fadeIn .15s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.rest-pref-box{background:var(--navy2);border:1px solid var(--border2);border-radius:16px 16px 12px 12px;padding:1.2rem 1.4rem 1.4rem;width:100%;max-width:400px;box-shadow:0 -8px 40px rgba(0,0,0,.5)}
+.rest-pref-title{font-family:var(--serif);font-size:1rem;font-weight:700;color:var(--text);margin-bottom:.25rem}
+.rest-pref-sub{font-size:.78rem;color:var(--text2);margin-bottom:1rem;line-height:1.5}
+.rest-pref-opts{display:grid;grid-template-columns:repeat(3,1fr);gap:.45rem;margin-bottom:.8rem}
+.rest-pref-opt{padding:.55rem .4rem;border-radius:8px;border:1.5px solid var(--border2);background:var(--navy3);color:var(--text2);font-family:var(--mono);font-size:.75rem;font-weight:700;cursor:pointer;text-align:center;transition:all .15s}
+.rest-pref-opt:hover{border-color:var(--amber);color:var(--amber2);background:rgba(212,146,10,.08)}
+.rest-pref-opt.sel{border-color:var(--amber);color:var(--amber2);background:rgba(212,146,10,.12)}
+.rest-pref-no-timer{width:100%;padding:.55rem;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text3);font-size:.78rem;cursor:pointer;transition:all .15s}
+.rest-pref-no-timer:hover{color:var(--text2)}
 .trk-set-rows{display:flex;flex-direction:column;gap:.28rem;margin-bottom:.3rem}
 .trk-set-row{display:flex;align-items:center;gap:.35rem;flex-wrap:wrap}
 .trk-set-num{font-size:.66rem;color:var(--muted);font-weight:700;width:2.1rem;text-align:right;flex-shrink:0;font-family:var(--jb)}
@@ -1059,7 +1082,7 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
           <div class="hero-card-icon">⚙️</div>
           <div class="hero-card-tag">Smart Plan Builder</div>
           <div class="hero-card-title">Build My Programme</div>
-          <div class="hero-card-sub">Let our engine structure the perfect routine — tell us your schedule and focus, we'll do the rest.</div>
+          <div class="hero-card-sub">Let our engine structure the perfect routine — tell us your schedule and goals, we'll do the rest.</div>
           <div class="hero-card-arrow">→</div>
         </div>
         <div class="hero-card" onclick="showView('goal')">
@@ -6909,6 +6932,7 @@ function renderTrkLog(plan){
 }
 
 function toggleLogSession(dayIdx){
+  if(trkState.openDay !== dayIdx) _resetRestTimer(); // opening a new session
   trkState.openDay = trkState.openDay===dayIdx ? null : dayIdx;
   renderTrkLog(trkGetPlan(trkState.activeSlot||0));
   if(trkState.openDay!==null){
@@ -6939,7 +6963,7 @@ function buildLogForm(plan, day, weekNum, existingLog, partial){
     if(hasPrev) html+=`<div class="trk-prefill-note">💡 Weights pre-filled from your previous session — adjust as needed<br><span style="font-size:.64rem;opacity:.8">⚠️ This is a suggestion only. Always load what feels right for you today.</span></div>`;
   }
 
-  if(day.type==='gym')               html += buildGymForm(day, weekNum, initData, u, kgToUnit);
+  if(day.type==='gym')               html += buildGymForm(plan, day, weekNum, initData, u, kgToUnit);
   else if(day.type==='cardio')        html += buildCardioForm(day, weekNum, initData);
   else if(day.type==='muscular_endurance') html += buildBtypeForm(day, weekNum, initData, u, kgToUnit);
 
@@ -6965,11 +6989,21 @@ function buildLogForm(plan, day, weekNum, existingLog, partial){
 }
 
 // ─── Gym form ─────────────────────────────────────────────────────────
-function buildGymForm(day, weekNum, initData, u, kgToUnit){
+function buildGymForm(plan, day, weekNum, initData, u, kgToUnit){
   let html = '';
-  const proto = day.proto||{};
-  const prescSets = day.isDeload ? Math.max(2,(proto.sets||3)-1) : (proto.sets||3);
-  const prescReps = proto.rmin===proto.rmax ? `${proto.rmin||1}` : `${proto.rmin||1}–${proto.rmax||12}`;
+  const proto = day.proto || {};
+
+  // ── Week-accurate prescribed sets & reps (undulation applied) ─────────
+  const wk = plan?.weeks?.find(w => w.weekNum === weekNum);
+  const isDeload = wk?.isDeload || false;
+  const wip = wk?.weekInPhase || null;
+  // undulateReps applies the 5%/10% load-drop rep bump per week in phase
+  const undulatedProto = (proto.rmin && !isDeload && wip) ? undulateReps(proto, wip) : proto;
+  const prescSets = isDeload ? Math.max(2,(proto.sets||3)-1) : (proto.sets||3);
+  const prescReps = undulatedProto.rmin === undulatedProto.rmax
+    ? `${undulatedProto.rmin||1}`
+    : `${undulatedProto.rmin||1}–${undulatedProto.rmax||12}`;
+  const prescRest = proto.rest || '';
 
   (day.exercises||[]).forEach((ex,exi)=>{
     const exLog = initData?.exercises?.find(e=>e.id===ex.id);
@@ -6978,9 +7012,9 @@ function buildGymForm(day, weekNum, initData, u, kgToUnit){
     const exRpe  = exLog?.rpe ?? null;
     html+=`<div class="trk-ex-block" id="trk-ex-${weekNum}-${day.dayIdx}-${exi}">
       <div class="trk-ex-name">${ex.name}</div>
-      <div class="trk-ex-prescribed">Prescribed: ${prescSets} sets × ${prescReps} reps · ${proto.rest||''}</div>
+      <div class="trk-ex-prescribed">Prescribed: ${prescSets} sets × ${prescReps} reps${prescRest?' · '+prescRest:''}</div>
       <div class="trk-set-rows" id="trk-sets-${weekNum}-${day.dayIdx}-${exi}">
-        ${sets.map((s,si)=>buildSetRow(weekNum,day.dayIdx,exi,si,s,u,kgToUnit)).join('')}
+        ${sets.map((s,si)=>buildSetRow(weekNum,day.dayIdx,exi,si,s,u,kgToUnit,prescRest)).join('')}
       </div>
       <div style="display:flex;align-items:center;gap:.5rem;margin-top:.3rem;flex-wrap:wrap">
         <button class="trk-add-set" onclick="addSetRow(${weekNum},${day.dayIdx},${exi})" type="button" style="margin-top:0">+ Add set</button>
@@ -6995,8 +7029,9 @@ function buildGymForm(day, weekNum, initData, u, kgToUnit){
   return html;
 }
 
-function buildSetRow(weekNum,dayIdx,exi,si,s,u,kgToUnit){
+function buildSetRow(weekNum,dayIdx,exi,si,s,u,kgToUnit,prescRest=''){
   const wVal = s.weight!=null ? kgToUnit(s.weight) : '';
+  const restArg = prescRest ? `'${prescRest.replace(/'/g,"\\'")}'` : "''";
   return `<div class="trk-set-row" id="trk-set-row-${weekNum}-${dayIdx}-${exi}-${si}">
     <span class="trk-set-num">Set ${si+1}</span>
     <input class="trk-input trk-w-input" type="number" min="0" step="0.5" placeholder="—"
@@ -7005,7 +7040,7 @@ function buildSetRow(weekNum,dayIdx,exi,si,s,u,kgToUnit){
     <span class="trk-input-lbl">${u}</span>
     <input class="trk-input trk-r-input" type="number" min="0" max="999" step="1" placeholder="reps"
       value="${s.reps!=null?s.reps:''}" id="trk-r-${weekNum}-${dayIdx}-${exi}-${si}"
-      oninput="trkAutoSavePartial(${weekNum},${dayIdx})">
+      oninput="trkAutoSavePartial(${weekNum},${dayIdx});trkOnRepsInput(this,${weekNum},${dayIdx},${exi},${si},${restArg})">
     <span class="trk-input-lbl">reps</span>
     <button class="trk-del-set" onclick="delSetRow(${weekNum},${dayIdx},${exi},${si})" type="button" title="Remove set">×</button>
   </div>`;
@@ -7307,6 +7342,148 @@ function selectExRPE(weekNum, dayIdx, exi, val){
 }
 
 // ─── Dynamic set rows ─────────────────────────────────────────────────
+// =====================================================================
+// REST TIMER — starts after a set is logged (reps filled)
+// =====================================================================
+const _restTimer = {
+  active: false,
+  total: 0,          // total seconds for this countdown
+  remaining: 0,      // seconds left
+  interval: null,    // setInterval handle
+  prefAsked: false,  // has the preference been asked this session?
+  prefSecs: null,    // null = use prescribed, 0 = disabled, N = custom seconds
+  prescRest: ''      // last prescribed rest string for display
+};
+
+// Parse "90 sec" / "2 min" / "1:30" → seconds
+function _parseRestSecs(str){
+  if(!str) return 90;
+  const s = String(str).toLowerCase();
+  const minMatch = s.match(/(\d+)\s*min/);
+  const secMatch = s.match(/(\d+)\s*sec/);
+  const colonMatch = s.match(/(\d+):(\d+)/);
+  if(colonMatch) return parseInt(colonMatch[1])*60 + parseInt(colonMatch[2]);
+  let total = 0;
+  if(minMatch) total += parseInt(minMatch[1])*60;
+  if(secMatch) total += parseInt(secMatch[1]);
+  return total || 90;
+}
+
+function _fmtSecs(s){ return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}` }
+
+function trkOnRepsInput(input, weekNum, dayIdx, exi, si, prescRest){
+  const reps = parseInt(input.value);
+  if(!reps || reps <= 0) return;
+  const wInput = document.getElementById(`trk-w-${weekNum}-${dayIdx}-${exi}-${si}`);
+  // Trigger even for bodyweight (no weight required)
+  if(!_restTimer.prefAsked){
+    _restTimer.prescRest = prescRest;
+    _showRestPrefModal(prescRest);
+  } else if(_restTimer.prefSecs !== 0){
+    const secs = _restTimer.prefSecs || _parseRestSecs(prescRest);
+    _startRestCountdown(secs, prescRest);
+  }
+}
+
+function _showRestPrefModal(prescRest){
+  // Remove any existing modal
+  document.getElementById('rest-pref-modal')?.remove();
+  const prescSecs = _parseRestSecs(prescRest);
+  const prescLabel = prescRest ? `${prescRest} (prescribed)` : '90 sec (default)';
+
+  const opts = [
+    {secs: prescSecs, label: prescLabel, isPrimed: true},
+    {secs: 60,  label: '60 sec'},
+    {secs: 90,  label: '90 sec'},
+    {secs: 120, label: '2 min'},
+    {secs: 180, label: '3 min'},
+    {secs: 300, label: '5 min'},
+  ];
+  // Deduplicate by secs value
+  const seen = new Set();
+  const deduped = opts.filter(o=>{ if(seen.has(o.secs)) return false; seen.add(o.secs); return true; });
+
+  const optHtml = deduped.map(o=>`
+    <button class="rest-pref-opt${o.isPrimed?' sel':''}" data-secs="${o.secs}"
+      onclick="_selectRestPref(${o.secs})">${o.label}</button>`).join('');
+
+  const overlay = document.createElement('div');
+  overlay.id = 'rest-pref-modal';
+  overlay.className = 'rest-pref-overlay';
+  overlay.innerHTML = `<div class="rest-pref-box">
+    <div class="rest-pref-title">⏱ Rest Timer</div>
+    <div class="rest-pref-sub">How long do you want to rest between sets?<br>
+      <span style="color:var(--text3);font-size:.72rem">This preference will be used for the whole session.</span>
+    </div>
+    <div class="rest-pref-opts">${optHtml}</div>
+    <button class="rest-pref-no-timer" onclick="_selectRestPref(0)">No timer for this session</button>
+  </div>`;
+  document.body.appendChild(overlay);
+}
+
+function _selectRestPref(secs){
+  _restTimer.prefAsked = true;
+  _restTimer.prefSecs  = secs;
+  document.getElementById('rest-pref-modal')?.remove();
+  if(secs > 0) _startRestCountdown(secs, _restTimer.prescRest);
+}
+
+function _startRestCountdown(totalSecs, prescRest){
+  // Clear any running timer
+  if(_restTimer.interval) clearInterval(_restTimer.interval);
+  _restTimer.active    = true;
+  _restTimer.total     = totalSecs;
+  _restTimer.remaining = totalSecs;
+  _renderRestBar(totalSecs, totalSecs);
+  _restTimer.interval = setInterval(()=>{
+    _restTimer.remaining--;
+    if(_restTimer.remaining <= 0){
+      clearInterval(_restTimer.interval);
+      _restTimer.active = false;
+      _renderRestBar(0, totalSecs, true); // done state
+      // Auto-remove after 2.5s when done
+      setTimeout(()=>{ document.getElementById('rest-timer-bar')?.remove(); }, 2500);
+    } else {
+      _renderRestBar(_restTimer.remaining, totalSecs);
+    }
+  }, 1000);
+}
+
+function _renderRestBar(remaining, total, done=false){
+  let bar = document.getElementById('rest-timer-bar');
+  if(!bar){
+    bar = document.createElement('div');
+    bar.id = 'rest-timer-bar';
+    // Attach to the open log form
+    const form = document.querySelector('.trk-form');
+    if(form) form.appendChild(bar);
+    else document.body.appendChild(bar);
+  }
+  const pct = total > 0 ? Math.round((1 - remaining/total)*100) : 100;
+  const cls = done ? 'rest-timer-bar green' : 'rest-timer-bar';
+  const label = done ? '✓ Rest done — start your next set!' : `Rest · ${_fmtSecs(remaining)} remaining`;
+  bar.className = cls;
+  bar.innerHTML = `
+    <div class="rest-timer-countdown">${done ? '✓' : _fmtSecs(remaining)}</div>
+    <div class="rest-timer-label">${label}</div>
+    <button class="rest-timer-skip" onclick="_skipRestTimer()">Skip ×</button>
+    <div class="rest-timer-track" style="width:${pct}%"></div>`;
+}
+
+function _skipRestTimer(){
+  if(_restTimer.interval) clearInterval(_restTimer.interval);
+  _restTimer.active = false;
+  document.getElementById('rest-timer-bar')?.remove();
+}
+
+// Reset timer state when a new log session is opened
+function _resetRestTimer(){
+  _skipRestTimer();
+  _restTimer.prefAsked = false;
+  _restTimer.prefSecs  = null;
+  _restTimer.prescRest = '';
+}
+
 function addSetRow(weekNum, dayIdx, exi){
   const container = document.getElementById(`trk-sets-${weekNum}-${dayIdx}-${exi}`);
   if(!container) return;
