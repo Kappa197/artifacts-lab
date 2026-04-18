@@ -299,6 +299,20 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
   .goal-sessions-grid{grid-template-columns:1fr}
 }
 
+/* PRIORITY LEVEL SLIDER */
+.priority-level-wrap{margin-top:.85rem;padding:.8rem 1rem;background:var(--bg);border:1px solid var(--border);border-radius:12px;transition:all .2s}
+.priority-level-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:.65rem}
+.priority-level-badge{font-family:var(--mono);font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:.18rem .6rem;border-radius:999px;background:rgba(212,146,10,.15);color:var(--amber2);border:1px solid rgba(212,146,10,.3);transition:all .2s}
+.priority-level-badge.medium{background:rgba(245,166,35,.2);color:var(--amber2);border-color:rgba(245,166,35,.4)}
+.priority-level-badge.heavy{background:rgba(212,146,10,.3);color:#fbbf24;border-color:rgba(212,146,10,.6)}
+.priority-level-track{margin-bottom:.5rem}
+.priority-level-track input[type=range]{width:100%;-webkit-appearance:none;height:4px;border-radius:2px;background:var(--border);outline:none;cursor:pointer}
+.priority-level-track input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--amber);border:2px solid var(--navy);box-shadow:0 0 0 2px rgba(212,146,10,.3);cursor:pointer;transition:transform .15s}
+.priority-level-track input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
+.priority-level-track input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--amber);border:2px solid var(--navy);cursor:pointer}
+.priority-level-labels{display:flex;justify-content:space-between;font-size:.65rem;color:var(--text3);font-family:var(--mono);margin-top:.35rem;padding:0 2px}
+.priority-level-desc{font-size:.75rem;color:var(--text3);line-height:1.55;font-style:italic}
+
 /* FOCUS SUMMARY PANEL */
 .focus-summary-panel{background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:.85rem 1rem;margin-bottom:.2rem}
 .focus-summary-title{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.55rem}
@@ -1137,6 +1151,24 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
           <div class="chip" data-val="core"       onclick="togglePriority(this)">Core</div>
           <div class="chip" data-val="calves"     onclick="togglePriority(this)">Calves</div>
         </div>
+
+        <!-- Focus intensity slider — appears once at least one muscle is selected -->
+        <div id="priority-level-wrap" class="priority-level-wrap hidden">
+          <div class="priority-level-hdr">
+            <span class="fl">Focus intensity</span>
+            <span class="priority-level-badge" id="priority-level-badge">Mild</span>
+          </div>
+          <div class="priority-level-track">
+            <input type="range" id="priority-level-slider" min="0" max="2" step="1" value="0"
+              oninput="setPriorityLevel(this.value)">
+            <div class="priority-level-labels">
+              <span>Mild</span><span>Medium</span><span>Heavy</span>
+            </div>
+          </div>
+          <div class="priority-level-desc" id="priority-level-desc">
+            Slight preference — the selected muscles appear a bit more often across sessions.
+          </div>
+        </div>
       </div>
 
       <div class="step-nav">
@@ -1675,7 +1707,8 @@ const S = {
   splitChoice: 'ppl',
   superset: false,
   enduranceModalities: new Set(['run']),
-  dayFocus: {0:'hypertrophy',1:'hypertrophy',2:'hypertrophy',3:'hypertrophy',4:'hypertrophy',5:'hypertrophy'}
+  dayFocus: {0:'hypertrophy',1:'hypertrophy',2:'hypertrophy',3:'hypertrophy',4:'hypertrophy',5:'hypertrophy'},
+  priorityLevel: 'mild',  // 'mild' | 'medium' | 'heavy' — focus boost for priority muscles
 };
 
 // =====================================================================
@@ -3075,8 +3108,11 @@ function scoreEx(ex, targetMuscles, state, dayIndex, weekNum){
   else if(state.secondaryFocus&&state.secondaryFocus!=='none'&&ex.fc.includes(state.secondaryFocus))sc+=2;
   // Category bonus
   if(ex.cat==='compound'||ex.cat==='explosive')sc+=3;
-  // Muscle priority — below focus
-  state.priority.forEach(p=>{ if(ex.primary.includes(p))sc+=3; });
+  // Muscle priority — boost scales with user-selected intensity level
+  const priorityBoost = state.priorityLevel === 'heavy' ? 10
+                      : state.priorityLevel === 'medium' ? 6
+                      : 3; // mild (default)
+  state.priority.forEach(p=>{ if(ex.primary.includes(p))sc+=priorityBoost; });
   // Explosive bonus for power/speed
   if(state.focus==='power_speed'&&ex.cat==='explosive')sc+=5;
   // Variation seed
@@ -4133,7 +4169,7 @@ function buildAndShow(){
     const maxDays = can.sixSessionMax ? 6 : can.fiveSessionMax ? 5 : 3;
     if(S.wpw > maxDays) S.wpw = maxDays;
     if(!can.longerPlans && S.weeks !== 4) S.weeks = 4;
-    if(!can.priority) S.priority = [];
+    if(!can.priority){ S.priority = []; S.priorityLevel = 'mild'; }
     if(!can.supersets) S.superset = false;
     // Revert any advanced focus to hypertrophy for free users
     if(!can.advancedGoals){
@@ -4193,6 +4229,13 @@ function adjustPlan(){
   });
   // Equipment chips already carry their sel class from the last user interaction
   // Day focus grid re-renders from S.dayFocus when goStep(3) is reached
+  // Restore priority level slider
+  const plSlider = document.getElementById('priority-level-slider');
+  const levelIdx = ['mild','medium','heavy'].indexOf(S.priorityLevel);
+  if(plSlider) plSlider.value = Math.max(0, levelIdx);
+  setPriorityLevel(Math.max(0, levelIdx));
+  const wrap = document.getElementById('priority-level-wrap');
+  if(wrap) wrap.classList.toggle('hidden', S.priority.length === 0);
   updateWpwLockZone(can.sixSessionMax ? 6 : can.fiveSessionMax ? 5 : 3);
   goStep(1); // land on Schedule — step 1
 }
@@ -5261,6 +5304,28 @@ function togglePriority(el){
     el.classList.add('sel');
     S.priority.push(val);
   }
+  // Show slider only when at least one priority muscle is selected
+  const wrap = document.getElementById('priority-level-wrap');
+  if(wrap) wrap.classList.toggle('hidden', S.priority.length === 0);
+}
+
+const PRIORITY_LEVEL_DESCS = {
+  0: 'Slight preference — the selected muscles appear a bit more often across sessions.',
+  1: 'Clear emphasis — the selected muscles are strongly preferred for compound and isolation exercise selection.',
+  2: 'Maximum focus — the selected muscles dominate the session. Other muscle groups will be secondary throughout.'
+};
+const PRIORITY_LEVEL_LABELS = ['Mild','Medium','Heavy'];
+
+function setPriorityLevel(val){
+  const levels = ['mild','medium','heavy'];
+  S.priorityLevel = levels[val] || 'mild';
+  const badge = document.getElementById('priority-level-badge');
+  const desc  = document.getElementById('priority-level-desc');
+  if(badge){
+    badge.textContent = PRIORITY_LEVEL_LABELS[val];
+    badge.className = 'priority-level-badge' + (val > 0 ? (' ' + levels[val]) : '');
+  }
+  if(desc) desc.textContent = PRIORITY_LEVEL_DESCS[val] || PRIORITY_LEVEL_DESCS[0];
 }
 
 // =====================================================================
